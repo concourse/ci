@@ -1,0 +1,12 @@
+---
+platform: windows
+
+inputs:
+- name: concourse
+
+caches:
+- path: gopath
+
+run:
+  path: powershell
+  args: [concourse/ci/tasks/scripts/fly.ps1]
