@@ -3,9 +3,10 @@ platform: darwin
 
 inputs:
 - name: concourse
+- name: ci
 
 caches:
 - path: gopath
 
 run:
-  path: concourse/ci/tasks/scripts/fly-darwin
+  path: ci/tasks/scripts/fly-darwin

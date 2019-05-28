@@ -2,7 +2,7 @@
 
 set -e -u
 
-source concourse/ci/tasks/scripts/docker-helpers.sh
+source ci/tasks/scripts/docker-helpers.sh
 
 start_docker
 
@@ -15,15 +15,15 @@ pushd concourse
   if [ "$BUILD" = "true" ]; then
     docker-compose \
       -f docker-compose.yml \
-      -f ci/overrides/docker-compose.ci.yml \
+      -f ../ci/overrides/docker-compose.ci.yml \
       up --build -d
   else
-    ./ci/tasks/scripts/generate-keys
+    ../ci/tasks/scripts/generate-keys
 
     docker-compose \
       -f docker-compose.yml \
-      -f ci/overrides/docker-compose.ci.yml \
-      -f ci/overrides/docker-compose.no-build.yml \
+      -f ../ci/overrides/docker-compose.ci.yml \
+      -f ../ci/overrides/docker-compose.no-build.yml \
       up --no-build -d
   fi
 popd

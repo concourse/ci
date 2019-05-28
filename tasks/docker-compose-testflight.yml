@@ -7,6 +7,7 @@ image_resource:
 
 inputs:
 - name: concourse
+- name: ci
 - name: dev-image
   optional: true
 - name: postgres-image
@@ -19,5 +20,5 @@ params:
   BUILD:
 
 run:
-  path: concourse/ci/tasks/scripts/with-docker-compose
-  args: [concourse/ci/tasks/scripts/testflight]
+  path: ci/tasks/scripts/with-docker-compose
+  args: [ci/tasks/scripts/testflight]

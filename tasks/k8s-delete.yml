@@ -11,6 +11,7 @@ params:
 
 inputs:
 - name: concourse
+- name: ci
 
 run:
-  path: concourse/ci/tasks/scripts/k8s-delete
+  path: ci/tasks/scripts/k8s-delete

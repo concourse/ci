@@ -8,6 +8,7 @@ image_resource:
 
 inputs:
 - name: concourse
+- name: ci
 
 outputs:
 - name: endpoint-info
@@ -20,4 +21,4 @@ params:
   BOSH_INSTANCE_GROUP:
 
 run:
-  path: concourse/ci/tasks/scripts/discover-bosh-endpoint-info
+  path: ci/tasks/scripts/discover-bosh-endpoint-info

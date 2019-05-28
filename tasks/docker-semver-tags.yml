@@ -7,6 +7,7 @@ image_resource:
 
 inputs:
 - name: concourse
+- name: ci
 - name: version
 - name: latest-version
 - name: latest-of-same-major-version
@@ -15,4 +16,4 @@ outputs:
 - name: tags
 
 run:
-  path: concourse/ci/tasks/scripts/docker-semver-tags
+  path: ci/tasks/scripts/docker-semver-tags

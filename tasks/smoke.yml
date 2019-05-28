@@ -7,6 +7,7 @@ image_resource:
 
 inputs:
 - name: concourse
+- name: ci
 - name: endpoint-info
 
 caches:
@@ -14,4 +15,4 @@ caches:
 - path: concourse/web/wats/node_modules
 
 run:
-  path: concourse/ci/tasks/scripts/smoke
+  path: ci/tasks/scripts/smoke

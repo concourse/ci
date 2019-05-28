@@ -7,9 +7,10 @@ image_resource:
 
 inputs:
 - name: concourse
+- name: ci 
 
 outputs:
 - name: btrfs-tools
 
 run:
-  path: concourse/ci/tasks/scripts/build-btrfs-tools
+  path: ci/tasks/scripts/build-btrfs-tools

@@ -3,6 +3,7 @@ platform: darwin
 
 inputs:
 - name: concourse
+- name: ci
 - name: version
   optional: true
 - name: final-version
@@ -21,5 +22,5 @@ caches:
 - path: gopath
 
 run:
-  path: concourse/ci/tasks/scripts/concourse-build
+  path: ci/tasks/scripts/concourse-build
   args: [darwin]

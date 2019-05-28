@@ -6,10 +6,11 @@ image_resource:
 
 params:
   REPOSITORY: concourse/dev
-  DOCKERFILE: concourse/ci/dockerfiles/dev/Dockerfile
+  DOCKERFILE: ci/dockerfiles/dev/Dockerfile
 
 inputs:
 - name: concourse
+- name: ci
 - name: gdn
 - name: fly-linux
 - name: fly-windows

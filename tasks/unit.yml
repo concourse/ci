@@ -7,9 +7,10 @@ image_resource:
 
 inputs:
 - name: concourse
+- name: ci
 
 caches:
 - path: gopath
 
 run:
-  path: concourse/ci/tasks/scripts/unit
+  path: ci/tasks/scripts/unit

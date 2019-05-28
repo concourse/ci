@@ -12,6 +12,7 @@ params:
 
 inputs:
 - name: concourse
+- name: ci
 - name: concourse-rc-image
 - name: charts
 
@@ -19,4 +20,4 @@ caches:
 - path: gopath
 
 run:
-  path: concourse/ci/tasks/scripts/k8s-topgun
+  path: ci/tasks/scripts/k8s-topgun

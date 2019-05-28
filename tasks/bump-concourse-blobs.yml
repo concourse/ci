@@ -8,6 +8,7 @@ image_resource:
 
 inputs:
 - name: concourse
+- name: ci
 - name: version
 - name: concourse-release-repo
 - name: ubuntu-linux-rc
@@ -20,4 +21,4 @@ params:
   GCP_JSON_KEY:
 
 run:
-  path: concourse/ci/tasks/scripts/bump-concourse-blobs
+  path: ci/tasks/scripts/bump-concourse-blobs

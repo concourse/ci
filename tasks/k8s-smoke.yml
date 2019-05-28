@@ -12,10 +12,11 @@ params:
 
 inputs:
 - name: concourse
+- name: ci
 
 caches:
 - path: gopath
 - path: concourse/web/wats/node_modules
 
 run:
-  path: concourse/ci/tasks/scripts/k8s-smoke
+  path: ci/tasks/scripts/k8s-smoke

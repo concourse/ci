@@ -8,6 +8,7 @@ image_resource:
 
 inputs:
 - name: concourse
+- name: ci
 - name: bosh-io-release-resource
   path: resources/bosh-io-release
 - name: bosh-io-stemcell-resource
@@ -42,4 +43,4 @@ outputs:
 - name: ubuntu-linux-rc
 
 run:
-  path: concourse/ci/tasks/scripts/ubuntu-replace-resource-types
+  path: ci/tasks/scripts/ubuntu-replace-resource-types

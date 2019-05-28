@@ -8,6 +8,7 @@ image_resource:
 
 inputs:
 - name: concourse
+- name: ci
 - name: from-commit
 - name: to-commit
 
@@ -18,4 +19,4 @@ params:
   HEADING:
 
 run:
-  path: concourse/ci/tasks/scripts/issues-for-commit-range
+  path: ci/tasks/scripts/issues-for-commit-range

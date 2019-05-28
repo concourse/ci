@@ -7,6 +7,7 @@ image_resource:
 
 inputs:
 - name: concourse
+- name: ci
 - name: gdn
 - name: resource-types
 - name: version
@@ -27,5 +28,5 @@ outputs:
 - name: concourse-linux
 
 run:
-  path: concourse/ci/tasks/scripts/concourse-build
+  path: ci/tasks/scripts/concourse-build
   args: [linux]

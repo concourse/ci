@@ -11,10 +11,11 @@ params:
 
 inputs:
 - name: concourse
+- name: ci
 
 caches:
 - path: gems
 - path: concourse/pkg
 
 run:
-  path: concourse/ci/tasks/scripts/lengthy-output
+  path: ci/tasks/scripts/lengthy-output

@@ -7,6 +7,7 @@ image_resource:
 
 inputs:
 - name: concourse
+- name: ci
 - name: linux-rc
 - name: distribution
 
@@ -15,4 +16,4 @@ params:
   DISTRIBUTION: ''
 
 run:
-  path: concourse/ci/tasks/scripts/check-distribution-env/diff
+  path: ci/tasks/scripts/check-distribution-env/diff

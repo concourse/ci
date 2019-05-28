@@ -3,11 +3,12 @@ platform: linux
 
 params:
   REPOSITORY: concourse/golang-builder
-  DOCKERFILE: concourse/ci/dockerfiles/golang-builder/Dockerfile
+  DOCKERFILE: ci/dockerfiles/golang-builder/Dockerfile
   CONTEXT: .
 
 inputs:
 - name: concourse
+- name: ci
 - name: golang-linux
 
 outputs:

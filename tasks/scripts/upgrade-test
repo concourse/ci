@@ -6,7 +6,7 @@ export PIPELINE_NAME=test-pipeline
 
 inputs=$PWD
 
-source concourse/ci/tasks/scripts/docker-helpers.sh
+source ci/tasks/scripts/docker-helpers.sh
 
 start_docker
 
@@ -20,26 +20,26 @@ export CONCOURSE_LATEST_TAG=$(cat concourse-image/tag)
 cd concourse
 
 # generate keys for the cluster
-./ci/tasks/scripts/generate-keys
+$inputs/ci/tasks/scripts/generate-keys
 
 # start with latest release and set up
 docker-compose \
   -f docker-compose.yml \
-  -f ci/overrides/docker-compose.ci.yml \
-  -f ci/overrides/docker-compose.no-build.yml \
-  -f ci/overrides/docker-compose.latest.yml \
+  -f $inputs/ci/overrides/docker-compose.ci.yml \
+  -f $inputs/ci/overrides/docker-compose.no-build.yml \
+  -f $inputs/ci/overrides/docker-compose.latest.yml \
   up --no-build -d
 
-./ci/tasks/scripts/create-upgrade-downgrade-pipeline
+$inputs/ci/tasks/scripts/create-upgrade-downgrade-pipeline
 
 # upgrade and verify
 docker-compose \
   -f docker-compose.yml \
-  -f ci/overrides/docker-compose.ci.yml \
-  -f ci/overrides/docker-compose.no-build.yml \
+  -f $inputs/ci/overrides/docker-compose.ci.yml \
+  -f $inputs/ci/overrides/docker-compose.no-build.yml \
   up --no-build -d
 
-./ci/tasks/scripts/verify-upgrade-downgrade-pipeline
+$inputs/ci/tasks/scripts/verify-upgrade-downgrade-pipeline
 
 # run smoke tests
 cd web/wats

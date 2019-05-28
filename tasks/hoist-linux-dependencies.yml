@@ -7,10 +7,11 @@ image_resource:
 
 inputs:
 - name: concourse
+- name: ci
 
 outputs:
 - name: gdn
 - name: resource-types
 
 run:
-  path: concourse/ci/tasks/scripts/hoist-linux-dependencies
+  path: ci/tasks/scripts/hoist-linux-dependencies

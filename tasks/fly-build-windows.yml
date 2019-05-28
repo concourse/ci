@@ -3,6 +3,7 @@ platform: windows
 
 inputs:
 - name: concourse
+- name: ci
 - name: final-version
   optional: true
 
@@ -14,4 +15,4 @@ caches:
 
 run:
   path: powershell
-  args: [concourse/ci/tasks/scripts/fly-build.ps1]
+  args: [ci/tasks/scripts/fly-build.ps1]

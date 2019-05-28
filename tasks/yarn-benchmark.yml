@@ -7,9 +7,10 @@ image_resource:
 
 inputs:
 - name: concourse
+- name: ci
 
 caches:
 - path: concourse/node_modules
 
 run:
-  path: concourse/ci/tasks/scripts/yarn-benchmark
+  path: ci/tasks/scripts/yarn-benchmark

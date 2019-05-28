@@ -7,10 +7,11 @@ image_resource:
 
 inputs:
 - name: concourse
+- name: ci
 
 caches:
 - path: gopath
 - path: old-ref
 
 run:
-  path: concourse/ci/tasks/scripts/golang-lint
+  path: ci/tasks/scripts/golang-lint

@@ -13,7 +13,8 @@ params:
 inputs:
 - name: charts
 - name: concourse
+- name: ci
 - name: image-info
 
 run:
-  path: concourse/ci/tasks/scripts/k8s-deploy
+  path: ci/tasks/scripts/k8s-deploy

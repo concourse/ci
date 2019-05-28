@@ -30,9 +30,10 @@ inputs:
 - name: stemcell
 - name: vault-release
 - name: backup-and-restore-sdk-release
+- name: ci
 
 caches:
 - path: gopath
 
 run:
-  path: concourse/ci/tasks/scripts/topgun
+  path: ci/tasks/scripts/topgun
