@@ -8,6 +8,7 @@ image_resource:
 inputs:
 - name: concourse-pr
 - name: concourse-master
+- name: ci
 
 run:
-  path: concourse-pr/ci/tasks/scripts/check-migration-order
+  path: ci/tasks/scripts/check-migration-order
