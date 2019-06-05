@@ -2,7 +2,7 @@
 platform: windows
 
 inputs:
-- name: concourse
+- name: ci
 
 params:
   PACKAGE:
@@ -11,4 +11,4 @@ run:
   path: powershell.exe
   args:
   - -File
-  - '.\concourse\ci\tasks\scripts\choco-install.ps1'
+  - '.\ci\tasks\scripts\choco-install.ps1'
