@@ -232,7 +232,7 @@ jobs:
   - task: unit-linux
     privileged: true
     timeout: 1h
-    file: ci/unit-linux.yml
+    file: baggageclaim-master/ci/unit-linux.yml
     input_mapping: {baggageclaim: baggageclaim-pr}
     tags: [pr]
 
