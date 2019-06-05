@@ -1,0 +1,66 @@
+groups: []
+
+resources:
+- name: bbr-tool
+  type: github-release
+  source:
+    access_token: ((concourse_github_release.access_token))
+    owner: cloudfoundry-incubator
+    repository: bosh-backup-and-restore
+- name: gcs-backup
+  type: gcs-resource
+  source:
+    bucket: concourse-prod-backup
+    json_key: ((backups_bucket_json_key))
+    versioned_file: prod-db-backup.tgz
+- name: midnight
+  type: time
+  source:
+    location: America/Toronto
+    start: 1:00 AM
+    stop: 2:00 AM
+
+resource_types:
+- name: gcs-resource
+  type: docker-image
+  source:
+    repository: frodenas/gcs-resource
+
+jobs:
+- name: backup-prod-env
+  plan:
+  - get: midnight
+    trigger: true
+  - get: bbr-tool
+  - task: backup-prod-env
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source:
+          repository: ubuntu
+      params:
+        BOSH_CLIENT: ((bosh_client.id))
+        BOSH_CLIENT_SECRET: ((bosh_client.secret))
+        BOSH_DEPLOYMENT: concourse-prod
+        BOSH_ENVIRONMENT: ((bosh_target))
+        CA_CERT: ((bosh_ca_cert.ca_cert))
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          #!/bin/bash
+          mv bbr-tool/bbr-1.5.1-linux-amd64 /usr/local/bin/bbr
+          chmod +x /usr/local/bin/bbr
+          bbr deployment backup --artifact-path=bbr_artifacts
+          tar -zcf bbr_artifacts/bbr_backup.tgz bbr_artifacts/*
+      inputs:
+      - name: bbr-tool
+      outputs:
+      - name: bbr_artifacts
+  - put: gcs-backup
+    params:
+      file: bbr_artifacts/bbr_backup.tgz
+      inputs:
+      - name: bbr_artifacts
