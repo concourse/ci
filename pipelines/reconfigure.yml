@@ -9,12 +9,13 @@ resources:
   type: git
   icon: github-circle
   source:
-    uri: https://github.com/concourse/concourse
+    uri: https://github.com/concourse/ci
     paths:
-    - ci/pipelines
+    - pipelines
 
 - name: prod
   type: concourse-pipeline
+  icon: pipe
   source:
     target: https://ci.concourse-ci.org
     teams:
@@ -23,16 +24,23 @@ resources:
       password: ((basic_auth.password))
 
 jobs:
-- name: reconfigure
+- name: reconfigure-pipelines
   plan:
   - get: pipelines
     trigger: true
   - put: prod
     params:
       pipelines:
-      - name: concourse
-        team: main
-        config_file: pipelines/ci/pipelines/concourse.yml
       - name: prs
         team: main
-        config_file: pipelines/ci/pipelines/prs.yml
+        config_file: pipelines/pipelines/prs.yml
+      - name: release-5.2.x
+        team: main
+        config_file: pipelines/pipelines/release.yml
+        vars:
+          release_major: "5"
+          release_minor: "5.2"
+          concourse_smoke_deployment_name: "concourse-smoke-5-2"
+      - name: concourse
+        team: main
+        config_file: pipelines/pipelines/concourse.yml
