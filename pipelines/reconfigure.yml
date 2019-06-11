@@ -41,6 +41,13 @@ jobs:
           release_major: "5"
           release_minor: "5.2"
           concourse_smoke_deployment_name: "concourse-smoke-5-2"
+      - name: release-5.3.x
+        team: main
+        config_file: pipelines/pipelines/release.yml
+        vars:
+          release_major: "5"
+          release_minor: "5.3"
+          concourse_smoke_deployment_name: "concourse-smoke-5-3"
       - name: concourse
         team: main
         config_file: pipelines/pipelines/concourse.yml
