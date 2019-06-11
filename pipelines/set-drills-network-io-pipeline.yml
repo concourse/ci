@@ -1,0 +1,54 @@
+resources:
+- name: drills
+  type: git
+  source:
+    uri: https://github.com/concourse/drills.git
+- name: 10m-timer
+  type: time
+  source:
+    interval: 10m
+- name: dev-image
+  type: registry-image
+  source:
+    repository: concourse/dev
+    username: ((docker.username))
+    password: ((docker.password))
+
+
+jobs:
+- name: set-drills-network-io-pipeline
+  plan:
+  - get: drills
+    trigger: true
+  - get: 10m-timer
+    trigger: true
+  - get: dev-image
+  - task: reset-pipeline
+    image: dev-image
+    config:
+      platform: linux
+      inputs:
+      - name: drills
+      params:
+        DRILLS_ENVIRONMENT: ((runtime_drills_environment.url))
+        USERNAME: ((runtime_drills_environment.username))
+        PASSWORD: ((runtime_drills_environment.password))
+      run:
+        path: sh
+        args:
+          - -c
+          - |
+            #!/bin/bash
+            tar -xvf /usr/local/concourse/fly-assets/fly-linux-amd64.tgz
+
+            mv ./fly /usr/local/bin/fly
+
+            fly -t drills login -u $USERNAME -p $PASSWORD -c $DRILLS_ENVIRONMENT
+
+            fly -t drills dp -p streaming-pipeline -n
+
+            sleep 10
+
+            fly -t drills sp -p streaming-pipeline -c drills/runtime-drills/pipelines/multiple-input-streaming.yml -n
+
+            fly -t drills up -p streaming-pipeline
