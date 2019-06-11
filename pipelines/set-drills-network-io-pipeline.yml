@@ -10,9 +10,7 @@ resources:
 - name: dev-image
   type: registry-image
   source:
-    repository: concourse/dev
-    username: ((docker.username))
-    password: ((docker.password))
+    repository: golang
 
 
 jobs:
@@ -39,9 +37,7 @@ jobs:
           - -c
           - |
             #!/bin/bash
-            tar -xvf /usr/local/concourse/fly-assets/fly-linux-amd64.tgz
-
-            mv ./fly /usr/local/bin/fly
+            go get github.com/concourse/concourse/fly
 
             fly -t drills login -u $USERNAME -p $PASSWORD -c $DRILLS_ENVIRONMENT
 
