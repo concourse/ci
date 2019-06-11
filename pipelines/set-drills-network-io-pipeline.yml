@@ -3,10 +3,10 @@ resources:
   type: git
   source:
     uri: https://github.com/concourse/drills.git
-- name: 10m-timer
+- name: 30m-timer
   type: time
   source:
-    interval: 10m
+    interval: 30m
 - name: dev-image
   type: registry-image
   source:
@@ -18,7 +18,7 @@ jobs:
   plan:
   - get: drills
     trigger: true
-  - get: 10m-timer
+  - get: 30m-timer
     trigger: true
   - get: dev-image
   - task: reset-pipeline
