@@ -1046,6 +1046,7 @@ jobs:
       passed: [shipit]
       params: {format: oci}
     - get: latest-version
+    - get: ci
   - task: docker-semver-tags
     file: ci/tasks/docker-semver-tags.yml
     input_mapping:
