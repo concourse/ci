@@ -631,6 +631,7 @@ jobs:
     file: ci/tasks/bump-concourse-blobs.yml
     image: unit-image
     params: {GCP_JSON_KEY: ((concourse_artifacts_json_key))}
+    input_mapping: {linux-rc: ubuntu-linux-rc}
   - put: concourse-release-repo
     params: {repository: bumped-concourse-release-repo}
 

@@ -25,7 +25,7 @@ pushd bumped-concourse-release-repo/
     bosh -n remove-blob $blob
   done
 
-  for blob in ../ubuntu-linux-rc/concourse-*.tgz ../windows-rc/concourse-*.zip; do
+  for blob in ../linux-rc/concourse-*.tgz ../windows-rc/concourse-*.zip; do
     bosh -n add-blob $blob concourse/$(basename $blob)
   done
 
