@@ -8,9 +8,9 @@ deployment_path=ci/deployments/branch-env
 
 cat > cloud-config/cloud-config.yml <<EOF
 vm_extensions:
-- name: ${WORKSPACE}-target-pool
+- name: ${WORKSPACE}-web-target-pool
   cloud_properties:
-    target_pool: ${WORKSPACE}-target-pool
+    target_pool: ${WORKSPACE}-web-target-pool
 EOF
 
 cd $deployment_path
