@@ -448,6 +448,7 @@ jobs:
       trigger: true
     - get: ci
   - task: terraform-smoke
+    image: unit-image
     file: ci/tasks/terraform-smoke.yml
     params:
       GCP_PROJECT: cf-concourse-production
@@ -602,7 +603,9 @@ jobs:
   serial: true
   plan:
   - get: ci
+  - get: unit-image
   - task: terraform-branch-env
+    image: unit-image
     file: ci/tasks/terraform-branch-env.yml
     params:
       GCP_PROJECT: cf-concourse-production
