@@ -19,11 +19,8 @@ fi
 
 pushd concourse
   export CGO_ENABLED=1
-  if [ "$platform" = "linux" ]; then
-    export CGO_ENABLED=0
-  fi
 
-  go build -ldflags "$ldflags" -o $output/fly ./fly
+  go build --ldflags '-linkmode external -extldflags "-static"' -o $output/fly ./fly
 
   if [ "$platform" = "linux" ] && which ldd && ldd $output/fly; then
     echo "binary is not static; aborting"
