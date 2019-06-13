@@ -489,16 +489,12 @@ jobs:
   - in_parallel:
     - get: concourse
       passed: [build-rc]
-      trigger: true
     - get: unit-image
       passed: [build-rc]
-      trigger: true
     - get: linux-rc
       passed: [build-rc]
-      trigger: true
     - get: windows-rc
       passed: [build-rc]
-      trigger: true
     - get: concourse-release-repo
     - get: ci
   - task: bump-concourse-blobs
