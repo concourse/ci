@@ -68,11 +68,10 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: concourse
+    - get: ci
       resource: unit-dockerfile
       trigger: true
     - get: builder
-    - get: ci
   - task: build
     image: builder
     privileged: true
@@ -81,7 +80,7 @@ jobs:
       params:
         REPOSITORY: concourse/unit
         CONTEXT: ci/dockerfiles/unit
-      inputs: [{name: concourse}, {name: ci}]
+      inputs: [{name: ci}]
       outputs: [{name: image}]
       caches: [{path: cache}]
       run: {path: build}
@@ -93,13 +92,12 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: concourse
+    - get: ci
       resource: golang-builder-dockerfile
       trigger: true
     - get: builder
     - get: golang-linux
       trigger: true
-    - get: ci
   - task: build
     image: builder
     privileged: true
@@ -1134,17 +1132,17 @@ resources:
   type: git
   icon: *git-icon
   source:
-    uri: https://github.com/concourse/concourse.git
+    uri: https://github.com/concourse/ci.git
     branch: master
-    paths: [ci/dockerfiles/unit]
+    paths: [dockerfiles/unit]
 
 - name: golang-builder-dockerfile
   type: git
   icon: *git-icon
   source:
-    uri: https://github.com/concourse/concourse.git
+    uri: https://github.com/concourse/ci.git
     branch: master
-    paths: [ci/dockerfiles/golang-builder]
+    paths: [dockerfiles/golang-builder]
 
 - name: dev-image
   type: registry-image
