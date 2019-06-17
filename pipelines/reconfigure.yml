@@ -51,3 +51,27 @@ jobs:
       - name: concourse
         team: main
         config_file: pipelines/pipelines/concourse.yml
+      - name: new-algorithm
+        team: main
+        config_file: pipelines/pipelines/branch.yml
+        vars:
+          branch_name: new-algorithm
+          environment: algorithm
+      - name: runtime-drills
+        team: main
+        config_file: pipelines/pipelines/branch.yml
+        vars:
+          branch_name: master
+          environment: runtime-drills
+      - name: set-zstd-drills-env
+        team: main
+        config_file: pipelines/pipelines/branch.yml
+        vars:
+          branch_name: use_zstd
+          environment: use-zstd
+      - name: drill-test-postgres-table-migration
+        team: main
+        config_file: pipelines/pipelines/branch.yml
+        vars:
+          branch_name: postgres-table-migrations
+          environment: drill-test-postgres-table-migrations
