@@ -61,7 +61,7 @@ RUN curl -L https://releases.hashicorp.com/vault/0.7.3/vault_0.7.3_linux_amd64.z
       rm /tmp/vault.zip
 
 # install Terraform and jq for bin-smoke
-RUN curl -fsSL https://releases.hashicorp.com/terraform/0.12.0/terraform_0.12.0_linux_amd64.zip -o /tmp/terraform.zip && \
+RUN curl -fsSL https://releases.hashicorp.com/terraform/0.12.1/terraform_0.12.1_linux_amd64.zip -o /tmp/terraform.zip && \
       unzip /tmp/terraform.zip -d /usr/local/bin && \
       rm /tmp/terraform.zip
 RUN apt-get update && apt-get -y install jq
