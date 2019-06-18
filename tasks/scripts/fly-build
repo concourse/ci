@@ -21,7 +21,7 @@ pushd concourse
   export CGO_ENABLED=1
 
   if [ "$platform" = "linux" ]; then
-    ldflags+='-linkmode external -extldflags "-static"'
+    ldflags+=' -linkmode external -extldflags "-static"'
   fi
 
   go build -ldflags "$ldflags" -o $output/fly ./fly
