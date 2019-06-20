@@ -1,0 +1,11 @@
+---
+platform: linux
+image_resource:
+  type: registry-image
+  source: { repository: ubuntu }
+
+inputs:
+- name: scan-status
+
+run:
+  path: ci/tasks/scripts/check-norsk-status

@@ -1,0 +1,40 @@
+---
+resources:
+- name: latest-scan-status
+  type: git
+  source:
+    private_key: ((norsk_deploy_key))
+    uri: git@github.com:pivotal/oslo-scan-status.git
+    paths: [ p-concourse/* ]
+- name: 4.2.X-scan-status
+  type: git
+  source:
+    private_key: ((norsk_deploy_key))
+    uri: git@github.com:pivotal/oslo-scan-status.git
+    paths: [ p-concourse-4.2.x/* ]
+- name: ci
+  type: git
+  icon: &git-icon github-circle
+  source:
+    uri: https://github.com/concourse/ci.git
+    branch: master
+
+jobs:
+- name: check-p-concourse-latest
+  plan:
+  - get: latest-scan-status
+    trigger: true
+  - get: ci
+  - task: check-status-file
+    file: ci/tasks/check-norsk-status.yml
+    input_mapping: {scan-status: latest-scan-status}
+
+- name: check-p-concourse-4.2.X
+  plan:
+  - get: 4.2.X-scan-status
+    trigger: true
+  - get: ci
+  - task: check-status-file
+    file: ci/tasks/check-norsk-status.yml
+    input_mapping: {scan-status: 4.2.X-scan-status}
+
