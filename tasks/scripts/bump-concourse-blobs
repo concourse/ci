@@ -3,11 +3,6 @@
 
 set -e -x
 
-version=""
-if [ -e version/version ]; then
-  version="$(cat version/version)"
-fi
-
 git clone concourse-release-repo bumped-concourse-release-repo
 
 # authenticate us to upload to GCS bucket
@@ -36,9 +31,5 @@ pushd bumped-concourse-release-repo/
   bosh -n upload-blobs
 
   git add -A
-  if [ -n "$version" ]; then
-    git commit -m "bump concourse to $version"
-  else
-    git commit -m "bump concourse"
-  fi
+  git commit -m "bump concourse"
 popd
