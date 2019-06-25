@@ -1,0 +1,15 @@
+#!/bin/bash
+
+status_file=scan-status/p-concourse/status.json
+cat "$status_file"
+
+num_failures="$(grep -c '"status": "failed"' $status_file)"
+echo ""
+
+if [ "$num_failures" -eq 0 ]; then
+  echo "No failures found"
+  exit 0
+else
+  echo "$num_failures failures found! Please check your norsk-viewers pipelines specified in the status.json and resolve the errors. Contact the OSL team if you need help."
+  exit 1
+fi
