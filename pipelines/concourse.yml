@@ -751,7 +751,7 @@ jobs:
       passed: [bosh-smoke, bosh-topgun]
       trigger: true
     - get: vault-release
-      passed: [bosh-smoke, bosh-topgun]
+      passed: [bosh-topgun]
       trigger: true
     - get: cbd
       trigger: true
