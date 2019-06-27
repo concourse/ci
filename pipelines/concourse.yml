@@ -751,6 +751,9 @@ jobs:
     - get: gcp-xenial-stemcell
       passed: [bosh-smoke, bosh-topgun]
       trigger: true
+    - get: vault-release
+      passed: [bosh-smoke, bosh-topgun]
+      trigger: true
     - get: cbd
       trigger: true
     - get: gcp-windows-stemcell
@@ -768,6 +771,7 @@ jobs:
       - postgres-release/*.tgz
       - bpm-release/*.tgz
       - bbr-sdk-release/*.tgz
+      - vault-release/*.tgz
       ops_files:
       - cbd/cluster/operations/scale.yml
       - cbd/cluster/operations/dev-versions.yml
@@ -831,6 +835,7 @@ jobs:
         worker_rebalance_interval: 30m
         volume_sweeper_max_in_flight: 3
         vault_shared_path: "shared"
+        vault_host: vault.concourse-ci.org
 
 - name: bosh-wings-deploy
   serial: true
