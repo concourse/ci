@@ -71,373 +71,363 @@ jobs:
   public: true
   serial: true
   plan:
-  - do:
-    - in_parallel:
-      - get: ci
-        resource: unit-dockerfile
-        trigger: true
-      - get: builder
-    - task: build
-      image: builder
-      privileged: true
-      config:
-        platform: linux
-        params:
-          REPOSITORY: concourse/unit
-          CONTEXT: ci/dockerfiles/unit
-        inputs: [{name: ci}]
-        outputs: [{name: image}]
-        caches: [{path: cache}]
-        run: {path: build}
-    - put: unit-image
-      params: {image: image/image.tar}
-    on_success: &fixed-ci
-      do:
-      - task: format-slack-message
-        file: ci/tasks/format-slack-message.yml
-        input_mapping: {src: ci}
-      - put: notify
-        params:
-          message_file: message/message
-          mode: normal
-          alert_type: fixed
-    on_failure: &broke-ci
-      do:
-      - task: format-slack-message
-        file: ci/tasks/format-slack-message.yml
-        input_mapping: {src: ci}
-      - put: notify
-        params:
-          message_file: message/message
-          mode: normal
-          alert_type: broke
+  - in_parallel:
+    - get: ci
+      resource: unit-dockerfile
+      trigger: true
+    - get: builder
+  - task: build
+    image: builder
+    privileged: true
+    config:
+      platform: linux
+      params:
+        REPOSITORY: concourse/unit
+        CONTEXT: ci/dockerfiles/unit
+      inputs: [{name: ci}]
+      outputs: [{name: image}]
+      caches: [{path: cache}]
+      run: {path: build}
+  - put: unit-image
+    params: {image: image/image.tar}
+  on_success: &fixed-ci
+    do:
+    - task: format-slack-message
+      file: ci/tasks/format-slack-message.yml
+      input_mapping: {src: ci}
+    - put: notify
+      params:
+        message_file: message/message
+        mode: normal
+        alert_type: fixed
+  on_failure: &broke-ci
+    do:
+    - task: format-slack-message
+      file: ci/tasks/format-slack-message.yml
+      input_mapping: {src: ci}
+    - put: notify
+      params:
+        message_file: message/message
+        mode: normal
+        alert_type: broke
 
 - name: golang-builder-image
   public: true
   serial: true
   plan:
-    do:
-    - in_parallel:
-      - get: ci
-        resource: golang-builder-dockerfile
-        trigger: true
-      - get: builder
-      - get: golang-linux
-        trigger: true
-    - task: build
-      image: builder
-      privileged: true
-      file: ci/tasks/build-golang-builder-image.yml
-    - put: golang-builder-image
-      params: {image: image/image.tar}
-    on_success: *fixed-ci
-    on_failure: *broke-ci
+  - in_parallel:
+    - get: ci
+      resource: golang-builder-dockerfile
+      trigger: true
+    - get: builder
+    - get: golang-linux
+      trigger: true
+  - task: build
+    image: builder
+    privileged: true
+    file: ci/tasks/build-golang-builder-image.yml
+  - put: golang-builder-image
+    params: {image: image/image.tar}
+  on_success: *fixed-ci
+  on_failure: *broke-ci
 
 - name: unit
   public: true
   serial: true
   plan:
-    do:
-    - in_parallel:
-      - get: concourse
-        trigger: true
-      - get: unit-image
-        trigger: true
-      - get: ci
-    - task: yarn-test
+  - in_parallel:
+    - get: concourse
+      trigger: true
+    - get: unit-image
+      trigger: true
+    - get: ci
+  - task: yarn-test
+    image: unit-image
+    file: ci/tasks/yarn-test.yml
+  - in_parallel:
+    - task: unit
       image: unit-image
-      file: ci/tasks/yarn-test.yml
-    - in_parallel:
-      - task: unit
-        image: unit-image
-        file: ci/tasks/unit.yml
-        input_mapping: {concourse: built-concourse}
-        timeout: 1h
-      - task: fly-darwin
-        file: ci/tasks/fly-darwin.yml
-        timeout: 1h
-      - task: fly-windows
-        file: ci/tasks/fly-windows.yml
-        timeout: 1h
-    on_success: &fixed-concourse
-      do:
-      - task: format-slack-message
-        file: ci/tasks/format-slack-message.yml
-        input_mapping: {src: concourse}
-      - put: notify
-        params:
-          message_file: message/message
-          mode: normal
-          alert_type: fixed
-    on_failure: &broke-concourse
-      do:
-      - task: format-slack-message
-        file: ci/tasks/format-slack-message.yml
-        input_mapping: {src: concourse}
-      - put: notify
-        params:
-          message_file: message/message
-          mode: normal
-          alert_type: broke
+      file: ci/tasks/unit.yml
+      input_mapping: {concourse: built-concourse}
+      timeout: 1h
+    - task: fly-darwin
+      file: ci/tasks/fly-darwin.yml
+      timeout: 1h
+    - task: fly-windows
+      file: ci/tasks/fly-windows.yml
+      timeout: 1h
+  on_success: &fixed-concourse
+    do:
+    - task: format-slack-message
+      file: ci/tasks/format-slack-message.yml
+      input_mapping: {src: concourse}
+    - put: notify
+      params:
+        message_file: message/message
+        mode: normal
+        alert_type: fixed
+  on_failure: &broke-concourse
+    do:
+    - task: format-slack-message
+      file: ci/tasks/format-slack-message.yml
+      input_mapping: {src: concourse}
+    - put: notify
+      params:
+        message_file: message/message
+        mode: normal
+        alert_type: broke
 
 - name: dev-image
   public: true
   serial: true
   plan:
-    do:
-    - in_parallel:
-      - get: concourse
-        trigger: true
-      - get: unit-image
-        trigger: true
-      - get: gdn
-        trigger: true
-      - get: dumb-init
-        trigger: true
-      - get: bosh-io-release-resource
-        trigger: true
-      - get: bosh-io-stemcell-resource
-        trigger: true
-      - get: cf-resource
-        trigger: true
-      - get: docker-image-resource
-        trigger: true
-      - get: git-resource
-        trigger: true
-      - get: github-release-resource
-        trigger: true
-      - get: hg-resource
-        trigger: true
-      - get: pool-resource
-        trigger: true
-      - get: registry-image-resource
-        trigger: true
-      - get: s3-resource
-        trigger: true
-      - get: semver-resource
-        trigger: true
-      - get: time-resource
-        trigger: true
-      - get: tracker-resource
-        trigger: true
-      - get: mock-resource
-        trigger: true
-      - get: builder
-      - get: ci
-    - task: yarn-build
-      image: unit-image
-      file: ci/tasks/yarn-build.yml
-    - in_parallel:
-      - task: fly-linux
-        file: ci/tasks/fly-build-linux.yml
-      - task: fly-windows
-        file: ci/tasks/fly-build-windows.yml
-      - task: fly-darwin
-        file: ci/tasks/fly-build-darwin.yml
-    - task: build
-      image: builder
-      privileged: true
-      input_mapping: {concourse: built-concourse}
-      file: ci/tasks/build-dev-image.yml
-    - put: dev-image
-      params: {image: image/image.tar}
-      get_params: {format: oci}
-    on_success: *fixed-concourse
-    on_failure: *broke-concourse
+  - in_parallel:
+    - get: concourse
+      trigger: true
+    - get: unit-image
+      trigger: true
+    - get: gdn
+      trigger: true
+    - get: dumb-init
+      trigger: true
+    - get: bosh-io-release-resource
+      trigger: true
+    - get: bosh-io-stemcell-resource
+      trigger: true
+    - get: cf-resource
+      trigger: true
+    - get: docker-image-resource
+      trigger: true
+    - get: git-resource
+      trigger: true
+    - get: github-release-resource
+      trigger: true
+    - get: hg-resource
+      trigger: true
+    - get: pool-resource
+      trigger: true
+    - get: registry-image-resource
+      trigger: true
+    - get: s3-resource
+      trigger: true
+    - get: semver-resource
+      trigger: true
+    - get: time-resource
+      trigger: true
+    - get: tracker-resource
+      trigger: true
+    - get: mock-resource
+      trigger: true
+    - get: builder
+    - get: ci
+  - task: yarn-build
+    image: unit-image
+    file: ci/tasks/yarn-build.yml
+  - in_parallel:
+    - task: fly-linux
+      file: ci/tasks/fly-build-linux.yml
+    - task: fly-windows
+      file: ci/tasks/fly-build-windows.yml
+    - task: fly-darwin
+      file: ci/tasks/fly-build-darwin.yml
+  - task: build
+    image: builder
+    privileged: true
+    input_mapping: {concourse: built-concourse}
+    file: ci/tasks/build-dev-image.yml
+  - put: dev-image
+    params: {image: image/image.tar}
+    get_params: {format: oci}
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: testflight
   public: true
   max_in_flight: 2
   plan:
-    do:
-    - in_parallel:
-      - get: concourse
-        passed: [unit, dev-image]
-        trigger: true
-      - get: unit-image
-        passed: [unit, dev-image]
-        trigger: true
-      - get: dev-image
-        passed: [dev-image]
-        trigger: true
-        params: {format: oci}
-      - get: postgres-image
-        params: {format: oci}
-      - get: ci
-    - task: testflight
-      image: unit-image
-      privileged: true
-      timeout: 1h
-      file: ci/tasks/docker-compose-testflight.yml
-    on_success: *fixed-concourse
-    on_failure: *broke-concourse
+  - in_parallel:
+    - get: concourse
+      passed: [unit, dev-image]
+      trigger: true
+    - get: unit-image
+      passed: [unit, dev-image]
+      trigger: true
+    - get: dev-image
+      passed: [dev-image]
+      trigger: true
+      params: {format: oci}
+    - get: postgres-image
+      params: {format: oci}
+    - get: ci
+  - task: testflight
+    image: unit-image
+    privileged: true
+    timeout: 1h
+    file: ci/tasks/docker-compose-testflight.yml
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: watsjs
   public: true
   max_in_flight: 2
   plan:
-    do:
-    - in_parallel:
-      - get: concourse
-        passed: [unit, dev-image]
-        trigger: true
-      - get: unit-image
-        passed: [unit, dev-image]
-        trigger: true
-      - get: dev-image
-        passed: [dev-image]
-        trigger: true
-        params: {format: oci}
-      - get: postgres-image
-        params: {format: oci}
-      - get: ci
-    - task: watsjs
-      image: unit-image
-      privileged: true
-      timeout: 1h
-      file: ci/tasks/docker-compose-watsjs.yml
-    on_success: *fixed-concourse
-    on_failure: *broke-concourse
+  - in_parallel:
+    - get: concourse
+      passed: [unit, dev-image]
+      trigger: true
+    - get: unit-image
+      passed: [unit, dev-image]
+      trigger: true
+    - get: dev-image
+      passed: [dev-image]
+      trigger: true
+      params: {format: oci}
+    - get: postgres-image
+      params: {format: oci}
+    - get: ci
+  - task: watsjs
+    image: unit-image
+    privileged: true
+    timeout: 1h
+    file: ci/tasks/docker-compose-watsjs.yml
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: upgrade
   public: true
   serial: true
   plan:
-    do:
-    - in_parallel:
-      - get: concourse
-        passed: [unit, dev-image]
-        trigger: true
-      - get: dev-image
-        passed: [dev-image]
-        params: {format: oci}
-        trigger: true
-      - get: unit-image
-        passed: [unit, dev-image]
-      - get: concourse-image
-        params: {format: oci}
-      - get: postgres-image
-        params: {format: oci}
-      - get: ci
-    - task: upgrade-test
-      privileged: true
-      image: unit-image
-      file: ci/tasks/upgrade-test.yml
-    on_success: *fixed-concourse
-    on_failure: *broke-concourse
+  - in_parallel:
+    - get: concourse
+      passed: [unit, dev-image]
+      trigger: true
+    - get: dev-image
+      passed: [dev-image]
+      params: {format: oci}
+      trigger: true
+    - get: unit-image
+      passed: [unit, dev-image]
+    - get: concourse-image
+      params: {format: oci}
+    - get: postgres-image
+      params: {format: oci}
+    - get: ci
+  - task: upgrade-test
+    privileged: true
+    image: unit-image
+    file: ci/tasks/upgrade-test.yml
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: downgrade
   public: true
   serial: true
   plan:
-    do:
-    - in_parallel:
-      - get: concourse
-        passed: [unit, dev-image]
-        trigger: true
-      - get: dev-image
-        passed: [dev-image]
-        params: {format: oci}
-        trigger: true
-      - get: unit-image
-        passed: [unit, dev-image]
-      - get: concourse-image
-        params: {format: oci}
-      - get: postgres-image
-        params: {format: oci}
-      - get: ci
-    - task: downgrade-test
-      privileged: true
-      image: unit-image
-      file: ci/tasks/downgrade-test.yml
-    on_success: *fixed-concourse
-    on_failure: *broke-concourse
+  - in_parallel:
+    - get: concourse
+      passed: [unit, dev-image]
+      trigger: true
+    - get: dev-image
+      passed: [dev-image]
+      params: {format: oci}
+      trigger: true
+    - get: unit-image
+      passed: [unit, dev-image]
+    - get: concourse-image
+      params: {format: oci}
+    - get: postgres-image
+      params: {format: oci}
+    - get: ci
+  - task: downgrade-test
+    privileged: true
+    image: unit-image
+    file: ci/tasks/downgrade-test.yml
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: k8s-smoke
   public: true
   serial: true
   plan:
-    do:
-    - in_parallel:
-      - get: concourse
-        passed: [build-rc-image]
-        trigger: true
-      - get: concourse-rc-image
-        passed: [build-rc-image]
-        params: {format: oci}
-        trigger: true
-      - get: version
-        passed: [build-rc-image]
-        trigger: true
-      - get: charts
-        trigger: true
-      - get: unit-image
-        passed: [build-rc-image]
-      - get: ci
-    - try:
-        task: try-delete
-        image: unit-image
-        file: ci/tasks/k8s-delete.yml
-        params:
-          KUBE_CONFIG: ((kube_config))
-          RELEASE_NAME: concourse-smoke
-          CONCOURSE_IMAGE: concourse/concourse-rc
-    - task: deploy
-      image: unit-image
-      input_mapping: {image-info: concourse-rc-image}
-      file: ci/tasks/k8s-deploy.yml
-      params:
-        KUBE_CONFIG: ((kube_config))
-        RELEASE_NAME: concourse-smoke
-        CONCOURSE_IMAGE: concourse/concourse-rc
-    - task: k8s-smoke
-      image: unit-image
-      file: ci/tasks/k8s-smoke.yml
-      params:
-        KUBE_CONFIG: ((kube_config))
-        RELEASE_NAME: concourse-smoke
-        MAX_TICKS: 180
-    - task: delete
+  - in_parallel:
+    - get: concourse
+      passed: [build-rc-image]
+      trigger: true
+    - get: concourse-rc-image
+      passed: [build-rc-image]
+      params: {format: oci}
+      trigger: true
+    - get: version
+      passed: [build-rc-image]
+      trigger: true
+    - get: charts
+      trigger: true
+    - get: unit-image
+      passed: [build-rc-image]
+    - get: ci
+  - try:
+      task: try-delete
       image: unit-image
       file: ci/tasks/k8s-delete.yml
       params:
         KUBE_CONFIG: ((kube_config))
         RELEASE_NAME: concourse-smoke
         CONCOURSE_IMAGE: concourse/concourse-rc
-    on_success: *fixed-concourse
-    on_failure: *broke-concourse
+  - task: deploy
+    image: unit-image
+    input_mapping: {image-info: concourse-rc-image}
+    file: ci/tasks/k8s-deploy.yml
+    params:
+      KUBE_CONFIG: ((kube_config))
+      RELEASE_NAME: concourse-smoke
+      CONCOURSE_IMAGE: concourse/concourse-rc
+  - task: k8s-smoke
+    image: unit-image
+    file: ci/tasks/k8s-smoke.yml
+    params:
+      KUBE_CONFIG: ((kube_config))
+      RELEASE_NAME: concourse-smoke
+      MAX_TICKS: 180
+  - task: delete
+    image: unit-image
+    file: ci/tasks/k8s-delete.yml
+    params:
+      KUBE_CONFIG: ((kube_config))
+      RELEASE_NAME: concourse-smoke
+      CONCOURSE_IMAGE: concourse/concourse-rc
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: k8s-topgun
   public: true
   serial: true
   plan:
-    do:
-    - in_parallel:
-      - get: concourse
-        passed: [k8s-smoke]
-        trigger: true
-      - get: version
-        passed: [k8s-smoke]
-        trigger: true
-      - get: concourse-rc-image
-        passed: [k8s-smoke]
-        trigger: true
-        params: {format: oci}
-      - get: unit-image
-        passed: [k8s-smoke]
-        trigger: true
-      - get: charts
-        trigger: true
-        passed: [k8s-smoke]
-      - get: ci
-    - task: k8s-topgun
-      file: ci/tasks/k8s-topgun.yml
-      image: unit-image
-      params:
-        KUBE_CONFIG: ((kube_config))
-        CONCOURSE_IMAGE_NAME: concourse/concourse-rc
-    on_success: *fixed-concourse
-    on_failure: *broke-concourse
+  - in_parallel:
+    - get: concourse
+      passed: [k8s-smoke]
+      trigger: true
+    - get: version
+      passed: [k8s-smoke]
+      trigger: true
+    - get: concourse-rc-image
+      passed: [k8s-smoke]
+      trigger: true
+      params: {format: oci}
+    - get: unit-image
+      passed: [k8s-smoke]
+      trigger: true
+    - get: charts
+      trigger: true
+      passed: [k8s-smoke]
+    - get: ci
+  - task: k8s-topgun
+    file: ci/tasks/k8s-topgun.yml
+    image: unit-image
+    params:
+      KUBE_CONFIG: ((kube_config))
+      CONCOURSE_IMAGE_NAME: concourse/concourse-rc
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: k8s-check-helm-params
   public: true
@@ -576,35 +566,34 @@ jobs:
   public: true
   serial: true
   plan:
-    do:
-    - in_parallel:
-      - get: concourse
-        passed: [build-rc]
-        trigger: true
-      - get: version
-        passed: [build-rc]
-        trigger: true
-      - get: linux-rc
-        passed: [build-rc]
-        trigger: true
-      - get: unit-image
-        passed: [build-rc]
-        trigger: true
-      - get: ci
-    - task: terraform-smoke
-      image: unit-image
-      file: ci/tasks/terraform-smoke.yml
-      params:
-        GCP_PROJECT: cf-concourse-production
-        GCP_KEY: ((concourse_smoke_gcp_key))
-        SSH_KEY: ((concourse_smoke_ssh_key))
-        DEPLOYMENT: smoke
-    - task: smoke
-      image: unit-image
-      file: ci/tasks/smoke.yml
-      input_mapping: {endpoint-info: outputs}
-    on_success: *fixed-concourse
-    on_failure: *broke-concourse
+  - in_parallel:
+    - get: concourse
+      passed: [build-rc]
+      trigger: true
+    - get: version
+      passed: [build-rc]
+      trigger: true
+    - get: linux-rc
+      passed: [build-rc]
+      trigger: true
+    - get: unit-image
+      passed: [build-rc]
+      trigger: true
+    - get: ci
+  - task: terraform-smoke
+    image: unit-image
+    file: ci/tasks/terraform-smoke.yml
+    params:
+      GCP_PROJECT: cf-concourse-production
+      GCP_KEY: ((concourse_smoke_gcp_key))
+      SSH_KEY: ((concourse_smoke_ssh_key))
+      DEPLOYMENT: smoke
+  - task: smoke
+    image: unit-image
+    file: ci/tasks/smoke.yml
+    input_mapping: {endpoint-info: outputs}
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: bosh-check-props
   public: true
@@ -709,101 +698,99 @@ jobs:
   public: true
   serial: true
   plan:
-    do:
-    - in_parallel:
-      # these don't trigger, to ensure that the job gets triggered by
-      # concourse-release, which is unfortunately decoupled from the resource
-      # that we 'put' to.
-      - get: concourse
-        passed: [bosh-bump]
-      - get: unit-image
-        passed: [bosh-bump]
-      - get: version
-        passed: [bosh-bump]
-      - get: concourse-release
-        trigger: true
-      - get: postgres-release
-        trigger: true
-      - get: bpm-release
-        trigger: true
-      - get: gcp-xenial-stemcell
-        trigger: true
-      - get: ci
-    - put: smoke-deployment
-      params:
-        manifest: ci/deployments/bosh-smoke.yml
-        releases:
-        - concourse-release/*.tgz
-        - postgres-release/*.tgz
-        - bpm-release/*.tgz
-        stemcells:
-        - gcp-xenial-stemcell/*.tgz
-        vars:
-          deployment_name: concourse-smoke
-    - task: discover-bosh-endpoint-info
-      file: ci/tasks/discover-bosh-endpoint-info.yml
-      image: unit-image
-      params:
-        BOSH_ENVIRONMENT: ((bosh_target))
-        BOSH_CLIENT: ((bosh_client.id))
-        BOSH_CLIENT_SECRET: ((bosh_client.secret))
-        BOSH_DEPLOYMENT: concourse-smoke
-        BOSH_INSTANCE_GROUP: concourse
-    - task: smoke
-      image: unit-image
-      file: ci/tasks/smoke.yml
-    on_success: *fixed-concourse
-    on_failure: *broke-concourse
+  - in_parallel:
+    # these don't trigger, to ensure that the job gets triggered by
+    # concourse-release, which is unfortunately decoupled from the resource
+    # that we 'put' to.
+    - get: concourse
+      passed: [bosh-bump]
+    - get: unit-image
+      passed: [bosh-bump]
+    - get: version
+      passed: [bosh-bump]
+    - get: concourse-release
+      trigger: true
+    - get: postgres-release
+      trigger: true
+    - get: bpm-release
+      trigger: true
+    - get: gcp-xenial-stemcell
+      trigger: true
+    - get: ci
+  - put: smoke-deployment
+    params:
+      manifest: ci/deployments/bosh-smoke.yml
+      releases:
+      - concourse-release/*.tgz
+      - postgres-release/*.tgz
+      - bpm-release/*.tgz
+      stemcells:
+      - gcp-xenial-stemcell/*.tgz
+      vars:
+        deployment_name: concourse-smoke
+  - task: discover-bosh-endpoint-info
+    file: ci/tasks/discover-bosh-endpoint-info.yml
+    image: unit-image
+    params:
+      BOSH_ENVIRONMENT: ((bosh_target))
+      BOSH_CLIENT: ((bosh_client.id))
+      BOSH_CLIENT_SECRET: ((bosh_client.secret))
+      BOSH_DEPLOYMENT: concourse-smoke
+      BOSH_INSTANCE_GROUP: concourse
+  - task: smoke
+    image: unit-image
+    file: ci/tasks/smoke.yml
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: bosh-topgun
   public: true
   serial: true
   interruptible: true
   plan:
-    do:
-    - in_parallel:
-      # these don't trigger, to ensure that the job gets triggered by
-      # concourse-release, which is unfortunately decoupled from the resource
-      # that we 'put' to.
-      - get: concourse
-        passed: [bosh-bump]
-      - get: unit-image
-        passed: [bosh-bump]
-      - get: version
-        passed: [bosh-bump]
-      - get: concourse-release
-        trigger: true
-      - get: postgres-release
-        trigger: true
-      - get: bpm-release
-        trigger: true
-      - get: backup-and-restore-sdk-release
-        trigger: true
-      - get: gcp-xenial-stemcell
-        trigger: true
-      - get: vault-release
-        trigger: true
-      - get: credhub-release
-        trigger: true
-      - get: bbr
-        trigger: true
-      - get: ci
-    - task: bosh-topgun
-      file: ci/tasks/topgun.yml
-      image: unit-image
-      input_mapping:
-        stemcell: gcp-xenial-stemcell
-      params:
-        BOSH_ENVIRONMENT: ((bosh_target))
-        BOSH_CA_CERT: ((tmp_bosh_client.ca_cert))
-        BOSH_CLIENT: ((bosh_client.id))
-        BOSH_CLIENT_SECRET: ((bosh_client.secret))
-        BOSH_SSH_KEY: ((topgun_bosh_key))
-        AWS_REGION: ((topgun_aws_ssm.region))
-        AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
-        AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
-    on_success: *fixed-concourse
-    on_failure: *broke-concourse
+  - in_parallel:
+    # these don't trigger, to ensure that the job gets triggered by
+    # concourse-release, which is unfortunately decoupled from the resource
+    # that we 'put' to.
+    - get: concourse
+      passed: [bosh-bump]
+    - get: unit-image
+      passed: [bosh-bump]
+    - get: version
+      passed: [bosh-bump]
+    - get: concourse-release
+      trigger: true
+    - get: postgres-release
+      trigger: true
+    - get: bpm-release
+      trigger: true
+    - get: backup-and-restore-sdk-release
+      trigger: true
+    - get: gcp-xenial-stemcell
+      trigger: true
+    - get: vault-release
+      trigger: true
+    - get: credhub-release
+      trigger: true
+    - get: bbr
+      trigger: true
+    - get: ci
+  - task: bosh-topgun
+    file: ci/tasks/topgun.yml
+    image: unit-image
+    input_mapping:
+      stemcell: gcp-xenial-stemcell
+    params:
+      BOSH_ENVIRONMENT: ((bosh_target))
+      BOSH_CA_CERT: ((tmp_bosh_client.ca_cert))
+      BOSH_CLIENT: ((bosh_client.id))
+      BOSH_CLIENT_SECRET: ((bosh_client.secret))
+      BOSH_SSH_KEY: ((topgun_bosh_key))
+      AWS_REGION: ((topgun_aws_ssm.region))
+      AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
+      AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: bosh-prod-deploy
   public: true
@@ -1213,6 +1200,7 @@ resources:
 
 - name: notify
   type: slack-notifier
+  icon: slack
   source:
     url: ((slack_hook))
     username: ((basic_auth.username))
