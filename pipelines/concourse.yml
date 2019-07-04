@@ -634,7 +634,6 @@ jobs:
       trigger: true
     - get: version
       passed: [bosh-check-props]
-      trigger: true
     - get: linux-rc
       passed: [build-rc, bosh-check-props]
       trigger: true
