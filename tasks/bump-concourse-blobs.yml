@@ -11,8 +11,6 @@ inputs:
 - name: concourse-release-repo
 - name: linux-rc
 - name: windows-rc
-- name: version
-  optional: true
 
 outputs:
 - name: bumped-concourse-release-repo

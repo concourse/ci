@@ -15,8 +15,8 @@ platform="$1"
 
 archive=concourse-${platform}-amd64.tgz
 if [ -e version/version ]; then
-  version="$(cat version/version)"
-  archive=concourse-${version}-${platform}-amd64.tgz
+  sha="$(git -C concourse rev-parse HEAD)"
+  archive=concourse-${sha}-${platform}-amd64.tgz
 fi
 
 final_version=""
