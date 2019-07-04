@@ -7,6 +7,12 @@ resources:
     access_token: ((concourse_github_release.access_token))
     owner: cloudfoundry-incubator
     repository: bosh-backup-and-restore
+- name: bosh-cli
+  type: github-release
+  source:
+    access_token: ((concourse_github_release.access_token))
+    owner: cloudfoundry
+    repository: bosh-cli
 - name: gcs-backup
   type: gcs-resource
   source:
@@ -32,13 +38,14 @@ jobs:
   - get: midnight
     trigger: true
   - get: bbr-tool
+  - get: bosh-cli
   - task: backup-prod-env
     config:
       platform: linux
       image_resource:
         type: registry-image
         source:
-          repository: ubuntu
+          repository: concourse/unit
       params:
         BOSH_CLIENT: ((bosh_client.id))
         BOSH_CLIENT_SECRET: ((bosh_client.secret))
@@ -51,12 +58,16 @@ jobs:
         - -exc
         - |
           #!/bin/bash
-          mv bbr-tool/bbr-1.5.1-linux-amd64 /usr/local/bin/bbr
+          mv bbr-tool/bbr-*-linux-amd64 /usr/local/bin/bbr
           chmod +x /usr/local/bin/bbr
+          mv bosh-cli/bosh-cli-*-linux-amd64 /usr/local/bin/bosh
+          chmod +x /usr/local/bin/bosh
           bbr deployment backup --artifact-path=bbr_artifacts
+          bosh -d concourse-prod dep | grep concourse/ | awk '{print $1}' > bbr_artifacts/concourse_version
           tar -zcf bbr_artifacts/bbr_backup.tgz bbr_artifacts/*
       inputs:
       - name: bbr-tool
+      - name: bosh-cli
       outputs:
       - name: bbr_artifacts
   - put: gcs-backup
