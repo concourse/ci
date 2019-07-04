@@ -6,11 +6,8 @@ $env:Path += ";C:\Go\bin;C:\Program Files\Git\cmd;C:\ProgramData\chocolatey\lib\
 $env:GOPATH = "$pwd\gopath"
 $env:Path += ";$pwd\gopath\bin"
 
-$archive = "concourse-windows-amd64.zip"
-if (Test-Path "version\version") {
-  $version = (Get-Content "version\version")
-  $archive = "concourse-${version}-windows-amd64.zip"
-}
+$sha = & git -C concourse rev-parse HEAD
+$archive = "concourse-${sha}-windows-amd64.zip"
 
 # can't figure out how to pass an empty string arg in PowerShell, so just
 # configure a noop for the fallback
