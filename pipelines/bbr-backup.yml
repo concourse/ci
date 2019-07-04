@@ -40,6 +40,7 @@ jobs:
   - get: bbr-tool
   - get: bosh-cli
   - task: backup-prod-env
+    attempts: 3
     config:
       platform: linux
       image_resource:
