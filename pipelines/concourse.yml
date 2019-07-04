@@ -902,58 +902,6 @@ jobs:
         vault_shared_path: "shared"
         vault_host: vault.concourse-ci.org
 
-- name: bosh-wings-deploy
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed: [bosh-prod-deploy]
-    - get: version
-      passed: [bosh-prod-deploy]
-    - get: concourse-release
-      passed: [bosh-prod-deploy]
-    - get: bpm-release
-      passed: [bosh-prod-deploy]
-    - get: gcp-xenial-stemcell
-      passed: [bosh-prod-deploy]
-    - get: cbd
-      passed: [bosh-prod-deploy]
-    - get: prod
-    - get: ci
-  - put: wings-deployment
-    params:
-      manifest: cbd/cluster/concourse.yml
-      stemcells:
-      - gcp-xenial-stemcell/*.tgz
-      releases:
-      - concourse-release/*.tgz
-      - bpm-release/*.tgz
-      ops_files:
-      - cbd/cluster/operations/dev-versions.yml
-      - cbd/cluster/operations/privileged-http.yml
-      - cbd/cluster/operations/privileged-https.yml
-      - cbd/cluster/operations/tls.yml
-      - cbd/cluster/operations/web-network-extension.yml
-      - cbd/cluster/operations/scale.yml
-      - cbd/cluster/operations/syslog_forwarder.yml
-      - cbd/cluster/operations/team-authorized-keys.yml
-      - cbd/cluster/operations/storage-driver.yml
-      - cbd/cluster/operations/external-postgres.yml
-      - cbd/cluster/operations/external-postgres-tls.yml
-      - cbd/cluster/operations/influxdb.yml
-      - cbd/cluster/operations/container-placement-strategy.yml
-      - cbd/cluster/operations/github-auth.yml
-      - cbd/cluster/operations/add-local-users.yml
-      - cbd/cluster/operations/worker-rebalancing.yml
-      - cbd/cluster/operations/encryption.yml
-      - cbd/cluster/operations/garden-dns.yml
-      - cbd/cluster/operations/max-in-flight.yml
-      - cbd/cluster/operations/worker-max-in-flight.yml
-      - cbd/cluster/operations/enable-global-resources.yml
-      - prod/wings/ops.yml
-      vars_files:
-      - prod/wings/vars.yml
-
 - name: shipit
   public: true
   serial_groups: [version]
@@ -997,6 +945,58 @@ jobs:
     passed: [bosh-smoke, bosh-topgun]
   - put: version
     params: {file: final-version/version}
+
+- name: bosh-wings-deploy
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse
+      passed: [shipit]
+    - get: version
+      passed: [shipit]
+    - get: concourse-release
+      passed: [shipit]
+    - get: bpm-release
+      passed: [shipit]
+    - get: gcp-xenial-stemcell
+      passed: [bosh-prod-deploy]
+    - get: cbd
+      passed: [bosh-prod-deploy]
+    - get: prod
+    - get: ci
+  - put: wings-deployment
+    params:
+      manifest: cbd/cluster/concourse.yml
+      stemcells:
+      - gcp-xenial-stemcell/*.tgz
+      releases:
+      - concourse-release/*.tgz
+      - bpm-release/*.tgz
+      ops_files:
+      - cbd/cluster/operations/dev-versions.yml
+      - cbd/cluster/operations/privileged-http.yml
+      - cbd/cluster/operations/privileged-https.yml
+      - cbd/cluster/operations/tls.yml
+      - cbd/cluster/operations/web-network-extension.yml
+      - cbd/cluster/operations/scale.yml
+      - cbd/cluster/operations/syslog_forwarder.yml
+      - cbd/cluster/operations/team-authorized-keys.yml
+      - cbd/cluster/operations/storage-driver.yml
+      - cbd/cluster/operations/external-postgres.yml
+      - cbd/cluster/operations/external-postgres-tls.yml
+      - cbd/cluster/operations/influxdb.yml
+      - cbd/cluster/operations/container-placement-strategy.yml
+      - cbd/cluster/operations/github-auth.yml
+      - cbd/cluster/operations/add-local-users.yml
+      - cbd/cluster/operations/worker-rebalancing.yml
+      - cbd/cluster/operations/encryption.yml
+      - cbd/cluster/operations/garden-dns.yml
+      - cbd/cluster/operations/max-in-flight.yml
+      - cbd/cluster/operations/worker-max-in-flight.yml
+      - cbd/cluster/operations/enable-global-resources.yml
+      - prod/wings/ops.yml
+      vars_files:
+      - prod/wings/vars.yml
 
 - name: publish-binaries
   serial: true
