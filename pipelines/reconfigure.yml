@@ -69,9 +69,6 @@ jobs:
         vars:
           branch_name: use_zstd
           environment: use-zstd
-      - name: drill-test-postgres-table-migration
+      - name: prod-db-backup
         team: main
-        config_file: pipelines/pipelines/branch.yml
-        vars:
-          branch_name: postgres-table-migrations
-          environment: drill-test-postgres-table-migrations
+        config_file: pipelines/pipelines/bbr-backup.yml
