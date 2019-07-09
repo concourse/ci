@@ -73,8 +73,6 @@ jobs:
   plan:
   - in_parallel:
     - get: ci
-      resource: unit-dockerfile
-      trigger: true
     - get: builder
   - task: build
     image: builder
@@ -117,7 +115,6 @@ jobs:
   plan:
   - in_parallel:
     - get: ci
-      resource: golang-builder-dockerfile
       trigger: true
     - get: builder
     - get: golang-linux
@@ -1206,22 +1203,6 @@ resources:
     username: ((basic_auth.username))
     password: ((basic_auth.password))
     concourse_url: https://ci.concourse-ci.org
-
-- name: unit-dockerfile
-  type: git
-  icon: *git-icon
-  source:
-    uri: https://github.com/concourse/ci.git
-    branch: master
-    paths: [dockerfiles/unit]
-
-- name: golang-builder-dockerfile
-  type: git
-  icon: *git-icon
-  source:
-    uri: https://github.com/concourse/ci.git
-    branch: master
-    paths: [dockerfiles/golang-builder]
 
 - name: dev-image
   type: registry-image
