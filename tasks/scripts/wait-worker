@@ -46,17 +46,21 @@ try_until_responding() {
 
   echo "waiting for a worker to be running"
 
-  until fly -t $TARGET_NAME workers | grep 'running' &> /dev/null; do
-    echo -n
+  while true; do
+    workers= fly -t $TARGET_NAME workers | grep 'running'
+    if [ -z workers ]; then
+      echo -n '.'
 
-    ((ticks++))
+      ((ticks++))
+      if [[ $ticks -ge $MAX_TICKS ]]; then
+        echo "giving up. :("
+        exit 1
+      fi
 
-    if [[ $ticks -ge $MAX_TICKS ]]; then
-      echo "giving up. :("
-      exit 1
+      sleep 1
+    else
+     exit
     fi
-
-    sleep 1
   done
 }
 
