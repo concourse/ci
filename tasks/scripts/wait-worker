@@ -59,7 +59,7 @@ try_until_responding() {
 
       sleep 1
     else
-     exit
+      break
     fi
   done
 }
