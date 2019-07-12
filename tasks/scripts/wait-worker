@@ -52,7 +52,7 @@ try_until_responding() {
     if [ -z "$(fly -t $TARGET_NAME workers | grep 'running')" ]; then
       echo -n '.'
 
-      ((ticks++))
+      ticks=$((ticks+1))
       if [[ $ticks -ge $MAX_TICKS ]]; then
         echo "giving up. :("
         exit 1
