@@ -44,7 +44,7 @@ try_until_responding() {
   echo "waiting for a worker to be running"
 
   for _ in $(seq 1 $MAX_TICKS); do
-    if fly -t $TARGET_NAME workers | grep 'running'; then
+    if fly -t $TARGET_NAME workers | grep 'running' >/dev/null; then
       echo "worker started"
       exit 0
     fi
