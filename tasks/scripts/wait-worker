@@ -42,28 +42,18 @@ create_target() {
 }
 
 try_until_responding() {
-  local ticks=0
-
   echo "waiting for a worker to be running"
 
-  while true; do
-    # if workers result is empty or only contains a newline
-    # print out dot and increase the tick
-    if [ -z "$(fly -t $TARGET_NAME workers | grep 'running')" ]; then
-      echo -n '.'
-
-      ticks=$((ticks+1))
-      if [[ $ticks -ge $MAX_TICKS ]]; then
-        echo "giving up. :("
-        exit 1
-      fi
-
-      sleep 1
-    else
+  for _ in $(seq 1 $MAX_TICKS); do
+    if fly -t $TARGET_NAME workers | grep 'running'; then
       echo "worker started"
-      break
+      exit 0
     fi
+    echo -n '.'
+    sleep 1
   done
+  echo "giving up. :("
+  exit 1
 }
 
 main
