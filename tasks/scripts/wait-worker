@@ -47,8 +47,10 @@ try_until_responding() {
   echo "waiting for a worker to be running"
 
   while true; do
-    workers= fly -t $TARGET_NAME workers | grep 'running'
-    if [ -z workers ]; then
+    workers=$(fly -t $TARGET_NAME workers | grep 'running')
+    # if workers result is empty or only contains a newline
+    # print out dot and increase the tick
+    if [ -z "`echo $workers | tr -d '\n'`" ]; then
       echo -n '.'
 
       ((ticks++))
@@ -59,6 +61,7 @@ try_until_responding() {
 
       sleep 1
     else
+      echo "worker started"
       break
     fi
   done
