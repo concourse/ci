@@ -47,10 +47,9 @@ try_until_responding() {
   echo "waiting for a worker to be running"
 
   while true; do
-    workers=$(fly -t $TARGET_NAME workers | grep 'running')
     # if workers result is empty or only contains a newline
     # print out dot and increase the tick
-    if [ -z "`echo $workers | tr -d '\n'`" ]; then
+    if [ -z "$(fly -t $TARGET_NAME workers | grep 'running')" ]; then
       echo -n '.'
 
       ((ticks++))
