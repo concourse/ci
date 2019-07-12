@@ -32,7 +32,7 @@ forward_atc_port () {
     --namespace $RELEASE_NAME \
     deployment/$RELEASE_NAME-web \
     --pod-running-timeout=5m \
-    8080:8080 & 2>/dev/null
+    8080:8080 >/dev/null &
 }
 
 run_test () {
