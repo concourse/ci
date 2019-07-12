@@ -2,7 +2,7 @@
 
 # vim: set ft=sh
 
-set -e -u -x
+set -e -u
 
 readonly ATC_URL="${ATC_URL:-}"
 readonly MAX_TICKS="${MAX_TICKS:-}"
@@ -12,7 +12,6 @@ main() {
   check_environment_variables
   create_target
   try_until_responding
-  echo 'ok!'
 }
 
 check_environment_variables() {
