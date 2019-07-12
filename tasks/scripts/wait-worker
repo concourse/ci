@@ -2,7 +2,7 @@
 
 # vim: set ft=sh
 
-set -e -u
+set -e -u -x
 
 readonly ATC_URL="${ATC_URL:-}"
 readonly MAX_TICKS="${MAX_TICKS:-}"
