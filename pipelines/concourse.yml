@@ -29,6 +29,10 @@ groups:
   - upgrade
   - downgrade
 
+- name: quickstart
+  jobs:
+  - quickstart-smoke
+
 - name: k8s
   jobs:
   - k8s-check-helm-params
@@ -589,6 +593,32 @@ jobs:
     image: unit-image
     file: ci/tasks/smoke.yml
     input_mapping: {endpoint-info: outputs}
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
+
+- name: quickstart-smoke
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse
+      passed: [build-rc-image]
+      trigger: true
+    - get: concourse-rc-image
+      passed: [build-rc-image]
+      params: {format: oci}
+      trigger: true
+    - get: version
+      passed: [build-rc-image]
+      trigger: true
+    - get: unit-image
+      passed: [build-rc-image]
+    - get: ci
+  - task: quickstart-smoke
+    image: unit-image
+    file: ci/tasks/quickstart-smoke.yml
+    params:
+      RELEASE_NAME: concourse-smoke
   on_success: *fixed-concourse
   on_failure: *broke-concourse
 

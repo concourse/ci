@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -ex -u
+
+source ci/tasks/scripts/docker-helpers.sh
+
+start_docker
+
+[ -d concourse-rc-image ] && docker load -i concourse-rc-image/image.tar
+# concourse/concourse-rc:latest
+
+pushd docs
+  docker-compose -f docker-compose.yml -f latest-rc.override.yml up -d
+popd
+
+# now run the watjs/smoke tests
+mkdir -p endpoint-info
+pushd endpoint-info
+  echo "localhost" > instance_ip
+  echo "test" > admin_username
+  echo "test" > admin_password
+popd
+
+ci/tasks/scripts/smoke
+
+pushd docs
+  docker-compose down
+popd
+
+stop_docker

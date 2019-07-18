@@ -1,0 +1,22 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: concourse/unit}
+
+params:
+  RELEASE_NAME:
+
+inputs:
+- name: concourse
+- name: ci
+- name: docs
+- name: concourse-rc-image
+
+caches:
+- path: gopath
+- path: concourse/web/wats/node_modules
+
+run:
+  path: ci/tasks/scripts/quickstart-smoke
