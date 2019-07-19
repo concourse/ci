@@ -12,7 +12,6 @@ main() {
   check_environment_variables
   create_target
   try_until_responding
-  echo 'ok!'
 }
 
 check_environment_variables() {
@@ -42,22 +41,18 @@ create_target() {
 }
 
 try_until_responding() {
-  local ticks=0
-
   echo "waiting for a worker to be running"
 
-  until fly -t $TARGET_NAME workers | grep 'running' &> /dev/null; do
-    echo -n
-
-    ((ticks++))
-
-    if [[ $ticks -ge $MAX_TICKS ]]; then
-      echo "giving up. :("
-      exit 1
+  for _ in $(seq 1 $MAX_TICKS); do
+    if fly -t $TARGET_NAME workers | grep 'running' >/dev/null; then
+      echo "worker started"
+      exit 0
     fi
-
+    echo -n '.'
     sleep 1
   done
+  echo "giving up. :("
+  exit 1
 }
 
 main

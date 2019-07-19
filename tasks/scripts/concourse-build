@@ -13,11 +13,8 @@ fi
 
 platform="$1"
 
-archive=concourse-${platform}-amd64.tgz
-if [ -e version/version ]; then
-  sha="$(git -C concourse rev-parse HEAD)"
-  archive=concourse-${sha}-${platform}-amd64.tgz
-fi
+sha="$(git -C concourse rev-parse HEAD)"
+archive=concourse-${sha}-${platform}-amd64.tgz
 
 final_version=""
 ldflags=""
