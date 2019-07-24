@@ -1133,7 +1133,9 @@ jobs:
     - get: docs
   - task: build-docs
     file: docs/ci/build.yml
-    params: {ANALYTICS_ID: ((analytics_id))}
+    params:
+      ANALYTICS_ID: ((analytics_id))
+      GITHUB_TOKEN: ((concourse_github_dummy.access_token))
   - put: docs-gh-pages
     params: {repository: built-docs}
 
