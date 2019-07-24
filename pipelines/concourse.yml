@@ -34,6 +34,7 @@ groups:
   - k8s-check-helm-params
   - k8s-smoke
   - k8s-topgun
+  - k8s-topgun-pks
 
 - name: bosh
   jobs:
@@ -423,6 +424,44 @@ jobs:
     params:
       KUBE_CONFIG: ((kube_config))
       CONCOURSE_IMAGE_NAME: concourse/concourse-rc
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
+
+- name: k8s-topgun-pks
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse
+      passed: [k8s-smoke]
+      trigger: true
+      tags: [pks]
+    - get: version
+      passed: [k8s-smoke]
+      trigger: true
+      tags: [pks]
+    - get: concourse-rc-image
+      passed: [k8s-smoke]
+      trigger: true
+      tags: [pks]
+      params: {format: oci}
+    - get: unit-image
+      passed: [k8s-smoke]
+      trigger: true
+      tags: [pks]
+    - get: charts
+      trigger: true
+      passed: [k8s-smoke]
+      tags: [pks]
+    - get: ci
+  - task: k8s-topgun
+    tags: [pks]
+    file: ci/tasks/k8s-topgun.yml
+    image: unit-image
+    params:
+      KUBE_CONFIG: ((kube_config_pks))
+      CONCOURSE_IMAGE_NAME: concourse/concourse-rc
+      K8S_ENGINE: PKS
   on_success: *fixed-concourse
   on_failure: *broke-concourse
 
