@@ -898,6 +898,25 @@ jobs:
         volume_sweeper_max_in_flight: 3
         vault_shared_path: "shared"
         vault_host: vault.concourse-ci.org
+  - put: prod-pks-worker-deployment
+    tags: [pks]
+    params:
+      manifest: cbd/cluster/external-worker.yml
+      stemcells:
+      - gcp-xenial-stemcell/*.tgz
+      releases:
+      - concourse-release/*.tgz
+      ops_files:
+      - prod/pks-worker/ops.yml
+      vars_files:
+      - cbd/versions.yml
+      vars:
+        azs: [default]
+        deployment_name: prod-external-worker
+        external_worker_network_name: default
+        instances: 1
+        tsa_host: ci.concourse-ci.org
+        worker_vm_type: medium.disk
 
 - name: shipit
   public: true
@@ -1531,6 +1550,16 @@ resources:
     client: ((bosh_client.id))
     client_secret: ((bosh_client.secret))
     deployment: concourse-prod
+
+- name: prod-pks-worker-deployment
+  type: bosh-deployment
+  icon: sync
+  source:
+    target: ((bosh_pks_target))
+    ca_cert: ((bosh_pks_ca_cert))
+    client: ((bosh_pks_client.id))
+    client_secret: ((bosh_pks_client.secret))
+    deployment: prod-external-worker
 
 - name: wings-deployment
   type: bosh-deployment
