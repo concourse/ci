@@ -819,6 +819,8 @@ jobs:
     - get: cbd
       trigger: true
     - get: gcp-windows-stemcell
+    - get: vsphere-xenial-stemcell
+      tags: [pks]
     - get: bbr-sdk-release
     - get: prod
     - get: ci
@@ -899,11 +901,12 @@ jobs:
         vault_shared_path: "shared"
         vault_host: vault.concourse-ci.org
   - put: prod-pks-worker-deployment
+    inputs: [cbd, concourse-release, vsphere-xenial-stemcell, prod]
     tags: [pks]
     params:
       manifest: cbd/cluster/external-worker.yml
       stemcells:
-      - gcp-xenial-stemcell/*.tgz
+      - vsphere-xenial-stemcell/*.tgz
       releases:
       - concourse-release/*.tgz
       ops_files:
@@ -1555,11 +1558,11 @@ resources:
   type: bosh-deployment
   icon: sync
   source:
-    target: ((bosh_pks_target))
     ca_cert: ((bosh_pks_ca_cert))
     client: ((bosh_pks_client.id))
     client_secret: ((bosh_pks_client.secret))
     deployment: prod-external-worker
+    target: ((bosh_pks_target))
 
 - name: wings-deployment
   type: bosh-deployment
@@ -1575,6 +1578,12 @@ resources:
   icon: *release-icon
   source:
     name: bosh-google-kvm-ubuntu-xenial-go_agent
+
+- name: vsphere-xenial-stemcell
+  type: bosh-io-stemcell
+  icon: *release-icon
+  source:
+    name: bosh-vsphere-esxi-ubuntu-xenial-go_agent
 
 - name: gcp-windows-stemcell
   type: bosh-io-stemcell
