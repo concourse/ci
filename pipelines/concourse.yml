@@ -761,7 +761,7 @@ jobs:
       trigger: true
     - get: bpm-release
       trigger: true
-    - get: backup-and-restore-sdk-release
+    - get: bbr-sdk-release
       trigger: true
     - get: gcp-xenial-stemcell
       trigger: true
@@ -1499,12 +1499,6 @@ resources:
   icon: *release-icon
   source:
     repository: pivotal-cf/credhub-release
-
-- name: backup-and-restore-sdk-release
-  type: bosh-io-release
-  icon: *release-icon
-  source:
-    repository: cloudfoundry-incubator/backup-and-restore-sdk-release
 
 - name: concourse-release-repo
   type: git
