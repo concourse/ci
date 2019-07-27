@@ -830,7 +830,7 @@ resources:
   type: bosh-io-release
   icon: *release-icon
   source:
-    repository: cloudfoundry-incubator/bpm-release
+    repository: cloudfoundry/bpm-release
 
 - name: vault-release
   type: bosh-io-release
