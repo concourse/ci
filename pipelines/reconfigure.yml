@@ -13,6 +13,20 @@ resources:
     paths:
     - pipelines
 
+- name: charts-maintenance
+  type: git
+  icon: github-circle
+  source:
+    uri: https://github.com/concourse/charts
+    branch: maintenance
+
+- name: maintenance-image
+  type: registry-image
+  source:
+    password: ((docker.password))
+    repository: concourse/charts-maintenance
+    username: ((docker.username))
+
 - name: prod
   type: concourse-pipeline
   icon: pipe
@@ -28,6 +42,20 @@ jobs:
   plan:
   - get: pipelines
     trigger: true
+  - get: charts-maintenance
+    trigger: true
+  - task: generate-charts-yaml
+    image: maintenance-image
+    config:
+      platform: linux
+      inputs:
+      - name: charts-maintenance
+      outputs:
+      - name: charts-maintenance
+      run:
+        dir: charts-maintenance
+        path: make
+        args: [pipeline.yaml]
   - put: prod
     params:
       pipelines:
@@ -58,6 +86,9 @@ jobs:
       - name: concourse
         team: main
         config_file: pipelines/pipelines/concourse.yml
+      - name: concourse-charts
+        team: main
+        config_file: charts-maintenance/pipeline.yaml
       - name: new-algorithm
         team: main
         config_file: pipelines/pipelines/branch.yml
