@@ -32,5 +32,5 @@ run:
     chmod +x /usr/local/bin/fly
 
     fly -t target login -c "$web_url" -u admin -p admin
-    fly -t target unpause-pipeline -p bbr-test-2
-    fly -t target trigger-job -j bbr-test-2/simple-job -w
+    fly -t target unpause-pipeline -p bbr-restore-verify
+    fly -t target trigger-job -j bbr-restore-verify/simple-job -w
