@@ -29,7 +29,7 @@ instance_groups:
       postgresql:
         database: atc
         role:
-          name: concourse
+          name: atc
           password: ((postgres_password))
 
       main_team:
