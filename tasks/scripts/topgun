@@ -22,7 +22,7 @@ bosh upload-release bpm-release/*.tgz
 bosh upload-release postgres-release/*.tgz
 bosh upload-release vault-release/*.tgz
 bosh upload-release credhub-release/*.tgz
-bosh upload-release backup-and-restore-sdk-release/*.tgz
+bosh upload-release bbr-sdk-release/*.tgz
 bosh upload-stemcell stemcell/*.tgz
 
 tar xf ./bbr/bbr-*.tar

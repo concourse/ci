@@ -13,6 +13,20 @@ resources:
     paths:
     - pipelines
 
+- name: charts-maintenance
+  type: git
+  icon: github-circle
+  source:
+    uri: https://github.com/concourse/charts
+    branch: maintenance
+
+- name: maintenance-image
+  type: registry-image
+  source:
+    password: ((docker.password))
+    repository: concourse/charts-maintenance
+    username: ((docker.username))
+
 - name: prod
   type: concourse-pipeline
   icon: pipe
@@ -28,6 +42,20 @@ jobs:
   plan:
   - get: pipelines
     trigger: true
+  - get: charts-maintenance
+    trigger: true
+  - task: generate-charts-yaml
+    image: maintenance-image
+    config:
+      platform: linux
+      inputs:
+      - name: charts-maintenance
+      outputs:
+      - name: charts-maintenance
+      run:
+        dir: charts-maintenance
+        path: make
+        args: [pipeline.yaml]
   - put: prod
     params:
       pipelines:
@@ -48,9 +76,19 @@ jobs:
           release_major: "5"
           release_minor: "5.3"
           concourse_smoke_deployment_name: "concourse-smoke-5-3"
+      - name: release-5.4.x
+        team: main
+        config_file: pipelines/pipelines/release.yml
+        vars:
+          release_major: "5"
+          release_minor: "5.4"
+          concourse_smoke_deployment_name: "concourse-smoke-5-4"
       - name: concourse
         team: main
         config_file: pipelines/pipelines/concourse.yml
+      - name: concourse-charts
+        team: main
+        config_file: charts-maintenance/pipeline.yaml
       - name: new-algorithm
         team: main
         config_file: pipelines/pipelines/branch.yml
@@ -69,9 +107,6 @@ jobs:
         vars:
           branch_name: use_zstd
           environment: use-zstd
-      - name: drill-test-postgres-table-migration
+      - name: prod-db-backup
         team: main
-        config_file: pipelines/pipelines/branch.yml
-        vars:
-          branch_name: postgres-table-migrations
-          environment: drill-test-postgres-table-migrations
+        config_file: pipelines/pipelines/bbr-backup.yml

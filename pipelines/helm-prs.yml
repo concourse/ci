@@ -1,0 +1,75 @@
+---
+resource_types:
+- name: pull-request
+  type: registry-image
+  source: {repository: teliaoss/github-pr-resource}
+
+resources:
+- name: stable-concourse-pr
+  type: pull-request
+  icon: source-pull
+  source:
+    repository: helm/charts
+    paths:
+      - stable/concourse/
+    access_token: ((pr_access_token))
+
+- name: concourse
+  type: git
+  icon: github-circle
+  source:
+    uri: https://github.com/concourse/concourse.git
+    branch: master
+
+- name: ci
+  type: git
+  icon: github-circle
+  source:
+    uri: https://github.com/concourse/ci.git
+    branch: master
+
+- name: concourse-rc-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: concourse/concourse-rc
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: unit-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: concourse/unit
+    username: ((docker.username))
+    password: ((docker.password))
+
+jobs:
+- name: k8s-topgun
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: stable-concourse-pr
+    - get: concourse
+    - get: concourse-rc-image
+    - get: ci
+    - get: unit-image
+  - task: k8s-topgun
+    file: ci/tasks/k8s-topgun.yml
+    input_mapping:
+      charts: stable-concourse-pr
+    image: unit-image
+    params:
+      KUBE_CONFIG: ((kube_config))
+      CONCOURSE_IMAGE_NAME: concourse/concourse-rc
+    on_success:
+      put: stable-concourse-pr
+      params:
+        path: stable-concourse-pr
+        comment: "Topgun tests passed: $ATC_EXTERNAL_URL/builds/$BUILD_ID"
+    on_failure:
+      put: stable-concourse-pr
+      params:
+        path: stable-concourse-pr
+        comment: "Topgun tests failed: $ATC_EXTERNAL_URL/builds/$BUILD_ID"

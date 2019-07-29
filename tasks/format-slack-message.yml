@@ -1,0 +1,21 @@
+---
+platform: linux
+image_resource:
+  type: registry-image
+  source: {repository: python}
+
+params:
+  SLACK_TOKEN: ((slack_token))
+
+inputs:
+- name: ci
+- name: src
+
+outputs:
+- name: message
+
+caches:
+- path: pip-cache
+
+run:
+  path: ci/tasks/scripts/format-slack-message

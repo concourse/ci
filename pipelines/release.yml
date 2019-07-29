@@ -550,7 +550,6 @@ jobs:
       trigger: true
     - get: version
       passed: [bosh-check-props]
-      trigger: true
     - get: linux-rc
       passed: [build-rc, bosh-check-props]
       trigger: true
@@ -1076,7 +1075,7 @@ resources:
   type: bosh-io-release
   icon: *release-icon
   source:
-    repository: cloudfoundry-incubator/bpm-release
+    repository: cloudfoundry/bpm-release
 
 - name: vault-release
   type: bosh-io-release
@@ -1088,7 +1087,6 @@ resources:
   type: bosh-io-release
   icon: *release-icon
   source: {repository: pivotal-cf/credhub-release}
-  version: {version: 1.9.5}
 
 - name: backup-and-restore-sdk-release
   type: bosh-io-release
