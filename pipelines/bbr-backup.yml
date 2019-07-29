@@ -46,7 +46,7 @@ jobs:
 
   - task: generate-dynamic-ops-files
     image: ubuntu-image
-    file: ci/tasks/bbr-generate-ops-files.yml
+    file: ci/tasks/bbr-generate-concourse-version-ops.yml
 
   - put: deploy-db
     inputs: &deploy-inputs
