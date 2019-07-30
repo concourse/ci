@@ -1,0 +1,19 @@
+platform: linux
+
+params:
+  BOSH_CA_CERT:
+  BOSH_CLIENT:
+  BOSH_CLIENT_SECRET:
+  BOSH_DEPLOYMENT:
+  BOSH_ENVIRONMENT:
+
+inputs:
+- name: ci
+- name: bbr-cli
+- name: bosh-cli
+
+outputs:
+- name: bbr_artifacts
+
+run:
+  path: ci/tasks/scripts/bbr-backup.sh

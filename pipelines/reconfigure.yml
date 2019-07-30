@@ -110,3 +110,6 @@ jobs:
       - name: prod-db-backup
         team: main
         config_file: pipelines/pipelines/bbr-backup.yml
+      - name: bbr-restore-verify
+        team: main
+        config_file: pipelines/pipelines/bbr-restore-verify.yml
