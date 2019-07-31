@@ -115,7 +115,7 @@ jobs:
         team: main
         config_file: pipelines/pipelines/branch.yml
         vars:
-          branch_name: feature/3788-checks
+          branch_name: checks
           environment: lidar-drills
       - name: prod-db-backup
         team: main
