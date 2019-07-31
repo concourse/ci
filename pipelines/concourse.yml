@@ -800,7 +800,7 @@ jobs:
       trigger: true
     - get: bpm-release
       trigger: true
-    - get: backup-and-restore-sdk-release
+    - get: bbr-sdk-release
       trigger: true
     - get: gcp-xenial-stemcell
       trigger: true
@@ -858,6 +858,8 @@ jobs:
     - get: cbd
       trigger: true
     - get: gcp-windows-stemcell
+    - get: vsphere-xenial-stemcell
+      tags: [pks]
     - get: bbr-sdk-release
     - get: prod
     - get: ci
@@ -937,6 +939,26 @@ jobs:
         volume_sweeper_max_in_flight: 3
         vault_shared_path: "shared"
         vault_host: vault.concourse-ci.org
+  - put: prod-pks-worker-deployment
+    inputs: [cbd, concourse-release, vsphere-xenial-stemcell, prod]
+    tags: [pks]
+    params:
+      manifest: cbd/cluster/external-worker.yml
+      stemcells:
+      - vsphere-xenial-stemcell/*.tgz
+      releases:
+      - concourse-release/*.tgz
+      ops_files:
+      - prod/pks-worker/ops.yml
+      vars_files:
+      - cbd/versions.yml
+      vars:
+        azs: [default]
+        deployment_name: prod-external-worker
+        external_worker_network_name: default
+        instances: 1
+        tsa_host: ci.concourse-ci.org
+        worker_vm_type: medium.disk
 
 - name: shipit
   public: true
@@ -1519,7 +1541,7 @@ resources:
   type: bosh-io-release
   icon: *release-icon
   source:
-    repository: cloudfoundry-incubator/bpm-release
+    repository: cloudfoundry/bpm-release
 
 - name: bbr-sdk-release
   type: bosh-io-release
@@ -1538,12 +1560,6 @@ resources:
   icon: *release-icon
   source:
     repository: pivotal-cf/credhub-release
-
-- name: backup-and-restore-sdk-release
-  type: bosh-io-release
-  icon: *release-icon
-  source:
-    repository: cloudfoundry-incubator/backup-and-restore-sdk-release
 
 - name: concourse-release-repo
   type: git
@@ -1571,6 +1587,16 @@ resources:
     client_secret: ((bosh_client.secret))
     deployment: concourse-prod
 
+- name: prod-pks-worker-deployment
+  type: bosh-deployment
+  icon: sync
+  source:
+    ca_cert: ((bosh_pks_ca_cert))
+    client: ((bosh_pks_client.id))
+    client_secret: ((bosh_pks_client.secret))
+    deployment: prod-external-worker
+    target: ((bosh_pks_target))
+
 - name: wings-deployment
   type: bosh-deployment
   icon: airplane-takeoff
@@ -1585,6 +1611,12 @@ resources:
   icon: *release-icon
   source:
     name: bosh-google-kvm-ubuntu-xenial-go_agent
+
+- name: vsphere-xenial-stemcell
+  type: bosh-io-stemcell
+  icon: *release-icon
+  source:
+    name: bosh-vsphere-esxi-ubuntu-xenial-go_agent
 
 - name: gcp-windows-stemcell
   type: bosh-io-stemcell

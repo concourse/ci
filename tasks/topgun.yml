@@ -29,7 +29,7 @@ inputs:
 - name: postgres-release
 - name: stemcell
 - name: vault-release
-- name: backup-and-restore-sdk-release
+- name: bbr-sdk-release
 - name: ci
 
 caches:

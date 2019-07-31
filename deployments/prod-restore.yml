@@ -1,0 +1,25 @@
+# giving the `SUPERUSER` permission so that we can
+# enable the `pg_statements` extension, and change
+# the password to something simple
+# 
+- type: replace
+  path: /instance_groups/name=db/jobs/name=postgres/properties/databases/roles/name=concourse
+  value:
+    name: concourse
+    password: concourse
+    permissions:
+      - SUPERUSER
+
+- type: replace
+  path: /instance_groups/name=web/jobs/name=web/properties/postgresql/role
+  value:
+    name: concourse
+    password: concourse
+
+
+# including the encryption key from prod so that
+# `atc` can properly read from the database.
+#
+- type: replace
+  path: /instance_groups/name=web/jobs/name=web/properties/encryption_key?
+  value: ((/concourse-prod-bosh/concourse-prod/encryption_key))
