@@ -1,10 +1,8 @@
 ---
 resources:
 - name: test-resource
-  type: time
-  icon: timer
-  source:
-    interval: 1m
+  type: mock
+  source: {mirror_self: true}
 
 - name: test-image
   type: registry-image
