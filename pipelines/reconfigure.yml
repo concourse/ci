@@ -56,7 +56,7 @@ jobs:
       run:
         dir: charts-maintenance
         path: make
-        args: [pipeline.yaml]
+        args: [pipeline.yml]
   - put: prod
     params:
       pipelines:
@@ -92,7 +92,7 @@ jobs:
         config_file: pipelines/pipelines/concourse.yml
       - name: concourse-charts
         team: main
-        config_file: charts-maintenance/pipeline.yaml
+        config_file: charts-maintenance/pipeline.yml
       - name: new-algorithm
         team: main
         config_file: pipelines/pipelines/branch.yml
