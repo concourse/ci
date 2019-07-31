@@ -107,6 +107,12 @@ jobs:
         vars:
           branch_name: use_zstd
           environment: use-zstd
+      - name: lidar-drills
+        team: main
+        config_file: pipelines/pipelines/branch.yml
+        vars:
+          branch_name: feature/3788-checks
+          environment: lidar-drills
       - name: prod-db-backup
         team: main
         config_file: pipelines/pipelines/bbr-backup.yml
