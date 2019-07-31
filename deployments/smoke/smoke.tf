@@ -75,6 +75,7 @@ resource "google_compute_instance" "smoke" {
   provisioner "remote-exec" {
     inline = [
       "set -e -x",
+      "until [ -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done",
       "apt-get update",
       "apt-get -y install postgresql-10",
       "sudo -i -u postgres createuser concourse",
