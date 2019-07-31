@@ -34,6 +34,7 @@ groups:
   - k8s-check-helm-params
   - k8s-smoke
   - k8s-topgun
+  - k8s-topgun-pks
 
 - name: bosh
   jobs:
@@ -426,6 +427,44 @@ jobs:
   on_success: *fixed-concourse
   on_failure: *broke-concourse
 
+- name: k8s-topgun-pks
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse
+      passed: [k8s-smoke]
+      trigger: true
+      tags: [pks]
+    - get: version
+      passed: [k8s-smoke]
+      trigger: true
+      tags: [pks]
+    - get: concourse-rc-image
+      passed: [k8s-smoke]
+      trigger: true
+      tags: [pks]
+      params: {format: oci}
+    - get: unit-image
+      passed: [k8s-smoke]
+      trigger: true
+      tags: [pks]
+    - get: charts
+      trigger: true
+      passed: [k8s-smoke]
+      tags: [pks]
+    - get: ci
+  - task: k8s-topgun
+    tags: [pks]
+    file: ci/tasks/k8s-topgun.yml
+    image: unit-image
+    params:
+      KUBE_CONFIG: ((kube_config_pks))
+      CONCOURSE_IMAGE_NAME: concourse/concourse-rc
+      K8S_ENGINE: PKS
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
+
 - name: k8s-check-helm-params
   public: true
   max_in_flight: 1
@@ -761,7 +800,7 @@ jobs:
       trigger: true
     - get: bpm-release
       trigger: true
-    - get: backup-and-restore-sdk-release
+    - get: bbr-sdk-release
       trigger: true
     - get: gcp-xenial-stemcell
       trigger: true
@@ -819,6 +858,8 @@ jobs:
     - get: cbd
       trigger: true
     - get: gcp-windows-stemcell
+    - get: vsphere-xenial-stemcell
+      tags: [pks]
     - get: bbr-sdk-release
     - get: prod
     - get: ci
@@ -898,6 +939,26 @@ jobs:
         volume_sweeper_max_in_flight: 3
         vault_shared_path: "shared"
         vault_host: vault.concourse-ci.org
+  - put: prod-pks-worker-deployment
+    inputs: [cbd, concourse-release, vsphere-xenial-stemcell, prod]
+    tags: [pks]
+    params:
+      manifest: cbd/cluster/external-worker.yml
+      stemcells:
+      - vsphere-xenial-stemcell/*.tgz
+      releases:
+      - concourse-release/*.tgz
+      ops_files:
+      - prod/pks-worker/ops.yml
+      vars_files:
+      - cbd/versions.yml
+      vars:
+        azs: [default]
+        deployment_name: prod-external-worker
+        external_worker_network_name: default
+        instances: 1
+        tsa_host: ci.concourse-ci.org
+        worker_vm_type: medium.disk
 
 - name: shipit
   public: true
@@ -1133,7 +1194,9 @@ jobs:
     - get: docs
   - task: build-docs
     file: docs/ci/build.yml
-    params: {ANALYTICS_ID: ((analytics_id))}
+    params:
+      ANALYTICS_ID: ((analytics_id))
+      GITHUB_TOKEN: ((concourse_github_dummy.access_token))
   - put: docs-gh-pages
     params: {repository: built-docs}
 
@@ -1498,12 +1561,6 @@ resources:
   source:
     repository: pivotal-cf/credhub-release
 
-- name: backup-and-restore-sdk-release
-  type: bosh-io-release
-  icon: *release-icon
-  source:
-    repository: cloudfoundry-incubator/backup-and-restore-sdk-release
-
 - name: concourse-release-repo
   type: git
   icon: *git-icon
@@ -1530,6 +1587,16 @@ resources:
     client_secret: ((bosh_client.secret))
     deployment: concourse-prod
 
+- name: prod-pks-worker-deployment
+  type: bosh-deployment
+  icon: sync
+  source:
+    ca_cert: ((bosh_pks_ca_cert))
+    client: ((bosh_pks_client.id))
+    client_secret: ((bosh_pks_client.secret))
+    deployment: prod-external-worker
+    target: ((bosh_pks_target))
+
 - name: wings-deployment
   type: bosh-deployment
   icon: airplane-takeoff
@@ -1544,6 +1611,12 @@ resources:
   icon: *release-icon
   source:
     name: bosh-google-kvm-ubuntu-xenial-go_agent
+
+- name: vsphere-xenial-stemcell
+  type: bosh-io-stemcell
+  icon: *release-icon
+  source:
+    name: bosh-vsphere-esxi-ubuntu-xenial-go_agent
 
 - name: gcp-windows-stemcell
   type: bosh-io-stemcell
