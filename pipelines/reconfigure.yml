@@ -44,6 +44,7 @@ jobs:
     trigger: true
   - get: charts-maintenance
     trigger: true
+  - get: maintenance-image
   - task: generate-charts-yaml
     image: maintenance-image
     config:
@@ -59,6 +60,9 @@ jobs:
   - put: prod
     params:
       pipelines:
+      - name: reconfigure-pipelines
+        team: main
+        config_file: pipelines/pipelines/reconfigure.yml
       - name: prs
         team: main
         config_file: pipelines/pipelines/prs.yml
