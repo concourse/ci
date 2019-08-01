@@ -112,6 +112,26 @@ jobs:
     - task: fly-windows
       file: ci/tasks/fly-windows.yml
       timeout: 1h
+  on_success: &fixed-concourse
+    do:
+    - task: format-slack-message
+      file: ci/tasks/format-slack-message.yml
+      input_mapping: {src: concourse}
+    - put: notify
+      params:
+        message_file: message/message
+        mode: normal
+        alert_type: fixed
+  on_failure: &broke-concourse
+    do:
+    - task: format-slack-message
+      file: ci/tasks/format-slack-message.yml
+      input_mapping: {src: concourse}
+    - put: notify
+      params:
+        message_file: message/message
+        mode: normal
+        alert_type: broke
 
 - name: dev-image
   public: true
@@ -174,6 +194,8 @@ jobs:
   - put: dev-image
     params: {image: image/image.tar}
     get_params: {format: oci}
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: testflight
   public: true
@@ -197,6 +219,8 @@ jobs:
     privileged: true
     timeout: 1h
     file: ci/tasks/docker-compose-testflight.yml
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: watsjs
   public: true
@@ -220,6 +244,8 @@ jobs:
     privileged: true
     timeout: 1h
     file: ci/tasks/docker-compose-watsjs.yml
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: upgrade
   public: true
@@ -244,6 +270,8 @@ jobs:
     privileged: true
     image: unit-image
     file: ci/tasks/upgrade-test.yml
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: downgrade
   public: true
@@ -297,6 +325,8 @@ jobs:
     image: unit-image
     input_mapping: {distribution: charts}
     params: {DISTRIBUTION: helm}
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: k8s-smoke
   public: true
@@ -348,6 +378,8 @@ jobs:
       KUBE_CONFIG: ((kube_config))
       RELEASE_NAME: ((concourse_smoke_deployment_name))
       CONCOURSE_IMAGE: concourse/concourse-rc
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: k8s-topgun
   public: true
@@ -377,6 +409,8 @@ jobs:
     params:
       KUBE_CONFIG: ((kube_config))
       CONCOURSE_IMAGE_NAME: concourse/concourse-rc
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: rc
   public: true
@@ -511,6 +545,8 @@ jobs:
     image: unit-image
     file: ci/tasks/smoke.yml
     input_mapping: {endpoint-info: outputs}
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: bosh-check-props
   public: true
@@ -655,6 +691,8 @@ jobs:
   - task: smoke
     image: unit-image
     file: ci/tasks/smoke.yml
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: bosh-topgun
   public: true
@@ -703,6 +741,8 @@ jobs:
       AWS_REGION: ((topgun_aws_ssm.region))
       AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
       AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: shipit
   public: true
@@ -869,6 +909,15 @@ resources:
   source:
     uri: https://github.com/concourse/concourse-docker.git
     branch: master
+
+- name: notify
+  type: slack-notifier
+  icon: slack
+  source:
+    url: ((slack_hook))
+    username: ((basic_auth.username))
+    password: ((basic_auth.password))
+    concourse_url: https://ci.concourse-ci.org
 
 - name: dev-image
   type: registry-image
