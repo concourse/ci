@@ -50,6 +50,10 @@ resource_types:
   type: registry-image
   source: {repository: concourse/bosh-io-stemcell-resource}
 
+- name: slack-notifier
+  type: registry-image
+  source: {repository: mockersf/concourse-slack-notifier}
+
 groups:
 - name: develop
   jobs:
