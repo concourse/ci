@@ -1,9 +1,13 @@
-#!/bin/bash
+#!/bin/sh
 # vim: set ft=sh
 
 set -e -x
 
-pip install slackclient --cache-dir pip-cache
-python \
-  ci/tasks/scripts/format-slack-message.py \
-  $(cat src/.git/committer) > message/message
+stty cols 80
+src="$PWD/src"
+message_file="$PWD/message/message"
+apk add git
+
+cd ci/tasks/scripts
+yarn install
+yarn blame $(git -C "$src" rev-parse HEAD) > "$message_file"

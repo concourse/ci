@@ -13,7 +13,6 @@ params:
   BOSH_ENVIRONMENT:
   BOSH_SSH_KEY:
   BOSH_PASSWORD:
-  BOSH_USER:
   SKIP:
   TOPGUN_NETWORK_OFFSET:
   AWS_REGION:
@@ -29,7 +28,7 @@ inputs:
 - name: postgres-release
 - name: stemcell
 - name: vault-release
-- name: backup-and-restore-sdk-release
+- name: bbr-sdk-release
 - name: ci
 
 caches:
