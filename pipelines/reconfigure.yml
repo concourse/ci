@@ -93,11 +93,11 @@ jobs:
       - name: concourse-charts
         team: main
         config_file: charts-maintenance/pipeline.yml
-      - name: new-algorithm
+      - name: algorithm-v3
         team: main
         config_file: pipelines/pipelines/branch.yml
         vars:
-          branch_name: new-algorithm
+          branch_name: algorithm-v3
           environment: algorithm
       - name: runtime-drills
         team: main
