@@ -56,7 +56,7 @@ jobs:
       run:
         dir: charts-maintenance
         path: make
-        args: [pipeline.yaml]
+        args: [pipeline.yml]
   - put: prod
     params:
       pipelines:
@@ -92,12 +92,12 @@ jobs:
         config_file: pipelines/pipelines/concourse.yml
       - name: concourse-charts
         team: main
-        config_file: charts-maintenance/pipeline.yaml
-      - name: new-algorithm
+        config_file: charts-maintenance/pipeline.yml
+      - name: algorithm-v3
         team: main
         config_file: pipelines/pipelines/branch.yml
         vars:
-          branch_name: new-algorithm
+          branch_name: algorithm-v3
           environment: algorithm
       - name: runtime-drills
         team: main
@@ -115,7 +115,7 @@ jobs:
         team: main
         config_file: pipelines/pipelines/branch.yml
         vars:
-          branch_name: feature/3788-checks
+          branch_name: checks
           environment: lidar-drills
       - name: prod-db-backup
         team: main
