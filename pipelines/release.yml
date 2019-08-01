@@ -1022,6 +1022,13 @@ resources:
     uri: https://github.com/concourse/docs
     branch: master
 
+- name: release-notes
+  type: git
+  icon: *git-icon
+  source:
+    uri: https://github.com/concourse/release-notes
+    branch: master
+
 - name: docs-gh-pages
   type: git
   icon: *git-icon
