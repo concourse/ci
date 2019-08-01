@@ -809,13 +809,15 @@ jobs:
       passed: [shipit]
     - get: darwin-rc
       passed: [shipit]
-    - get: ci
-  - task: prep-release-assets
-    file: ci/tasks/prep-release-assets.yml
-    image: unit-image
-  - task: build-release-notes
-    file: ci/tasks/build-release-notes.yml
-    image: unit-image
+    - get: release-notes
+    - get: docs
+  - in_parallel:
+    - task: prep-release-assets
+      file: release-notes/ci/prep-release-assets.yml
+      image: unit-image
+    - task: build-release-notes
+      file: release-notes/ci/build.yml
+      image: unit-image
   - put: concourse-github-release
     params:
       commitish: concourse/.git/ref
@@ -824,12 +826,18 @@ jobs:
       name: release-notes/release-name
       body: release-notes/notes.md
       globs:
-      - concourse-linux/*.tgz
-      - concourse-windows/*.zip
-      - concourse-darwin/*.tgz
-      - fly-linux/fly-*-linux-*.tgz
-      - fly-windows/fly-*-windows-*.zip
-      - fly-darwin/fly-*-darwin-*.tgz
+      - concourse-linux/concourse-*.tgz
+      - concourse-windows/concourse-*.zip
+      - concourse-darwin/concourse-*.tgz
+      - fly-linux/fly-*.tgz
+      - fly-windows/fly-*.zip
+      - fly-darwin/fly-*.tgz
+      - concourse-linux/*.sha1
+      - concourse-windows/*.sha1
+      - concourse-darwin/*.sha1
+      - fly-linux/*.sha1
+      - fly-windows/*.sha1
+      - fly-darwin/*.sha1
 
 - name: publish-bosh-release
   serial: true
