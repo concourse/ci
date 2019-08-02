@@ -653,6 +653,7 @@ jobs:
     - get: unit-image
       passed: [build-rc-image]
     - get: ci
+    - get: docs
   - task: quickstart-smoke
     image: unit-image
     file: ci/tasks/quickstart-smoke.yml
