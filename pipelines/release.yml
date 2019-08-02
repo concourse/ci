@@ -818,6 +818,8 @@ jobs:
     - task: build-release-notes
       file: release-notes/ci/build.yml
       image: unit-image
+      params:
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
   - put: concourse-github-release
     params:
       commitish: concourse/.git/ref
