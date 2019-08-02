@@ -655,6 +655,7 @@ jobs:
     - get: ci
     - get: docs
   - task: quickstart-smoke
+    privileged: true
     image: unit-image
     file: ci/tasks/quickstart-smoke.yml
     params:
