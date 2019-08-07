@@ -938,6 +938,7 @@ jobs:
       - cbd/cluster/operations/worker-volume-sweeper-max-in-flight.yml
       - cbd/cluster/operations/vault-shared-path.yml
       - cbd/cluster/operations/audit.yml
+      - cbd/cluster/operations/cluster-name.yml
       - prod/prod/ops.yml
       vars_files:
       - cbd/versions.yml
@@ -950,7 +951,7 @@ jobs:
         db_vm_type: database
         worker_vm_type: worker
         untrusted_worker_vm_type: worker
-        db_persistent_disk_type: large
+        db_persistent_disk_type: super-extra-large
         network_name: private
         web_network_name: web
         untrusted_worker_network_name: private
@@ -981,6 +982,7 @@ jobs:
         enable_team_audit_log: true
         enable_volume_audit_log: true
         enable_worker_audit_log: true
+        cluster_name: "prod"
   - put: prod-pks-worker-deployment
     inputs: [cbd, concourse-release, vsphere-xenial-stemcell, prod]
     tags: [pks]
