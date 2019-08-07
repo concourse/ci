@@ -949,7 +949,7 @@ jobs:
         db_vm_type: database
         worker_vm_type: worker
         untrusted_worker_vm_type: worker
-        db_persistent_disk_type: large
+        db_persistent_disk_type: super-extra-large
         network_name: private
         web_network_name: web
         untrusted_worker_network_name: private
