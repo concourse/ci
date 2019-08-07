@@ -113,7 +113,7 @@ jobs:
           environment: use-zstd
       - name: lidar-drills
         team: main
-        config_file: pipelines/pipelines/branch.yml
+        config_file: pipelines/pipelines/drills.yml
         vars:
           branch_name: checks
           environment: lidar-drills
