@@ -937,6 +937,7 @@ jobs:
       - cbd/cluster/operations/x-frame-options-unset.yml
       - cbd/cluster/operations/worker-volume-sweeper-max-in-flight.yml
       - cbd/cluster/operations/vault-shared-path.yml
+      - cbd/cluster/operations/audit.yml
       - cbd/cluster/operations/cluster-name.yml
       - prod/prod/ops.yml
       vars_files:
@@ -972,6 +973,15 @@ jobs:
         volume_sweeper_max_in_flight: 3
         vault_shared_path: "shared"
         vault_host: vault.concourse-ci.org
+        enable_build_audit_log: true
+        enable_container_audit_log: true
+        enable_job_audit_log: true
+        enable_pipeline_audit_log: true
+        enable_resource_audit_log: true
+        enable_system_audit_log: true
+        enable_team_audit_log: true
+        enable_volume_audit_log: true
+        enable_worker_audit_log: true
         cluster_name: "prod"
   - put: prod-pks-worker-deployment
     inputs: [cbd, concourse-release, vsphere-xenial-stemcell, prod]
