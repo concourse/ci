@@ -1,0 +1,102 @@
+jobs:
+- name: bosh-wings-deploy
+  serial: true
+  plan:
+  - in_parallel:
+    - get: bpm-release
+    - get: cbd
+    - get: concourse-release
+    - get: gcp-xenial-stemcell
+    - get: prod
+  - put: wings-deployment
+    params:
+      manifest: cbd/cluster/concourse.yml
+      stemcells:
+      - gcp-xenial-stemcell/*.tgz
+      releases:
+      - concourse-release/*.tgz
+      - bpm-release/*.tgz
+      ops_files:
+      - cbd/cluster/operations/dev-versions.yml
+      - cbd/cluster/operations/privileged-http.yml
+      - cbd/cluster/operations/privileged-https.yml
+      - cbd/cluster/operations/tls.yml
+      - cbd/cluster/operations/web-network-extension.yml
+      - cbd/cluster/operations/scale.yml
+      - cbd/cluster/operations/syslog_forwarder.yml
+      - cbd/cluster/operations/team-authorized-keys.yml
+      - cbd/cluster/operations/storage-driver.yml
+      - cbd/cluster/operations/external-postgres.yml
+      - cbd/cluster/operations/external-postgres-tls.yml
+      - cbd/cluster/operations/influxdb.yml
+      - cbd/cluster/operations/container-placement-strategy.yml
+      - cbd/cluster/operations/github-auth.yml
+      - cbd/cluster/operations/add-local-users.yml
+      - cbd/cluster/operations/worker-rebalancing.yml
+      - cbd/cluster/operations/encryption.yml
+      - cbd/cluster/operations/garden-dns.yml
+      - cbd/cluster/operations/max-in-flight.yml
+      - cbd/cluster/operations/worker-max-in-flight.yml
+      - cbd/cluster/operations/enable-global-resources.yml
+      - prod/wings/ops.yml
+      vars_files:
+      - prod/wings/vars.yml
+
+
+
+resource_types:
+- name: bosh-deployment
+  type: registry-image
+  source: {repository: cloudfoundry/bosh-deployment-resource}
+
+- name: bosh-release
+  type: registry-image
+  source: {repository: dpb587/bosh-release-resource}
+
+
+
+resources:
+- name: wings-deployment
+  type: bosh-deployment
+  icon: airplane-takeoff
+  source:
+    target: ((bosh_target))
+    client: ((bosh_client.id))
+    client_secret: ((bosh_client.secret))
+    deployment: concourse-wings
+
+- name: bpm-release
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry/bpm-release
+
+- name: cbd
+  type: git
+  source:
+    uri: git@github.com:concourse/concourse-bosh-deployment.git
+    branch: develop
+    private_key: ((concourse_deployment_repo_private_key))
+
+- name: concourse-release
+  type: bosh-release
+  source:
+    uri: https://github.com/concourse/concourse-bosh-release
+    branch: master
+    dev_releases: true
+    private_config:
+      blobstore:
+        provider: gcs
+        options:
+          credentials_source: static
+          json_key: ((concourse_artifacts_json_key))
+
+- name: gcp-xenial-stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-google-kvm-ubuntu-xenial-go_agent
+
+- name: prod
+  type: git
+  source:
+    uri: https://github.com/concourse/prod.git
+    branch: master
