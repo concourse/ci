@@ -262,4 +262,6 @@ jobs:
   - task: build
     file: docs-master/ci/build.yml
     input_mapping: {docs: docs-pr}
+    params:
+      GITHUB_TOKEN: ((concourse_github_dummy.access_token))
     tags: [pr]
