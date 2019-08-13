@@ -1783,7 +1783,6 @@ resources:
   icon: *image-icon
   source:
     repository: concourse/concourse-rc
-    tag: switch-base
     username: ((docker.username))
     password: ((docker.password))
 
@@ -1791,8 +1790,8 @@ resources:
   type: registry-image
   icon: *image-icon
   source:
-    repository: concourse/concourse-ubuntu-rc
-    tag: switch-base
+    repository: concourse/concourse-rc
+    tag: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
