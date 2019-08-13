@@ -11,7 +11,7 @@ RUN apt-get update && apt-get -y install \
 
 # install PostgreSQL for DB tests
 RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
-RUN add-apt-repository "deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main"
+RUN add-apt-repository "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main"
 RUN apt-get update && apt-get -y install postgresql-11
 ENV PATH $PATH:/usr/lib/postgresql/11/bin
 
