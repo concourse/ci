@@ -138,6 +138,8 @@ jobs:
   - in_parallel:
     - task: fly-linux
       file: ci/tasks/fly-build-linux.yml
+      params:
+        USE_EXTERNAL_LINKER: false
     - task: fly-windows
       file: ci/tasks/fly-build-windows.yml
     - task: fly-darwin
@@ -375,6 +377,8 @@ jobs:
   - in_parallel:
     - task: fly-linux
       file: ci/tasks/fly-build-linux.yml
+      params:
+        USE_EXTERNAL_LINKER: false
     - task: fly-windows
       file: ci/tasks/fly-build-windows.yml
     - task: fly-darwin

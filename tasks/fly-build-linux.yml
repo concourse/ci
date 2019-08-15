@@ -5,6 +5,9 @@ image_resource:
   type: registry-image
   source: {repository: golang}
 
+params:
+  USE_EXTERNAL_LINKER:
+
 inputs:
 - name: concourse
 - name: ci
