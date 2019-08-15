@@ -919,19 +919,24 @@ jobs:
     - get: latest-version
     - get: latest-of-same-major-version
     - get: ci
-  - task: docker-semver-tags
-    file: ci/tasks/docker-semver-tags.yml
   - in_parallel:
-    - put: concourse-image
-      inputs: [concourse-rc-image, tags]
-      params:
-        image: concourse-rc-image/image.tar
-        additional_tags: tags/tags
-    - put: concourse-image-ubuntu
-      inputs: [concourse-rc-image-ubuntu, tags]
-      params:
-        image: concourse-rc-image-ubuntu/image.tar
-        additional_tags: tags/tags
+    - do:
+      - task: docker-semver-tags
+        file: ci/tasks/docker-semver-tags.yml
+      - put: concourse-image
+        inputs: [concourse-rc-image, tags]
+        params:
+          image: concourse-rc-image/image.tar
+          additional_tags: tags/tags
+    - do:
+      - task: docker-semver-tags
+        file: ci/tasks/docker-semver-tags.yml
+        params: {SUFFIX: ubuntu}
+      - put: concourse-image-ubuntu
+        inputs: [concourse-rc-image-ubuntu, tags]
+        params:
+          image: concourse-rc-image-ubuntu/image.tar
+          additional_tags: tags/tags
 
 - name: publish-docs
   public: true
@@ -1005,8 +1010,8 @@ resources:
   type: registry-image
   icon: &image-icon docker
   source:
-    repository: concourse/resource-types-ubuntu
-    tag: release-((release_minor))
+    repository: concourse/resource-types
+    tag: release-((release_minor))-ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
@@ -1033,9 +1038,9 @@ resources:
   icon: *image-icon
   source:
     repository: concourse/concourse-rc
-    tag: ubuntu
     username: ((docker.username))
     password: ((docker.password))
+    tag: release-((release_minor))-ubuntu
 
 - name: concourse-image
   type: registry-image
@@ -1053,13 +1058,13 @@ resources:
   type: registry-image
   icon: *image-icon
   source:
-    repository: concourse/concourse-ubuntu
+    repository: concourse/concourse
     username: ((docker.username))
     password: ((docker.password))
 
     # avoid tagging as 'latest' in case this is a patch release for an older
     # version
-    tag: ((release_minor))
+    tag: ((release_minor))-ubuntu
 
 - name: version
   type: semver

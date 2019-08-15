@@ -1199,21 +1199,28 @@ jobs:
       params: {format: oci}
     - get: latest-version
     - get: ci
-  - task: docker-semver-tags
-    file: ci/tasks/docker-semver-tags.yml
-    input_mapping:
-      latest-of-same-major-version: latest-version
   - in_parallel:
-    - put: concourse-image
-      inputs: [concourse-rc-image, tags]
-      params:
-        image: concourse-rc-image/image.tar
-        additional_tags: tags/tags
-    - put: concourse-image-ubuntu
-      inputs: [concourse-rc-image-ubuntu, tags]
-      params:
-        image: concourse-rc-image-ubuntu/image.tar
-        additional_tags: tags/tags
+    - do:
+      - task: docker-semver-tags
+        file: ci/tasks/docker-semver-tags.yml
+        input_mapping:
+          latest-of-same-major-version: latest-version
+      - put: concourse-image
+        inputs: [concourse-rc-image, tags]
+        params:
+          image: concourse-rc-image/image.tar
+          additional_tags: tags/tags
+    - do:
+      - task: docker-semver-tags
+        file: ci/tasks/docker-semver-tags.yml
+        input_mapping:
+          latest-of-same-major-version: latest-version
+        params: {SUFFIX: ubuntu}
+      - put: concourse-image-ubuntu
+        inputs: [concourse-rc-image-ubuntu, tags]
+        params:
+          image: concourse-rc-image-ubuntu/image.tar
+          additional_tags: tags/tags
 
 - name: publish-docs
   public: true
@@ -1319,7 +1326,8 @@ resources:
   type: registry-image
   icon: *image-icon
   source:
-    repository: concourse/concourse-ubuntu
+    tag: ubuntu
+    repository: concourse/concourse
     username: ((docker.username))
     password: ((docker.password))
 
@@ -1741,7 +1749,8 @@ resources:
   type: registry-image
   icon: &image-icon docker
   source:
-    repository: concourse/resource-types-ubuntu
+    repository: concourse/resource-types
+    tag: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
