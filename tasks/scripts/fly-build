@@ -22,6 +22,9 @@ pushd concourse
 
   if [ "$platform" = "linux" ]; then
     ldflags+=' -extldflags "-static"'
+    if [ "$USE_EXTERNAL_LINKER" = "true" ]; then
+      ldflags+=' -linkmode external'
+    fi
   fi
 
   go build --tags netgo -a -ldflags "$ldflags" -o $output/fly ./fly
