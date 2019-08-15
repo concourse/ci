@@ -76,6 +76,7 @@ jobs:
           release_major: "5"
           release_minor: "5.2"
           concourse_smoke_deployment_name: "concourse-smoke-5-2"
+          use_external_linker: true
       - name: release-5.3.x
         team: main
         config_file: pipelines/pipelines/release.yml
@@ -83,6 +84,7 @@ jobs:
           release_major: "5"
           release_minor: "5.3"
           concourse_smoke_deployment_name: "concourse-smoke-5-3"
+          use_external_linker: true
       - name: release-5.4.x
         team: main
         config_file: pipelines/pipelines/release.yml
@@ -90,6 +92,7 @@ jobs:
           release_major: "5"
           release_minor: "5.4"
           concourse_smoke_deployment_name: "concourse-smoke-5-4"
+          use_external_linker: false
       - name: concourse
         team: main
         config_file: pipelines/pipelines/concourse.yml
