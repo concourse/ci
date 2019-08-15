@@ -75,6 +75,7 @@ jobs:
         vars:
           release_major: "5"
           release_minor: "5.2"
+          charts_version: '060b57708ed34ffd47f8076bf5906167dfce96b8'
           concourse_smoke_deployment_name: "concourse-smoke-5-2"
           use_external_linker: true
       - name: release-5.3.x
@@ -83,6 +84,7 @@ jobs:
         vars:
           release_major: "5"
           release_minor: "5.3"
+          charts_version: 'f3dde5b4c00ea44c0684afcf154858032c703a40'
           concourse_smoke_deployment_name: "concourse-smoke-5-3"
           use_external_linker: true
       - name: release-5.4.x
@@ -91,6 +93,7 @@ jobs:
         vars:
           release_major: "5"
           release_minor: "5.4"
+          charts_version: '060b57708ed34ffd47f8076bf5906167dfce96b8'
           concourse_smoke_deployment_name: "concourse-smoke-5-4"
           use_external_linker: false
       - name: concourse
