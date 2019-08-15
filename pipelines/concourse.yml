@@ -178,8 +178,6 @@ jobs:
         mode: normal
         alert_type: broke
 
-
-
 - name: resource-types-images
   public: true
   serial: true

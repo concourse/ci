@@ -62,6 +62,7 @@ groups:
 - name: develop
   jobs:
   - unit
+  - resource-types-image
   - dev-image
   - testflight
   - watsjs
@@ -141,19 +142,11 @@ jobs:
         mode: normal
         alert_type: broke
 
-- name: dev-image
+- name: resource-types-image
   public: true
   serial: true
   plan:
   - in_parallel:
-    - get: concourse
-      trigger: true
-    - get: unit-image
-      trigger: true
-    - get: gdn
-      trigger: true
-    - get: dumb-init
-      trigger: true
     - get: bosh-io-release-resource
       trigger: true
     - get: bosh-io-stemcell-resource
@@ -184,22 +177,54 @@ jobs:
       trigger: true
     - get: builder
     - get: ci
-  - task: yarn-build
-    image: unit-image
-    file: ci/tasks/yarn-build.yml
+  - task: build-ubuntu
+    output_mapping: {image: image_ubuntu}
+    image: builder
+    privileged: true
+    params:
+      BUILD_ARG_distro: ubuntu
+    file: ci/tasks/build-resource-types-image.yml
+  - put: resource-types-ubuntu-image
+    params: {image: image_ubuntu/image.tar}
+    get_params: {format: oci}
+
+- name: dev-image
+  public: true
+  serial: true
+  plan:
   - in_parallel:
-    - task: fly-linux
-      file: ci/tasks/fly-build-linux.yml
-      params:
-        USE_EXTERNAL_LINKER: ((use_external_linker))
-    - task: fly-windows
-      file: ci/tasks/fly-build-windows.yml
-    - task: fly-darwin
-      file: ci/tasks/fly-build-darwin.yml
+    - get: concourse
+      trigger: true
+    - get: unit-image
+      trigger: true
+    - get: gdn
+      trigger: true
+    - get: dumb-init
+      trigger: true
+    - get: resource-types-ubuntu-image
+      passed: [resource-types-image]
+    - get: builder
+    - get: ci
+  - in_parallel:
+      fail_fast: true
+      steps:
+      - task: yarn-build
+        image: unit-image
+        file: ci/tasks/yarn-build.yml
+      - task: fly-linux
+        file: ci/tasks/fly-build-linux.yml
+        params:
+          USE_EXTERNAL_LINKER: ((use_external_linker))
+      - task: fly-windows
+        file: ci/tasks/fly-build-windows.yml
+      - task: fly-darwin
+        file: ci/tasks/fly-build-darwin.yml
   - task: build
     image: builder
     privileged: true
-    input_mapping: {concourse: built-concourse}
+    input_mapping:
+      concourse: built-concourse
+      resource-types-image: resource-types-ubuntu-image
     file: ci/tasks/build-dev-image.yml
   - put: dev-image
     params: {image: image/image.tar}
@@ -592,8 +617,6 @@ jobs:
       passed: [bosh-check-props]
       trigger: true
     - get: unit-image
-      passed: [bosh-check-props]
-      trigger: true
     - get: version
       passed: [bosh-check-props]
     - get: linux-rc
@@ -603,51 +626,7 @@ jobs:
       passed: [build-rc]
       trigger: true
     - get: concourse-release-repo
-    - get: bosh-io-release-resource
-      passed: [dev-image]
-      trigger: true
-    - get: bosh-io-stemcell-resource
-      passed: [dev-image]
-      trigger: true
-    - get: cf-resource
-      passed: [dev-image]
-      trigger: true
-    - get: docker-image-resource
-      passed: [dev-image]
-      trigger: true
-    - get: git-resource
-      passed: [dev-image]
-      trigger: true
-    - get: github-release-resource
-      passed: [dev-image]
-      trigger: true
-    - get: hg-resource
-      passed: [dev-image]
-      trigger: true
-    - get: pool-resource
-      passed: [dev-image]
-      trigger: true
-    - get: registry-image-resource
-      passed: [dev-image]
-      trigger: true
-    - get: s3-resource
-      passed: [dev-image]
-      trigger: true
-    - get: semver-resource
-      passed: [dev-image]
-      trigger: true
-    - get: time-resource
-      passed: [dev-image]
-      trigger: true
-    - get: tracker-resource
-      passed: [dev-image]
-      trigger: true
-    - get: mock-resource
-      passed: [dev-image]
-      trigger: true
     - get: ci
-  - task: ubuntu-image-replace
-    file: ci/tasks/ubuntu-image-replace.yml
   - task: bump-concourse-blobs
     file: ci/tasks/bump-concourse-blobs.yml
     image: unit-image
@@ -941,9 +920,18 @@ resources:
     password: ((basic_auth.password))
     concourse_url: https://ci.concourse-ci.org
 
-- name: dev-image
+- name: resource-types-ubuntu-image
   type: registry-image
   icon: &image-icon docker
+  source:
+    repository: concourse/resource-types
+    username: ((docker.username))
+    password: ((docker.password))
+    tag: release-((release_minor))
+
+- name: dev-image
+  type: registry-image
+  icon: *image-icon
   source:
     repository: concourse/dev
     username: ((docker.username))
