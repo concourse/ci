@@ -584,6 +584,7 @@ jobs:
     image: unit-image
     input_mapping:
       stemcell: gcp-xenial-stemcell
+      concourse-release: concourse-release-branch
     params:
       DEPLOYMENT_NAME_PREFIX: concourse-topgun-((branch_name))
       BOSH_ENVIRONMENT: ((bosh_target))
