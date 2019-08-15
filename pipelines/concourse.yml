@@ -293,8 +293,6 @@ jobs:
       passed: [unit, dev-image]
       trigger: true
     - get: unit-image
-      passed: [unit, dev-image]
-      trigger: true
     - get: dev-image
       passed: [dev-image]
       trigger: true
@@ -319,8 +317,6 @@ jobs:
       passed: [unit, dev-image]
       trigger: true
     - get: unit-image
-      passed: [unit, dev-image]
-      trigger: true
     - get: dev-image
       passed: [dev-image]
       trigger: true
@@ -349,7 +345,6 @@ jobs:
       params: {format: oci}
       trigger: true
     - get: unit-image
-      passed: [unit, dev-image]
     - get: concourse-image-alpine
       params: {format: oci}
     - get: postgres-image
@@ -376,7 +371,6 @@ jobs:
       params: {format: oci}
       trigger: true
     - get: unit-image
-      passed: [unit, dev-image]
     - get: concourse-image-alpine
       params: {format: oci}
     - get: postgres-image
@@ -412,7 +406,6 @@ jobs:
     - get: charts
       trigger: true
     - get: unit-image
-      passed: [build-rc-image]
     - get: ci
   - try:
       task: try-delete
@@ -467,8 +460,6 @@ jobs:
       trigger: true
       params: {format: oci}
     - get: unit-image
-      passed: [k8s-smoke]
-      trigger: true
     - get: charts
       trigger: true
       passed: [k8s-smoke]
@@ -502,8 +493,6 @@ jobs:
       tags: [pks]
       params: {format: oci}
     - get: unit-image
-      passed: [k8s-smoke]
-      trigger: true
       tags: [pks]
     - get: charts
       trigger: true
@@ -540,8 +529,6 @@ jobs:
       passed: [build-rc-image]
       trigger: true
     - get: unit-image
-      passed: [build-rc-image]
-      trigger: true
     - get: charts
       trigger: true
     - get: ci
@@ -563,8 +550,6 @@ jobs:
       trigger: true
       passed: [testflight, watsjs, upgrade, downgrade]
     - get: unit-image
-      passed: [testflight, watsjs, upgrade, downgrade]
-      trigger: true
     - get: ci
   - put: version
     params: {pre: rc}
@@ -578,8 +563,6 @@ jobs:
       passed: [rc]
       trigger: true
     - get: unit-image
-      passed: [rc]
-      trigger: true
     - get: version
       passed: [rc]
       trigger: true
@@ -659,8 +642,6 @@ jobs:
       passed: [build-rc]
       trigger: true
     - get: unit-image
-      passed: [build-rc]
-      trigger: true
     - get: version
       passed: [build-rc]
       trigger: true
@@ -718,8 +699,6 @@ jobs:
       passed: [build-rc]
       trigger: true
     - get: unit-image
-      passed: [build-rc]
-      trigger: true
     - get: ci
   - task: terraform-smoke
     image: unit-image
@@ -753,7 +732,6 @@ jobs:
       passed: [build-rc-image]
       trigger: true
     - get: unit-image
-      passed: [build-rc-image]
     - get: ci
     - get: docs
   - task: quickstart-smoke
@@ -775,8 +753,6 @@ jobs:
       passed: [bin-smoke]
       trigger: true
     - get: unit-image
-      passed: [bin-smoke]
-      trigger: true
     - get: version
       passed: [bin-smoke]
       trigger: true
@@ -801,8 +777,6 @@ jobs:
       passed: [bosh-check-props]
       trigger: true
     - get: unit-image
-      passed: [bosh-check-props]
-      trigger: true
     - get: version
       passed: [bosh-check-props]
     - get: linux-rc-ubuntu
@@ -832,7 +806,6 @@ jobs:
     - get: concourse
       passed: [bosh-bump]
     - get: unit-image
-      passed: [bosh-bump]
     - get: version
       passed: [bosh-bump]
     - get: concourse-release
@@ -882,7 +855,6 @@ jobs:
     - get: concourse
       passed: [bosh-bump]
     - get: unit-image
-      passed: [bosh-bump]
     - get: version
       passed: [bosh-bump]
     - get: concourse-release
