@@ -1,3 +1,4 @@
+---
 platform: linux
 
 image_resource:
@@ -9,26 +10,13 @@ params:
   DOCKERFILE: ci/dockerfiles/dev/Dockerfile
 
 inputs:
-- name: concourse
 - name: ci
+- name: concourse
 - name: gdn
+- name: resource-types-image
 - name: fly-linux
 - name: fly-windows
 - name: fly-darwin
-- name: bosh-io-release-resource
-- name: bosh-io-stemcell-resource
-- name: cf-resource
-- name: docker-image-resource
-- name: git-resource
-- name: github-release-resource
-- name: hg-resource
-- name: mock-resource
-- name: pool-resource
-- name: registry-image-resource
-- name: s3-resource
-- name: semver-resource
-- name: time-resource
-- name: tracker-resource
 
 outputs:
 - name: image
