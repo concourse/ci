@@ -2,6 +2,8 @@
 #
 #   ((release_major))                   the MAJOR version, e.g. 5
 #   ((release_minor))                   the MAJOR.MINOR version, e.g. 5.1
+#   ((charts_version))                  the commit on `helm/charts` where the version of
+#                                       concourse matches the desired release version
 #   ((concourse_smoke_deployment_name)) a unique name for the smoke bosh deployment
 #   ((use_external_linker))             whether to use an external linker for go builds;
 #                                       otherwise the built-in go linker will be used.
@@ -326,7 +328,6 @@ jobs:
       passed: [build-rc-image]
       trigger: true
     - get: charts
-      trigger: true
     - get: ci
   - task: check-params
     file: ci/tasks/check-distribution-env.yml
@@ -352,7 +353,6 @@ jobs:
       passed: [build-rc-image]
       trigger: true
     - get: charts
-      trigger: true
     - get: unit-image
       passed: [build-rc-image]
     - get: ci
@@ -1088,6 +1088,7 @@ resources:
 - name: charts
   type: git
   icon: *git-icon
+  version: {ref: ((charts_version))}
   source:
     uri: https://github.com/helm/charts.git
     branch: master
