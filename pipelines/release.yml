@@ -238,7 +238,6 @@ jobs:
   - task: build
     image: builder
     privileged: true
-    input_mapping:
     input_mapping: {concourse: built-concourse, resource-types-image: resource-types-alpine-image}
     file: ci/tasks/build-dev-image.yml
   - put: dev-image
@@ -1212,7 +1211,7 @@ resources:
 - name: builder
   type: registry-image
   icon: *image-icon
-  source: {repository: concourse/builder}
+  source: {repository: concourse/builder-task}
 
 - name: gcp-xenial-stemcell
   type: bosh-io-stemcell
