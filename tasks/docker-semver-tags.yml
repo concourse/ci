@@ -5,6 +5,9 @@ image_resource:
   type: registry-image
   source: {repository: concourse/unit}
 
+params:
+  SUFFIX:
+
 inputs:
 - name: concourse
 - name: ci

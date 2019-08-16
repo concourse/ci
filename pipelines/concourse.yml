@@ -178,8 +178,6 @@ jobs:
         mode: normal
         alert_type: broke
 
-
-
 - name: resource-types-images
   public: true
   serial: true
@@ -345,7 +343,7 @@ jobs:
       params: {format: oci}
       trigger: true
     - get: unit-image
-    - get: concourse-image-alpine
+    - get: concourse-image
       params: {format: oci}
     - get: postgres-image
       params: {format: oci}
@@ -353,7 +351,6 @@ jobs:
   - task: upgrade-test
     privileged: true
     image: unit-image
-    input_mapping: {concourse-image: concourse-image-alpine}
     file: ci/tasks/upgrade-test.yml
   on_success: *fixed-concourse
   on_failure: *broke-concourse
@@ -371,14 +368,13 @@ jobs:
       params: {format: oci}
       trigger: true
     - get: unit-image
-    - get: concourse-image-alpine
+    - get: concourse-image
       params: {format: oci}
     - get: postgres-image
       params: {format: oci}
     - get: ci
   - task: downgrade-test
     privileged: true
-    input_mapping: {concourse-image: concourse-image-alpine}
     image: unit-image
     file: ci/tasks/downgrade-test.yml
   on_success: *fixed-concourse
@@ -392,7 +388,7 @@ jobs:
     - get: concourse
       passed: [build-rc-image]
       trigger: true
-    - get: concourse-rc-image-alpine
+    - get: concourse-rc-image
       passed: [build-rc-image]
       params: {format: oci}
       trigger: true
@@ -417,7 +413,7 @@ jobs:
         CONCOURSE_IMAGE: concourse/concourse-rc
   - task: deploy
     image: unit-image
-    input_mapping: {image-info: concourse-rc-image-alpine}
+    input_mapping: {image-info: concourse-rc-image}
     file: ci/tasks/k8s-deploy.yml
     params:
       KUBE_CONFIG: ((kube_config))
@@ -451,7 +447,7 @@ jobs:
     - get: version
       passed: [k8s-smoke]
       trigger: true
-    - get: concourse-rc-image-alpine
+    - get: concourse-rc-image
       passed: [k8s-smoke]
       trigger: true
       params: {format: oci}
@@ -466,7 +462,6 @@ jobs:
     - get: ci
   - task: k8s-topgun
     file: ci/tasks/k8s-topgun.yml
-    input_mapping: {concourse-rc-image: concourse-rc-image-alpine}
     image: unit-image
     params:
       KUBE_CONFIG: ((kube_config))
@@ -487,7 +482,7 @@ jobs:
       passed: [k8s-smoke]
       trigger: true
       tags: [pks]
-    - get: concourse-rc-image-alpine
+    - get: concourse-rc-image
       passed: [k8s-smoke]
       trigger: true
       tags: [pks]
@@ -503,7 +498,6 @@ jobs:
     tags: [pks]
     file: ci/tasks/k8s-topgun.yml
     image: unit-image
-    input_mapping: {concourse-rc-image: concourse-rc-image-alpine}
     params:
       KUBE_CONFIG: ((kube_config_pks))
       CONCOURSE_IMAGE_NAME: concourse/concourse-rc
@@ -519,7 +513,7 @@ jobs:
     - get: concourse
       passed: [build-rc-image]
       trigger: true
-    - get: concourse-rc-image-alpine
+    - get: concourse-rc-image
       passed: [build-rc-image]
       trigger: true
     - get: concourse-rc-image-ubuntu
@@ -535,8 +529,10 @@ jobs:
   - task: check-params
     file: ci/tasks/check-distribution-env.yml
     image: unit-image
-    input_mapping: {distribution: charts, concourse-rc-image: concourse-rc-image-alpine}
+    input_mapping: {distribution: charts}
     params: {DISTRIBUTION: helm}
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: rc
   public: true
@@ -620,7 +616,7 @@ jobs:
         file: ci/tasks/concourse-build-darwin.yml
         input_mapping: {concourse: built-concourse}
   - in_parallel:
-    - put: linux-rc-alpine
+    - put: linux-rc
       params: {file: concourse-linux-alpine/concourse-*.tgz}
       inputs: [concourse-linux-alpine]
     - put: linux-rc-ubuntu
@@ -645,7 +641,7 @@ jobs:
     - get: version
       passed: [build-rc]
       trigger: true
-    - get: linux-rc-alpine
+    - get: linux-rc
       trigger: true
       passed: [build-rc]
     - get: linux-rc-ubuntu
@@ -661,7 +657,6 @@ jobs:
         - task: build-alpine
           file: concourse-docker/ci/build-image.yml
           image: builder
-          input_mapping: {linux-rc: linux-rc-alpine}
           output_mapping: {image: image-alpine}
           privileged: true
         - task: build-ubuntu
@@ -673,7 +668,7 @@ jobs:
   - in_parallel:
       fail_fast: true
       steps:
-        - put: concourse-rc-image-alpine
+        - put: concourse-rc-image
           inputs: [image-alpine, version]
           params:
             image: image-alpine/image.tar
@@ -703,7 +698,6 @@ jobs:
   - task: terraform-smoke
     image: unit-image
     file: ci/tasks/terraform-smoke.yml
-    input_mapping: { linux-rc: linux-rc-alpine }
     params:
       GCP_PROJECT: cf-concourse-production
       GCP_KEY: ((concourse_smoke_gcp_key))
@@ -724,7 +718,7 @@ jobs:
     - get: concourse
       passed: [build-rc-image]
       trigger: true
-    - get: concourse-rc-image-alpine
+    - get: concourse-rc-image
       passed: [build-rc-image]
       params: {format: oci}
       trigger: true
@@ -737,7 +731,6 @@ jobs:
   - task: quickstart-smoke
     privileged: true
     image: unit-image
-    input_mapping: {concourse-rc-image: concourse-rc-image-alpine}
     file: ci/tasks/quickstart-smoke.yml
     params:
       RELEASE_NAME: concourse-smoke
@@ -1062,7 +1055,7 @@ jobs:
     - k8s-check-helm-params
     - bosh-smoke
     - bosh-topgun
-  - get: linux-rc-alpine
+  - get: linux-rc
     passed: [build-rc]
   - get: linux-rc-ubuntu
     passed: [build-rc]
@@ -1070,7 +1063,7 @@ jobs:
     passed: [build-rc]
   - get: darwin-rc
     passed: [build-rc]
-  - get: concourse-rc-image-alpine
+  - get: concourse-rc-image
     passed: [k8s-topgun, k8s-check-helm-params]
   - get: concourse-rc-image-ubuntu
     passed: [k8s-topgun, k8s-check-helm-params]
@@ -1094,7 +1087,7 @@ jobs:
       passed: [shipit]
     - get: unit-image
       passed: [shipit]
-    - get: linux-rc-alpine
+    - get: linux-rc
       passed: [shipit]
     - get: windows-rc
       passed: [shipit]
@@ -1105,11 +1098,12 @@ jobs:
   - in_parallel:
     - task: prep-release-assets
       file: release-notes/ci/prep-release-assets.yml
-      input_mapping: {linux-rc: linux-rc-alpine}
       image: unit-image
     - task: build-release-notes
       file: release-notes/ci/build.yml
       image: unit-image
+      params:
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
   - put: concourse-github-release
     params:
       commitish: concourse/.git/ref
@@ -1197,29 +1191,36 @@ jobs:
       trigger: true
     - get: concourse
       passed: [shipit]
-    - get: concourse-rc-image-ubuntu
+    - get: concourse-rc-image
       passed: [shipit]
       params: {format: oci}
-    - get: concourse-rc-image-alpine
+    - get: concourse-rc-image-ubuntu
       passed: [shipit]
       params: {format: oci}
     - get: latest-version
     - get: ci
-  - task: docker-semver-tags
-    file: ci/tasks/docker-semver-tags.yml
-    input_mapping:
-      latest-of-same-major-version: latest-version
   - in_parallel:
-    - put: concourse-image-alpine
-      inputs: [concourse-rc-image-alpine, tags]
-      params:
-        image: concourse-rc-image-alpine/image.tar
-        additional_tags: tags/tags
-    - put: concourse-image-ubuntu
-      inputs: [concourse-rc-image-ubuntu, tags]
-      params:
-        image: concourse-rc-image-ubuntu/image.tar
-        additional_tags: tags/tags
+    - do:
+      - task: docker-semver-tags
+        file: ci/tasks/docker-semver-tags.yml
+        input_mapping:
+          latest-of-same-major-version: latest-version
+      - put: concourse-image
+        inputs: [concourse-rc-image, tags]
+        params:
+          image: concourse-rc-image/image.tar
+          additional_tags: tags/tags
+    - do:
+      - task: docker-semver-tags
+        file: ci/tasks/docker-semver-tags.yml
+        input_mapping:
+          latest-of-same-major-version: latest-version
+        params: {SUFFIX: ubuntu}
+      - put: concourse-image-ubuntu
+        inputs: [concourse-rc-image-ubuntu, tags]
+        params:
+          image: concourse-rc-image-ubuntu/image.tar
+          additional_tags: tags/tags
 
 - name: publish-docs
   public: true
@@ -1313,7 +1314,7 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: concourse-image-alpine
+- name: concourse-image
   type: registry-image
   icon: *image-icon
   source:
@@ -1501,7 +1502,7 @@ resources:
     json_key: ((concourse_artifacts_json_key))
     key: version
 
-- name: linux-rc-alpine
+- name: linux-rc
   type: gcs
   icon: linux
   source:
@@ -1741,7 +1742,6 @@ resources:
   icon: &image-icon docker
   source:
     repository: concourse/resource-types
-    tag: alpine
     username: ((docker.username))
     password: ((docker.password))
 
@@ -1754,7 +1754,7 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: concourse-rc-image-alpine
+- name: concourse-rc-image
   type: registry-image
   icon: *image-icon
   source:
