@@ -246,11 +246,10 @@ jobs:
       passed: [rc]
       trigger: true
     - get: unit-image
-      passed: [rc]
-      trigger: true
-    - get: dev-image
-      passed: [rc]
-      trigger: true
+    - get: resource-types-alpine-image
+      passed: [dev-image]
+    - get: gdn
+      passed: [dev-image]
     - get: ci
   - in_parallel:
     - task: fly-linux
@@ -262,7 +261,7 @@ jobs:
     - task: fly-darwin
       file: ci/tasks/fly-build-darwin.yml
   - task: hoist-linux-dependencies
-    image: dev-image
+    image: resource-types-alpine-image
     file: ci/tasks/hoist-linux-dependencies.yml
   - task: yarn-build
     image: unit-image
