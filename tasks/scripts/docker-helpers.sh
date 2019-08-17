@@ -64,8 +64,6 @@ function start_docker() {
   dockerd --data-root /scratch/docker ${server_args} >/tmp/docker.log 2>&1 &
   echo $! > /tmp/docker.pid
 
-  # trap stop_docker EXIT
-
   sleep 1
 
   until docker info >/dev/null 2>&1; do

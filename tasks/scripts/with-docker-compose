@@ -28,10 +28,13 @@ pushd concourse
   fi
 popd
 
+trap stop_docker_compose EXIT
+function stop_docker_compose() {
+  pushd concourse
+    docker-compose logs > docker-compose.log
+    docker-compose down
+  popd
+  stop_docker
+}
+
 "$@"
-
-pushd concourse
-  docker-compose down
-popd
-
-stop_docker
