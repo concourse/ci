@@ -39,7 +39,7 @@ mkdir $output/concourse
 bin=$output/concourse/bin
 mkdir $bin
 mv concourse/concourse $bin
-[ -d gdn ] && cp gdn/gdn* $bin
+[ -d gdn ] && install -m 0755 gdn/gdn* $bin/gdn
 
 [ -d resource-types ] && cp -a resource-types $output/concourse
 
