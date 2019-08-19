@@ -28,7 +28,7 @@ pushd concourse
   fi
 popd
 
-trap stop_docker_compose EXIT
+trap stop_docker_compose EXIT SIGTERM SIGINT
 function stop_docker_compose() {
   pushd concourse
     docker-compose logs > docker-compose.log
