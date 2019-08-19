@@ -29,6 +29,15 @@ docker-compose \
   -f $inputs/ci/overrides/docker-compose.no-build.yml \
   up --no-build -d
 
+trap stop_docker_compose EXIT SIGTERM SIGINT
+function stop_docker_compose() {
+  pushd $inputs/concourse
+    docker-compose logs > docker-compose.log
+    docker-compose down
+  popd
+  stop_docker
+}
+
 $inputs/ci/tasks/scripts/create-upgrade-downgrade-pipeline
 
 # perform down migrations
