@@ -39,6 +39,7 @@ eventually_populate_kube_config() {
 run_helm_deploy() {
   local chart=./charts/stable/concourse
 
+  curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
   helm init --upgrade --wait
   helm version
   helm dependency update $chart
