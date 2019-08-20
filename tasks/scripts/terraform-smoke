@@ -18,6 +18,10 @@ echo "$SSH_KEY" > keys/id_rsa
 chmod 0600 keys/id_rsa
 ssh-keygen -y -f keys/id_rsa > keys/id_rsa.pub
 
+curl -fsSL https://releases.hashicorp.com/terraform/0.12.6/terraform_0.12.6_linux_amd64.zip -o /tmp/terraform.zip
+unzip -o /tmp/terraform.zip -d /usr/local/bin
+rm /tmp/terraform.zip
+
 terraform init
 
 terraform workspace select "$WORKSPACE" || \
