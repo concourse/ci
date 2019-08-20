@@ -1,15 +1,17 @@
-FROM golang:1
+FROM concourse/golang-builder
 
 # basic setup for adding new apt sources and installing packages
 RUN apt-get update && apt-get -y install \
       apt-transport-https \
       ca-certificates \
       curl \
+      iproute2 \
       gnupg2 \
       software-properties-common \
       unzip
 
 # install PostgreSQL for DB tests
+ENV DEBIAN_FRONTEND noninteractive
 RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN add-apt-repository "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main"
 RUN apt-get update && apt-get -y install postgresql-11
@@ -26,7 +28,7 @@ RUN apt-get update && apt-get -y install yarn
 
 # install Docker
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
-RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 RUN apt-get update && apt-get -y install docker-ce
 
 # install Docker Compose
