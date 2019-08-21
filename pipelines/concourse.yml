@@ -539,6 +539,9 @@ jobs:
     - get: concourse-rc-image-ubuntu
       passed: [build-rc-image]
       trigger: true
+    - get: linux-rc-ubuntu
+      passed: [build-rc-image]
+      trigger: true
     - get: version
       passed: [build-rc-image]
       trigger: true
@@ -549,7 +552,7 @@ jobs:
   - task: check-params
     file: ci/tasks/check-distribution-env.yml
     image: unit-image
-    input_mapping: {distribution: charts}
+    input_mapping: {distribution: charts, linux-rc: linux-rc-ubuntu}
     params: {DISTRIBUTION: helm}
   on_success: *fixed-concourse
   on_failure: *broke-concourse
