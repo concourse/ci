@@ -8,8 +8,8 @@ image_resource:
     tag: 12.7.0-alpine
 
 params:
-  GITHUB_TOKEN: ((concourse_github_dummy.access_token))
-  SLACK_TOKEN: ((slack_token))
+  GITHUB_TOKEN:
+  SLACK_TOKEN:
 
 inputs:
 - name: ci

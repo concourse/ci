@@ -102,6 +102,9 @@ jobs:
     - task: format-slack-message
       file: ci/tasks/format-slack-message.yml
       input_mapping: {src: ci}
+      params:
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+        SLACK_TOKEN: ((slack_token))
     - put: notify
       params:
         message_file: message/message
@@ -112,6 +115,9 @@ jobs:
     - task: format-slack-message
       file: ci/tasks/format-slack-message.yml
       input_mapping: {src: ci}
+      params:
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+        SLACK_TOKEN: ((slack_token))
     - put: notify
       params:
         message_file: message/message
@@ -166,6 +172,9 @@ jobs:
     - task: format-slack-message
       file: ci/tasks/format-slack-message.yml
       input_mapping: {src: concourse}
+      params:
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+        SLACK_TOKEN: ((slack_token))
     - put: notify
       params:
         message_file: message/message
@@ -176,6 +185,9 @@ jobs:
     - task: format-slack-message
       file: ci/tasks/format-slack-message.yml
       input_mapping: {src: concourse}
+      params:
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+        SLACK_TOKEN: ((slack_token))
     - put: notify
       params:
         message_file: message/message
