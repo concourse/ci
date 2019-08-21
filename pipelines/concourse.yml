@@ -53,7 +53,7 @@ groups:
   jobs:
   - resource-types-images
   - unit-image
-  - golang-builder-image
+  - build-golang-builder-image
 
 - name: publish
   jobs:
@@ -79,6 +79,10 @@ jobs:
   - in_parallel:
     - get: ci
     - get: builder
+    - get: golang-builder-trigger
+      trigger: true
+      params:
+        skip_download: true
   - task: build
     image: builder
     privileged: true
@@ -120,7 +124,7 @@ jobs:
         mode: normal
         alert_type: broke
 
-- name: golang-builder-image
+- name: build-golang-builder-image
   public: true
   serial: true
   plan:
@@ -260,6 +264,10 @@ jobs:
         trigger: true
       - get: unit-image
         trigger: true
+      - get: golang-builder-trigger
+        trigger: true
+        params:
+          skip_download: true
       - get: gdn
         trigger: true
       - get: dumb-init
@@ -1353,6 +1361,14 @@ resources:
 
 - name: golang-builder-image
   type: registry-image
+  icon: *image-icon
+  source:
+    repository: concourse/golang-builder
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: golang-builder-trigger
+  type: docker-image
   icon: *image-icon
   source:
     repository: concourse/golang-builder
