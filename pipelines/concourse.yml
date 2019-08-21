@@ -718,6 +718,7 @@ jobs:
   - task: terraform-smoke
     image: unit-image
     file: ci/tasks/terraform-smoke.yml
+    input_mapping: {linux-rc: linux-rc-ubuntu}
     params:
       GCP_PROJECT: cf-concourse-production
       GCP_KEY: ((concourse_smoke_gcp_key))
