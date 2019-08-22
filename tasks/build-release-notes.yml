@@ -1,0 +1,17 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: concourse/unit}
+
+inputs:
+- name: concourse
+- name: version
+  optional: true
+
+outputs:
+- name: built-notes
+
+run:
+  path: scripts/build-release-notes
