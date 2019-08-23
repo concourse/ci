@@ -921,6 +921,9 @@ jobs:
     - get: concourse-rc-image-ubuntu
       passed: [shipit]
       params: {format: oci}
+    - get: concourse-rc-image-ubuntu-rootfs
+      resource: concourse-rc-image-ubuntu
+      passed: [shipit]
     - get: latest-version
     - get: latest-of-same-major-version
     - get: ci
@@ -937,6 +940,16 @@ jobs:
       - task: docker-semver-tags
         file: ci/tasks/docker-semver-tags.yml
         params: {SUFFIX: ubuntu}
+
+      - task: generate-dpkg-list
+        file: ci/tasks/generate-dpkg-list.yml
+        image: concourse-rc-image-ubuntu-rootfs
+        params: {COMPONENT_NAME: "concourse"}
+
+      - put: concourse-image-dpkg-list
+        inputs: [dpkg-list]
+        params: {file: "dpkg-list/concourse-*.txt"}
+
       - put: concourse-image-ubuntu
         inputs: [concourse-rc-image-ubuntu, tags]
         params:
@@ -1392,3 +1405,11 @@ resources:
     owner: concourse
     repository: tracker-resource
     access_token: ((concourse_github_dummy.access_token))
+
+- name: concourse-image-dpkg-list
+  type: gcs
+  icon: format-list-bulleted
+  source:
+    bucket: concourse-ubuntu-dpkg-list
+    json_key: ((concourse_dpkg_list_json_key))
+    regexp: "concourse-dpkg-list-(.*).txt"
