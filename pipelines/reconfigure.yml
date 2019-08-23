@@ -128,7 +128,7 @@ jobs:
           environment: lidar-drills
       - name: prod-db-backup
         team: main
-        config_file: pipelines/pipelines/bbr-backup.yml
-      - name: bbr-restore-verify
+        config_file: pipelines/pipelines/prod-db-backup.yml
+      - name: prod-db-restore-verify
         team: main
-        config_file: pipelines/pipelines/bbr-restore-verify.yml
+        config_file: pipelines/pipelines/prod-db-restore-verify.yml

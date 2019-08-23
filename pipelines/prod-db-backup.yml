@@ -66,7 +66,7 @@ jobs:
       vars: &deploy-vars
         db_persistent_disk_type: large
         db_vm_type: test
-        deployment_name: test-restore
+        deployment_name: prod-test-restore
         external_url: http://localhost:8080
         local_user.password: admin
         local_user.username: admin
@@ -81,7 +81,7 @@ jobs:
     file: ci/tasks/bbr-restore.yml
     params:
       <<: *bosh-params
-      BOSH_DEPLOYMENT: test-restore
+      BOSH_DEPLOYMENT: prod-test-restore
 
   - put: deploy-all
     inputs: *deploy-inputs
@@ -100,7 +100,7 @@ jobs:
     file: ci/tasks/bbr-trigger-existing-pipeline.yml
     params:
       <<: *bosh-params
-      BOSH_DEPLOYMENT: test-restore
+      BOSH_DEPLOYMENT: prod-test-restore
 
   ensure:
     put: delete-deployment
@@ -156,7 +156,7 @@ resources:
   type: git
   source:
     uri: https://github.com/concourse/ci.git
-    branch: test-restore
+    branch: master
 
 - name: deployment
   type: bosh-deployment
@@ -164,7 +164,7 @@ resources:
     target: ((bosh_target))
     client: ((bosh_client.id))
     client_secret: ((bosh_client.secret))
-    deployment: test-restore
+    deployment: prod-test-restore
 
 
 
