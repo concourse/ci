@@ -9,9 +9,10 @@ inputs:
 - name: concourse
 - name: version
   optional: true
+- name: ci
 
 outputs:
 - name: built-notes
 
 run:
-  path: scripts/build-release-notes
+  path: ci/tasks/scripts/build-release-notes

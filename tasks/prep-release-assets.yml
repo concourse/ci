@@ -10,6 +10,7 @@ inputs:
 - name: linux-rc
 - name: windows-rc
 - name: darwin-rc
+- name: ci
 
 outputs:
 - name: concourse-linux
@@ -20,4 +21,4 @@ outputs:
 - name: fly-darwin
 
 run:
-  path: scripts/prep-release-assets
+  path: ci/tasks/scripts/prep-release-assets
