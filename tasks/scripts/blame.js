@@ -1,15 +1,16 @@
 const Octokit = require('@octokit/rest');
 const { WebClient } = require('@slack/web-api');
+const fs = require('fs');
+
 const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN
 });
-
 const token = process.env.SLACK_TOKEN;
 const web = new WebClient(token);
 const sha = process.argv[2];
+const outputFile = process.argv[3];
 const owner = 'concourse';
 const repo = 'concourse';
-
 
 async function main() {
   var searchResults = await octokit.search.issuesAndPullRequests({
@@ -35,7 +36,11 @@ async function main() {
   }
   var emails = whoIsToBlame(commits);
   var slackIds = await slackIdsForEmails(emails);
-  console.log(slackMessage(slackIds));
+  fs.writeFile(outputFile, slackMessage(slackIds), function(err) {
+    if (err) {
+      return console.log(err);
+    }
+  });
 }
 
 async function slackIdsForEmails(emails) {

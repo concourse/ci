@@ -10,4 +10,4 @@ apk add git
 
 cd ci/tasks/scripts
 yarn install
-yarn blame $(git -C "$src" rev-parse HEAD) > "$message_file"
+yarn blame $(git -C "$src" rev-parse HEAD) "$message_file"

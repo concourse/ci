@@ -1,15 +1,17 @@
-FROM golang:1
+FROM concourse/golang-builder
 
 # basic setup for adding new apt sources and installing packages
 RUN apt-get update && apt-get -y install \
       apt-transport-https \
       ca-certificates \
       curl \
+      iproute2 \
       gnupg2 \
       software-properties-common \
       unzip
 
 # install PostgreSQL for DB tests
+ENV DEBIAN_FRONTEND noninteractive
 RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN add-apt-repository "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main"
 RUN apt-get update && apt-get -y install postgresql-11
@@ -26,7 +28,7 @@ RUN apt-get update && apt-get -y install yarn
 
 # install Docker
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
-RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 RUN apt-get update && apt-get -y install docker-ce
 
 # install Docker Compose
@@ -60,8 +62,8 @@ RUN curl -L https://releases.hashicorp.com/vault/0.7.3/vault_0.7.3_linux_amd64.z
       unzip /tmp/vault.zip -d /usr/local/bin && \
       rm /tmp/vault.zip
 
-# install Terraform and jq for bin-smoke
+# install Terraform, ssh and jq for bin-smoke
 RUN curl -fsSL https://releases.hashicorp.com/terraform/0.12.6/terraform_0.12.6_linux_amd64.zip -o /tmp/terraform.zip && \
       unzip /tmp/terraform.zip -d /usr/local/bin && \
       rm /tmp/terraform.zip
-RUN apt-get update && apt-get -y install jq
+RUN apt-get update && apt-get -y install jq openssh-client
