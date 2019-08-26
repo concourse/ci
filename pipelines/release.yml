@@ -860,14 +860,14 @@ jobs:
       passed: [shipit]
     - get: darwin-rc
       passed: [shipit]
-    - get: release-notes
     - get: docs
+    - get: ci
   - in_parallel:
     - task: prep-release-assets
-      file: release-notes/ci/prep-release-assets.yml
+      file: ci/tasks/prep-release-assets.yml
       image: unit-image
     - task: build-release-notes
-      file: release-notes/ci/build.yml
+      file: ci/tasks/build-release-notes.yml
       image: unit-image
       params:
         GITHUB_TOKEN: ((concourse_github_dummy.access_token))
@@ -1149,13 +1149,6 @@ resources:
   icon: *git-icon
   source:
     uri: https://github.com/concourse/docs
-    branch: master
-
-- name: release-notes
-  type: git
-  icon: *git-icon
-  source:
-    uri: https://github.com/concourse/release-notes
     branch: master
 
 - name: docs-gh-pages
