@@ -25,4 +25,4 @@ run:
         VERSION=$(cat ./version/version)
       fi
 
-      dpkg -l > ./dpkg-list/${COMPONENT_NAME}-${VERSION}.txt
+      dpkg -l > ./dpkg-list/${COMPONENT_NAME}-dpkg-list-${VERSION}.txt
