@@ -22,6 +22,6 @@ outputs:
 - name: image
 
 caches:
-- name: cache
+- path: cache
 
 run: {path: build}
