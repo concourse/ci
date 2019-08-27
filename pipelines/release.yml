@@ -370,11 +370,14 @@ jobs:
     - get: unit-image
     - get: charts
       trigger: true
+    - get: linux-rc-ubuntu
+      passed: [bin-smoke]
+      trigger: true
     - get: ci
   - task: check-params
     file: ci/tasks/check-distribution-env.yml
     image: unit-image
-    input_mapping: {distribution: charts}
+    input_mapping: {distribution: charts, linux-rc: linux-rc-ubuntu}
     params: {DISTRIBUTION: helm}
   on_success: *fixed-concourse
   on_failure: *broke-concourse
@@ -667,7 +670,7 @@ jobs:
   - task: check-props
     file: ci/tasks/check-distribution-env.yml
     image: unit-image
-    input_mapping: {distribution: concourse-release-repo}
+    input_mapping: {distribution: concourse-release-repo, linux-rc: linux-rc-ubuntu}
     params: {DISTRIBUTION: bosh}
 
 - name: bosh-bump
