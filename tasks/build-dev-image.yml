@@ -21,4 +21,7 @@ inputs:
 outputs:
 - name: image
 
+caches:
+- name: cache
+
 run: {path: build}
