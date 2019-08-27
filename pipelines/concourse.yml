@@ -231,14 +231,14 @@ jobs:
       trigger: true
   - in_parallel:
     - task: build-alpine
-      image: builder
+      image: oci-build-task
       privileged: true
       params:
         BUILD_ARG_distro: alpine
       file: ci/tasks/build-resource-types-image.yml
     - task: build-ubuntu
       output_mapping: {image: image_ubuntu}
-      image: builder
+      image: oci-build-task
       privileged: true
       params:
         BUILD_ARG_distro: ubuntu
@@ -273,7 +273,7 @@ jobs:
       - get: resource-types-alpine-image
         passed: [resource-types-images]
         trigger: true
-      - get: builder
+      - get: oci-build-task
       - get: ci
   - in_parallel:
       fail_fast: true
@@ -670,7 +670,7 @@ jobs:
       passed: [build-rc]
     - get: concourse-docker
       trigger: true
-    - get: builder
+    - get: oci-build-task
     - get: ci
   - in_parallel:
       fail_fast: true
