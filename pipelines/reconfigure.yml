@@ -66,6 +66,9 @@ jobs:
       - name: prs
         team: main
         config_file: pipelines/pipelines/prs.yml
+      - name: bosh-cleanup
+        team: main
+        config_file: pipelines/pipelines/bosh-cleanup.yml
       - name: wings
         team: main
         config_file: pipelines/pipelines/wings.yml
