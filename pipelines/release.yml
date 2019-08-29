@@ -820,7 +820,6 @@ jobs:
     params: {bump: final}
     passed:
     - build-rc
-    - k8s-topgun
     - bosh-smoke
     - bosh-topgun
   - get: linux-rc
@@ -834,7 +833,6 @@ jobs:
   - get: concourse-rc-image
     passed: [k8s-topgun]
   - get: concourse-rc-image-ubuntu
-    passed: [k8s-topgun]
   - get: concourse-release
     passed: [bosh-smoke, bosh-topgun]
   - get: bpm-release
