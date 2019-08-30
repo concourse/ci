@@ -13,7 +13,8 @@ RUN apt-get update && apt-get -y install \
       ca-certificates \
       file \
       btrfs-tools \
-      dumb-init
+
+COPY dumb-init/dumb-init_*_amd64 /usr/local/bin/dumb-init
 
 # add and install executable dependencies
 COPY gdn/gdn-* /usr/local/concourse/bin/gdn
