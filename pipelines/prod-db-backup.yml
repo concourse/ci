@@ -1,5 +1,6 @@
 jobs:
 - name: backup
+  public: true
   serial: true
   plan:
 
@@ -28,8 +29,36 @@ jobs:
     params:
       file: bbr_artifacts/bbr_backup.tar
 
+  on_success: &fixed-ci
+    do:
+    - task: format-slack-message
+      file: ci/tasks/format-slack-message.yml
+      input_mapping: {src: ci}
+      params:
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+        SLACK_TOKEN: ((slack_token))
+    - put: notify
+      params:
+        message_file: message/message
+        mode: normal
+        alert_type: fixed
+  on_failure: &broke-ci
+    do:
+    - task: format-slack-message
+      file: ci/tasks/format-slack-message.yml
+      input_mapping: {src: ci}
+      params:
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+        SLACK_TOKEN: ((slack_token))
+    - put: notify
+      params:
+        message_file: message/message
+        mode: normal
+        alert_type: broke
+
 
 - name: restore
+  public: true
   serial: true
   plan:
 
@@ -111,6 +140,9 @@ jobs:
         enabled: true
         force: true
 
+  on_success: *fixed-ci
+  on_failure: *broke-ci
+
 
 
 resources:
@@ -166,6 +198,14 @@ resources:
     client_secret: ((bosh_client.secret))
     deployment: prod-test-restore
 
+- name: notify
+  type: slack-notifier
+  icon: slack
+  source:
+    url: ((slack_hook))
+    username: ((basic_auth.username))
+    password: ((basic_auth.password))
+    concourse_url: https://ci.concourse-ci.org
 
 
 
@@ -178,3 +218,7 @@ resource_types:
 - name: bosh-deployment
   type: registry-image
   source: {repository: cloudfoundry/bosh-deployment-resource}
+
+- name: slack-notifier
+  type: registry-image
+  source: {repository: mockersf/concourse-slack-notifier}
