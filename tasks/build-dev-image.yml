@@ -11,6 +11,7 @@ params:
 
 inputs:
 - name: ci
+- name: dumb-init
 - name: concourse
 - name: gdn
 - name: resource-types-image
