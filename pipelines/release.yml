@@ -684,6 +684,7 @@ jobs:
       trigger: true
     - get: unit-image
     - get: version
+      trigger: true
       passed: [bosh-check-props]
     - get: linux-rc-ubuntu
       passed: [build-rc, bosh-check-props]
