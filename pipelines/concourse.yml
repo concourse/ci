@@ -1117,6 +1117,7 @@ jobs:
       passed: [shipit]
     - get: docs
     - get: ci
+    - get: release-notes
   - in_parallel:
     - task: prep-release-assets
       file: ci/tasks/prep-release-assets.yml
@@ -1328,6 +1329,8 @@ resources:
   source:
     uri: https://github.com/concourse/concourse.git
     branch: master
+    ignore_paths:
+    - release-notes/
 
 - name: ci
   type: git
