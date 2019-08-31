@@ -1,7 +1,5 @@
 #!/bin/bash
 
-cd $(dirname $0)/..
-
 if [ -d version ]; then
   version=v$(cat version/version)
 elif [ "$#" -eq 1 ]; then
@@ -13,4 +11,4 @@ fi
 
 echo "$version" > ./built-notes/release-name
 # if this fails, it's because we forgot to manually promote latest.md to $version.md
-cp concourse/release-notes/"$version".md ./built-notes/notes.md
+cp release-notes/release-notes/"$version".md ./built-notes/notes.md
