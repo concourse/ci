@@ -30,6 +30,11 @@ install ./releases/bbr /usr/local/bin/
 
 cd concourse
 
+# [cc] temporarily replace the location of the transitive dependency
+# `thrift` so that `go` can reach a git server (that is online at the
+# moment - lol) hosting what we need.
+#
+echo "replace git.apache.org/thrift.git => github.com/apache/thrift v0.0.0-20180902110319-2566ecd5d999" >> ./go.mod
 go mod download
 
 go install github.com/onsi/ginkgo/ginkgo
