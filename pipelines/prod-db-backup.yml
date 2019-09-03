@@ -1,5 +1,6 @@
 jobs:
 - name: backup
+  public: true
   serial: true
   plan:
 
@@ -28,8 +29,36 @@ jobs:
     params:
       file: bbr_artifacts/bbr_backup.tar
 
+  on_success: &fixed-ci
+    do:
+    - task: format-slack-message
+      file: ci/tasks/format-slack-message.yml
+      input_mapping: {src: ci}
+      params:
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+        SLACK_TOKEN: ((slack_token))
+    - put: notify
+      params:
+        message_file: message/message
+        mode: normal
+        alert_type: fixed
+  on_failure: &broke-ci
+    do:
+    - task: format-slack-message
+      file: ci/tasks/format-slack-message.yml
+      input_mapping: {src: ci}
+      params:
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+        SLACK_TOKEN: ((slack_token))
+    - put: notify
+      params:
+        message_file: message/message
+        mode: normal
+        alert_type: broke
+
 
 - name: restore
+  public: true
   serial: true
   plan:
 
@@ -66,7 +95,7 @@ jobs:
       vars: &deploy-vars
         db_persistent_disk_type: large
         db_vm_type: test
-        deployment_name: test-restore
+        deployment_name: prod-test-restore
         external_url: http://localhost:8080
         local_user.password: admin
         local_user.username: admin
@@ -81,7 +110,7 @@ jobs:
     file: ci/tasks/bbr-restore.yml
     params:
       <<: *bosh-params
-      BOSH_DEPLOYMENT: test-restore
+      BOSH_DEPLOYMENT: prod-test-restore
 
   - put: deploy-all
     inputs: *deploy-inputs
@@ -100,7 +129,7 @@ jobs:
     file: ci/tasks/bbr-trigger-existing-pipeline.yml
     params:
       <<: *bosh-params
-      BOSH_DEPLOYMENT: test-restore
+      BOSH_DEPLOYMENT: prod-test-restore
 
   ensure:
     put: delete-deployment
@@ -110,6 +139,9 @@ jobs:
       delete:
         enabled: true
         force: true
+
+  on_success: *fixed-ci
+  on_failure: *broke-ci
 
 
 
@@ -156,7 +188,7 @@ resources:
   type: git
   source:
     uri: https://github.com/concourse/ci.git
-    branch: test-restore
+    branch: master
 
 - name: deployment
   type: bosh-deployment
@@ -164,8 +196,16 @@ resources:
     target: ((bosh_target))
     client: ((bosh_client.id))
     client_secret: ((bosh_client.secret))
-    deployment: test-restore
+    deployment: prod-test-restore
 
+- name: notify
+  type: slack-notifier
+  icon: slack
+  source:
+    url: ((slack_hook))
+    username: ((basic_auth.username))
+    password: ((basic_auth.password))
+    concourse_url: https://ci.concourse-ci.org
 
 
 
@@ -178,3 +218,7 @@ resource_types:
 - name: bosh-deployment
   type: registry-image
   source: {repository: cloudfoundry/bosh-deployment-resource}
+
+- name: slack-notifier
+  type: registry-image
+  source: {repository: mockersf/concourse-slack-notifier}
