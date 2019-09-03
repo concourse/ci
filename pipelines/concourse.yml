@@ -1339,7 +1339,7 @@ resources:
     uri: https://github.com/concourse/ci.git
     branch: master
 
-- name: concourse
+- name: release-notes
   type: git
   icon: *git-icon
   source:
