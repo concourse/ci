@@ -235,6 +235,7 @@ jobs:
         file: ci/tasks/yarn-build.yml
       - task: fly-linux
         file: ci/tasks/fly-build-linux.yml
+        image: unit-image
         params:
           USE_EXTERNAL_LINKER: ((use_external_linker))
       - task: fly-windows
@@ -370,11 +371,14 @@ jobs:
     - get: unit-image
     - get: charts
       trigger: true
+    - get: linux-rc-ubuntu
+      passed: [bin-smoke]
+      trigger: true
     - get: ci
   - task: check-params
     file: ci/tasks/check-distribution-env.yml
     image: unit-image
-    input_mapping: {distribution: charts}
+    input_mapping: {distribution: charts, linux-rc: linux-rc-ubuntu}
     params: {DISTRIBUTION: helm}
   on_success: *fixed-concourse
   on_failure: *broke-concourse
@@ -633,6 +637,7 @@ jobs:
   - task: terraform-smoke
     image: unit-image
     file: ci/tasks/terraform-smoke.yml
+    input_mapping: {linux-rc: linux-rc-ubuntu}
     params:
       GCP_PROJECT: cf-concourse-production
       GCP_KEY: ((concourse_smoke_gcp_key))
@@ -666,7 +671,7 @@ jobs:
   - task: check-props
     file: ci/tasks/check-distribution-env.yml
     image: unit-image
-    input_mapping: {distribution: concourse-release-repo}
+    input_mapping: {distribution: concourse-release-repo, linux-rc: linux-rc-ubuntu}
     params: {DISTRIBUTION: bosh}
 
 - name: bosh-bump
@@ -679,6 +684,7 @@ jobs:
       trigger: true
     - get: unit-image
     - get: version
+      trigger: true
       passed: [bosh-check-props]
     - get: linux-rc-ubuntu
       passed: [build-rc, bosh-check-props]
@@ -803,14 +809,12 @@ jobs:
     passed:
     - build-rc
     - k8s-topgun
-    - k8s-check-helm-params
     - bosh-smoke
     - bosh-topgun
   - get: unit-image
     passed:
     - build-rc
     - k8s-topgun
-    - k8s-check-helm-params
     - bosh-smoke
     - bosh-topgun
   - get: final-version
@@ -818,8 +822,6 @@ jobs:
     params: {bump: final}
     passed:
     - build-rc
-    - k8s-topgun
-    - k8s-check-helm-params
     - bosh-smoke
     - bosh-topgun
   - get: linux-rc
@@ -831,9 +833,8 @@ jobs:
   - get: darwin-rc
     passed: [build-rc]
   - get: concourse-rc-image
-    passed: [k8s-topgun, k8s-check-helm-params]
+    passed: [k8s-topgun]
   - get: concourse-rc-image-ubuntu
-    passed: [k8s-topgun, k8s-check-helm-params]
   - get: concourse-release
     passed: [bosh-smoke, bosh-topgun]
   - get: bpm-release
@@ -860,14 +861,14 @@ jobs:
       passed: [shipit]
     - get: darwin-rc
       passed: [shipit]
-    - get: release-notes
     - get: docs
+    - get: ci
   - in_parallel:
     - task: prep-release-assets
-      file: release-notes/ci/prep-release-assets.yml
+      file: ci/tasks/prep-release-assets.yml
       image: unit-image
     - task: build-release-notes
-      file: release-notes/ci/build.yml
+      file: ci/tasks/build-release-notes.yml
       image: unit-image
       params:
         GITHUB_TOKEN: ((concourse_github_dummy.access_token))
@@ -921,6 +922,9 @@ jobs:
     - get: concourse-rc-image-ubuntu
       passed: [shipit]
       params: {format: oci}
+    - get: concourse-rc-image-ubuntu-rootfs
+      resource: concourse-rc-image-ubuntu
+      passed: [shipit]
     - get: latest-version
     - get: latest-of-same-major-version
     - get: ci
@@ -937,6 +941,16 @@ jobs:
       - task: docker-semver-tags
         file: ci/tasks/docker-semver-tags.yml
         params: {SUFFIX: ubuntu}
+
+      - task: generate-dpkg-list
+        file: ci/tasks/generate-dpkg-list.yml
+        image: concourse-rc-image-ubuntu-rootfs
+        params: {COMPONENT_NAME: "concourse"}
+
+      - put: concourse-image-dpkg-list
+        inputs: [dpkg-list]
+        params: {file: "dpkg-list/concourse-*.txt"}
+
       - put: concourse-image-ubuntu
         inputs: [concourse-rc-image-ubuntu, tags]
         params:
@@ -1136,13 +1150,6 @@ resources:
   icon: *git-icon
   source:
     uri: https://github.com/concourse/docs
-    branch: master
-
-- name: release-notes
-  type: git
-  icon: *git-icon
-  source:
-    uri: https://github.com/concourse/release-notes
     branch: master
 
 - name: docs-gh-pages
@@ -1392,3 +1399,11 @@ resources:
     owner: concourse
     repository: tracker-resource
     access_token: ((concourse_github_dummy.access_token))
+
+- name: concourse-image-dpkg-list
+  type: gcs
+  icon: format-list-bulleted
+  source:
+    bucket: concourse-ubuntu-dpkg-list
+    json_key: ((concourse_dpkg_list_json_key))
+    regexp: "concourse-dpkg-list-(.*).txt"

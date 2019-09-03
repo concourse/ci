@@ -78,19 +78,17 @@ jobs:
   plan:
   - in_parallel:
     - get: ci
-    - get: builder
+    - get: oci-build-task
     - get: golang-builder-trigger
       trigger: true
       params:
         skip_download: true
   - task: build
-    image: builder
+    image: oci-build-task
     privileged: true
     config:
       platform: linux
-      params:
-        REPOSITORY: concourse/unit
-        CONTEXT: ci/dockerfiles/unit
+      params: {CONTEXT: ci/dockerfiles/unit}
       inputs: [{name: ci}]
       outputs: [{name: image}]
       caches: [{path: cache}]
@@ -130,11 +128,11 @@ jobs:
   plan:
   - in_parallel:
     - get: ci
-    - get: builder
+    - get: oci-build-task
     - get: golang-linux
       trigger: true
   - task: build
-    image: builder
+    image: oci-build-task
     privileged: true
     file: ci/tasks/build-golang-builder-image.yml
   - put: golang-builder-image
@@ -227,20 +225,20 @@ jobs:
       trigger: true
     - get: mock-resource
       trigger: true
-    - get: builder
+    - get: oci-build-task
       trigger: true
     - get: ci
       trigger: true
   - in_parallel:
     - task: build-alpine
-      image: builder
+      image: oci-build-task
       privileged: true
       params:
         BUILD_ARG_distro: alpine
       file: ci/tasks/build-resource-types-image.yml
     - task: build-ubuntu
       output_mapping: {image: image_ubuntu}
-      image: builder
+      image: oci-build-task
       privileged: true
       params:
         BUILD_ARG_distro: ubuntu
@@ -275,7 +273,7 @@ jobs:
       - get: resource-types-alpine-image
         passed: [resource-types-images]
         trigger: true
-      - get: builder
+      - get: oci-build-task
       - get: ci
   - in_parallel:
       fail_fast: true
@@ -292,7 +290,7 @@ jobs:
         - task: fly-darwin
           file: ci/tasks/fly-build-darwin.yml
   - task: build
-    image: builder
+    image: oci-build-task
     privileged: true
     input_mapping: {concourse: built-concourse, resource-types-image: resource-types-alpine-image}
     file: ci/tasks/build-dev-image.yml
@@ -672,19 +670,19 @@ jobs:
       passed: [build-rc]
     - get: concourse-docker
       trigger: true
-    - get: builder
+    - get: oci-build-task
     - get: ci
   - in_parallel:
       fail_fast: true
       steps:
         - task: build-alpine
           file: concourse-docker/ci/build-image.yml
-          image: builder
+          image: oci-build-task
           output_mapping: {image: image-alpine}
           privileged: true
         - task: build-ubuntu
           file: concourse-docker/ci/build-image.yml
-          image: builder
+          image: oci-build-task
           input_mapping: {linux-rc: linux-rc-ubuntu}
           output_mapping: {image: image-ubuntu}
           privileged: true
@@ -1117,14 +1115,14 @@ jobs:
       passed: [shipit]
     - get: darwin-rc
       passed: [shipit]
-    - get: release-notes
     - get: docs
+    - get: ci
   - in_parallel:
     - task: prep-release-assets
-      file: release-notes/ci/prep-release-assets.yml
+      file: ci/tasks/prep-release-assets.yml
       image: unit-image
     - task: build-release-notes
-      file: release-notes/ci/build.yml
+      file: ci/tasks/build-release-notes.yml
       image: unit-image
       params:
         GITHUB_TOKEN: ((concourse_github_dummy.access_token))
@@ -1221,6 +1219,9 @@ jobs:
     - get: concourse-rc-image-ubuntu
       passed: [shipit]
       params: {format: oci}
+    - get: concourse-rc-image-ubuntu-rootfs
+      resource: concourse-rc-image-ubuntu
+      passed: [shipit]
     - get: latest-version
     - get: ci
   - in_parallel:
@@ -1245,6 +1246,20 @@ jobs:
         params:
           image: concourse-rc-image-ubuntu/image.tar
           additional_tags: tags/tags
+      - task: generate-dpkg-list
+        file: ci/tasks/generate-dpkg-list.yml
+        image: concourse-rc-image-ubuntu-rootfs
+        params: {COMPONENT_NAME: "concourse"}
+      - put: concourse-image-dpkg-list
+        inputs: [dpkg-list]
+        params: {file: "dpkg-list/concourse-*.txt"}
+      - put: concourse-image-ubuntu
+        inputs: [concourse-rc-image-ubuntu, tags]
+        params:
+          image: concourse-rc-image-ubuntu/image.tar
+          additional_tags: tags/tags
+
+
 
 - name: publish-docs
   public: true
@@ -1520,10 +1535,10 @@ resources:
     repository: tracker-resource
     access_token: ((concourse_github_dummy.access_token))
 
-- name: builder
+- name: oci-build-task
   type: registry-image
   icon: *image-icon
-  source: {repository: concourse/builder-task}
+  source: {repository: vito/oci-build-task}
 
 - name: version
   type: semver
@@ -1571,13 +1586,6 @@ resources:
   icon: *git-icon
   source:
     uri: https://github.com/concourse/docs
-    branch: master
-
-- name: release-notes
-  type: git
-  icon: *git-icon
-  source:
-    uri: https://github.com/concourse/release-notes
     branch: master
 
 - name: docs-gh-pages
@@ -1803,3 +1811,10 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
+- name: concourse-image-dpkg-list
+  type: gcs
+  icon: format-list-bulleted
+  source:
+    bucket: concourse-ubuntu-dpkg-list
+    json_key: ((concourse_dpkg_list_json_key))
+    regexp: "concourse-dpkg-list-(.*).txt"

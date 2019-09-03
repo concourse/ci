@@ -11,6 +11,7 @@ params:
 
 inputs:
 - name: ci
+- name: dumb-init
 - name: concourse
 - name: gdn
 - name: resource-types-image
@@ -20,5 +21,8 @@ inputs:
 
 outputs:
 - name: image
+
+caches:
+- path: cache
 
 run: {path: build}
