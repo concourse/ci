@@ -63,6 +63,9 @@ jobs:
       - name: reconfigure-pipelines
         team: main
         config_file: pipelines/pipelines/reconfigure.yml
+      - name: concourse
+        team: main
+        config_file: pipelines/pipelines/concourse.yml
       - name: prs
         team: main
         config_file: pipelines/pipelines/prs.yml
@@ -72,6 +75,12 @@ jobs:
       - name: wings
         team: main
         config_file: pipelines/pipelines/wings.yml
+      - name: concourse-charts
+        team: main
+        config_file: charts-maintenance/pipeline.yml
+      - name: norsk-mirror
+        team: main
+        config_file: pipelines/pipelines/norsk-mirror.yml
       - name: release-5.2.x
         team: main
         config_file: pipelines/pipelines/release.yml
@@ -99,12 +108,6 @@ jobs:
           charts_version: '060b57708ed34ffd47f8076bf5906167dfce96b8'
           concourse_smoke_deployment_name: "concourse-smoke-5-4"
           use_external_linker: false
-      - name: concourse
-        team: main
-        config_file: pipelines/pipelines/concourse.yml
-      - name: concourse-charts
-        team: main
-        config_file: charts-maintenance/pipeline.yml
       - name: algorithm-v3
         team: main
         config_file: pipelines/pipelines/branch.yml
