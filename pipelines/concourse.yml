@@ -1115,7 +1115,6 @@ jobs:
       passed: [shipit]
     - get: darwin-rc
       passed: [shipit]
-    - get: docs
     - get: ci
     - get: release-notes
   - in_parallel:
@@ -1260,15 +1259,13 @@ jobs:
           image: concourse-rc-image-ubuntu/image.tar
           additional_tags: tags/tags
 
-
-
 - name: publish-docs
   public: true
   serial: true
   plan:
   - in_parallel:
-    - get: version
-      passed: [shipit]
+    - get: concourse-github-release
+      passed: [publish-binaries]
       trigger: true
     - get: docs
   - task: build-docs
