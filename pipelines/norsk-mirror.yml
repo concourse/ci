@@ -1,4 +1,9 @@
 ---
+resource_types:
+- name: slack-notifier
+  type: registry-image
+  source: {repository: mockersf/concourse-slack-notifier}
+
 resources:
 - name: latest-scan-status
   type: git
@@ -18,6 +23,14 @@ resources:
   source:
     uri: https://github.com/concourse/ci.git
     branch: master
+- name: notify
+  type: slack-notifier
+  icon: slack
+  source:
+    url: ((slack_hook))
+    username: ((basic_auth.username))
+    password: ((basic_auth.password))
+    concourse_url: https://ci.concourse-ci.org
 
 jobs:
 - name: check-p-concourse-latest
@@ -28,6 +41,32 @@ jobs:
   - task: check-status-file
     file: ci/tasks/check-norsk-status.yml
     input_mapping: {scan-status: latest-scan-status}
+  on_success: &fixed-status
+    do:
+    - task: format-slack-message
+      file: ci/tasks/format-slack-message.yml
+      input_mapping: {src: latest-scan-status}
+      params:
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+        SLACK_TOKEN: ((slack_token))
+    - put: notify
+      params:
+        message_file: message/message
+        mode: normal
+        alert_type: fixed
+  on_failure: &broke-status
+    do:
+    - task: format-slack-message
+      file: ci/tasks/format-slack-message.yml
+      input_mapping: {src: latest-scan-status}
+      params:
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+        SLACK_TOKEN: ((slack_token))
+    - put: notify
+      params:
+        message_file: message/message
+        mode: normal
+        alert_type: broke
 
 - name: check-p-concourse-4.2.X
   plan:
@@ -37,4 +76,30 @@ jobs:
   - task: check-status-file
     file: ci/tasks/check-norsk-status.yml
     input_mapping: {scan-status: 4.2.X-scan-status}
+  on_success: &fixed-status
+    do:
+    - task: format-slack-message
+      file: ci/tasks/format-slack-message.yml
+      input_mapping: {src: 4.2.x-scan-status}
+      params:
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+        SLACK_TOKEN: ((slack_token))
+    - put: notify
+      params:
+        message_file: message/message
+        mode: normal
+        alert_type: fixed
+  on_failure: &broke-status
+    do:
+    - task: format-slack-message
+      file: ci/tasks/format-slack-message.yml
+      input_mapping: {src: 4.2.x-scan-status}
+      params:
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+        SLACK_TOKEN: ((slack_token))
+    - put: notify
+      params:
+        message_file: message/message
+        mode: normal
+        alert_type: broke
 
