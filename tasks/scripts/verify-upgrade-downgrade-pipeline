@@ -50,4 +50,4 @@ fly -t local builds \
 
 # test that we can check our resources
 fly -t local check-resource -r "test-pipeline/test-resource" \
-  | grep "checked"
+  | grep "test-resource.*succeeded"
