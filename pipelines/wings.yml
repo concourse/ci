@@ -17,31 +17,32 @@ jobs:
       - concourse-release/*.tgz
       - bpm-release/*.tgz
       ops_files:
+      - cbd/cluster/operations/add-local-users.yml
+      - cbd/cluster/operations/container-placement-strategy.yml
+      - cbd/cluster/operations/credhub-path-prefix.yml
+      - cbd/cluster/operations/credhub.yml
       - cbd/cluster/operations/dev-versions.yml
+      - cbd/cluster/operations/enable-global-resources.yml
+      - cbd/cluster/operations/encryption.yml
+      - cbd/cluster/operations/external-postgres-tls.yml
+      - cbd/cluster/operations/external-postgres.yml
+      - cbd/cluster/operations/garden-dns.yml
+      - cbd/cluster/operations/github-auth.yml
+      - cbd/cluster/operations/influxdb.yml
+      - cbd/cluster/operations/max-in-flight.yml
       - cbd/cluster/operations/privileged-http.yml
       - cbd/cluster/operations/privileged-https.yml
-      - cbd/cluster/operations/tls.yml
-      - cbd/cluster/operations/web-network-extension.yml
       - cbd/cluster/operations/scale.yml
+      - cbd/cluster/operations/storage-driver.yml
       - cbd/cluster/operations/syslog_forwarder.yml
       - cbd/cluster/operations/team-authorized-keys.yml
-      - cbd/cluster/operations/storage-driver.yml
-      - cbd/cluster/operations/external-postgres.yml
-      - cbd/cluster/operations/external-postgres-tls.yml
-      - cbd/cluster/operations/influxdb.yml
-      - cbd/cluster/operations/container-placement-strategy.yml
-      - cbd/cluster/operations/github-auth.yml
-      - cbd/cluster/operations/add-local-users.yml
-      - cbd/cluster/operations/worker-rebalancing.yml
-      - cbd/cluster/operations/encryption.yml
-      - cbd/cluster/operations/garden-dns.yml
-      - cbd/cluster/operations/max-in-flight.yml
+      - cbd/cluster/operations/tls.yml
+      - cbd/cluster/operations/web-network-extension.yml
       - cbd/cluster/operations/worker-max-in-flight.yml
-      - cbd/cluster/operations/enable-global-resources.yml
+      - cbd/cluster/operations/worker-rebalancing.yml
       - prod/wings/ops.yml
       vars_files:
       - prod/wings/vars.yml
-
 
 
 resource_types:
