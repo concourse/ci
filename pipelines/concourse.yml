@@ -977,7 +977,7 @@ jobs:
       - cbd/cluster/operations/task-limits.yml
       - cbd/cluster/operations/windows-worker-network.yml
       - cbd/cluster/operations/syslog-drainer.yml
-      - cbd/cluster/operations/container-placement-strategy.yml
+      - cbd/cluster/operations/container-placement-strategy-limit-active-tasks.yml
       - cbd/cluster/operations/worker-rebalancing.yml
       - cbd/cluster/operations/enable-global-resources.yml
       - cbd/cluster/operations/enable-lidar.yml
@@ -1015,7 +1015,7 @@ jobs:
         syslog_permitted_peer: "*.papertrailapp.com"
         default_task_memory_limit: 5GB
         default_task_cpu_limit: 1024
-        container_placement_strategy: "fewest-build-containers"
+        max-active-tasks-per-worker: 5
         worker_rebalance_interval: 30m
         volume_sweeper_max_in_flight: 3
         vault_shared_path: "shared"
