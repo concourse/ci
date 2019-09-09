@@ -1,10 +1,4 @@
-$ErrorActionPreference = "Stop"
-trap { $host.SetShouldExit(1) }
-
-$env:Path += ";C:\Go\bin;C:\Program Files\Git\cmd;C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin"
-
-$env:GOPATH = "$pwd\gopath"
-$env:Path += ";$pwd\gopath\bin"
+. .\ci\tasks\scripts\go-build.ps1
 
 $sha = & git -C concourse rev-parse HEAD
 $archive = "concourse-${sha}-windows-amd64.zip"
