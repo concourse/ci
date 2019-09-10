@@ -5,6 +5,13 @@ set -e
 
 cd concourse
 
+if [ -f .git/resource/changed_files ]; then
+  grep -v release-notes .git/resource/changed_files || {
+    echo 'skipping testing for release-notes-only change'
+    exit 0
+  }
+fi
+
 # check if smoke tests already downloaded fly
 if ! [ -e /usr/local/bin/fly ]; then
   go install ./fly
