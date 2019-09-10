@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ -f concourse/.git/resource/changed_files ]; then
+  grep -v release-notes concourse/.git/resource/changed_files || {
+    echo 'skipping testing for release-notes-only change'
+    exit 0
+  }
+fi
+
+"$@"
