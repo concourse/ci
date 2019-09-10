@@ -28,6 +28,7 @@ main() {
     exit 0
   fi
 
+	echo "Error: found some variables in ${DISTRIBUTION} packaging that might not be supported by the Concourse binary:"
   echo "$diff"
 
   exit 1
