@@ -146,8 +146,6 @@ jobs:
       trigger: true
       version: every
       tags: [pr]
-    - get: concourse-master
-      tags: [pr]
     - get: dev-image
       params: {format: oci}
       tags: [pr]
@@ -189,8 +187,6 @@ jobs:
     - get: concourse-pr
       trigger: true
       version: every
-      tags: [pr]
-    - get: concourse-master
       tags: [pr]
     - get: dev-image
       params: {format: oci}
