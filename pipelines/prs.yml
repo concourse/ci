@@ -89,6 +89,7 @@ jobs:
     - get: concourse-pr
       trigger: true
       version: every
+      params: {list_changed_files: true}
       tags: [pr]
     - get: concourse-master
       tags: [pr]
@@ -100,32 +101,41 @@ jobs:
     inputs: [concourse-pr]
     params: {path: concourse-pr, status: pending, context: unit}
     tags: [pr]
-  - task: check-migration-order
-    timeout: 5m
-    file: ci/tasks/check-migration-order.yml
-    tags: [pr]
-  - task: yarn-analyse
-    attempts: 3
-    file: ci/tasks/yarn-analyse.yml
-    input_mapping: {concourse: concourse-pr}
-    tags: [pr]
-  - task: yarn-test
-    attempts: 3
-    file: ci/tasks/yarn-test.yml
-    input_mapping: {concourse: concourse-pr}
-    tags: [pr]
-  - task: yarn-benchmark
-    attempts: 3
-    file: ci/tasks/yarn-benchmark.yml
-    input_mapping: {concourse: concourse-pr}
-    tags: [pr]
-  - task: unit
-    image: unit-image
-    attempts: 3
-    timeout: 1h
-    file: ci/tasks/unit.yml
-    input_mapping: {concourse: built-concourse}
-    tags: [pr]
+  - task: release-notes-only
+    file: ci/tasks/release-notes-only.yml
+    on_failure:
+      put: concourse-pr
+      inputs: [concourse-pr]
+      params: {path: concourse-pr, status: success, context: unit}
+      tags: [pr]
+    on_success:
+      do:
+      - task: check-migration-order
+        timeout: 5m
+        file: ci/tasks/check-migration-order.yml
+        tags: [pr]
+      - task: yarn-analyse
+        attempts: 3
+        file: ci/tasks/yarn-analyse.yml
+        input_mapping: {concourse: concourse-pr}
+        tags: [pr]
+      - task: yarn-test
+        attempts: 3
+        file: ci/tasks/yarn-test.yml
+        input_mapping: {concourse: concourse-pr}
+        tags: [pr]
+      - task: yarn-benchmark
+        attempts: 3
+        file: ci/tasks/yarn-benchmark.yml
+        input_mapping: {concourse: concourse-pr}
+        tags: [pr]
+      - task: unit
+        image: unit-image
+        attempts: 3
+        timeout: 1h
+        file: ci/tasks/unit.yml
+        input_mapping: {concourse: built-concourse}
+        tags: [pr]
 
 - name: testflight
   public: true
@@ -145,6 +155,7 @@ jobs:
     - get: concourse-pr
       trigger: true
       version: every
+      params: {list_changed_files: true}
       tags: [pr]
     - get: dev-image
       params: {format: oci}
@@ -156,18 +167,27 @@ jobs:
   - put: concourse-pr
     inputs: [concourse-pr]
     params: {path: concourse-pr, status: pending, context: testflight}
-  - task: yarn-build
-    attempts: 3
-    file: ci/tasks/yarn-build.yml
-    input_mapping: {concourse: concourse-pr}
-    tags: [pr]
-  - task: testflight
-    timeout: 1h
-    privileged: true
-    file: ci/tasks/docker-compose-testflight.yml
-    input_mapping: {concourse: built-concourse}
-    params: {BUILD: true}
-    tags: [pr]
+  - task: release-notes-only
+    file: ci/tasks/release-notes-only.yml
+    on_failure:
+      put: concourse-pr
+      inputs: [concourse-pr]
+      params: {path: concourse-pr, status: success, context: testflight}
+      tags: [pr]
+    on_success:
+      do:
+      - task: yarn-build
+        attempts: 3
+        file: ci/tasks/yarn-build.yml
+        input_mapping: {concourse: concourse-pr}
+        tags: [pr]
+      - task: testflight
+        timeout: 1h
+        privileged: true
+        file: ci/tasks/docker-compose-testflight.yml
+        input_mapping: {concourse: built-concourse}
+        params: {BUILD: true}
+        tags: [pr]
 
 - name: watsjs
   public: true
@@ -187,6 +207,7 @@ jobs:
     - get: concourse-pr
       trigger: true
       version: every
+      params: {list_changed_files: true}
       tags: [pr]
     - get: dev-image
       params: {format: oci}
@@ -199,18 +220,27 @@ jobs:
     inputs: [concourse-pr]
     params: {path: concourse-pr, status: pending, context: watsjs}
     tags: [pr]
-  - task: yarn-build
-    attempts: 3
-    file: ci/tasks/yarn-build.yml
-    input_mapping: {concourse: concourse-pr}
-    tags: [pr]
-  - task: watsjs
-    timeout: 1h
-    privileged: true
-    file: ci/tasks/docker-compose-watsjs.yml
-    input_mapping: {concourse: built-concourse}
-    params: {BUILD: true}
-    tags: [pr]
+  - task: release-notes-only
+    file: ci/tasks/release-notes-only.yml
+    on_failure:
+      put: concourse-pr
+      inputs: [concourse-pr]
+      params: {path: concourse-pr, status: success, context: watsjs}
+      tags: [pr]
+    on_success:
+      do:
+      - task: yarn-build
+        attempts: 3
+        file: ci/tasks/yarn-build.yml
+        input_mapping: {concourse: concourse-pr}
+        tags: [pr]
+      - task: watsjs
+        timeout: 1h
+        privileged: true
+        file: ci/tasks/docker-compose-watsjs.yml
+        input_mapping: {concourse: built-concourse}
+        params: {BUILD: true}
+        tags: [pr]
 
 - name: baggageclaim
   public: true
