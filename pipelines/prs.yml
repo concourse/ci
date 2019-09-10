@@ -8,7 +8,6 @@ resource_types:
   type: registry-image
   source: {repository: teliaoss/github-pr-resource}
 
-
 resources:
 - name: concourse-master
   type: git
@@ -97,10 +96,6 @@ jobs:
       tags: [pr]
     - get: ci
       tags: [pr]
-  - put: concourse-pr
-    inputs: [concourse-pr]
-    params: {path: concourse-pr, status: pending, context: unit}
-    tags: [pr]
   - task: release-notes-only
     file: ci/tasks/release-notes-only.yml
     on_failure:
@@ -110,6 +105,10 @@ jobs:
       tags: [pr]
     on_success:
       do:
+      - put: concourse-pr
+        inputs: [concourse-pr]
+        params: {path: concourse-pr, status: pending, context: unit}
+        tags: [pr]
       - task: check-migration-order
         timeout: 5m
         file: ci/tasks/check-migration-order.yml
@@ -164,9 +163,6 @@ jobs:
       params: {format: oci}
       tags: [pr]
     - get: ci
-  - put: concourse-pr
-    inputs: [concourse-pr]
-    params: {path: concourse-pr, status: pending, context: testflight}
   - task: release-notes-only
     file: ci/tasks/release-notes-only.yml
     on_failure:
@@ -176,6 +172,9 @@ jobs:
       tags: [pr]
     on_success:
       do:
+      - put: concourse-pr
+        inputs: [concourse-pr]
+        params: {path: concourse-pr, status: pending, context: testflight}
       - task: yarn-build
         attempts: 3
         file: ci/tasks/yarn-build.yml
@@ -216,10 +215,6 @@ jobs:
       params: {format: oci}
       tags: [pr]
     - get: ci
-  - put: concourse-pr
-    inputs: [concourse-pr]
-    params: {path: concourse-pr, status: pending, context: watsjs}
-    tags: [pr]
   - task: release-notes-only
     file: ci/tasks/release-notes-only.yml
     on_failure:
@@ -229,6 +224,10 @@ jobs:
       tags: [pr]
     on_success:
       do:
+      - put: concourse-pr
+        inputs: [concourse-pr]
+        params: {path: concourse-pr, status: pending, context: watsjs}
+        tags: [pr]
       - task: yarn-build
         attempts: 3
         file: ci/tasks/yarn-build.yml
