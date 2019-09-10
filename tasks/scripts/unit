@@ -6,6 +6,15 @@ set -e -u
 export GOPATH=$PWD/gopath
 export PATH=$GOPATH/bin:$PATH
 
+cd concourse
+
+if [ -f .git/resource/changed_files ]; then
+  grep -v release-notes .git/resource/changed_files || {
+    echo 'skipping testing for release-notes-only change'
+    exit 0
+  }
+fi
+
 mkdir /tmp/concourse-pg-runner
 if ! mount -t tmpfs none /tmp/concourse-pg-runner 2>/dev/null; then
   if grep '/dev/shm.*tmpfs' /proc/mounts >/dev/null; then
@@ -17,7 +26,6 @@ if ! mount -t tmpfs none /tmp/concourse-pg-runner 2>/dev/null; then
   fi
 fi
 
-cd concourse
 
 go mod download
 
