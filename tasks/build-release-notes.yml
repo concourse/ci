@@ -6,7 +6,7 @@ image_resource:
   source: {repository: concourse/unit}
 
 inputs:
-- name: concourse
+- name: release-notes
 - name: version
   optional: true
 - name: ci

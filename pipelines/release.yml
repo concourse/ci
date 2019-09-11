@@ -861,8 +861,8 @@ jobs:
       passed: [shipit]
     - get: darwin-rc
       passed: [shipit]
-    - get: docs
     - get: ci
+    - get: release-notes
   - in_parallel:
     - task: prep-release-assets
       file: ci/tasks/prep-release-assets.yml
@@ -962,8 +962,8 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: version
-      passed: [shipit]
+    - get: concourse-github-release
+      passed: [publish-binaries]
       trigger: true
     - get: docs
   - task: build-docs
@@ -991,13 +991,24 @@ resources:
   source:
     uri: https://github.com/concourse/concourse.git
     branch: release/((release_minor)).x
+    ignore_paths:
+    - release-notes/
 
 - name: ci
   type: git
-  icon: &git-icon github-circle
+  icon: *git-icon
   source:
     uri: https://github.com/concourse/ci.git
     branch: master
+
+- name: release-notes
+  type: git
+  icon: *git-icon
+  source:
+    uri: https://github.com/concourse/concourse.git
+    branch: master
+    paths:
+    - release-notes/
 
 - name: concourse-docker
   type: git

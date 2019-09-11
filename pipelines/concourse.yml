@@ -977,9 +977,10 @@ jobs:
       - cbd/cluster/operations/task-limits.yml
       - cbd/cluster/operations/windows-worker-network.yml
       - cbd/cluster/operations/syslog-drainer.yml
-      - cbd/cluster/operations/container-placement-strategy.yml
+      - cbd/cluster/operations/container-placement-strategy-limit-active-tasks.yml
       - cbd/cluster/operations/worker-rebalancing.yml
       - cbd/cluster/operations/enable-global-resources.yml
+      - cbd/cluster/operations/enable-lidar.yml
       - cbd/cluster/operations/x-frame-options-unset.yml
       - cbd/cluster/operations/worker-volume-sweeper-max-in-flight.yml
       - cbd/cluster/operations/vault-shared-path.yml
@@ -1014,7 +1015,7 @@ jobs:
         syslog_permitted_peer: "*.papertrailapp.com"
         default_task_memory_limit: 5GB
         default_task_cpu_limit: 1024
-        container_placement_strategy: "fewest-build-containers"
+        max-active-tasks-per-worker: 5
         worker_rebalance_interval: 30m
         volume_sweeper_max_in_flight: 3
         vault_shared_path: "shared"
@@ -1115,8 +1116,8 @@ jobs:
       passed: [shipit]
     - get: darwin-rc
       passed: [shipit]
-    - get: docs
     - get: ci
+    - get: release-notes
   - in_parallel:
     - task: prep-release-assets
       file: ci/tasks/prep-release-assets.yml
@@ -1259,15 +1260,13 @@ jobs:
           image: concourse-rc-image-ubuntu/image.tar
           additional_tags: tags/tags
 
-
-
 - name: publish-docs
   public: true
   serial: true
   plan:
   - in_parallel:
-    - get: version
-      passed: [shipit]
+    - get: concourse-github-release
+      passed: [publish-binaries]
       trigger: true
     - get: docs
   - task: build-docs
@@ -1328,13 +1327,24 @@ resources:
   source:
     uri: https://github.com/concourse/concourse.git
     branch: master
+    ignore_paths:
+    - release-notes/
 
 - name: ci
   type: git
-  icon: &git-icon github-circle
+  icon: *git-icon
   source:
     uri: https://github.com/concourse/ci.git
     branch: master
+
+- name: release-notes
+  type: git
+  icon: *git-icon
+  source:
+    uri: https://github.com/concourse/concourse.git
+    branch: master
+    paths:
+    - release-notes/
 
 - name: notify
   type: slack-notifier

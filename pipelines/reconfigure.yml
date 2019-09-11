@@ -63,6 +63,9 @@ jobs:
       - name: reconfigure-pipelines
         team: main
         config_file: pipelines/pipelines/reconfigure.yml
+      - name: concourse
+        team: main
+        config_file: pipelines/pipelines/concourse.yml
       - name: prs
         team: main
         config_file: pipelines/pipelines/prs.yml
@@ -72,6 +75,12 @@ jobs:
       - name: wings
         team: main
         config_file: pipelines/pipelines/wings.yml
+      - name: concourse-charts
+        team: main
+        config_file: charts-maintenance/pipeline.yml
+      - name: norsk-mirror
+        team: main
+        config_file: pipelines/pipelines/norsk-mirror.yml
       - name: release-5.2.x
         team: main
         config_file: pipelines/pipelines/release.yml
@@ -99,12 +108,15 @@ jobs:
           charts_version: '060b57708ed34ffd47f8076bf5906167dfce96b8'
           concourse_smoke_deployment_name: "concourse-smoke-5-4"
           use_external_linker: false
-      - name: concourse
+      - name: release-5.5.x
         team: main
-        config_file: pipelines/pipelines/concourse.yml
-      - name: concourse-charts
-        team: main
-        config_file: charts-maintenance/pipeline.yml
+        config_file: pipelines/pipelines/release.yml
+        vars:
+          release_major: "5"
+          release_minor: "5.5"
+          charts_version: '96c33a23657b63630220b085e763f26862ac9ff3'
+          concourse_smoke_deployment_name: "concourse-smoke-5-5"
+          use_external_linker: false
       - name: algorithm-v3
         team: main
         config_file: pipelines/pipelines/branch.yml
@@ -131,7 +143,7 @@ jobs:
           environment: lidar-drills
       - name: prod-db-backup
         team: main
-        config_file: pipelines/pipelines/bbr-backup.yml
-      - name: bbr-restore-verify
+        config_file: pipelines/pipelines/prod-db-backup.yml
+      - name: prod-db-restore-verify
         team: main
-        config_file: pipelines/pipelines/bbr-restore-verify.yml
+        config_file: pipelines/pipelines/prod-db-restore-verify.yml

@@ -5,6 +5,7 @@ image_resource:
   source: { repository: ubuntu }
 
 inputs:
+- name: ci
 - name: scan-status
 
 run:

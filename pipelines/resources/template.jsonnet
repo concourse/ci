@@ -427,8 +427,7 @@ local build_image(distro) = {
       source: {
         repo: "concourse/"+resource+"-resource",
         base: "master",
-        access_token: "((pull_requests_access_token))",
-        [if resource == "s3" || resource == "semver" then "label"]: "approved-for-ci"
+        access_token: "((pull_requests_access_token))"
       }
     },
     {
