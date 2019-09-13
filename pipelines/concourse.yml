@@ -44,7 +44,10 @@ groups:
   jobs:
   - bosh-bump
   - bosh-smoke
-  - bosh-topgun
+  - bosh-topgun-core
+  - bosh-topgun-runtime
+  - bosh-topgun-both
+  - bosh-topgun-pcf
   - bosh-prod-deploy
   - bosh-check-props
   - merge-cbd
@@ -858,7 +861,7 @@ jobs:
   on_success: *fixed-concourse
   on_failure: *broke-concourse
 
-- name: bosh-topgun
+- name: bosh-topgun-core
   public: true
   serial: true
   interruptible: true
@@ -903,6 +906,154 @@ jobs:
       AWS_REGION: ((topgun_aws_ssm.region))
       AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
       AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
+      SUITE: core
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
+
+- name: bosh-topgun-runtime
+  public: true
+  serial: true
+  interruptible: true
+  plan:
+  - in_parallel:
+    # these don't trigger, to ensure that the job gets triggered by
+    # concourse-release, which is unfortunately decoupled from the resource
+    # that we 'put' to.
+    - get: concourse
+      passed: [bosh-bump]
+    - get: unit-image
+    - get: version
+      passed: [bosh-bump]
+    - get: concourse-release
+      trigger: true
+    - get: postgres-release
+      trigger: true
+    - get: bpm-release
+      trigger: true
+    - get: bbr-sdk-release
+      trigger: true
+    - get: gcp-xenial-stemcell
+      trigger: true
+    - get: vault-release
+      trigger: true
+    - get: credhub-release
+      trigger: true
+    - get: bbr
+      trigger: true
+    - get: ci
+  - task: bosh-topgun
+    file: ci/tasks/topgun.yml
+    image: unit-image
+    input_mapping:
+      stemcell: gcp-xenial-stemcell
+    params:
+      BOSH_ENVIRONMENT: ((bosh_target))
+      BOSH_CA_CERT: ((tmp_bosh_client.ca_cert))
+      BOSH_CLIENT: ((bosh_client.id))
+      BOSH_CLIENT_SECRET: ((bosh_client.secret))
+      BOSH_SSH_KEY: ((topgun_bosh_key))
+      AWS_REGION: ((topgun_aws_ssm.region))
+      AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
+      AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
+      SUITE: runtime
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
+
+- name: bosh-topgun-both
+  public: true
+  serial: true
+  interruptible: true
+  plan:
+  - in_parallel:
+    # these don't trigger, to ensure that the job gets triggered by
+    # concourse-release, which is unfortunately decoupled from the resource
+    # that we 'put' to.
+    - get: concourse
+      passed: [bosh-bump]
+    - get: unit-image
+    - get: version
+      passed: [bosh-bump]
+    - get: concourse-release
+      trigger: true
+    - get: postgres-release
+      trigger: true
+    - get: bpm-release
+      trigger: true
+    - get: bbr-sdk-release
+      trigger: true
+    - get: gcp-xenial-stemcell
+      trigger: true
+    - get: vault-release
+      trigger: true
+    - get: credhub-release
+      trigger: true
+    - get: bbr
+      trigger: true
+    - get: ci
+  - task: bosh-topgun
+    file: ci/tasks/topgun.yml
+    image: unit-image
+    input_mapping:
+      stemcell: gcp-xenial-stemcell
+    params:
+      BOSH_ENVIRONMENT: ((bosh_target))
+      BOSH_CA_CERT: ((tmp_bosh_client.ca_cert))
+      BOSH_CLIENT: ((bosh_client.id))
+      BOSH_CLIENT_SECRET: ((bosh_client.secret))
+      BOSH_SSH_KEY: ((topgun_bosh_key))
+      AWS_REGION: ((topgun_aws_ssm.region))
+      AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
+      AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
+      SUITE: both
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
+
+- name: bosh-topgun-pcf
+  public: true
+  serial: true
+  interruptible: true
+  plan:
+  - in_parallel:
+    # these don't trigger, to ensure that the job gets triggered by
+    # concourse-release, which is unfortunately decoupled from the resource
+    # that we 'put' to.
+    - get: concourse
+      passed: [bosh-bump]
+    - get: unit-image
+    - get: version
+      passed: [bosh-bump]
+    - get: concourse-release
+      trigger: true
+    - get: postgres-release
+      trigger: true
+    - get: bpm-release
+      trigger: true
+    - get: bbr-sdk-release
+      trigger: true
+    - get: gcp-xenial-stemcell
+      trigger: true
+    - get: vault-release
+      trigger: true
+    - get: credhub-release
+      trigger: true
+    - get: bbr
+      trigger: true
+    - get: ci
+  - task: bosh-topgun
+    file: ci/tasks/topgun.yml
+    image: unit-image
+    input_mapping:
+      stemcell: gcp-xenial-stemcell
+    params:
+      BOSH_ENVIRONMENT: ((bosh_target))
+      BOSH_CA_CERT: ((tmp_bosh_client.ca_cert))
+      BOSH_CLIENT: ((bosh_client.id))
+      BOSH_CLIENT_SECRET: ((bosh_client.secret))
+      BOSH_SSH_KEY: ((topgun_bosh_key))
+      AWS_REGION: ((topgun_aws_ssm.region))
+      AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
+      AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
+      SUITE: pcf
   on_success: *fixed-concourse
   on_failure: *broke-concourse
 
@@ -913,25 +1064,25 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
-      passed: [bosh-smoke, bosh-topgun]
+      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
       trigger: true
     - get: version
-      passed: [bosh-smoke, bosh-topgun]
+      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
       trigger: true
     - get: concourse-release
-      passed: [bosh-smoke, bosh-topgun]
+      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
       trigger: true
     - get: postgres-release
-      passed: [bosh-smoke, bosh-topgun]
+      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
       trigger: true
     - get: bpm-release
-      passed: [bosh-smoke, bosh-topgun]
+      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
       trigger: true
     - get: gcp-xenial-stemcell
-      passed: [bosh-smoke, bosh-topgun]
+      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
       trigger: true
     - get: vault-release
-      passed: [bosh-topgun]
+      passed: [bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
       trigger: true
     - get: cbd
       trigger: true
@@ -980,7 +1131,6 @@ jobs:
       - cbd/cluster/operations/container-placement-strategy-limit-active-tasks.yml
       - cbd/cluster/operations/worker-rebalancing.yml
       - cbd/cluster/operations/enable-global-resources.yml
-      - cbd/cluster/operations/enable-lidar.yml
       - cbd/cluster/operations/x-frame-options-unset.yml
       - cbd/cluster/operations/worker-volume-sweeper-max-in-flight.yml
       - cbd/cluster/operations/vault-shared-path.yml
@@ -1061,14 +1211,20 @@ jobs:
     - k8s-topgun
     - k8s-check-helm-params
     - bosh-smoke
-    - bosh-topgun
+    - bosh-topgun-core
+    - bosh-topgun-runtime
+    - bosh-topgun-both
+    - bosh-topgun-pcf
   - get: unit-image
     passed:
     - build-rc
     - k8s-topgun
     - k8s-check-helm-params
     - bosh-smoke
-    - bosh-topgun
+    - bosh-topgun-core
+    - bosh-topgun-runtime
+    - bosh-topgun-both
+    - bosh-topgun-pcf
   - get: final-version
     resource: version
     params: {bump: final}
@@ -1077,7 +1233,10 @@ jobs:
     - k8s-topgun
     - k8s-check-helm-params
     - bosh-smoke
-    - bosh-topgun
+    - bosh-topgun-core
+    - bosh-topgun-runtime
+    - bosh-topgun-both
+    - bosh-topgun-pcf
   - get: linux-rc
     passed: [build-rc]
   - get: linux-rc-ubuntu
@@ -1091,11 +1250,11 @@ jobs:
   - get: concourse-rc-image-ubuntu
     passed: [k8s-topgun, k8s-check-helm-params]
   - get: concourse-release
-    passed: [bosh-smoke, bosh-topgun]
+    passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
   - get: bpm-release
-    passed: [bosh-smoke, bosh-topgun]
+    passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
   - get: postgres-release
-    passed: [bosh-smoke, bosh-topgun]
+    passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
   - put: version
     params: {file: final-version/version}
 
