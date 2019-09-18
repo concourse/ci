@@ -17,12 +17,28 @@ export CREDHUB_RELEASE_VERSION="$(cat credhub-release/version)"
 export BACKUP_AND_RESTORE_SDK_RELEASE_VERSION="$(cat bbr-sdk-release/version)"
 export STEMCELL_VERSION="$(cat stemcell/version)"
 
-bosh upload-release concourse-release/*.tgz
-bosh upload-release bpm-release/*.tgz
-bosh upload-release postgres-release/*.tgz
-bosh upload-release vault-release/*.tgz
-bosh upload-release credhub-release/*.tgz
-bosh upload-release bbr-sdk-release/*.tgz
+DEPLOYMENT_NAME_PREFIX=${DEPLOYMENT_NAME_PREFIX:-concourse-topgun}
+if [ ! -z $SUITE ]; then
+  DEPLOYMENT_NAME_PREFIX+="-$SUITE"
+fi
+
+function upload_release() {
+  while true; do
+    release_lock_task_id=$(bosh locks --json |
+      jq -r '.Tables[0].Rows[] | select(.type=="release") | .task_id')
+    [ -z "$release_lock_task_id" ] && break
+    echo "waiting for release lock (task id $release_lock_task_id)..."
+    sleep 5
+  done
+  bosh upload-release $1
+}
+
+upload_release concourse-release/*.tgz
+upload_release bpm-release/*.tgz
+upload_release postgres-release/*.tgz
+upload_release vault-release/*.tgz
+upload_release credhub-release/*.tgz
+upload_release bbr-sdk-release/*.tgz
 bosh upload-stemcell stemcell/*.tgz
 
 tar xf ./bbr/bbr-*.tar
