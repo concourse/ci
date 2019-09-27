@@ -6,9 +6,6 @@ set -e
 export GOPATH=$PWD/gopath
 export PATH=$GOPATH/bin:$PATH
 
-eval $(ssh-agent)
-ssh-add <(echo "$BOSH_SSH_KEY")
-
 export CONCOURSE_RELEASE_VERSION="$(cat concourse-release/version)"
 export BPM_RELEASE_VERSION="$(cat bpm-release/version)"
 export POSTGRES_RELEASE_VERSION="$(cat postgres-release/version)"
@@ -34,11 +31,11 @@ function upload_release() {
 }
 
 upload_release concourse-release
-upload_release bpm-release
-upload_release postgres-release
-upload_release vault-release
-upload_release credhub-release
-upload_release bbr-sdk-release
+bosh upload-release bpm-release/*.tgz
+bosh upload-release postgres-release/*.tgz
+bosh upload-release vault-release/*.tgz
+bosh upload-release credhub-release/*.tgz
+bosh upload-release bbr-sdk-release/*.tgz
 bosh upload-stemcell stemcell/*.tgz
 
 tar xf ./bbr/bbr-*.tar
