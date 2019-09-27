@@ -1453,8 +1453,6 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: concourse
-      params: {submodules: none}
     - get: golang-windows
     - get: ci
   - task: install-go
