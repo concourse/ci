@@ -17,12 +17,28 @@ export CREDHUB_RELEASE_VERSION="$(cat credhub-release/version)"
 export BACKUP_AND_RESTORE_SDK_RELEASE_VERSION="$(cat bbr-sdk-release/version)"
 export STEMCELL_VERSION="$(cat stemcell/version)"
 
-bosh upload-release concourse-release/*.tgz
-bosh upload-release bpm-release/*.tgz
-bosh upload-release postgres-release/*.tgz
-bosh upload-release vault-release/*.tgz
-bosh upload-release credhub-release/*.tgz
-bosh upload-release bbr-sdk-release/*.tgz
+function upload_release() {
+  release_dir=$PWD/$1
+  release=$release_dir/*.tgz
+  if [ ! -z $SUITE ]; then
+    mkdir -p release-unzipped
+    tar -C release-unzipped -xzf $release
+    rm $release
+    sed -i "s/^name: concourse$/name: concourse-$SUITE/" release-unzipped/release.MF
+    pushd release-unzipped
+      tar -czf $release_dir/release.tgz *
+    popd
+    rm -rf release-unzipped
+  fi
+  bosh upload-release $release
+}
+
+upload_release concourse-release
+upload_release bpm-release
+upload_release postgres-release
+upload_release vault-release
+upload_release credhub-release
+upload_release bbr-sdk-release
 bosh upload-stemcell stemcell/*.tgz
 
 tar xf ./bbr/bbr-*.tar
@@ -34,4 +50,4 @@ go mod download
 
 go install github.com/onsi/ginkgo/ginkgo
 
-ginkgo -nodes=2 -race -keepGoing -slowSpecThreshold=300 -skip="$SKIP" ./topgun/$SUITE "$@"
+ginkgo -nodes=8 -race -keepGoing -slowSpecThreshold=300 -skip="$SKIP" ./topgun/$SUITE "$@"

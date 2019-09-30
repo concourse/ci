@@ -1131,6 +1131,7 @@ jobs:
       - cbd/cluster/operations/container-placement-strategy-limit-active-tasks.yml
       - cbd/cluster/operations/worker-rebalancing.yml
       - cbd/cluster/operations/enable-global-resources.yml
+      - cbd/cluster/operations/enable-lidar.yml
       - cbd/cluster/operations/x-frame-options-unset.yml
       - cbd/cluster/operations/worker-volume-sweeper-max-in-flight.yml
       - cbd/cluster/operations/vault-shared-path.yml
@@ -1452,8 +1453,6 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: concourse
-      params: {submodules: none}
     - get: golang-windows
     - get: ci
   - task: install-go
