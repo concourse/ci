@@ -16,4 +16,6 @@ outputs:
 - name: built-concourse
 
 run:
-  path: ci/tasks/scripts/yarn-build
+  path: ci/tasks/scripts/pass-release-notes-only-change
+  args:
+  - ci/tasks/scripts/yarn-build

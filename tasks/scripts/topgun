@@ -6,9 +6,6 @@ set -e
 export GOPATH=$PWD/gopath
 export PATH=$GOPATH/bin:$PATH
 
-eval $(ssh-agent)
-ssh-add <(echo "$BOSH_SSH_KEY")
-
 export CONCOURSE_RELEASE_VERSION="$(cat concourse-release/version)"
 export BPM_RELEASE_VERSION="$(cat bpm-release/version)"
 export POSTGRES_RELEASE_VERSION="$(cat postgres-release/version)"
@@ -17,7 +14,23 @@ export CREDHUB_RELEASE_VERSION="$(cat credhub-release/version)"
 export BACKUP_AND_RESTORE_SDK_RELEASE_VERSION="$(cat bbr-sdk-release/version)"
 export STEMCELL_VERSION="$(cat stemcell/version)"
 
-bosh upload-release concourse-release/*.tgz
+function upload_release() {
+  release_dir=$PWD/$1
+  release=$release_dir/*.tgz
+  if [ ! -z $SUITE ]; then
+    mkdir -p release-unzipped
+    tar -C release-unzipped -xzf $release
+    rm $release
+    sed -i "s/^name: concourse$/name: concourse-$SUITE/" release-unzipped/release.MF
+    pushd release-unzipped
+      tar -czf $release_dir/release.tgz *
+    popd
+    rm -rf release-unzipped
+  fi
+  bosh upload-release $release
+}
+
+upload_release concourse-release
 bosh upload-release bpm-release/*.tgz
 bosh upload-release postgres-release/*.tgz
 bosh upload-release vault-release/*.tgz
@@ -30,13 +43,8 @@ install ./releases/bbr /usr/local/bin/
 
 cd concourse
 
-# [cc] temporarily replace the location of the transitive dependency
-# `thrift` so that `go` can reach a git server (that is online at the
-# moment - lol) hosting what we need.
-#
-echo "replace git.apache.org/thrift.git => github.com/apache/thrift v0.0.0-20180902110319-2566ecd5d999" >> ./go.mod
 go mod download
 
 go install github.com/onsi/ginkgo/ginkgo
 
-ginkgo -nodes=8 -race -keepGoing -slowSpecThreshold=300 -skip="$SKIP" ./topgun "$@"
+ginkgo -nodes=8 -race -keepGoing -slowSpecThreshold=300 -skip="$SKIP" ./topgun/$SUITE "$@"

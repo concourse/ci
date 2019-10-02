@@ -19,16 +19,26 @@ fi
 distro_scripts=$(dirname $0)/$DISTRIBUTION
 
 main() {
-  local actual=$(get_distribution_variables)
-  local expected=$(get_concourse_variables)
-  local diff=$(get_diff "$actual" "$expected")
+  local variables_in_packaging=$(get_distribution_variables | sort -u)
+  local variables_supported_by_binary=$(get_concourse_variables | sort -u)
 
-  if [[ -z $diff ]]; then
+  local unsupported_by_binary=$(comm -23 <(echo "$variables_in_packaging") <(echo "$variables_supported_by_binary"))
+  local missing_from_packaging=$(comm -13 <(echo "$variables_in_packaging") <(echo "$variables_supported_by_binary"))
+
+  if [[ ! -z $unsupported_by_binary ]]; then
+    echo "Error: found some variables in the ${DISTRIBUTION} packaging that might not be supported by the Concourse binary:"
+    echo "$unsupported_by_binary"
+  fi
+
+  if [[ ! -z $missing_from_packaging ]]; then
+    echo "Error: found some variables supported by the Concourse binary that are missing from the ${DISTRIBUTION} packaging:"
+    echo "$missing_from_packaging"
+  fi
+
+  if [[ -z $unsupported_by_binary ]] && [[ -z $missing_from_packaging ]]; then
     echo "All good!"
     exit 0
   fi
-
-  echo "$diff"
 
   exit 1
 }
@@ -55,14 +65,6 @@ filter_list() {
   else
     egrep -v $filter
   fi
-}
-
-get_diff() {
-  local actual=$1
-  local expected=$2
-
-  comm -23 <(echo "$expected" | sort -u) <(echo "$actual" | sort -u) | sed 's/^/+ /'
-  comm -13 <(echo "$expected" | sort -u) <(echo "$actual" | sort -u) | sed 's/^/- /'
 }
 
 main "$@"

@@ -8,7 +8,6 @@ resource_types:
   type: registry-image
   source: {repository: teliaoss/github-pr-resource}
 
-
 resources:
 - name: concourse-master
   type: git
@@ -99,6 +98,7 @@ jobs:
   - put: concourse-pr
     inputs: [concourse-pr]
     params: {path: concourse-pr, status: pending, context: unit}
+    get_params: {list_changed_files: true}
     tags: [pr]
   - task: check-migration-order
     timeout: 5m
@@ -146,8 +146,6 @@ jobs:
       trigger: true
       version: every
       tags: [pr]
-    - get: concourse-master
-      tags: [pr]
     - get: dev-image
       params: {format: oci}
       tags: [pr]
@@ -158,6 +156,7 @@ jobs:
   - put: concourse-pr
     inputs: [concourse-pr]
     params: {path: concourse-pr, status: pending, context: testflight}
+    get_params: {list_changed_files: true}
   - task: yarn-build
     attempts: 3
     file: ci/tasks/yarn-build.yml
@@ -190,8 +189,6 @@ jobs:
       trigger: true
       version: every
       tags: [pr]
-    - get: concourse-master
-      tags: [pr]
     - get: dev-image
       params: {format: oci}
       tags: [pr]
@@ -202,6 +199,7 @@ jobs:
   - put: concourse-pr
     inputs: [concourse-pr]
     params: {path: concourse-pr, status: pending, context: watsjs}
+    get_params: {list_changed_files: true}
     tags: [pr]
   - task: yarn-build
     attempts: 3

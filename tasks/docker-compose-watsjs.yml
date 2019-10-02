@@ -21,5 +21,7 @@ params:
   BUILD:
 
 run:
-  path: ci/tasks/scripts/with-docker-compose
-  args: [ci/tasks/scripts/watsjs]
+  path: ci/tasks/scripts/pass-release-notes-only-change
+  args:
+  - ci/tasks/scripts/with-docker-compose
+  - ci/tasks/scripts/watsjs
