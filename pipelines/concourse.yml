@@ -702,6 +702,8 @@ jobs:
           params:
             image: image-ubuntu/image.tar
             additional_tags: version/version
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
 
 - name: bin-smoke
   public: true
