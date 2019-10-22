@@ -810,13 +810,11 @@ jobs:
   - get: concourse
     passed:
     - build-rc
-    - k8s-topgun
     - bosh-smoke
     - bosh-topgun
   - get: unit-image
     passed:
     - build-rc
-    - k8s-topgun
     - bosh-smoke
     - bosh-topgun
   - get: final-version
@@ -835,7 +833,7 @@ jobs:
   - get: darwin-rc
     passed: [build-rc]
   - get: concourse-rc-image
-    passed: [k8s-topgun]
+    passed: [k8s-smoke]
   - get: concourse-rc-image-ubuntu
   - get: concourse-release
     passed: [bosh-smoke, bosh-topgun]
@@ -1237,7 +1235,7 @@ resources:
 - name: builder
   type: registry-image
   icon: *image-icon
-  source: {repository: concourse/builder-task}
+  source: {repository: vito/oci-build-task}
 
 - name: gcp-xenial-stemcell
   type: bosh-io-stemcell
