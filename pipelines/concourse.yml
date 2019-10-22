@@ -1116,7 +1116,7 @@ jobs:
       - cbd/cluster/operations/github-auth.yml
       - cbd/cluster/operations/encryption.yml
       - cbd/cluster/operations/vault-tls-cert-auth.yml
-      - cbd/cluster/operations/influxdb.yml
+      - cbd/cluster/operations/datadog.yml
       - cbd/cluster/operations/db-stats.yml
       - cbd/cluster/operations/web-network-extension.yml
       - cbd/cluster/operations/team-authorized-keys.yml
@@ -1183,6 +1183,8 @@ jobs:
         enable_volume_audit_log: true
         enable_worker_audit_log: true
         cluster_name: "prod"
+        datadog_api_key: ((datadog_api_key))
+        datadog_tags: ["bosh-deployment:concourse-prod"]
   - put: prod-pks-worker-deployment
     inputs: [cbd, concourse-release, vsphere-xenial-stemcell, prod]
     tags: [pks]
