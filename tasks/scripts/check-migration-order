@@ -4,6 +4,13 @@ migrations_path=atc/db/migration/migrations/
 master_dir=concourse-master/$migrations_path
 pr_dir=concourse-pr/$migrations_path
 
+target_branch=$(cat concourse-pr/.git/resource/base_name)
+[ $target_branch = 'master' ] || {
+  echo "skipping migration check because this PR does not target the 'master' branch"
+  echo "target branch: $target_branch"
+  exit 0
+}
+
 migrations_on_master=$(mktemp)
 find $master_dir -name '[0-9]*' -exec basename {} \; |
   sort > "$migrations_on_master"
