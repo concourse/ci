@@ -432,6 +432,49 @@ jobs:
         KUBE_CONFIG: ((kube_config))
         RELEASE_NAME: concourse-smoke
         CONCOURSE_IMAGE: concourse/concourse-rc
+  - task: prepare-deploy-values
+    image: unit-image
+    config:
+      platform: linux
+      outputs:
+      - name: values
+      run:
+        path: /bin/bash
+        args:
+          - cex
+          - |
+            echo '
+            persistence:
+              enabled: false
+
+            postgres:
+              persistence:
+                enabled: false
+
+            concourse:
+              worker:
+                baggageclaim:
+                  driver: naive
+              web:
+                kubernetes:
+                  enabled: false
+                auth:
+                  mainTeam:
+                    localUser: admin
+
+            secrets:
+              localUsers: "admin:admin,guest:guest"
+
+            web:
+              livenessProbe:
+                failureThreshold: 3
+                initialDelaySeconds: 3
+                periodSeconds: 3
+                timeoutSeconds: 3
+
+            worker:
+              replicas: 1
+            ' > ./values/values.yaml
   - task: deploy
     image: unit-image
     input_mapping: {image-info: concourse-rc-image}
@@ -456,6 +499,21 @@ jobs:
       CONCOURSE_IMAGE: concourse/concourse-rc
   on_success: *fixed-concourse
   on_failure: *broke-concourse
+
+- name: k8s-topgun-worker
+  serial: true
+  public: true
+  plan:
+  - get: unit-image
+  - task: deploy
+    image: unit-image
+    input_mapping: {image-info: concourse-rc-image}
+    file: ci/tasks/k8s-deploy.yml
+    params:
+      KUBE_CONFIG: ((kube_config))
+      VALUES: ((k8s-topgun-worker-values))
+      RELEASE_NAME: concourse-smoke
+      CONCOURSE_IMAGE: concourse/concourse-rc
 
 - name: k8s-topgun
   public: true

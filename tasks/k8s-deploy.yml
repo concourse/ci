@@ -9,12 +9,15 @@ params:
   CONCOURSE_IMAGE:
   KUBE_CONFIG:
   RELEASE_NAME:
+  VALUES:
 
 inputs:
 - name: charts
-- name: concourse
 - name: ci
+- name: concourse
 - name: image-info
+- name: values
+  optional: true
 
 run:
   path: ci/tasks/scripts/k8s-deploy

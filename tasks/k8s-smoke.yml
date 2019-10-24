@@ -11,8 +11,9 @@ params:
   MAX_TICKS: 180
 
 inputs:
-- name: concourse
 - name: ci
+- name: concourse
+- name: values
 
 caches:
 - path: gopath
