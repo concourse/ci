@@ -83,6 +83,7 @@ jobs:
         config_file: pipelines/pipelines/norsk-mirror.yml
       - name: release-5.2.x
         team: main
+        exposed: true
         config_file: pipelines/pipelines/release.yml
         vars:
           release_major: "5"
@@ -92,6 +93,7 @@ jobs:
           use_external_linker: true
       - name: release-5.3.x
         team: main
+        exposed: true
         config_file: pipelines/pipelines/release.yml
         vars:
           release_major: "5"
@@ -101,6 +103,7 @@ jobs:
           use_external_linker: true
       - name: release-5.4.x
         team: main
+        exposed: true
         config_file: pipelines/pipelines/release.yml
         vars:
           release_major: "5"
@@ -110,6 +113,7 @@ jobs:
           use_external_linker: false
       - name: release-5.5.x
         team: main
+        exposed: true
         config_file: pipelines/pipelines/release.yml
         vars:
           release_major: "5"
@@ -119,6 +123,7 @@ jobs:
           use_external_linker: false
       - name: release-5.6.x
         team: main
+        exposed: true
         config_file: pipelines/pipelines/release.yml
         vars:
           release_major: "5"
