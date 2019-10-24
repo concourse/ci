@@ -464,27 +464,36 @@ jobs:
   - in_parallel:
     - get: concourse
       passed: [k8s-smoke]
+      tags: [k8s-topgun]
       trigger: true
     - get: version
       passed: [k8s-smoke]
+      tags: [k8s-topgun]
       trigger: true
     - get: concourse-rc-image
-      passed: [k8s-smoke]
-      trigger: true
       params: {format: oci}
+      passed: [k8s-smoke]
+      tags: [k8s-topgun]
+      trigger: true
     - get: concourse-rc-image-ubuntu
-      passed: [k8s-smoke]
-      trigger: true
       params: {format: oci}
-    - get: unit-image
-    - get: charts
-      trigger: true
       passed: [k8s-smoke]
+      tags: [k8s-topgun]
+      trigger: true
+    - get: unit-image
+      tags: [k8s-topgun]
+    - get: charts
+      passed: [k8s-smoke]
+      tags: [k8s-topgun]
+      trigger: true
     - get: ci
+      tags: [k8s-topgun]
   - task: k8s-topgun
     file: ci/tasks/k8s-topgun.yml
+    tags: [k8s-topgun]
     image: unit-image
     params:
+      IN_CLUSTER: "true"
       KUBE_CONFIG: ((kube_config))
       CONCOURSE_IMAGE_NAME: concourse/concourse-rc
   on_success: *fixed-concourse
