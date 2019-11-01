@@ -131,6 +131,16 @@ jobs:
           charts_version: '5a33da9adf31ee802ca6e1247b0b5fdac2bb9aca'
           concourse_smoke_deployment_name: "concourse-smoke-5-6"
           use_external_linker: false
+      - name: release-5.7.x
+        team: main
+        exposed: true
+        config_file: pipelines/pipelines/release.yml
+        vars:
+          release_major: "5"
+          release_minor: "5.7"
+          charts_version: '1d5c61dd5ddb04fe4b159bc52d09ae8dbded9347'
+          concourse_smoke_deployment_name: "concourse-smoke-5-7"
+          use_external_linker: false
       - name: algorithm-v3
         team: main
         config_file: pipelines/pipelines/branch.yml
