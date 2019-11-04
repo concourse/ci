@@ -15,6 +15,12 @@ resource_types:
   type: registry-image
   source: {repository: mockersf/concourse-slack-notifier}
 
+- name: registry-image
+  type: registry-image
+  source:
+    repository: concourse/registry-image-resource
+    tag: 0.8.0
+
 groups:
 - name: develop
   jobs:
