@@ -11,7 +11,7 @@ params:
   RELEASE_NAME:
 
 inputs:
-- name: charts
+- name: concourse-chart
 - name: concourse
 - name: ci
 - name: image-info

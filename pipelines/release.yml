@@ -367,7 +367,7 @@ jobs:
       passed: [build-rc-image]
       trigger: true
     - get: unit-image
-    - get: charts
+    - get: concourse-chart
       trigger: true
     - get: linux-rc-ubuntu
       passed: [bin-smoke]
@@ -376,7 +376,7 @@ jobs:
   - task: check-params
     file: ci/tasks/check-distribution-env.yml
     image: unit-image
-    input_mapping: {distribution: charts, linux-rc: linux-rc-ubuntu}
+    input_mapping: {distribution: concourse-chart, linux-rc: linux-rc-ubuntu}
     params: {DISTRIBUTION: helm}
   on_success: *fixed-concourse
   on_failure: *broke-concourse
@@ -400,7 +400,7 @@ jobs:
     - get: version
       passed: [build-rc-image]
       trigger: true
-    - get: charts
+    - get: concourse-chart
     - get: unit-image
       passed: [build-rc-image]
     - get: ci
@@ -457,7 +457,8 @@ jobs:
       trigger: true
       params: {format: oci}
     - get: unit-image
-    - get: charts
+    - get: helm-charts
+    - get: concourse-chart
       trigger: true
       passed: [k8s-smoke]
     - get: ci
@@ -1216,7 +1217,14 @@ resources:
     ca_cert: ((topgun_ca_cert))
     deployment: ((concourse_smoke_deployment_name))
 
-- name: charts
+- name: concourse-chart
+  type: git
+  icon: *git-icon
+  source:
+    uri: https://github.com/concourse/concourse-chart.git
+    branch: release/((release_minor)).x
+
+- name: helm-charts
   type: git
   icon: *git-icon
   source:
