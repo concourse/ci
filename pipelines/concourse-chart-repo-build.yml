@@ -15,7 +15,6 @@ resources:
   type: git
   source:
     uri: https://github.com/concourse/concourse-chart
-    branch: chart-name
 jobs:
 - name: build-chart
   public: true
@@ -33,10 +32,12 @@ jobs:
         args:
         - -ceu
         - |
+          mkdir $CHART_NAME
+          mv $CHART_DIR/* $CHART_NAME/
           helm init --client-only
           helm repo remove local
           helm repo update
-          helm package -u -d $DESTINATION_DIR $CHART_DIR
+          helm package -u -d $DESTINATION_DIR $CHART_NAME
           helm repo index $DESTINATION_DIR
 
       inputs:
@@ -44,6 +45,7 @@ jobs:
       outputs:
       - name: repository
     params:
+      CHART_NAME: concourse
       CHART_DIR: ./concourse-chart
       DESTINATION_DIR: ./repository
   - put: chart-repo-store
