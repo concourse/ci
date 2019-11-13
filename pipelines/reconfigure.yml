@@ -31,7 +31,7 @@ resources:
   type: concourse-pipeline
   icon: pipe
   source:
-    target: https://ci.concourse-ci.org
+    target: https://nci.concourse-ci.org
     teams:
     - name: main
       username: ((basic_auth.username))
