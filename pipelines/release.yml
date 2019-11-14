@@ -2,7 +2,6 @@
 #
 #   ((release_major))                   the MAJOR version, e.g. 5
 #   ((release_minor))                   the MAJOR.MINOR version, e.g. 5.1
-#   ((charts_version))                  the commit on `helm/charts` where the version of
 #                                       concourse matches the desired release version
 #   ((concourse_smoke_deployment_name)) a unique name for the smoke bosh deployment
 #   ((use_external_linker))             whether to use an external linker for go builds;
@@ -12,7 +11,6 @@
 #
 #   concourse/concourse                 release/((release_minor)).x
 #   concourse/concourse-bosh-release    release/((release_minor)).x
-#   concourse/concourse-bosh-deployment release/((release_minor)).x
 #
 # everything else will be managed by the pipeline
 
@@ -1214,10 +1212,9 @@ resources:
 - name: charts
   type: git
   icon: *git-icon
-  version: {ref: ((charts_version))}
   source:
-    uri: https://github.com/helm/charts.git
-    branch: master
+    uri: https://github.com/concourse/concourse-chart.git
+    branch: release/((release_minor)).x
 
 - name: concourse-github-release
   type: github-release

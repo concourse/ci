@@ -31,7 +31,7 @@ resources:
   type: concourse-pipeline
   icon: pipe
   source:
-    target: https://ci.concourse-ci.org
+    target: https://nci.concourse-ci.org
     teams:
     - name: main
       username: ((basic_auth.username))
@@ -88,29 +88,8 @@ jobs:
         vars:
           release_major: "5"
           release_minor: "5.2"
-          charts_version: '060b57708ed34ffd47f8076bf5906167dfce96b8'
           concourse_smoke_deployment_name: "concourse-smoke-5-2"
           use_external_linker: true
-      - name: release-5.3.x
-        team: main
-        exposed: true
-        config_file: pipelines/pipelines/release.yml
-        vars:
-          release_major: "5"
-          release_minor: "5.3"
-          charts_version: 'f3dde5b4c00ea44c0684afcf154858032c703a40'
-          concourse_smoke_deployment_name: "concourse-smoke-5-3"
-          use_external_linker: true
-      - name: release-5.4.x
-        team: main
-        exposed: true
-        config_file: pipelines/pipelines/release.yml
-        vars:
-          release_major: "5"
-          release_minor: "5.4"
-          charts_version: '060b57708ed34ffd47f8076bf5906167dfce96b8'
-          concourse_smoke_deployment_name: "concourse-smoke-5-4"
-          use_external_linker: false
       - name: release-5.5.x
         team: main
         exposed: true
@@ -118,18 +97,7 @@ jobs:
         vars:
           release_major: "5"
           release_minor: "5.5"
-          charts_version: '96c33a23657b63630220b085e763f26862ac9ff3'
           concourse_smoke_deployment_name: "concourse-smoke-5-5"
-          use_external_linker: false
-      - name: release-5.6.x
-        team: main
-        exposed: true
-        config_file: pipelines/pipelines/release.yml
-        vars:
-          release_major: "5"
-          release_minor: "5.6"
-          charts_version: '5a33da9adf31ee802ca6e1247b0b5fdac2bb9aca'
-          concourse_smoke_deployment_name: "concourse-smoke-5-6"
           use_external_linker: false
       - name: release-5.7.x
         team: main
@@ -138,7 +106,6 @@ jobs:
         vars:
           release_major: "5"
           release_minor: "5.7"
-          charts_version: '1d5c61dd5ddb04fe4b159bc52d09ae8dbded9347'
           concourse_smoke_deployment_name: "concourse-smoke-5-7"
           use_external_linker: false
       - name: algorithm-v3
