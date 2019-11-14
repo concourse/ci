@@ -38,6 +38,82 @@ resources:
       password: ((basic_auth.password))
 
 jobs:
+- name: reconfigure-resource-pipelines
+  plan:
+  - get: pipelines
+    trigger: true
+  - task: render-resource-templates
+    file: pipelines/tasks/render-resource-pipeline-templates.yaml
+    params:
+      RESOURCES: |
+        git
+        time
+        docker-image
+        registry-image
+        cf
+        bosh-io-release
+        bosh-io-stemcell
+        tracker
+        hg
+        github-release
+        semver
+        s3
+        concourse-pipeline
+        pool
+        datadog-event
+        mock
+  - put : prod
+    params:
+      pipelines:
+        - name: git
+          team: resources
+          config_file: rendered_pipelines/git.yml
+        - name: time
+          team: resources
+          config_file: rendered_pipelines/time.yml
+        - name: docker-image
+          team: resources
+          config_file: rendered_pipelines/docker-image.yml
+        - name: registry-image
+          team: resources
+          config_file: rendered_pipelines/registry-image.yml
+        - name: cf
+          team: resources
+          config_file: rendered_pipelines/cf.yml
+        - name: bosh-io-release
+          team: resources
+          config_file: rendered_pipelines/bosh-io-release.yml
+        - name: bosh-io-stemcell
+          team: resources
+          config_file: rendered_pipelines/bosh-io-stemcell.yml
+        - name: tracker
+          team: resources
+          config_file: rendered_pipelines/tracker.yml
+        - name: hg
+          team: resources
+          config_file: rendered_pipelines/hg.yml
+        - name: github-release
+          team: resources
+          config_file: rendered_pipelines/github-release.yml
+        - name: semver
+          team: resources
+          config_file: rendered_pipelines/semver.yml
+        - name: s3
+          team: resources
+          config_file: rendered_pipelines/s3.yml
+        - name: concourse-pipeline
+          team: resources
+          config_file: rendered_pipelines/concourse-pipeline.yml
+        - name: pool
+          team: resources
+          config_file: rendered_pipelines/pool.yml
+        - name: datadog-event
+          team: resources
+          config_file: rendered_pipelines/datadog-event.yml
+        - name: mock
+          team: resources
+          config_file: rendered_pipelines/mock.yml
+
 - name: reconfigure-pipelines
   plan:
   - get: pipelines

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e -u
+
+for resource in $RESOURCES; do
+  echo "configuring $resource..."
+  jsonnet -V resource=$resource pipelines/pipelines/resources/template.jsonnet > rendered_pipelines/$resource.yml
+  echo ""
+done
