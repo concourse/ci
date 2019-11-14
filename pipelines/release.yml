@@ -726,6 +726,7 @@ jobs:
       trigger: true
     - get: ci
   - put: smoke-deployment
+    tags: [topgun]
     params:
       manifest: ci/deployments/bosh-smoke.yml
       releases:
@@ -737,15 +738,18 @@ jobs:
       vars:
         deployment_name: ((concourse_smoke_deployment_name))
   - task: discover-bosh-endpoint-info
+    tags: [topgun]
     file: ci/tasks/discover-bosh-endpoint-info.yml
     image: unit-image
     params:
-      BOSH_ENVIRONMENT: ((bosh_target))
-      BOSH_CLIENT: ((bosh_client.id))
-      BOSH_CLIENT_SECRET: ((bosh_client.secret))
+      BOSH_ENVIRONMENT: https://10.0.0.6:25555
+      BOSH_CA_CERT: ((topgun_ca_cert))
+      BOSH_CLIENT: ((topgun_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((topgun_bosh_client.secret))
       BOSH_DEPLOYMENT: ((concourse_smoke_deployment_name))
       BOSH_INSTANCE_GROUP: concourse
   - task: smoke
+    tags: [topgun]
     image: unit-image
     file: ci/tasks/smoke.yml
   on_success: *fixed-concourse
@@ -1205,9 +1209,10 @@ resources:
   type: bosh-deployment
   icon: fire
   source:
-    target: ((bosh_target))
-    client: ((bosh_client.id))
-    client_secret: ((bosh_client.secret))
+    target: https://10.0.0.6:25555
+    client: ((topgun_bosh_client.id))
+    client_secret: ((topgun_bosh_client.secret))
+    ca_cert: ((topgun_ca_cert))
     deployment: ((concourse_smoke_deployment_name))
 
 - name: charts
