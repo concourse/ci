@@ -802,6 +802,7 @@ jobs:
       AWS_REGION: ((topgun_aws_ssm.region))
       AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
       AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
+      SKIP_PACKAGES: "k8s"
   on_success: *fixed-concourse
   on_failure: *broke-concourse
 
