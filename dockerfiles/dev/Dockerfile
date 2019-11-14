@@ -10,6 +10,7 @@ FROM concourse/golang-builder
 
 RUN apt-get update && apt-get -y install \
       iproute2 \
+      curl \
       ca-certificates \
       file \
       btrfs-tools
@@ -21,7 +22,20 @@ RUN chmod +x /usr/local/bin/dumb-init
 COPY gdn/gdn-* /usr/local/concourse/bin/gdn
 RUN chmod +x /usr/local/concourse/bin/gdn
 
-# add fly executables
+# containerd executables
+ARG RUNC_VERSION=v1.0.0-rc8
+ARG CNI_VERSION=v0.8.2
+ARG CONTAINERD_VERSION=1.3.0
+
+RUN curl -sSL https://github.com/containerd/containerd/releases/download/v$CONTAINERD_VERSION/containerd-$CONTAINERD_VERSION.linux-amd64.tar.gz \
+      | tar -zvxf - -C /usr/local/concourse/bin --strip-components=1
+RUN curl -sSL https://github.com/containernetworking/plugins/releases/download/$CNI_VERSION/cni-plugins-linux-amd64-$CNI_VERSION.tgz \
+      | tar -zvxf - -C /usr/local/concourse/bin
+RUN curl -sSL https://github.com/opencontainers/runc/releases/download/$RUNC_VERSION/runc.amd64 \
+      -o /usr/local/concourse/bin/runc && chmod +x /usr/local/concourse/bin/runc
+
+
+## add fly executables
 RUN mkdir /usr/local/concourse/fly-assets
 COPY fly-linux/fly-*.tgz /usr/local/concourse/fly-assets
 COPY fly-windows/fly-*.zip /usr/local/concourse/fly-assets
