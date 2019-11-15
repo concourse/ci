@@ -63,6 +63,7 @@ jobs:
         datadog-event
         mock
   - put : prod
+    inputs: [rendered_pipelines]
     params:
       pipelines:
         - name: git
