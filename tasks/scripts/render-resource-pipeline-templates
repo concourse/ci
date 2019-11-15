@@ -3,7 +3,7 @@
 set -e -u
 
 for resource in $RESOURCES; do
-  echo "configuring $resource..."
+  echo "rendering '$resource' pipeline config..."
   jsonnet -V resource=$resource pipelines/pipelines/resources/template.jsonnet \
     > rendered_pipelines/$resource.yml
   echo ""
