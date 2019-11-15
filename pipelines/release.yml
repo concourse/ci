@@ -1009,7 +1009,7 @@ resources:
   icon: *git-icon
   source:
     uri: https://github.com/concourse/concourse.git
-    branch: master
+    branch: release/((release_minor)).x
     paths:
     - release-notes/
 
