@@ -37,7 +37,7 @@ eventually_populate_kube_config() {
 }
 
 run_helm_deploy() {
-  local chart=./charts/stable/concourse
+  local chart=./charts
 
   helm init --upgrade --wait
   helm version
