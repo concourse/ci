@@ -1817,6 +1817,7 @@ resources:
     private_key: ((concourse_release_deploy_key))
 
 - name: smoke-deployment
+  tags: [topgun]
   type: bosh-deployment
   icon: fire
   source:

@@ -2,7 +2,6 @@
 #
 #   ((release_major))                   the MAJOR version, e.g. 5
 #   ((release_minor))                   the MAJOR.MINOR version, e.g. 5.1
-#   ((charts_version))                  the commit on `helm/charts` where the version of
 #                                       concourse matches the desired release version
 #   ((concourse_smoke_deployment_name)) a unique name for the smoke bosh deployment
 #   ((use_external_linker))             whether to use an external linker for go builds;
@@ -12,7 +11,6 @@
 #
 #   concourse/concourse                 release/((release_minor)).x
 #   concourse/concourse-bosh-release    release/((release_minor)).x
-#   concourse/concourse-bosh-deployment release/((release_minor)).x
 #
 # everything else will be managed by the pipeline
 
@@ -728,6 +726,7 @@ jobs:
       trigger: true
     - get: ci
   - put: smoke-deployment
+    tags: [topgun]
     params:
       manifest: ci/deployments/bosh-smoke.yml
       releases:
@@ -739,15 +738,18 @@ jobs:
       vars:
         deployment_name: ((concourse_smoke_deployment_name))
   - task: discover-bosh-endpoint-info
+    tags: [topgun]
     file: ci/tasks/discover-bosh-endpoint-info.yml
     image: unit-image
     params:
-      BOSH_ENVIRONMENT: ((bosh_target))
-      BOSH_CLIENT: ((bosh_client.id))
-      BOSH_CLIENT_SECRET: ((bosh_client.secret))
+      BOSH_ENVIRONMENT: https://10.0.0.6:25555
+      BOSH_CA_CERT: ((topgun_ca_cert))
+      BOSH_CLIENT: ((topgun_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((topgun_bosh_client.secret))
       BOSH_DEPLOYMENT: ((concourse_smoke_deployment_name))
       BOSH_INSTANCE_GROUP: concourse
   - task: smoke
+    tags: [topgun]
     image: unit-image
     file: ci/tasks/smoke.yml
   on_success: *fixed-concourse
@@ -800,6 +802,7 @@ jobs:
       AWS_REGION: ((topgun_aws_ssm.region))
       AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
       AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
+      SKIP_PACKAGES: "k8s"
   on_success: *fixed-concourse
   on_failure: *broke-concourse
 
@@ -1006,7 +1009,7 @@ resources:
   icon: *git-icon
   source:
     uri: https://github.com/concourse/concourse.git
-    branch: master
+    branch: release/((release_minor)).x
     paths:
     - release-notes/
 
@@ -1203,21 +1206,22 @@ resources:
     private_key: ((concourse_release_deploy_key))
 
 - name: smoke-deployment
+  tags: [topgun]
   type: bosh-deployment
   icon: fire
   source:
-    target: ((bosh_target))
-    client: ((bosh_client.id))
-    client_secret: ((bosh_client.secret))
+    target: https://10.0.0.6:25555
+    client: ((topgun_bosh_client.id))
+    client_secret: ((topgun_bosh_client.secret))
+    ca_cert: ((topgun_ca_cert))
     deployment: ((concourse_smoke_deployment_name))
 
 - name: charts
   type: git
   icon: *git-icon
-  version: {ref: ((charts_version))}
   source:
-    uri: https://github.com/helm/charts.git
-    branch: master
+    uri: https://github.com/concourse/concourse-chart.git
+    branch: release/((release_minor)).x
 
 - name: concourse-github-release
   type: github-release
