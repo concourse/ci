@@ -1,0 +1,13 @@
+platform: linux
+image_resource:
+  type: registry-image
+  source: {repository: bitnami/jsonnet}
+inputs:
+- name: pipelines
+outputs:
+- name: rendered_pipelines
+params:
+  RESOURCES:
+run:
+  path: pipelines/tasks/scripts/render-resource-pipeline-templates
+  user: root
