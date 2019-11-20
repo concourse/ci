@@ -16,7 +16,8 @@ fi
 
 export CONCOURSE_IMAGE_DIGEST="$(cat concourse-rc-image/digest)"
 export CONCOURSE_IMAGE_TAG="$(cat concourse-rc-image/tag)"
-export CHARTS_DIR="$(realpath ./charts)"
+export HELM_CHARTS_DIR="$(realpath ./helm-charts)"
+export CONCOURSE_CHART_DIR="$(realpath ./concourse-chart)"
 
 cd concourse
 

@@ -1,6 +1,6 @@
 # the following vars must be specified on configuration:
 #
-#   ((branch_name)): the branch of 'concourse' and 'concourse-bosh-release'
+#   ((branch_name)): the branch of 'concourse', 'concourse-bosh-release', and 'concourse-chart'
 #   ((environment)): a name for the bosh-deployed drills testing environment
 #   ((admin_username)),
 #   ((admin_password)): credentials for the admin user
@@ -265,12 +265,12 @@ jobs:
     - get: linux-rc
       passed: [build-rc-image]
       trigger: true
-    - get: charts
+    - get: concourse-chart
     - get: ci
   - task: check-params
     file: ci/tasks/check-distribution-env.yml
     image: unit-image
-    input_mapping: {distribution: charts}
+    input_mapping: {distribution: concourse-chart}
     params: {DISTRIBUTION: helm}
 
 - name: k8s-smoke
@@ -285,7 +285,7 @@ jobs:
       passed: [build-rc-image]
       params: {format: oci}
       trigger: true
-    - get: charts
+    - get: concourse-chart
     - get: unit-image
       passed: [build-rc-image]
     - get: ci
@@ -335,7 +335,8 @@ jobs:
     - get: unit-image
       passed: [k8s-smoke]
       trigger: true
-    - get: charts
+    - get: helm-charts
+    - get: concourse-chart
       passed: [k8s-smoke]
     - get: ci
   - task: k8s-topgun
@@ -775,7 +776,14 @@ resources:
     client_secret: ((bosh_client.secret))
     deployment: concourse-smoke-((branch_name))
 
-- name: charts
+- name: concourse-chart
+  type: git
+  icon: *git-icon
+  source:
+    uri: https://github.com/concourse/concourse-chart.git
+    branch: ((branch_name))
+
+- name: helm-charts
   type: git
   icon: *git-icon
   source:

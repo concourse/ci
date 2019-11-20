@@ -5,14 +5,19 @@ resource_types:
   source: {repository: teliaoss/github-pr-resource}
 
 resources:
-- name: stable-concourse-pr
+- name: chart-pr
   type: pull-request
   icon: source-pull
   source:
-    repository: helm/charts
-    paths:
-      - stable/concourse/
+    repository: concourse/concourse-chart
     access_token: ((pr_access_token))
+
+- name: helm-charts
+  type: git
+  icon: github-circle
+  source:
+    uri: https://github.com/helm/charts.git
+    branch: master
 
 - name: concourse
   type: git
@@ -50,7 +55,8 @@ jobs:
   public: true
   plan:
   - in_parallel:
-    - get: stable-concourse-pr
+    - get: chart-pr
+    - get: helm-charts
     - get: concourse
     - get: concourse-rc-image
     - get: ci
@@ -58,18 +64,18 @@ jobs:
   - task: k8s-topgun
     file: ci/tasks/k8s-topgun.yml
     input_mapping:
-      charts: stable-concourse-pr
+      concourse-chart: chart-pr
     image: unit-image
     params:
       KUBE_CONFIG: ((kube_config))
       CONCOURSE_IMAGE_NAME: concourse/concourse-rc
     on_success:
-      put: stable-concourse-pr
+      put: chart-pr
       params:
-        path: stable-concourse-pr
+        path: chart-pr
         comment: "Topgun tests passed: $ATC_EXTERNAL_URL/builds/$BUILD_ID"
     on_failure:
-      put: stable-concourse-pr
+      put: chart-pr
       params:
-        path: stable-concourse-pr
+        path: chart-pr
         comment: "Topgun tests failed: $ATC_EXTERNAL_URL/builds/$BUILD_ID"

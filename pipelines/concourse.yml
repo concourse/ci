@@ -420,7 +420,7 @@ jobs:
     - get: version
       passed: [build-rc-image]
       trigger: true
-    - get: charts
+    - get: concourse-chart
       trigger: true
     - get: unit-image
     - get: ci
@@ -482,10 +482,12 @@ jobs:
       trigger: true
     - get: unit-image
       tags: [k8s-topgun]
-    - get: charts
+    - get: concourse-chart
       passed: [k8s-smoke]
       tags: [k8s-topgun]
       trigger: true
+    - get: helm-charts
+      tags: [k8s-topgun]
     - get: ci
       tags: [k8s-topgun]
   - task: k8s-topgun
@@ -519,10 +521,11 @@ jobs:
       params: {format: oci}
     - get: unit-image
       tags: [pks]
-    - get: charts
+    - get: concourse-chart
       trigger: true
       passed: [k8s-smoke]
       tags: [pks]
+    - get: helm-charts
     - get: ci
   - task: k8s-topgun
     tags: [pks]
@@ -556,13 +559,13 @@ jobs:
       passed: [build-rc-image]
       trigger: true
     - get: unit-image
-    - get: charts
+    - get: concourse-chart
       trigger: true
     - get: ci
   - task: check-params
     file: ci/tasks/check-distribution-env.yml
     image: unit-image
-    input_mapping: {distribution: charts, linux-rc: linux-rc-ubuntu}
+    input_mapping: {distribution: concourse-chart, linux-rc: linux-rc-ubuntu}
     params: {DISTRIBUTION: helm}
   on_success: *fixed-concourse
   on_failure: *broke-concourse
@@ -1869,12 +1872,19 @@ resources:
   source:
     uri: https://github.com/concourse/concourse-docker
 
-- name: charts
+- name: concourse-chart
   type: git
   icon: *git-icon
   source:
-    uri: https://github.com/concourse/charts.git
-    branch: merged
+    uri: https://github.com/concourse/concourse-chart.git
+    branch: dev
+
+- name: helm-charts
+  type: git
+  icon: *git-icon
+  source:
+    uri: https://github.com/helm/charts.git
+    branch: master
 
 - name: prod
   type: git

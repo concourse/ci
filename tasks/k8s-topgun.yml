@@ -14,7 +14,8 @@ inputs:
 - name: concourse
 - name: ci
 - name: concourse-rc-image
-- name: charts
+- name: concourse-chart
+- name: helm-charts
 
 caches:
 - path: gopath
