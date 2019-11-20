@@ -43,7 +43,7 @@ jobs:
   - get: pipelines
     trigger: true
   - task: render-resource-templates
-    file: pipelines/tasks/render-resource-pipeline-templates.yaml
+    file: pipelines/tasks/render-resource-pipeline-templates.yml
     params:
       RESOURCES: |
         git
