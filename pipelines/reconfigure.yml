@@ -36,6 +36,9 @@ resources:
     - name: main
       username: ((basic_auth.username))
       password: ((basic_auth.password))
+    - name: resources
+      username: ((basic_auth.username))
+      password: ((basic_auth.password))
 
 jobs:
 - name: reconfigure-resource-pipelines
@@ -62,7 +65,7 @@ jobs:
         pool
         datadog-event
         mock
-  - put : prod
+  - put: prod
     inputs: [rendered_pipelines]
     params:
       pipelines:
