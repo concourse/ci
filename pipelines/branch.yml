@@ -336,7 +336,6 @@ jobs:
       passed: [k8s-smoke]
       trigger: true
     - get: helm-charts
-      passed: [k8s-smoke]
     - get: concourse-chart
       passed: [k8s-smoke]
     - get: ci

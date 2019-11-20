@@ -487,7 +487,6 @@ jobs:
       tags: [k8s-topgun]
       trigger: true
     - get: helm-charts
-      passed: [k8s-smoke]
       tags: [k8s-topgun]
     - get: ci
       tags: [k8s-topgun]
@@ -1879,13 +1878,6 @@ resources:
   source:
     uri: https://github.com/concourse/concourse-chart.git
     branch: dev
-
-- name: concourse-chart-master
-  type: git
-  icon: *git-icon
-  source:
-    uri: https://github.com/concourse/concourse-chart.git
-    branch: master
 
 - name: helm-charts
   type: git

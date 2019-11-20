@@ -216,7 +216,6 @@ jobs:
     - get: concourse-chart
       passed: [k8s-smoke]
     - get: helm-charts
-      passed: [k8s-smoke]
     - get: ci
   - task: k8s-topgun
     file: ci/tasks/k8s-topgun.yml
