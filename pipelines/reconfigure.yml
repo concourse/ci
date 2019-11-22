@@ -170,6 +170,7 @@ jobs:
           release_minor: "5.2"
           concourse_smoke_deployment_name: "concourse-smoke-5-2"
           use_external_linker: true
+          ignored_in_concourse: CONCOURSE_MAIN_TEAM_CONFIG
       - name: release-5.5.x
         team: main
         exposed: true
@@ -179,6 +180,7 @@ jobs:
           release_minor: "5.5"
           concourse_smoke_deployment_name: "concourse-smoke-5-5"
           use_external_linker: false
+          ignored_in_concourse: CONCOURSE_MAIN_TEAM_CONFIG
       - name: release-5.7.x
         team: main
         exposed: true
@@ -188,6 +190,7 @@ jobs:
           release_minor: "5.7"
           concourse_smoke_deployment_name: "concourse-smoke-5-7"
           use_external_linker: false
+          ignored_in_concourse: CONCOURSE_MAIN_TEAM_CONFIG
       - name: algorithm-v3
         team: main
         config_file: pipelines/pipelines/branch.yml
