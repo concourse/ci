@@ -6,6 +6,10 @@
 #   ((concourse_smoke_deployment_name)) a unique name for the smoke bosh deployment
 #   ((use_external_linker))             whether to use an external linker for go builds;
 #                                       otherwise the built-in go linker will be used.
+#   ((ignored_in_concourse))            multiline string containing CONCOURSE_* env vars
+#                                       that the Concourse binary cares about but
+#                                       are not needed in the helm/bosh packaging
+#                                       for this release.
 #
 # the following git branches need to be created:
 #
@@ -377,7 +381,7 @@ jobs:
     file: ci/tasks/check-distribution-env.yml
     image: unit-image
     input_mapping: {distribution: concourse-chart, linux-rc: linux-rc-ubuntu}
-    params: {DISTRIBUTION: helm}
+    params: {DISTRIBUTION: helm, IGNORED_IN_CONCOURSE: ((ignored_in_concourse))}
   on_success: *fixed-concourse
   on_failure: *broke-concourse
 
@@ -673,7 +677,7 @@ jobs:
     file: ci/tasks/check-distribution-env.yml
     image: unit-image
     input_mapping: {distribution: concourse-release-repo, linux-rc: linux-rc-ubuntu}
-    params: {DISTRIBUTION: bosh}
+    params: {DISTRIBUTION: bosh, IGNORED_IN_CONCOURSE: ((ignored_in_concourse))}
 
 - name: bosh-bump
   public: true
