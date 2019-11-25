@@ -10,6 +10,7 @@ resources:
   icon: source-pull
   source:
     repository: concourse/concourse-chart
+    base_branch: ((pr_base_branch))
     access_token: ((pr_access_token))
 
 - name: helm-charts
@@ -24,7 +25,7 @@ resources:
   icon: github-circle
   source:
     uri: https://github.com/concourse/concourse.git
-    branch: master
+    branch: ((concourse_base_branch))
 
 - name: ci
   type: git
@@ -33,11 +34,12 @@ resources:
     uri: https://github.com/concourse/ci.git
     branch: master
 
-- name: concourse-rc-image
+- name: concourse-image
   type: registry-image
   icon: docker
   source:
-    repository: concourse/concourse-rc
+    repository: concourse/concourse
+    tag: ((concourse_image_tag))
     username: ((docker.username))
     password: ((docker.password))
 
@@ -53,29 +55,43 @@ jobs:
 - name: k8s-topgun
   serial: true
   public: true
+  on_failure:
+    put: chart-pr
+    inputs: [chart-pr]
+    params: {path: chart-pr, status: failure, context: k8s-topgun}
+    tags: [k8s-topgun]
+  on_success:
+    put: chart-pr
+    inputs: [chart-pr]
+    params: {path: chart-pr, status: success, context: k8s-topgun}
+    tags: [k8s-topgun]
   plan:
   - in_parallel:
     - get: chart-pr
+      tags: [k8s-topgun]
     - get: helm-charts
+      tags: [k8s-topgun]
     - get: concourse
-    - get: concourse-rc-image
+      tags: [k8s-topgun]
+    - get: concourse-image
+      tags: [k8s-topgun]
     - get: ci
+      tags: [k8s-topgun]
     - get: unit-image
+      tags: [k8s-topgun]
+  - put: chart-pr
+    inputs: [chart-pr]
+    params: {path: chart-pr, status: pending, context: k8s-topgun}
+    get_params: {list_changed_files: true}
+    tags: [k8s-topgun]
   - task: k8s-topgun
+    tags: [k8s-topgun]
     file: ci/tasks/k8s-topgun.yml
     input_mapping:
       concourse-chart: chart-pr
+      concourse-rc-image: concourse-image
     image: unit-image
     params:
-      KUBE_CONFIG: ((kube_config))
-      CONCOURSE_IMAGE_NAME: concourse/concourse-rc
-    on_success:
-      put: chart-pr
-      params:
-        path: chart-pr
-        comment: "Topgun tests passed: $ATC_EXTERNAL_URL/builds/$BUILD_ID"
-    on_failure:
-      put: chart-pr
-      params:
-        path: chart-pr
-        comment: "Topgun tests failed: $ATC_EXTERNAL_URL/builds/$BUILD_ID"
+      IN_CLUSTER: "true"
+      KUBE_CONFIG: ((topgun_kube_config))
+      CONCOURSE_IMAGE_NAME: concourse/concourse
