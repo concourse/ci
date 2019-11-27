@@ -44,7 +44,7 @@ main() {
 }
 
 get_distribution_variables() {
-  $distro_scripts/list-actual $distro_dir | filter_list $distro_scripts/ignored-in-distribution
+  $distro_scripts/list-actual $distro_dir | filter_list ignored-in-distribution
 }
 
 get_concourse_variables() {
@@ -54,11 +54,11 @@ get_concourse_variables() {
     $linux_rc/concourse/bin/concourse $subcommand --help 2>&1 |
       grep -o '\[\$.*\]' |
       tr -d \[\]\$
-  done | filter_list <(echo "$IGNORED_IN_CONCOURSE"; cat $distro_scripts/ignored-in-concourse)
+  done | filter_list ignored-in-concourse
 }
 
 filter_list() {
-  local filter="$(cat $1 | xargs | tr ' ' '|')"
+  local filter="$(cat $distro_scripts/$1 | xargs | tr ' ' '|')"
 
   if [ -z "$filter" ]; then
     tee
