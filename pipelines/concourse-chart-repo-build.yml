@@ -11,15 +11,84 @@ resources:
     bucket: concourse-chart
     json_key: ((concourse_chart_bucket_json_key))
     regexp: ".*"
+- name: helm-charts
+  type: git
+  icon: github-circle
+  source:
+    uri: https://github.com/helm/charts.git
+    branch: master
 - name: concourse-chart
   type: git
   source:
     uri: https://github.com/concourse/concourse-chart
+    branch: ((chart_release_branch))
+- name: concourse
+  type: git
+  icon: github-circle
+  source:
+    uri: https://github.com/concourse/concourse.git
+    branch: master
+- name: concourse-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: concourse/concourse
+    username: ((docker.username))
+    password: ((docker.password))
+- name: ci
+  type: git
+  icon: github-circle
+  source:
+    uri: https://github.com/concourse/ci.git
+    branch: master
+- name: unit-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: concourse/unit
+    username: ((docker.username))
+    password: ((docker.password))
+
 jobs:
+- name: k8s-topgun
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: concourse-chart
+      tags: [pr]
+    - get: helm-charts
+      tags: [pr]
+    - get: concourse
+      tags: [pr]
+    - get: concourse-image
+      tags: [pr]
+    - get: ci
+      tags: [pr]
+    - get: unit-image
+      tags: [pr]
+    params: {path: chart-pr, status: pending, context: k8s-topgun}
+    get_params: {list_changed_files: true}
+    tags: [pr]
+  - task: k8s-topgun
+    tags: [pr]
+    file: ci/tasks/k8s-topgun.yml
+    input_mapping:
+      concourse-chart: chart-pr
+      concourse-rc-image: concourse-image
+    image: unit-image
+    params:
+      KUBE_CONFIG: ((topgun_kube_config))
+      CONCOURSE_IMAGE_NAME: concourse/concourse
+      GINKGO_FOCUS_ON: "Worker lifecycle"
 - name: build-chart
   public: true
   plan:
   - get: concourse-chart
+    passed: [k8s-topgun]
+  - get: chart-repo-store
+    params:
+      filename: index.yaml
   - task: build
     config:
       platform: linux
@@ -38,8 +107,7 @@ jobs:
           helm repo remove local
           helm repo update
           helm package -u -d $DESTINATION_DIR $CHART_NAME
-          helm repo index $DESTINATION_DIR
-
+          helm repo index --merge chart-repo-store/index.yaml $DESTINATION_DIR
       inputs:
       - name: concourse-chart
       outputs:
