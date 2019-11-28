@@ -13,6 +13,13 @@ resources:
     paths:
     - pipelines
 
+- name: baggageclaim-ci
+  type: git
+  icon: github-circle
+  source:
+    uri: https://github.com/concourse/baggageclaim
+    paths: [ci]
+
 - name: ruby-alpine-image
   type: registry-image
   source:
@@ -123,6 +130,8 @@ jobs:
   plan:
   - get: pipelines
     trigger: true
+  - get: baggageclaim-ci
+    trigger: true
   - put: prod
     params:
       pipelines:
@@ -160,6 +169,9 @@ jobs:
           pr_base_branch: release/5.7.x
           concourse_base_branch: release/5.7.x
           concourse_image_tag: 5.7
+      - name: baggageclaim
+        team: main
+        config_file: baggageclaim-ci/ci/pipeline.yml
       - name: bosh-cleanup
         team: main
         config_file: pipelines/pipelines/bosh-cleanup.yml
