@@ -27,6 +27,18 @@ resources:
     repository: concourse/charts-maintenance
     username: ((docker.username))
 
+- name: ruby-alpine-image
+  type: registry-image
+  source:
+    repository: ruby
+    tag: rc-alpine
+
+- name: oxygen-mask
+  type: git
+  icon: github-circle
+  source:
+    uri: https://github.com/concourse/oxygen-mask
+
 - name: prod
   type: concourse-pipeline
   icon: pipe
@@ -37,6 +49,9 @@ resources:
       username: ((basic_auth.username))
       password: ((basic_auth.password))
     - name: resources
+      username: ((basic_auth.username))
+      password: ((basic_auth.password))
+    - name: monitoring-hush-house
       username: ((basic_auth.username))
       password: ((basic_auth.password))
 
@@ -206,15 +221,46 @@ jobs:
         vars:
           branch_name: use_zstd
           environment: use-zstd
-      - name: lidar-drills
-        team: main
-        config_file: pipelines/pipelines/drills.yml
-        vars:
-          branch_name: checks
-          environment: lidar-drills
       - name: prod-db-backup
         team: main
         config_file: pipelines/pipelines/prod-db-backup.yml
       - name: prod-db-restore-verify
         team: main
         config_file: pipelines/pipelines/prod-db-restore-verify.yml
+
+- name: reconfigure-monitoring-pipeline
+  plan:
+  - get: oxygen-mask
+    trigger: true
+  - get: ruby-alpine-image
+  - task: generate-monitor-yml
+    image: ruby-alpine-image
+    config:
+      platform: linux
+      inputs:
+      - name: oxygen-mask
+      outputs:
+      - name: oxygen-mask
+      run:
+        dir: oxygen-mask
+        path: sh
+        args:
+        - -c
+        - |
+          erb monitor.yml > gen-monitor.yml
+  - put: prod
+    params:
+      pipelines:
+      - name: monitoring-stats
+        team: monitoring-hush-house
+        config_file: oxygen-mask/gen-monitor.yml
+        vars:
+          atc_url: https://hush-house.pivotal.io
+          interval: 30s
+          username: ((basic_auth.username))
+          password: ((basic_auth.password))
+          team_name: main
+          pipeline_name: monitoring
+          datadog_api_key: ((datadog_api_key))
+          github_access_token: ((concourse_github_dummy.access_token))
+
