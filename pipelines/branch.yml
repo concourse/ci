@@ -130,7 +130,9 @@ jobs:
       trigger: true
     - get: mock-resource
       trigger: true
-    - get: builder
+    - get: resource-types-image
+      trigger: true
+    - get: oci-build-task
     - get: ci
   - task: yarn-build
     image: unit-image
@@ -145,7 +147,7 @@ jobs:
     - task: fly-darwin
       file: ci/tasks/fly-build-darwin.yml
   - task: build
-    image: builder
+    image: oci-build-task
     privileged: true
     input_mapping: {concourse: built-concourse}
     file: ci/tasks/build-dev-image.yml
@@ -429,10 +431,10 @@ jobs:
       passed: [build-rc]
     - get: concourse-docker
       trigger: true
-    - get: builder
+    - get: oci-build-task
     - get: ci
   - task: build
-    image: builder
+    image: oci-build-task
     privileged: true
     file: concourse-docker/ci/build-image.yml
   - put: concourse-rc-image
@@ -797,10 +799,10 @@ resources:
   icon: *image-icon
   source: {repository: concourse/unit}
 
-- name: builder
+- name: oci-build-task
   type: registry-image
   icon: *image-icon
-  source: {repository: concourse/builder}
+  source: {repository: vito/oci-build-task}
 
 - name: gcp-xenial-stemcell
   type: bosh-io-stemcell
@@ -1020,3 +1022,11 @@ resources:
     client: ((bosh_client.id))
     client_secret: ((bosh_client.secret))
     deployment: concourse-((environment))
+
+- name: resource-types-image
+  type: registry-image
+  icon: &image-icon docker
+  source:
+    repository: concourse/resource-types
+    username: ((docker.username))
+    password: ((docker.password))
