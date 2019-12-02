@@ -374,6 +374,8 @@ jobs:
     - get: dev-image
       passed: [rc]
       trigger: true
+    - get: gdn
+      trigger: true
     - get: ci
   - in_parallel:
     - task: fly-linux
