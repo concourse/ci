@@ -10,6 +10,7 @@ image_resource:
 params:
   GITHUB_TOKEN:
   SLACK_TOKEN:
+  GITHUB_REPO: concourse
 
 inputs:
 - name: ci
