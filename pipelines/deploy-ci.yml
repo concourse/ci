@@ -1,0 +1,45 @@
+resource_types:
+- name: helm
+  type: registry-image
+  source:
+    repository: linkyard/concourse-helm-resource
+
+resources:
+- name: hush-house
+  type: git
+  icon: *git-icon
+  source:
+    uri: https://github.com/concourse/hush-house.git
+    branch: master
+
+- name: k8s-topgun-worker
+  tags: [k8s-topgun]
+  type: helm
+  source:
+    release: ci-topgun
+    namespace: ci-topgun
+    cluster_url: https://kubernetes.default
+    cluster_ca: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt #change this to ((some-secret))
+		# We'll need these two params or token_path to a file with the bearer token...
+    admin_key: _base64 encoded key pem_
+    admin_cert: _base64 encoded certificate pem_
+
+jobs:
+- name: deploy-prod
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse
+    - get: hush-house
+    - get: ci
+  - put: k8s-topgun-worker
+    tags: [k8s-topgun]
+    params:
+      chart: hush-house/depoyments/with-creds/ci-topgun
+      values: hush-house/deployments/with-creds/ci-topgun/values.yaml
+      override_values:
+      - key: concourse.secrets.hostKeyPub
+        value: ((secret))
+      - key: concourse.secrets.workerKey
+        value: ((secret))
