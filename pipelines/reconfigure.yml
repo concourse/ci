@@ -146,7 +146,7 @@ jobs:
         config_file: pipelines/pipelines/prs.yml
       - name: helm-prs
         team: main
-        conifg_file: pipelines/pipelines/helm-prs.yml
+        config_file: pipelines/pipelines/helm-prs.yml
         vars:
           pr_base_branch: master
           # Why a release branch and not master?
@@ -157,14 +157,14 @@ jobs:
           concourse_image_tag: latest
       - name: helm-prs-5.5.x
         team: main
-        conifg_file: pipelines/pipelines/helm-prs.yml
+        config_file: pipelines/pipelines/helm-prs.yml
         vars:
           pr_base_branch: release/5.5.x
           concourse_base_branch: release/5.5.x
           concourse_image_tag: 5.5
       - name: helm-prs-5.7.x
         team: main
-        conifg_file: pipelines/pipelines/helm-prs.yml
+        config_file: pipelines/pipelines/helm-prs.yml
         vars:
           pr_base_branch: release/5.7.x
           concourse_base_branch: release/5.7.x
