@@ -142,6 +142,7 @@ jobs:
         team: main
         config_file: pipelines/pipelines/concourse.yml
       - name: prs
+        exposed: true
         team: main
         config_file: pipelines/pipelines/prs.yml
       - name: helm-prs
@@ -170,6 +171,7 @@ jobs:
           concourse_base_branch: release/5.7.x
           concourse_image_tag: 5.7
       - name: baggageclaim
+        exposed: true
         team: main
         config_file: baggageclaim-ci/ci/pipeline.yml
       - name: bosh-cleanup
