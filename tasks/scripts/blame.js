@@ -10,7 +10,7 @@ const web = new WebClient(token);
 const sha = process.argv[2];
 const outputFile = process.argv[3];
 const owner = 'concourse';
-const repo = 'concourse';
+const repo = process.env.GITHUB_REPO;
 
 async function main() {
   var searchResults = await octokit.search.issuesAndPullRequests({

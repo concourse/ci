@@ -1238,8 +1238,8 @@ resources:
   type: git
   icon: *git-icon
   source:
-    uri: https://github.com/concourse/concourse-chart.git
-    branch: release/((release_minor)).x
+    uri: https://github.com/helm/charts
+    branch: master
 
 - name: concourse-github-release
   type: github-release

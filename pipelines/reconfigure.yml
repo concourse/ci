@@ -13,19 +13,24 @@ resources:
     paths:
     - pipelines
 
-- name: charts-maintenance
+- name: baggageclaim-ci
   type: git
   icon: github-circle
   source:
-    uri: https://github.com/concourse/charts
-    branch: maintenance
+    uri: https://github.com/concourse/baggageclaim
+    paths: [ci]
 
-- name: maintenance-image
+- name: ruby-alpine-image
   type: registry-image
   source:
-    password: ((docker.password))
-    repository: concourse/charts-maintenance
-    username: ((docker.username))
+    repository: ruby
+    tag: rc-alpine
+
+- name: oxygen-mask
+  type: git
+  icon: github-circle
+  source:
+    uri: https://github.com/concourse/oxygen-mask
 
 - name: prod
   type: concourse-pipeline
@@ -37,6 +42,9 @@ resources:
       username: ((basic_auth.username))
       password: ((basic_auth.password))
     - name: resources
+      username: ((basic_auth.username))
+      password: ((basic_auth.password))
+    - name: monitoring-hush-house
       username: ((basic_auth.username))
       password: ((basic_auth.password))
 
@@ -122,21 +130,8 @@ jobs:
   plan:
   - get: pipelines
     trigger: true
-  - get: charts-maintenance
+  - get: baggageclaim-ci
     trigger: true
-  - get: maintenance-image
-  - task: generate-charts-yaml
-    image: maintenance-image
-    config:
-      platform: linux
-      inputs:
-      - name: charts-maintenance
-      outputs:
-      - name: charts-maintenance
-      run:
-        dir: charts-maintenance
-        path: make
-        args: [pipeline.yml]
   - put: prod
     params:
       pipelines:
@@ -147,17 +142,44 @@ jobs:
         team: main
         config_file: pipelines/pipelines/concourse.yml
       - name: prs
+        exposed: true
         team: main
         config_file: pipelines/pipelines/prs.yml
+      - name: helm-prs
+        team: main
+        config_file: pipelines/pipelines/helm-prs.yml
+        vars:
+          pr_base_branch: master
+          # Why a release branch and not master?
+          # A: We want to test pr's against the last stable release of Concourse,
+          # in particular we care about which version of k8s-topgun we use.
+          # Dev flags are tested in the main pipeline with other unreleased code
+          concourse_base_branch: release/5.7.x
+          concourse_image_tag: latest
+      - name: helm-prs-5.5.x
+        team: main
+        config_file: pipelines/pipelines/helm-prs.yml
+        vars:
+          pr_base_branch: release/5.5.x
+          concourse_base_branch: release/5.5.x
+          concourse_image_tag: 5.5
+      - name: helm-prs-5.7.x
+        team: main
+        config_file: pipelines/pipelines/helm-prs.yml
+        vars:
+          pr_base_branch: release/5.7.x
+          concourse_base_branch: release/5.7.x
+          concourse_image_tag: 5.7
+      - name: baggageclaim
+        exposed: true
+        team: main
+        config_file: baggageclaim-ci/ci/pipeline.yml
       - name: bosh-cleanup
         team: main
         config_file: pipelines/pipelines/bosh-cleanup.yml
       - name: wings
         team: main
         config_file: pipelines/pipelines/wings.yml
-      - name: concourse-charts
-        team: main
-        config_file: charts-maintenance/pipeline.yml
       - name: norsk-mirror
         team: main
         config_file: pipelines/pipelines/norsk-mirror.yml
@@ -206,15 +228,46 @@ jobs:
         vars:
           branch_name: use_zstd
           environment: use-zstd
-      - name: lidar-drills
-        team: main
-        config_file: pipelines/pipelines/drills.yml
-        vars:
-          branch_name: checks
-          environment: lidar-drills
       - name: prod-db-backup
         team: main
         config_file: pipelines/pipelines/prod-db-backup.yml
       - name: prod-db-restore-verify
         team: main
         config_file: pipelines/pipelines/prod-db-restore-verify.yml
+
+- name: reconfigure-monitoring-pipeline
+  plan:
+  - get: oxygen-mask
+    trigger: true
+  - get: ruby-alpine-image
+  - task: generate-monitor-yml
+    image: ruby-alpine-image
+    config:
+      platform: linux
+      inputs:
+      - name: oxygen-mask
+      outputs:
+      - name: oxygen-mask
+      run:
+        dir: oxygen-mask
+        path: sh
+        args:
+        - -c
+        - |
+          erb monitor.yml > gen-monitor.yml
+  - put: prod
+    params:
+      pipelines:
+      - name: monitoring-stats
+        team: monitoring-hush-house
+        config_file: oxygen-mask/gen-monitor.yml
+        vars:
+          atc_url: https://hush-house.pivotal.io
+          interval: 30s
+          username: ((basic_auth.username))
+          password: ((basic_auth.password))
+          team_name: main
+          pipeline_name: monitoring
+          datadog_api_key: ((datadog_api_key))
+          github_access_token: ((concourse_github_dummy.access_token))
+
