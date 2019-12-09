@@ -64,6 +64,11 @@ resources:
   icon: docker
   source: {repository: concourse/unit}
 
+- name: baggageclaim-ci
+  type: registry-image
+  icon: docker
+  source: {repository: concourse/baggageclaim-ci}
+
 - name: postgres-image
   type: registry-image
   icon: docker
@@ -232,11 +237,13 @@ jobs:
       tags: [pr]
     - get: baggageclaim-master
       tags: [pr]
+    - get: baggageclaim-ci
     - get: ci
   - put: baggageclaim-pr
     params: {path: baggageclaim-pr, status: pending, context: unit}
     tags: [pr]
   - task: unit-linux
+    image: baggageclaim-ci
     privileged: true
     timeout: 1h
     file: baggageclaim-master/ci/unit-linux.yml
