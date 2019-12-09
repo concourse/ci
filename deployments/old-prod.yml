@@ -1,0 +1,275 @@
+addons:
+- include:
+    stemcell:
+    - os: ubuntu-trusty
+    - os: ubuntu-xenial
+  jobs:
+  - name: dd-agent
+    release: datadog-agent
+  name: dd-agent
+  properties:
+    dd:
+      api_key: ((datadog_api_key))
+      dogstatsd_port: 18125
+      process_agent_enabled: true
+      tags:
+      - bosh-deployment:concourse-prod
+      unique_friendly_hostname: true
+      use_dogstatsd: true
+instance_groups:
+- azs:
+  - z1
+  instances: 1
+  jobs:
+  - name: bpm
+    release: bpm
+  - name: web
+    properties:
+      add_local_users:
+      - ((local_user.username)):((local_user.password))
+      audit:
+        build: true
+        container: true
+        job: true
+        pipeline: true
+        resource: true
+        system: true
+        team: true
+        volume: true
+        worker: true
+      bind_port: 80
+      cluster_name: prod
+      container_placement_strategy: limit-active-tasks
+      datadog:
+        agent_host: 127.0.0.1
+        agent_port: 18125
+        prefix: concourse.ci
+      default_task_cpu_limit: 1024
+      default_task_memory_limit: 5GB
+      enable_global_resources: true
+      enable_lidar: true
+      encryption_key: ((encryption_key))
+      external_url: https://ci.concourse-ci.org
+      github_auth:
+        client_id: ((github_client.username))
+        client_secret: ((github_client.password))
+      main_team:
+        auth:
+          github:
+            orgs: ((main_team.github_orgs))
+            teams: ((main_team.github_teams))
+            users: ((main_team.github_users))
+          local:
+            users:
+            - ((local_user.username))
+      max_active_tasks_per_worker: 5
+      postgresql:
+        database: atc
+        role:
+          name: concourse
+          password: ((postgres_password))
+      tls:
+        bind_port: 443
+        cert: ((atc_tls))
+      token_signing_key: ((token_signing_key))
+      vault:
+        auth:
+          backend: cert
+        shared_path: shared
+        tls:
+          ca_cert:
+            certificate: ((vault_cert.ca))
+          client_cert: ((vault_client_cert))
+        url: https://vault.concourse-ci.org:8200
+      worker_gateway:
+        authorized_keys: |
+          ((worker_key.public_key))
+        host_key: ((tsa_host_key))
+        team_authorized_keys: ((team_authorized_keys))
+      x_frame_options: ""
+    release: concourse
+  name: web
+  networks:
+  - name: web
+  stemcell: xenial
+  vm_extensions:
+  - concourse-web-target-pool
+  vm_type: web
+- azs:
+  - z1
+  instances: 1
+  jobs:
+  - name: postgres
+    properties:
+      databases:
+        additional_config:
+          checkpoint_completion_target: 0.9
+          default_statistics_target: 1000
+          effective_cache_size: 1179648
+          maintenance_work_mem: 262144
+          random_page_cost: 3
+          shared_buffers: 589824
+          work_mem: 10240
+        collect_statement_statistics: true
+        databases:
+        - name: atc
+        max_connections: 220
+        port: 5432
+        roles:
+        - name: concourse
+          password: ((postgres_password))
+    release: postgres
+  - name: telegraf-agent
+    properties:
+      influxdb:
+        database: ((influxdb_database))
+        password: ((influxdb_auth.password))
+        url: ((influxdb_url))
+        username: ((influxdb_auth.username))
+      inputs:
+        postgresql:
+          address: postgres://concourse:((postgres_password))@127.0.0.1/atc?sslmode=disable
+    release: telegraf-agent
+  - name: bbr-atcdb
+    release: concourse
+  - name: database-backup-restorer
+    release: backup-and-restore-sdk
+  name: db
+  networks:
+  - name: private
+  persistent_disk_type: super-extra-large
+  stemcell: xenial
+  vm_type: database
+- azs:
+  - z1
+  instances: 1
+  jobs:
+  - name: worker
+    properties:
+      baggageclaim:
+        driver: overlay
+      drain_timeout: 10m
+      volume_sweeper_max_in_flight: 3
+      worker_gateway:
+        rebalance_interval: 30m
+        worker_key: ((worker_key))
+    release: concourse
+  name: worker
+  networks:
+  - name: private
+  stemcell: xenial
+  vm_type: worker
+- azs:
+  - z1
+  instances: 3
+  jobs:
+  - name: worker
+    properties:
+      baggageclaim:
+        driver: overlay
+      garden:
+        deny_networks:
+        - 10.0.0.0/16
+        dns_servers:
+        - 8.8.8.8
+        - 8.8.4.4
+      log_level: debug
+      tags:
+      - pr
+      worker_gateway:
+        worker_key: ((worker_key))
+    release: concourse
+  name: untrusted-worker
+  networks:
+  - name: private
+  stemcell: xenial
+  vm_type: worker
+- azs:
+  - z1
+  instances: 1
+  jobs:
+  - name: enable_ssh
+    release: windows-utilities
+  - name: worker-windows
+    properties:
+      worker_gateway:
+        worker_key: ((worker_key))
+    release: concourse
+  name: windows-worker
+  networks:
+  - name: windows
+  stemcell: windows
+  vm_type: worker
+- azs:
+  - z1
+  instances: 1
+  jobs:
+  - name: vault
+    properties:
+      tls:
+        certificate: ((vault_cert.certificate))
+        private_key: ((vault_cert.private_key))
+    release: vault
+  name: vault
+  networks:
+  - name: vault
+    static_ips:
+    - 10.3.0.2
+  persistent_disk_type: large
+  stemcell: xenial
+  vm_type: vault
+name: concourse-prod
+releases:
+- name: concourse
+  version: 5.6.1-dev.20191031T143137Z.commit.825c9a5
+- name: bpm
+  version: 1.1.5
+- name: postgres
+  version: "39"
+- name: datadog-agent
+  version: latest
+- name: windows-utilities
+  sha1: efc10ac0f4acae23637ce2c6f864d20df2e3a781
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/windows-utilities-release?v=0.11.0
+  version: 0.11.0
+- name: telegraf-agent
+  version: latest
+- name: backup-and-restore-sdk
+  version: 1.17.2
+- name: vault
+  version: "3"
+stemcells:
+- alias: xenial
+  os: ubuntu-xenial
+  version: "621.5"
+- alias: windows
+  os: windows2016
+  version: "1709.21"
+update:
+  canaries: 1
+  canary_watch_time: 1000-60000
+  max_in_flight: 3
+  serial: false
+  update_watch_time: 1000-60000
+variables:
+- name: postgres_password
+  type: password
+- name: token_signing_key
+  type: rsa
+- name: tsa_host_key
+  type: ssh
+- name: worker_key
+  type: ssh
+- name: vault_client_cert
+  options:
+    common_name: concourse
+    is_ca: true
+  type: certificate
+- name: vault_cert
+  options:
+    alternative_names:
+    - vault.concourse-ci.org
+    - 127.0.0.1
+    common_name: 10.3.0.2
+    is_ca: true
+  type: certificate
