@@ -1114,8 +1114,7 @@ jobs:
       - concourse-release/*.tgz
       - bpm-release/*.tgz
       ops_files:
-      vars_files:
-      - cbd/versions.yml
+      - cbd/cluster/operations/dev-versions.yml
       vars:
         deployment_name: topgun-worker
         instances: 1
