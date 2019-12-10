@@ -34,7 +34,7 @@ resource "google_compute_firewall" "bosh-director" {
 
   allow {
     protocol = "tcp"
-    ports    = ["8080"]
+    ports    = ["443"]
   }
 
   target_tags = ["smoke"]
@@ -109,7 +109,7 @@ data "template_file" "web_conf" {
   template = file("systemd/smoke-web.conf.tpl")
 
   vars = {
-    instance_ip    = google_compute_address.smoke.address
+    instance_url   = "https://${google_compute_address.smoke.address}"
     admin_password = random_string.admin_password.result
     guest_password = random_string.guest_password.result
   }
@@ -188,8 +188,8 @@ resource "null_resource" "rerun" {
   }
 }
 
-output "instance_ip" {
-  value = google_compute_address.smoke.address
+output "instance_url" {
+  value = "https://${google_compute_address.smoke.address}"
 }
 
 output "admin_password" {
