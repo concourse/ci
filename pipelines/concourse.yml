@@ -1104,6 +1104,27 @@ jobs:
     - get: bbr-sdk-release
     - get: prod
     - get: ci
+  - put: bosh-topgun-worker-deployment
+    tags: [topgun]
+    params:
+      manifest: cbd/cluster/external-worker.yml
+      stemcells:
+      - gcp-xenial-stemcell/*.tgz
+      releases:
+      - concourse-release/*.tgz
+      - bpm-release/*.tgz
+      ops_files:
+      - cbd/cluster/operations/dev-versions.yml
+      vars:
+        deployment_name: topgun-worker
+        instances: 1
+        azs: [z1]
+        worker_vm_type: worker
+        external_worker_network_name: default
+        worker_tags: [topgun]
+        tsa_host: "nci.concourse-ci.org"
+        tsa_host_key.public_key: ((tsa_host_public_key))
+        worker_key: ((worker_private_key))
   - put: prod-deployment
     params:
       manifest: cbd/cluster/concourse.yml
@@ -1837,6 +1858,17 @@ resources:
     client: ((bosh_client.id))
     client_secret: ((bosh_client.secret))
     deployment: concourse-prod
+
+- name: bosh-topgun-worker-deployment
+  tags: [topgun]
+  type: bosh-deployment
+  icon: sync
+  source:
+    target: https://10.0.0.6:25555
+    client: ((topgun_bosh_client.id))
+    client_secret: ((topgun_bosh_client.secret))
+    ca_cert: ((topgun_ca_cert))
+    deployment: topgun-worker
 
 - name: gcp-xenial-stemcell
   type: bosh-io-stemcell
