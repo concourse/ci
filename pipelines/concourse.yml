@@ -73,7 +73,6 @@ groups:
   - publish-chart
   - chart-major
   - chart-minor
-  - chart-patch
 
 - name: workers
   jobs:
@@ -1559,13 +1558,6 @@ jobs:
   plan:
   - put: chart-version
     params: {bump: minor, pre: rc}
-
-- name: chart-patch
-  public: true
-  serial_groups: [chart-version]
-  plan:
-  - put: chart-version
-    params: {bump: patch, pre: rc}
 
 resources:
 - name: concourse

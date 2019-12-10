@@ -12,11 +12,12 @@ concourse_version=$(cat concourse-version/version)
 pushd concourse
   sed -i "s/version: .*/version: ${chart_version}/g" Chart.yaml
   sed -i "s/appVersion: .*/appVersion: ${concourse_version}/g" Chart.yaml
+  sed -i "s/imageTag: .*/imageTag: \"${chart_version}\"/g" values.yaml
+  sed -i "s/Concourse image version | .* |/Concourse image version | \`${chart_version}\` |/g" README.md
 
   git config --global user.email "ci@localhost"
   git config --global user.name "CI Bot"
 
-  git diff
   git add -A
   git commit -m "bump chart version"
   git tag -f "v$chart_version"

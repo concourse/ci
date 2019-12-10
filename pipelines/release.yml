@@ -91,7 +91,10 @@ groups:
   - publish-image
   - publish-bosh-release
   - publish-docs
+  - ship-chart
+  - publish-chart
   - patch
+  - chart-patch
 
 jobs:
 - name: unit
@@ -988,6 +991,54 @@ jobs:
   - put: docs-gh-pages
     params: {repository: built-docs}
 
+- name: ship-chart
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse-version
+      resource: version
+      passed: [shipit]
+    - get: concourse-chart
+      passed: [k8s-topgun]
+    - get: unit-image
+      passed: [k8s-topgun]
+    - get: final-chart-version
+      resource: chart-version
+      params: {bump: final}
+
+- name: publish-chart
+  serial: true
+  plan:
+  - in_parallel:
+    - get: chart-version
+      passed: [ship-chart]
+      trigger: true
+    - get: concourse-version
+      resource: version
+      passed: [ship-chart]
+    - get: concourse-chart
+      passed: [ship-chart]
+    - get: unit-image
+      passed: [ship-chart]
+    - get: chart-repo-index
+  - task: build-chart
+    image: unit-image
+    file: ci/tasks/package-chart.yml
+  - in_parallel:
+    - put: chart-repo-index
+      inputs: [packaged-chart]
+      params:
+        file: packaged-chart/index.yaml
+    - put: chart-repo
+      inputs: [packaged-chart]
+      params:
+        file: packaged-chart/concourse-.*.tgz
+    - put: concourse-chart
+      inputs: [concourse]
+      params:
+        repository: concourse
+        merge: true
+
 - name: patch
   public: true
   serial_groups: [version]
@@ -996,6 +1047,13 @@ jobs:
     passed: [shipit]
     trigger: true
   - put: version
+    params: {bump: patch, pre: rc}
+
+- name: chart-patch
+  public: true
+  serial_groups: [chart-version]
+  plan:
+  - put: chart-version
     params: {bump: patch, pre: rc}
 
 resources:
@@ -1233,6 +1291,7 @@ resources:
   source:
     uri: https://github.com/concourse/concourse-chart.git
     branch: release/((release_minor)).x
+    private_key: ((concourse_chart_private_key))
 
 - name: helm-charts
   type: git
@@ -1440,3 +1499,17 @@ resources:
     bucket: concourse-ubuntu-dpkg-list
     json_key: ((concourse_dpkg_list_json_key))
     regexp: "concourse-dpkg-list-(.*).txt"
+
+- name: chart-repo
+  type: gcs
+  source:
+    bucket: concourse-charts
+    json_key: ((concourse_charts_json_key))
+    regexp: concourse-(.*)\.tgz
+
+- name: chart-repo-index
+  type: gcs
+  source:
+    bucket: concourse-charts
+    json_key: ((concourse_charts_json_key))
+    versioned_file: index.yaml
