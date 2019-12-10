@@ -1909,7 +1909,7 @@ resources:
   icon: *git-icon
   source:
     uri: https://github.com/concourse/concourse-chart.git
-    branch: dev
+    branch: master
 
 - name: helm-charts
   type: git
