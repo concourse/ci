@@ -549,9 +549,10 @@ jobs:
     file: ci/tasks/discover-bosh-endpoint-info.yml
     image: unit-image
     params:
-      BOSH_ENVIRONMENT: ((bosh_target))
-      BOSH_CLIENT: ((bosh_client.id))
-      BOSH_CLIENT_SECRET: ((bosh_client.secret))
+      BOSH_ENVIRONMENT: https://10.0.0.6:25555
+      BOSH_CA_CERT: ((topgun_ca_cert))
+      BOSH_CLIENT: ((topgun_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((topgun_bosh_client.secret))
       BOSH_DEPLOYMENT: concourse-smoke-((branch_name))
       BOSH_INSTANCE_GROUP: concourse
   - task: smoke
@@ -600,10 +601,10 @@ jobs:
       concourse-release: concourse-release-branch
     params:
       DEPLOYMENT_NAME_PREFIX: concourse-topgun-((branch_name))
-      BOSH_ENVIRONMENT: ((bosh_target))
-      BOSH_CA_CERT: ((tmp_bosh_client.ca_cert))
-      BOSH_CLIENT: ((bosh_client.id))
-      BOSH_CLIENT_SECRET: ((bosh_client.secret))
+      BOSH_ENVIRONMENT: https://10.0.0.6:25555
+      BOSH_CA_CERT: ((topgun_ca_cert))
+      BOSH_CLIENT: ((topgun_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((topgun_bosh_client.secret))
       BOSH_SSH_KEY: ((topgun_bosh_key))
       AWS_REGION: ((topgun_aws_ssm.region))
       AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
@@ -779,9 +780,10 @@ resources:
   type: bosh-deployment
   icon: fire
   source:
-    target: ((bosh_target))
-    client: ((bosh_client.id))
-    client_secret: ((bosh_client.secret))
+    target: https://10.0.0.6:25555
+    client: ((topgun_bosh_client.id))
+    client_secret: ((topgun_bosh_client.secret))
+    ca_cert: ((topgun_ca_cert))
     deployment: concourse-smoke-((branch_name))
 
 - name: concourse-chart
@@ -1022,9 +1024,10 @@ resources:
   type: bosh-deployment
   icon: sync
   source:
-    target: ((bosh_target))
-    client: ((bosh_client.id))
-    client_secret: ((bosh_client.secret))
+    target: https://10.0.0.6:25555
+    client: ((topgun_bosh_client.id))
+    client_secret: ((topgun_bosh_client.secret))
+    ca_cert: ((topgun_ca_cert))
     deployment: concourse-((environment))
 
 - name: resource-types-image
