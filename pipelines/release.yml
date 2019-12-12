@@ -1005,6 +1005,9 @@ jobs:
     - get: final-chart-version
       resource: chart-version
       params: {bump: final}
+    - put: final-chart-version
+      resource: chart-version
+      params: {file: final-chart-version/version}
 
 - name: publish-chart
   serial: true
@@ -1033,7 +1036,7 @@ jobs:
     - put: chart-repo
       inputs: [packaged-chart]
       params:
-        file: packaged-chart/concourse-.*.tgz
+        file: packaged-chart/concourse-*.tgz
     - put: concourse-chart
       inputs: [concourse]
       params:
