@@ -1005,9 +1005,8 @@ jobs:
     - get: final-chart-version
       resource: chart-version
       params: {bump: final}
-    - put: final-chart-version
-      resource: chart-version
-      params: {file: final-chart-version/version}
+  - put: chart-version
+    params: {file: final-chart-version/version}
 
 - name: publish-chart
   serial: true
