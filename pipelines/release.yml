@@ -1293,7 +1293,7 @@ resources:
   type: git
   icon: *git-icon
   source:
-    uri: https://github.com/concourse/concourse-chart.git
+    uri: git@github.com:concourse/concourse-chart.git
     branch: release/((release_minor)).x
     private_key: ((concourse_chart_private_key))
 
