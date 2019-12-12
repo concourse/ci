@@ -235,7 +235,6 @@ jobs:
     - get: oci-build-task
       trigger: true
     - get: ci
-      trigger: true
   - in_parallel:
     - task: build-alpine
       image: oci-build-task

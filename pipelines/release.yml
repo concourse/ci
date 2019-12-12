@@ -185,7 +185,6 @@ jobs:
     - get: builder
       trigger: true
     - get: ci
-      trigger: true
   - in_parallel:
     - task: build-alpine
       image: builder
