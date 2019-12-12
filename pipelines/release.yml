@@ -1513,3 +1513,12 @@ resources:
     bucket: concourse-charts
     json_key: ((concourse_charts_json_key))
     versioned_file: index.yaml
+
+- name: chart-version
+  type: semver
+  icon: tag
+  source:
+    driver: gcs
+    bucket: concourse-artifacts
+    json_key: ((concourse_artifacts_json_key))
+    key: chart-version
