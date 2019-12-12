@@ -1,0 +1,20 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: concourse/unit}
+
+inputs:
+- name: concourse-chart
+- name: chart-repo-index
+- name: chart-version
+- name: concourse-version
+- name: ci
+
+outputs:
+- name: packaged-chart
+- name: concourse
+
+run:
+  path: ci/tasks/scripts/package-chart

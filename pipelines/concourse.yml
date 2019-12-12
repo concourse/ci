@@ -69,6 +69,10 @@ groups:
   - promote-cbd
   - bump-cbd-versions
   - publish-docs
+  - ship-chart
+  - publish-chart
+  - chart-major
+  - chart-minor
 
 - name: workers
   jobs:
@@ -1463,6 +1467,54 @@ jobs:
       repository: cbd-master
       merge: true
 
+- name: ship-chart
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse-version
+      resource: version
+      passed: [shipit]
+    - get: concourse-chart
+      passed: [k8s-topgun]
+    - get: unit-image
+      passed: [k8s-topgun]
+    - get: final-chart-version
+      resource: chart-version
+      params: {bump: final}
+
+- name: publish-chart
+  serial: true
+  plan:
+  - in_parallel:
+    - get: chart-version
+      passed: [ship-chart]
+      trigger: true
+    - get: concourse-version
+      resource: version
+      passed: [ship-chart]
+    - get: concourse-chart
+      passed: [ship-chart]
+    - get: unit-image
+      passed: [ship-chart]
+    - get: chart-repo-index
+  - task: build-chart
+    image: unit-image
+    file: ci/tasks/package-chart.yml
+  - in_parallel:
+    - put: chart-repo-index
+      inputs: [packaged-chart]
+      params:
+        file: packaged-chart/index.yaml
+    - put: chart-repo
+      inputs: [packaged-chart]
+      params:
+        file: packaged-chart/concourse-.*.tgz
+    - put: concourse-chart
+      inputs: [concourse]
+      params:
+        repository: concourse
+        merge: true
+
 - name: install-windows-deps
   public: true
   serial: true
@@ -1491,6 +1543,20 @@ jobs:
   serial_groups: [version]
   plan:
   - put: version
+    params: {bump: minor, pre: rc}
+
+- name: chart-major
+  public: true
+  serial_groups: [chart-version]
+  plan:
+  - put: chart-version
+    params: {bump: major, pre: rc}
+
+- name: chart-minor
+  public: true
+  serial_groups: [chart-version]
+  plan:
+  - put: chart-version
     params: {bump: minor, pre: rc}
 
 resources:
@@ -1732,6 +1798,15 @@ resources:
     json_key: ((concourse_artifacts_json_key))
     key: version
 
+- name: chart-version
+  type: semver
+  icon: tag
+  source:
+    driver: gcs
+    bucket: concourse-artifacts
+    json_key: ((concourse_artifacts_json_key))
+    key: chart-version
+
 - name: linux-rc
   type: gcs
   icon: linux
@@ -1910,6 +1985,7 @@ resources:
   source:
     uri: https://github.com/concourse/concourse-chart.git
     branch: master
+    private_key: ((concourse_chart_private_key))
 
 - name: helm-charts
   type: git
@@ -2004,3 +2080,17 @@ resources:
     bucket: concourse-ubuntu-dpkg-list
     json_key: ((concourse_dpkg_list_json_key))
     regexp: "concourse-dpkg-list-(.*).txt"
+
+- name: chart-repo
+  type: gcs
+  source:
+    bucket: concourse-charts
+    json_key: ((concourse_charts_json_key))
+    regexp: concourse-(.*)\.tgz
+
+- name: chart-repo-index
+  type: gcs
+  source:
+    bucket: concourse-charts
+    json_key: ((concourse_charts_json_key))
+    versioned_file: index.yaml
