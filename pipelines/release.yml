@@ -1021,6 +1021,7 @@ jobs:
     - get: unit-image
       passed: [ship-chart]
     - get: chart-repo-index
+    - get: ci
   - task: build-chart
     image: unit-image
     file: ci/tasks/package-chart.yml
