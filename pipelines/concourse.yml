@@ -1467,6 +1467,7 @@ jobs:
       merge: true
 
 - name: ship-chart
+  public: true
   serial: true
   plan:
   - in_parallel:
@@ -1484,6 +1485,7 @@ jobs:
     params: {file: final-chart-version/version}
 
 - name: publish-chart
+  public: true
   serial: true
   plan:
   - in_parallel:
