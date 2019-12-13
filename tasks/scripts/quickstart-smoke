@@ -16,7 +16,7 @@ popd
 # now run the watjs/smoke tests
 mkdir -p endpoint-info
 pushd endpoint-info
-  echo "localhost" > instance_ip
+  echo "http://localhost:8080" > instance_url
   echo "test" > admin_username
   echo "test" > admin_password
 popd
