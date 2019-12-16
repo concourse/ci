@@ -109,7 +109,7 @@ data "template_file" "web_conf" {
   template = file("systemd/smoke-web.conf.tpl")
 
   vars = {
-    instance_url   = "https://${google_compute_address.smoke.address}"
+    instance_url   = "https://${google_compute_address.smoke.address}.xip.io"
     admin_password = random_string.admin_password.result
     guest_password = random_string.guest_password.result
   }
@@ -189,7 +189,7 @@ resource "null_resource" "rerun" {
 }
 
 output "instance_url" {
-  value = "https://${google_compute_address.smoke.address}"
+  value = "https://${google_compute_address.smoke.address}.xip.io"
 }
 
 output "admin_password" {
