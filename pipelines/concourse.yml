@@ -128,6 +128,30 @@ jobs:
         mode: normal
         alert_type: broke
 
+- name: build-integration-image
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: ci
+    - get: oci-build-task
+    - get: golang-linux
+      trigger: true
+  - task: build
+    image: oci-build-task
+    privileged: true
+    config:
+      platform: linux
+      params: {CONTEXT: ci/dockerfiles/integration}
+      inputs: [{name: ci}]
+      outputs: [{name: image}]
+      caches: [{path: cache}]
+      run: {path: build}
+  - put: integration-image
+    params: {image: image/image.tar}
+  on_success: *fixed-ci
+  on_failure: *broke-ci
+
 - name: build-golang-builder-image
   public: true
   serial: true
@@ -322,7 +346,7 @@ jobs:
       params: {format: oci}
     - get: ci
   - task: testflight
-    image: unit-image
+    image: integration-image
     privileged: true
     timeout: 1h
     file: ci/tasks/docker-compose-testflight.yml
@@ -1480,6 +1504,14 @@ resources:
   icon: *image-icon
   source:
     repository: concourse/unit
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: integration-image
+  type: registry-image
+  icon: *image-icon
+  source:
+    repository: concourse/integration
     username: ((docker.username))
     password: ((docker.password))
 
