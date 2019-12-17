@@ -656,6 +656,7 @@ jobs:
       GCP_KEY: ((concourse_smoke_gcp_key))
       SSH_KEY: ((concourse_smoke_ssh_key))
       WORKSPACE: release-((release_minor))
+      USE_HTTPS: ((bin_smoke_use_https))
   - task: smoke
     image: unit-image
     file: ci/tasks/smoke.yml
