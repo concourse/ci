@@ -3,7 +3,7 @@ AmbientCapabilities=CAP_NET_BIND_SERVICE
 Environment=CONCOURSE_SESSION_SIGNING_KEY=/etc/concourse/session_signing_key
 Environment=CONCOURSE_TSA_HOST_KEY=/etc/concourse/host_key
 Environment=CONCOURSE_TSA_AUTHORIZED_KEYS=/etc/concourse/authorized_worker_keys
-%{ if var.use_https ~}
+%{ if use_https ~}
 Environment=CONCOURSE_EXTERNAL_URL=https://${instance_ip}.xip.io
 Environment=CONCOURSE_TLS_BIND_PORT="443"
 Environment=CONCOURSE_ENABLE_LETS_ENCRYPT="true"

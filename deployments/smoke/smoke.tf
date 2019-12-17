@@ -115,6 +115,7 @@ data "template_file" "web_conf" {
 
   vars = {
     instance_ip    = google_compute_address.smoke.address
+    use_https      = var.use_https
     admin_password = random_string.admin_password.result
     guest_password = random_string.guest_password.result
   }
