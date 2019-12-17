@@ -802,7 +802,7 @@ jobs:
       trigger: true
     - get: ci
   - task: bosh-topgun
-    tags: [topgun]
+    tags: [bosh]
     file: ci/tasks/topgun.yml
     image: unit-image
     input_mapping:
