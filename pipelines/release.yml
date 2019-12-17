@@ -740,7 +740,7 @@ jobs:
       trigger: true
     - get: ci
   - put: smoke-deployment
-    tags: [topgun]
+    tags: [bosh]
     params:
       manifest: ci/deployments/bosh-smoke.yml
       releases:
@@ -752,7 +752,7 @@ jobs:
       vars:
         deployment_name: ((concourse_smoke_deployment_name))
   - task: discover-bosh-endpoint-info
-    tags: [topgun]
+    tags: [bosh]
     file: ci/tasks/discover-bosh-endpoint-info.yml
     image: unit-image
     params:
@@ -763,7 +763,7 @@ jobs:
       BOSH_DEPLOYMENT: ((concourse_smoke_deployment_name))
       BOSH_INSTANCE_GROUP: concourse
   - task: smoke
-    tags: [topgun]
+    tags: [bosh]
     image: unit-image
     file: ci/tasks/smoke.yml
   on_success: *fixed-concourse
@@ -1280,7 +1280,7 @@ resources:
     private_key: ((concourse_release_deploy_key))
 
 - name: smoke-deployment
-  tags: [topgun]
+  tags: [bosh]
   type: bosh-deployment
   icon: fire
   source:
