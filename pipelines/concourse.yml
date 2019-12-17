@@ -48,7 +48,6 @@ groups:
   - bosh-topgun-runtime
   - bosh-topgun-both
   - bosh-topgun-pcf
-  - bosh-prod-deploy
   - bosh-check-props
   - merge-cbd
 
@@ -1074,152 +1073,6 @@ jobs:
   on_success: *fixed-concourse
   on_failure: *broke-concourse
 
-- name: bosh-prod-deploy
-  public: true
-  serial: true
-  interruptible: true
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
-      trigger: true
-    - get: version
-      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
-      trigger: true
-    - get: concourse-release
-      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
-      trigger: true
-    - get: postgres-release
-      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
-      trigger: true
-    - get: bpm-release
-      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
-      trigger: true
-    - get: gcp-xenial-stemcell
-      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
-      trigger: true
-    - get: vault-release
-      passed: [bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
-      trigger: true
-    - get: gcp-windows-stemcell
-    - get: cbd
-      trigger: true
-    - get: bbr-sdk-release
-    - get: prod
-    - get: ci
-  - put: bosh-topgun-worker-deployment
-    tags: [topgun]
-    params:
-      manifest: cbd/cluster/external-worker.yml
-      stemcells:
-      - gcp-xenial-stemcell/*.tgz
-      releases:
-      - concourse-release/*.tgz
-      - bpm-release/*.tgz
-      ops_files:
-      - cbd/cluster/operations/dev-versions.yml
-      vars:
-        deployment_name: topgun-worker
-        instances: 1
-        azs: [z1]
-        worker_vm_type: worker
-        external_worker_network_name: default
-        worker_tags: [topgun]
-        tsa_host: "nci.concourse-ci.org"
-        tsa_host_key.public_key: ((tsa_host_public_key))
-        worker_key: ((worker_private_key))
-  - put: prod-deployment
-    params:
-      manifest: cbd/cluster/concourse.yml
-      stemcells:
-      - gcp-xenial-stemcell/*.tgz
-      - gcp-windows-stemcell/*.tgz
-      releases:
-      - concourse-release/*.tgz
-      - postgres-release/*.tgz
-      - bpm-release/*.tgz
-      - bbr-sdk-release/*.tgz
-      - vault-release/*.tgz
-      ops_files:
-      - cbd/cluster/operations/scale.yml
-      - cbd/cluster/operations/dev-versions.yml
-      - cbd/cluster/operations/privileged-http.yml
-      - cbd/cluster/operations/tls.yml
-      - cbd/cluster/operations/privileged-https.yml
-      - cbd/cluster/operations/basic-auth.yml
-      - cbd/cluster/operations/github-auth.yml
-      - cbd/cluster/operations/encryption.yml
-      - cbd/cluster/operations/vault-tls-cert-auth.yml
-      - cbd/cluster/operations/datadog.yml
-      - cbd/cluster/operations/db-stats.yml
-      - cbd/cluster/operations/web-network-extension.yml
-      - cbd/cluster/operations/team-authorized-keys.yml
-      - cbd/cluster/operations/untrusted-worker.yml
-      - cbd/cluster/operations/debug-untrusted-worker.yml
-      - cbd/cluster/operations/scale-untrusted-worker.yml
-      - cbd/cluster/operations/windows-worker.yml
-      - cbd/cluster/operations/telegraf-postgres.yml
-      - cbd/cluster/operations/syslog_forwarder.yml
-      - cbd/cluster/operations/backup-atc.yml
-      - cbd/cluster/operations/task-limits.yml
-      - cbd/cluster/operations/windows-worker-network.yml
-      - cbd/cluster/operations/syslog-drainer.yml
-      - cbd/cluster/operations/container-placement-strategy-limit-active-tasks.yml
-      - cbd/cluster/operations/worker-rebalancing.yml
-      - cbd/cluster/operations/enable-global-resources.yml
-      - cbd/cluster/operations/enable-lidar.yml
-      - cbd/cluster/operations/x-frame-options-unset.yml
-      - cbd/cluster/operations/worker-volume-sweeper-max-in-flight.yml
-      - cbd/cluster/operations/vault-shared-path.yml
-      - cbd/cluster/operations/audit.yml
-      - cbd/cluster/operations/cluster-name.yml
-      - prod/prod/ops.yml
-      vars_files:
-      - cbd/versions.yml
-      vars:
-        deployment_name: concourse-prod
-        web_instances: 3
-        worker_instances: 8
-        external_url: "https://ci.concourse-ci.org"
-        web_vm_type: web
-        db_vm_type: database
-        worker_vm_type: worker
-        untrusted_worker_vm_type: worker
-        db_persistent_disk_type: super-extra-large
-        network_name: private
-        web_network_name: web
-        untrusted_worker_network_name: private
-        web_network_vm_extension: concourse-web-target-pool
-        untrusted_worker_deny_networks: [10.0.0.0/16]
-        untrusted_worker_tags: [pr]
-        untrusted_worker_instances: 3
-        windows_worker_tsa_host: ci.concourse-ci.org:2222
-        windows_worker_os: windows2016
-        windows_worker_vm_type: worker
-        windows_worker_network_name: windows
-        syslog_address: logs2.papertrailapp.com
-        syslog_port: '51403'
-        syslog_permitted_peer: "*.papertrailapp.com"
-        default_task_memory_limit: 5GB
-        default_task_cpu_limit: 1024
-        max-active-tasks-per-worker: 5
-        worker_rebalance_interval: 30m
-        volume_sweeper_max_in_flight: 3
-        vault_shared_path: "shared"
-        vault_host: vault.concourse-ci.org
-        enable_build_audit_log: true
-        enable_container_audit_log: true
-        enable_job_audit_log: true
-        enable_pipeline_audit_log: true
-        enable_resource_audit_log: true
-        enable_system_audit_log: true
-        enable_team_audit_log: true
-        enable_volume_audit_log: true
-        enable_worker_audit_log: true
-        cluster_name: "prod"
-        datadog_api_key: ((datadog_api_key))
-        datadog_tags: ["bosh-deployment:concourse-prod"]
-
 - name: shipit
   public: true
   serial_groups: [version]
@@ -1928,37 +1781,11 @@ resources:
     client_secret: ((bosh_client.secret))
     deployment: concourse-smoke
 
-- name: prod-deployment
-  type: bosh-deployment
-  icon: sync
-  source:
-    target: ((bosh_target))
-    client: ((bosh_client.id))
-    client_secret: ((bosh_client.secret))
-    deployment: concourse-prod
-
-- name: bosh-topgun-worker-deployment
-  tags: [topgun]
-  type: bosh-deployment
-  icon: sync
-  source:
-    target: https://10.0.0.6:25555
-    client: ((topgun_bosh_client.id))
-    client_secret: ((topgun_bosh_client.secret))
-    ca_cert: ((topgun_ca_cert))
-    deployment: topgun-worker
-
 - name: gcp-xenial-stemcell
   type: bosh-io-stemcell
   icon: *release-icon
   source:
     name: bosh-google-kvm-ubuntu-xenial-go_agent
-
-- name: gcp-windows-stemcell
-  type: bosh-io-stemcell
-  icon: *release-icon
-  source:
-    name: bosh-google-kvm-windows2016-go_agent
 
 - name: cbd
   type: git
@@ -1995,13 +1822,6 @@ resources:
   icon: *git-icon
   source:
     uri: https://github.com/helm/charts.git
-    branch: master
-
-- name: prod
-  type: git
-  icon: *git-icon
-  source:
-    uri: https://github.com/concourse/prod.git
     branch: master
 
 - name: golang-windows
