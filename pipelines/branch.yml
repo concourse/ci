@@ -130,7 +130,9 @@ jobs:
       trigger: true
     - get: mock-resource
       trigger: true
-    - get: builder
+    - get: resource-types-image
+      trigger: true
+    - get: oci-build-task
     - get: ci
   - task: yarn-build
     image: unit-image
@@ -145,7 +147,7 @@ jobs:
     - task: fly-darwin
       file: ci/tasks/fly-build-darwin.yml
   - task: build
-    image: builder
+    image: oci-build-task
     privileged: true
     input_mapping: {concourse: built-concourse}
     file: ci/tasks/build-dev-image.yml
@@ -374,6 +376,8 @@ jobs:
     - get: dev-image
       passed: [rc]
       trigger: true
+    - get: gdn
+      trigger: true
     - get: ci
   - in_parallel:
     - task: fly-linux
@@ -427,10 +431,10 @@ jobs:
       passed: [build-rc]
     - get: concourse-docker
       trigger: true
-    - get: builder
+    - get: oci-build-task
     - get: ci
   - task: build
-    image: builder
+    image: oci-build-task
     privileged: true
     file: concourse-docker/ci/build-image.yml
   - put: concourse-rc-image
@@ -531,6 +535,7 @@ jobs:
       trigger: true
     - get: ci
   - put: smoke-deployment
+    tags: [topgun]
     params:
       manifest: ci/deployments/bosh-smoke.yml
       releases:
@@ -542,15 +547,19 @@ jobs:
       vars:
         deployment_name: concourse-smoke-((branch_name))
   - task: discover-bosh-endpoint-info
+    tags: [topgun]
     file: ci/tasks/discover-bosh-endpoint-info.yml
     image: unit-image
     params:
-      BOSH_ENVIRONMENT: ((bosh_target))
-      BOSH_CLIENT: ((bosh_client.id))
-      BOSH_CLIENT_SECRET: ((bosh_client.secret))
+      BOSH_ENVIRONMENT: https://10.0.0.6:25555
+      BOSH_CA_CERT: ((topgun_ca_cert))
+      BOSH_CLIENT: ((topgun_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((topgun_bosh_client.secret))
       BOSH_DEPLOYMENT: concourse-smoke-((branch_name))
       BOSH_INSTANCE_GROUP: concourse
   - task: smoke
+    # Ensure the task runs on a BOSH deployed worker so it can reach the deployment
+    tags: [topgun]
     image: unit-image
     file: ci/tasks/smoke.yml
 
@@ -585,6 +594,8 @@ jobs:
       trigger: true
     - get: ci
   - task: bosh-topgun
+    # Ensure the task runs on a BOSH deployed worker so it can reach the deployment
+    tags: [topgun]
     file: ci/tasks/topgun.yml
     image: unit-image
     input_mapping:
@@ -592,10 +603,10 @@ jobs:
       concourse-release: concourse-release-branch
     params:
       DEPLOYMENT_NAME_PREFIX: concourse-topgun-((branch_name))
-      BOSH_ENVIRONMENT: ((bosh_target))
-      BOSH_CA_CERT: ((tmp_bosh_client.ca_cert))
-      BOSH_CLIENT: ((bosh_client.id))
-      BOSH_CLIENT_SECRET: ((bosh_client.secret))
+      BOSH_ENVIRONMENT: https://10.0.0.6:25555
+      BOSH_CA_CERT: ((topgun_ca_cert))
+      BOSH_CLIENT: ((topgun_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((topgun_bosh_client.secret))
       BOSH_SSH_KEY: ((topgun_bosh_key))
       AWS_REGION: ((topgun_aws_ssm.region))
       AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
@@ -771,9 +782,10 @@ resources:
   type: bosh-deployment
   icon: fire
   source:
-    target: ((bosh_target))
-    client: ((bosh_client.id))
-    client_secret: ((bosh_client.secret))
+    target: https://10.0.0.6:25555
+    client: ((topgun_bosh_client.id))
+    client_secret: ((topgun_bosh_client.secret))
+    ca_cert: ((topgun_ca_cert))
     deployment: concourse-smoke-((branch_name))
 
 - name: concourse-chart
@@ -795,10 +807,10 @@ resources:
   icon: *image-icon
   source: {repository: concourse/unit}
 
-- name: builder
+- name: oci-build-task
   type: registry-image
   icon: *image-icon
-  source: {repository: concourse/builder}
+  source: {repository: vito/oci-build-task}
 
 - name: gcp-xenial-stemcell
   type: bosh-io-stemcell
@@ -1014,7 +1026,16 @@ resources:
   type: bosh-deployment
   icon: sync
   source:
-    target: ((bosh_target))
-    client: ((bosh_client.id))
-    client_secret: ((bosh_client.secret))
+    target: https://10.0.0.6:25555
+    client: ((topgun_bosh_client.id))
+    client_secret: ((topgun_bosh_client.secret))
+    ca_cert: ((topgun_ca_cert))
     deployment: concourse-((environment))
+
+- name: resource-types-image
+  type: registry-image
+  icon: &image-icon docker
+  source:
+    repository: concourse/resource-types
+    username: ((docker.username))
+    password: ((docker.password))
