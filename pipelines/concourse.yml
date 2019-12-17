@@ -867,9 +867,10 @@ jobs:
     file: ci/tasks/discover-bosh-endpoint-info.yml
     image: unit-image
     params:
-      BOSH_ENVIRONMENT: ((bosh_target))
-      BOSH_CLIENT: ((bosh_client.id))
-      BOSH_CLIENT_SECRET: ((bosh_client.secret))
+      BOSH_ENVIRONMENT: https://10.0.0.6:25555
+      BOSH_CA_CERT: ((topgun_ca_cert))
+      BOSH_CLIENT: ((topgun_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((topgun_bosh_client.secret))
       BOSH_DEPLOYMENT: concourse-smoke
       BOSH_INSTANCE_GROUP: concourse
   - task: smoke
@@ -1774,13 +1775,14 @@ resources:
     private_key: ((concourse_release_deploy_key))
 
 - name: smoke-deployment
-  tags: [topgun]
+  tags: [bosh]
   type: bosh-deployment
   icon: fire
   source:
-    target: ((bosh_target))
-    client: ((bosh_client.id))
-    client_secret: ((bosh_client.secret))
+    target: https://10.0.0.6:25555
+    client: ((topgun_bosh_client.id))
+    client_secret: ((topgun_bosh_client.secret))
+    ca_cert: ((topgun_ca_cert))
     deployment: concourse-smoke
 
 - name: gcp-xenial-stemcell
