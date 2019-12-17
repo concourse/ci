@@ -23,7 +23,10 @@ terraform init
 terraform workspace select "$WORKSPACE" || \
   terraform workspace new "$WORKSPACE"
 
-terraform apply --auto-approve --var project=$GCP_PROJECT
+terraform apply \
+  --auto-approve \
+  --var project=$GCP_PROJECT \
+  --var use_https=$USE_HTTPS
 
 {
   terraform output -json | \

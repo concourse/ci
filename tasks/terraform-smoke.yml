@@ -10,6 +10,7 @@ params:
   GCP_KEY:
   SSH_KEY:
   WORKSPACE: default
+  USE_HTTPS: 'true'
 
 inputs:
 - name: concourse
