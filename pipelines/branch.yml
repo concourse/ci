@@ -552,9 +552,9 @@ jobs:
     image: unit-image
     params:
       BOSH_ENVIRONMENT: https://10.0.0.6:25555
-      BOSH_CA_CERT: ((topgun_ca_cert))
-      BOSH_CLIENT: ((topgun_bosh_client.id))
-      BOSH_CLIENT_SECRET: ((topgun_bosh_client.secret))
+      BOSH_CA_CERT: ((testing_bosh_ca_cert))
+      BOSH_CLIENT: ((testing_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
       BOSH_DEPLOYMENT: concourse-smoke-((branch_name))
       BOSH_INSTANCE_GROUP: concourse
   - task: smoke
@@ -604,9 +604,9 @@ jobs:
     params:
       DEPLOYMENT_NAME_PREFIX: concourse-topgun-((branch_name))
       BOSH_ENVIRONMENT: https://10.0.0.6:25555
-      BOSH_CA_CERT: ((topgun_ca_cert))
-      BOSH_CLIENT: ((topgun_bosh_client.id))
-      BOSH_CLIENT_SECRET: ((topgun_bosh_client.secret))
+      BOSH_CA_CERT: ((testing_bosh_ca_cert))
+      BOSH_CLIENT: ((testing_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
       BOSH_SSH_KEY: ((topgun_bosh_key))
       AWS_REGION: ((topgun_aws_ssm.region))
       AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
@@ -783,9 +783,9 @@ resources:
   icon: fire
   source:
     target: https://10.0.0.6:25555
-    client: ((topgun_bosh_client.id))
-    client_secret: ((topgun_bosh_client.secret))
-    ca_cert: ((topgun_ca_cert))
+    client: ((testing_bosh_client.id))
+    client_secret: ((testing_bosh_client.secret))
+    ca_cert: ((testing_bosh_ca_cert))
     deployment: concourse-smoke-((branch_name))
 
 - name: concourse-chart
@@ -1027,9 +1027,9 @@ resources:
   icon: sync
   source:
     target: https://10.0.0.6:25555
-    client: ((topgun_bosh_client.id))
-    client_secret: ((topgun_bosh_client.secret))
-    ca_cert: ((topgun_ca_cert))
+    client: ((testing_bosh_client.id))
+    client_secret: ((testing_bosh_client.secret))
+    ca_cert: ((testing_bosh_ca_cert))
     deployment: concourse-((environment))
 
 - name: resource-types-image

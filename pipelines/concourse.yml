@@ -868,9 +868,9 @@ jobs:
     image: unit-image
     params:
       BOSH_ENVIRONMENT: https://10.0.0.6:25555
-      BOSH_CA_CERT: ((topgun_ca_cert))
-      BOSH_CLIENT: ((topgun_bosh_client.id))
-      BOSH_CLIENT_SECRET: ((topgun_bosh_client.secret))
+      BOSH_CA_CERT: ((testing_bosh_ca_cert))
+      BOSH_CLIENT: ((testing_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
       BOSH_DEPLOYMENT: concourse-smoke
       BOSH_INSTANCE_GROUP: concourse
   - task: smoke
@@ -919,9 +919,9 @@ jobs:
       stemcell: gcp-xenial-stemcell
     params:
       BOSH_ENVIRONMENT: https://10.0.0.6:25555
-      BOSH_CA_CERT: ((topgun_ca_cert))
-      BOSH_CLIENT: ((topgun_bosh_client.id))
-      BOSH_CLIENT_SECRET: ((topgun_bosh_client.secret))
+      BOSH_CA_CERT: ((testing_bosh_ca_cert))
+      BOSH_CLIENT: ((testing_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
       AWS_REGION: ((topgun_aws_ssm.region))
       AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
       AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
@@ -968,9 +968,9 @@ jobs:
       stemcell: gcp-xenial-stemcell
     params:
       BOSH_ENVIRONMENT: https://10.0.0.6:25555
-      BOSH_CA_CERT: ((topgun_ca_cert))
-      BOSH_CLIENT: ((topgun_bosh_client.id))
-      BOSH_CLIENT_SECRET: ((topgun_bosh_client.secret))
+      BOSH_CA_CERT: ((testing_bosh_ca_cert))
+      BOSH_CLIENT: ((testing_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
       AWS_REGION: ((topgun_aws_ssm.region))
       AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
       AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
@@ -1017,9 +1017,9 @@ jobs:
       stemcell: gcp-xenial-stemcell
     params:
       BOSH_ENVIRONMENT: https://10.0.0.6:25555
-      BOSH_CA_CERT: ((topgun_ca_cert))
-      BOSH_CLIENT: ((topgun_bosh_client.id))
-      BOSH_CLIENT_SECRET: ((topgun_bosh_client.secret))
+      BOSH_CA_CERT: ((testing_bosh_ca_cert))
+      BOSH_CLIENT: ((testing_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
       AWS_REGION: ((topgun_aws_ssm.region))
       AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
       AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
@@ -1066,9 +1066,9 @@ jobs:
       stemcell: gcp-xenial-stemcell
     params:
       BOSH_ENVIRONMENT: https://10.0.0.6:25555
-      BOSH_CA_CERT: ((topgun_ca_cert))
-      BOSH_CLIENT: ((topgun_bosh_client.id))
-      BOSH_CLIENT_SECRET: ((topgun_bosh_client.secret))
+      BOSH_CA_CERT: ((testing_bosh_ca_cert))
+      BOSH_CLIENT: ((testing_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
       AWS_REGION: ((topgun_aws_ssm.region))
       AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
       AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
@@ -1780,9 +1780,9 @@ resources:
   icon: fire
   source:
     target: https://10.0.0.6:25555
-    client: ((topgun_bosh_client.id))
-    client_secret: ((topgun_bosh_client.secret))
-    ca_cert: ((topgun_ca_cert))
+    client: ((testing_bosh_client.id))
+    client_secret: ((testing_bosh_client.secret))
+    ca_cert: ((testing_bosh_ca_cert))
     deployment: concourse-smoke
 
 - name: gcp-xenial-stemcell
