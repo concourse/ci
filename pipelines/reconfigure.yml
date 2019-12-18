@@ -150,11 +150,8 @@ jobs:
         config_file: pipelines/pipelines/helm-prs.yml
         vars:
           pr_base_branch: master
-          # Why a release branch and not master?
-          # A: We want to test pr's against the last stable release of Concourse,
-          # in particular we care about which version of k8s-topgun we use.
-          # Dev flags are tested in the main pipeline with other unreleased code
-          concourse_base_branch: release/5.7.x
+          concourse_base_branch: master
+          concourse_image_name: concourse/concourse-rc
           concourse_image_tag: latest
       - name: helm-prs-5.5.x
         team: main
@@ -162,6 +159,7 @@ jobs:
         vars:
           pr_base_branch: release/5.5.x
           concourse_base_branch: release/5.5.x
+          concourse_image_name: concourse/concourse
           concourse_image_tag: 5.5
       - name: helm-prs-5.7.x
         team: main
@@ -169,6 +167,7 @@ jobs:
         vars:
           pr_base_branch: release/5.7.x
           concourse_base_branch: release/5.7.x
+          concourse_image_name: concourse/concourse
           concourse_image_tag: 5.7
       - name: baggageclaim
         exposed: true
