@@ -852,6 +852,7 @@ jobs:
       trigger: true
     - get: ci
   - put: smoke-deployment
+    tags: [bosh]
     params:
       manifest: ci/deployments/bosh-smoke.yml
       releases:
