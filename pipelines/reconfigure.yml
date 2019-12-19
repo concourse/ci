@@ -189,6 +189,7 @@ jobs:
         vars:
           release_major: "5"
           release_minor: "5.2"
+          latest_release: "5.2"
           concourse_smoke_deployment_name: "concourse-smoke-5-2"
           use_external_linker: true
           bin_smoke_use_https: "false"
@@ -199,6 +200,7 @@ jobs:
         vars:
           release_major: "5"
           release_minor: "5.5"
+          latest_release: "5.5"
           concourse_smoke_deployment_name: "concourse-smoke-5-5"
           use_external_linker: false
           bin_smoke_use_https: "true"
@@ -209,6 +211,7 @@ jobs:
         vars:
           release_major: "5"
           release_minor: "5.7"
+          latest_release: "5.7"
           concourse_smoke_deployment_name: "concourse-smoke-5-7"
           use_external_linker: false
           bin_smoke_use_https: "true"
@@ -219,6 +222,7 @@ jobs:
         vars:
           release_major: "6"
           release_minor: "6.0"
+          latest_release: "5"
           concourse_smoke_deployment_name: "concourse-smoke-6-0"
           use_external_linker: false
           bin_smoke_use_https: "true"
