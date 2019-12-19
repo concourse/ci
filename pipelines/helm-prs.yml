@@ -94,4 +94,4 @@ jobs:
     params:
       IN_CLUSTER: "true"
       KUBE_CONFIG: ((topgun_kube_config))
-      CONCOURSE_IMAGE_NAME: concourse/concourse
+      CONCOURSE_IMAGE_NAME: ((concourse_image_name))
