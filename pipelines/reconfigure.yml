@@ -212,6 +212,16 @@ jobs:
           concourse_smoke_deployment_name: "concourse-smoke-5-7"
           use_external_linker: false
           bin_smoke_use_https: "true"
+      - name: release-6.0.x
+        team: main
+        exposed: true
+        config_file: pipelines/pipelines/release.yml
+        vars:
+          release_major: "6"
+          release_minor: "6.0"
+          concourse_smoke_deployment_name: "concourse-smoke-6-0"
+          use_external_linker: false
+          bin_smoke_use_https: "true"
       - name: algorithm-v3
         team: main
         config_file: pipelines/pipelines/branch.yml
