@@ -1159,7 +1159,7 @@ resources:
 
     # avoid tagging as 'latest' in case this is a patch release for an older
     # version
-    tag: ((release_minor))
+    tag: ((latest_release))
 
 - name: concourse-image-ubuntu
   type: registry-image
