@@ -47,4 +47,4 @@ go mod download
 
 go install github.com/onsi/ginkgo/ginkgo
 
-ginkgo -nodes=8 -race -keepGoing -slowSpecThreshold=300 -skip="$SKIP" -r --skipPackage="$SKIP_PACKAGES" ./topgun/$SUITE "$@"
+ginkgo -nodes=8 -race -keepGoing -slowSpecThreshold=300 -skip="$SKIP" --progress -r --skipPackage="$SKIP_PACKAGES" ./topgun/$SUITE "$@"
