@@ -338,7 +338,7 @@ jobs:
     - get: concourse
       passed: [unit, dev-image]
       trigger: true
-    - get: unit-image
+    - get: integration-image
     - get: dev-image
       passed: [dev-image]
       trigger: true
