@@ -89,6 +89,8 @@ ENV PATH=$PATH:/usr/local/concourse/bin
 
 RUN set -x && \
 	mkdir -p /usr/local/concourse/bin && \
+	curl -sSL https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64 \
+		-o /usr/local/concourse/bin/init && chmod +x /usr/local/concourse/bin/init && \
 	curl -sSL https://github.com/containerd/containerd/releases/download/v$CONTAINERD_VERSION/containerd-$CONTAINERD_VERSION.linux-amd64.tar.gz \
 		| tar -zvxf - -C /usr/local/concourse/bin --strip-components=1 && \
 	curl -sSL https://github.com/opencontainers/runc/releases/download/$RUNC_VERSION/runc.amd64 \
