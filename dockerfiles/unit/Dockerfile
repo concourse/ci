@@ -78,3 +78,19 @@ RUN curl -so /etc/ssl/certs/fake_root.pem \
     -t "TCu,Cu,Tu" \
     -i /etc/ssl/certs/fake_root.pem \
     -d sql:/root/.pki/nssdb
+
+# install containerd
+ARG RUNC_VERSION=v1.0.0-rc8
+ARG CNI_VERSION=v0.8.2
+ARG CONTAINERD_VERSION=1.3.0
+
+ENV PATH=$PATH:/usr/local/concourse/bin
+
+RUN set -x && \
+	mkdir -p /usr/local/concourse/bin && \
+	curl -sSL https://github.com/containerd/containerd/releases/download/v$CONTAINERD_VERSION/containerd-$CONTAINERD_VERSION.linux-amd64.tar.gz \
+		| tar -zvxf - -C /usr/local/concourse/bin --strip-components=1 && \
+	curl -sSL https://github.com/opencontainers/runc/releases/download/$RUNC_VERSION/runc.amd64 \
+		-o /usr/local/concourse/bin/runc && chmod +x /usr/local/concourse/bin/runc && \
+	curl -sSL https://github.com/containernetworking/plugins/releases/download/$CNI_VERSION/cni-plugins-linux-amd64-$CNI_VERSION.tgz \
+		| tar -zvxf - -C /usr/local/concourse/bin
