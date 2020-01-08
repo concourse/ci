@@ -17,7 +17,7 @@ start_containerd() {
   mkdir -p /scratch/containerd
 
   echo '
-disabled_plugins = ["cri"]
+disabled_plugins = ["cri", "aufs", "btrfs", "zfs"]
 root = "/scratch/containerd"
 state = "/run/containerd"
 
