@@ -14,7 +14,27 @@ main() {
 }
 
 start_containerd() {
-  containerd >/tmp/containerd.log 2>&1 &
+  mkdir -p /scratch/containerd
+
+  echo '
+disabled_plugins = ["cri"]
+root = "/scratch/containerd"
+state = "/run/containerd"
+
+[grpc]
+  address = "/run/containerd/containerd.sock"
+
+[debug]
+  address = "/run/containerd/debug.sock"
+  level = "debug"
+
+[plugins]
+  [plugins."io.containerd.runtime.v1.linux"]
+    runtime = "runc"
+    shim = "containerd-shim"
+' >./containerd.toml
+
+  containerd --config ./containerd.toml >/tmp/containerd.log 2>&1 &
   echo $! >/tmp/containerd.pid
 
   sleep 1
