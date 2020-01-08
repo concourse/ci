@@ -80,9 +80,10 @@ RUN curl -so /etc/ssl/certs/fake_root.pem \
     -d sql:/root/.pki/nssdb
 
 # install containerd
-ARG RUNC_VERSION=v1.0.0-rc8
-ARG CNI_VERSION=v0.8.2
-ARG CONTAINERD_VERSION=1.3.0
+ARG RUNC_VERSION=v1.0.0-rc9
+ARG CNI_VERSION=v0.8.3
+ARG CONTAINERD_VERSION=1.3.2
+ARG INIT_VERSION=1.2.2
 
 ENV PATH=$PATH:/usr/local/concourse/bin
 
