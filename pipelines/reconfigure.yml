@@ -24,7 +24,7 @@ resources:
   type: git
   icon: github-circle
   source:
-    uri: https://github.com/pivotal/concourse-for-k8s
+    uri: git@github.com:pivotal/concourse-for-k8s.git
     private_key: ((concourse_for_k8s_token))
     paths:
     - ci
