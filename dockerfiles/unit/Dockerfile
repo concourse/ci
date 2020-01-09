@@ -85,8 +85,6 @@ ARG CNI_VERSION=v0.8.3
 ARG CONTAINERD_VERSION=1.3.2
 ARG INIT_VERSION=1.2.2
 
-ENV PATH=$PATH:/usr/local/concourse/bin
-
 RUN set -x && \
 	mkdir -p /usr/local/concourse/bin && \
 	curl -sSL https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64 \

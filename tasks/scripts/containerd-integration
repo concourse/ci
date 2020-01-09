@@ -34,7 +34,7 @@ state = "/run/containerd"
     shim = "containerd-shim"
 ' >./containerd.toml
 
-  containerd --config ./containerd.toml >/tmp/containerd.log 2>&1 &
+  PATH=/usr/local/concourse/bin containerd --config ./containerd.toml >/tmp/containerd.log 2>&1 &
   echo $! >/tmp/containerd.pid
 
   sleep 1
