@@ -1453,7 +1453,7 @@ resources:
     url: ((slack_hook))
     username: ((basic_auth.username))
     password: ((basic_auth.password))
-    concourse_url: https://nci.concourse-ci.org
+    concourse_url: https://ci.concourse-ci.org
 
 - name: dev-image
   type: registry-image
