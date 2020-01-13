@@ -5,7 +5,7 @@ set -e -u
 export GOPATH=$PWD/gopath
 export PATH=$GOPATH/bin:$PATH
 
-source ci/tasks/scripts/docker-helpers.sh
+source ci/tasks/scripts/cgroup-helpers.sh
 
 main() {
   sanitize_cgroups
