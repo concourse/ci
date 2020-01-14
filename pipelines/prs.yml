@@ -83,11 +83,13 @@ jobs:
     inputs: [concourse-pr]
     params: {path: concourse-pr, status: failure, context: unit}
     tags: [pr]
+    get_params: {skip_download: true}
   on_success:
     put: concourse-pr
     inputs: [concourse-pr]
     params: {path: concourse-pr, status: success, context: unit}
     tags: [pr]
+    get_params: {skip_download: true}
   plan:
   - in_parallel:
     - get: concourse-pr
@@ -103,8 +105,8 @@ jobs:
   - put: concourse-pr
     inputs: [concourse-pr]
     params: {path: concourse-pr, status: pending, context: unit}
-    get_params: {list_changed_files: true}
     tags: [pr]
+    get_params: {list_changed_files: true, skip_download: true}
   - task: check-migration-order
     timeout: 5m
     file: ci/tasks/check-migration-order.yml
@@ -140,11 +142,13 @@ jobs:
     inputs: [concourse-pr]
     params: {path: concourse-pr, status: failure, context: testflight}
     tags: [pr]
+    get_params: {skip_download: true}
   on_success:
     put: concourse-pr
     inputs: [concourse-pr]
     params: {path: concourse-pr, status: success, context: testflight}
     tags: [pr]
+    get_params: {skip_download: true}
   plan:
   - in_parallel:
     - get: concourse-pr
@@ -161,7 +165,8 @@ jobs:
   - put: concourse-pr
     inputs: [concourse-pr]
     params: {path: concourse-pr, status: pending, context: testflight}
-    get_params: {list_changed_files: true}
+    tags: [pr]
+    get_params: {list_changed_files: true, skip_download: true}
   - task: yarn-build
     attempts: 3
     file: ci/tasks/yarn-build.yml
@@ -183,11 +188,13 @@ jobs:
     inputs: [concourse-pr]
     params: {path: concourse-pr, status: failure, context: watsjs}
     tags: [pr]
+    get_params: {skip_download: true}
   on_success:
     put: concourse-pr
     inputs: [concourse-pr]
     params: {path: concourse-pr, status: success, context: watsjs}
     tags: [pr]
+    get_params: {skip_download: true}
   plan:
   - in_parallel:
     - get: concourse-pr
@@ -204,8 +211,8 @@ jobs:
   - put: concourse-pr
     inputs: [concourse-pr]
     params: {path: concourse-pr, status: pending, context: watsjs}
-    get_params: {list_changed_files: true}
     tags: [pr]
+    get_params: {list_changed_files: true, skip_download: true}
   - task: yarn-build
     attempts: 3
     file: ci/tasks/yarn-build.yml
