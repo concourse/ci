@@ -21,6 +21,7 @@ groups:
   - unit
   - dev-image
   - testflight
+  - containerd-integration
   - watsjs
   - rc
   - build-rc
@@ -302,6 +303,24 @@ jobs:
   - put: dev-image
     params: {image: image/image.tar}
     get_params: {format: oci}
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
+
+- name: containerd-integration
+  public: true
+  max_in_flight: 1
+  plan:
+  - in_parallel:
+    - get: concourse
+      passed: [unit]
+      trigger: true
+    - get: unit-image
+    - get: ci
+  - task: integration
+    image: unit-image
+    privileged: true
+    timeout: 1h
+    file: ci/tasks/containerd-integration.yml
   on_success: *fixed-concourse
   on_failure: *broke-concourse
 

@@ -1,0 +1,39 @@
+#!/bin/bash
+
+set -e -u
+
+export GOPATH=$PWD/gopath
+export PATH=$GOPATH/bin:$PATH
+
+source ci/tasks/scripts/cgroup-helpers.sh
+
+main() {
+  sanitize_cgroups
+  start_containerd
+  run_test
+}
+
+start_containerd() {
+  mkdir -p /scratch/containerd
+
+  PATH=/usr/local/concourse/bin containerd --config ./ci/deployments/containerd.toml >/tmp/containerd.log 2>&1 &
+  echo $! >/tmp/containerd.pid
+
+  sleep 1
+
+  until ctr version >/dev/null 2>&1; do
+    echo "waiting for containerd to come up..."
+    sleep 1
+  done
+}
+
+run_test() {
+  cd concourse
+
+  go mod download
+  go install github.com/onsi/ginkgo/ginkgo
+
+  ginkgo -r -nodes=4 -race -keepGoing -slowSpecThreshold=15 ./worker/backend/integration "$@"
+}
+
+main "$@"
