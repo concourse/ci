@@ -41,22 +41,6 @@ resources:
   source:
     uri: https://github.com/concourse/oxygen-mask
 
-- name: prod
-  type: concourse-pipeline
-  icon: pipe
-  source:
-    target: https://ci.concourse-ci.org
-    teams:
-    - name: main
-      username: ((basic_auth.username))
-      password: ((basic_auth.password))
-    - name: resources
-      username: ((basic_auth.username))
-      password: ((basic_auth.password))
-    - name: monitoring-hush-house
-      username: ((basic_auth.username))
-      password: ((basic_auth.password))
-
 jobs:
 - name: reconfigure-resource-pipelines
   plan:
@@ -82,58 +66,38 @@ jobs:
         pool
         datadog-event
         mock
-  - put: prod
-    inputs: [rendered_pipelines]
-    params:
-      pipelines:
-        - name: git
-          team: resources
-          config_file: rendered_pipelines/git.yml
-        - name: time
-          team: resources
-          config_file: rendered_pipelines/time.yml
-        - name: docker-image
-          team: resources
-          config_file: rendered_pipelines/docker-image.yml
-        - name: registry-image
-          team: resources
-          config_file: rendered_pipelines/registry-image.yml
-        - name: cf
-          team: resources
-          config_file: rendered_pipelines/cf.yml
-        - name: bosh-io-release
-          team: resources
-          config_file: rendered_pipelines/bosh-io-release.yml
-        - name: bosh-io-stemcell
-          team: resources
-          config_file: rendered_pipelines/bosh-io-stemcell.yml
-        - name: tracker
-          team: resources
-          config_file: rendered_pipelines/tracker.yml
-        - name: hg
-          team: resources
-          config_file: rendered_pipelines/hg.yml
-        - name: github-release
-          team: resources
-          config_file: rendered_pipelines/github-release.yml
-        - name: semver
-          team: resources
-          config_file: rendered_pipelines/semver.yml
-        - name: s3
-          team: resources
-          config_file: rendered_pipelines/s3.yml
-        - name: concourse-pipeline
-          team: resources
-          config_file: rendered_pipelines/concourse-pipeline.yml
-        - name: pool
-          team: resources
-          config_file: rendered_pipelines/pool.yml
-        - name: datadog-event
-          team: resources
-          config_file: rendered_pipelines/datadog-event.yml
-        - name: mock
-          team: resources
-          config_file: rendered_pipelines/mock.yml
+  - set_pipeline: git
+    file: rendered_pipelines/git.yml
+  - set_pipeline: time
+    file: rendered_pipelines/time.yml
+  - set_pipeline: docker-image
+    file: rendered_pipelines/docker-image.yml
+  - set_pipeline: registry-image
+    file: rendered_pipelines/registry-image.yml
+  - set_pipeline: cf
+    file: rendered_pipelines/cf.yml
+  - set_pipeline: bosh-io-release
+    file: rendered_pipelines/bosh-io-release.yml
+  - set_pipeline: bosh-io-stemcell
+    file: rendered_pipelines/bosh-io-stemcell.yml
+  - set_pipeline: tracker
+    file: rendered_pipelines/tracker.yml
+  - set_pipeline: hg
+    file: rendered_pipelines/hg.yml
+  - set_pipeline: github-release
+    file: rendered_pipelines/github-release.yml
+  - set_pipeline: semver
+    file: rendered_pipelines/semver.yml
+  - set_pipeline: s3
+    file: rendered_pipelines/s3.yml
+  - set_pipeline: concourse-pipeline
+    file: rendered_pipelines/concourse-pipeline.yml
+  - set_pipeline: pool
+    file: rendered_pipelines/pool.yml
+  - set_pipeline: datadog-event
+    file: rendered_pipelines/datadog-event.yml
+  - set_pipeline: mock
+    file: rendered_pipelines/mock.yml
 
 - name: reconfigure-pipelines
   plan:
@@ -143,130 +107,101 @@ jobs:
     trigger: true
   - get: concourse-for-k8s
     trigger: true
-  - put: prod
-    params:
-      pipelines:
-      - name: reconfigure-pipelines
-        team: main
-        config_file: pipelines/pipelines/reconfigure.yml
-      - name: concourse
-        team: main
-        config_file: pipelines/pipelines/concourse.yml
-      - name: prs
-        exposed: true
-        team: main
-        config_file: pipelines/pipelines/prs.yml
-      - name: helm-prs
-        team: main
-        config_file: pipelines/pipelines/helm-prs.yml
-        vars:
-          pr_base_branch: master
-          concourse_base_branch: master
-          concourse_image_name: concourse/concourse-rc
-          concourse_image_tag: latest
-      - name: helm-prs-5.5.x
-        team: main
-        config_file: pipelines/pipelines/helm-prs.yml
-        vars:
-          pr_base_branch: release/5.5.x
-          concourse_base_branch: release/5.5.x
-          concourse_image_name: concourse/concourse
-          concourse_image_tag: 5.5
-      - name: helm-prs-5.7.x
-        team: main
-        config_file: pipelines/pipelines/helm-prs.yml
-        vars:
-          pr_base_branch: release/5.7.x
-          concourse_base_branch: release/5.7.x
-          concourse_image_name: concourse/concourse
-          concourse_image_tag: 5.7
-      - name: baggageclaim
-        exposed: true
-        team: main
-        config_file: baggageclaim-ci/ci/pipeline.yml
-      - name: bosh-cleanup
-        team: main
-        config_file: pipelines/pipelines/bosh-cleanup.yml
-      - name: wings
-        team: main
-        config_file: pipelines/pipelines/wings.yml
-      - name: norsk-mirror
-        team: main
-        config_file: pipelines/pipelines/norsk-mirror.yml
-      - name: release-5.2.x
-        team: main
-        exposed: true
-        config_file: pipelines/pipelines/release.yml
-        vars:
-          release_major: "5"
-          release_minor: "5.2"
-          latest_release: "5.2"
-          concourse_smoke_deployment_name: "concourse-smoke-5-2"
-          use_external_linker: true
-          bin_smoke_use_https: "false"
-      - name: release-5.5.x
-        team: main
-        exposed: true
-        config_file: pipelines/pipelines/release.yml
-        vars:
-          release_major: "5"
-          release_minor: "5.5"
-          latest_release: "5.5"
-          concourse_smoke_deployment_name: "concourse-smoke-5-5"
-          use_external_linker: false
-          bin_smoke_use_https: "true"
-      - name: release-5.7.x
-        team: main
-        exposed: true
-        config_file: pipelines/pipelines/release.yml
-        vars:
-          release_major: "5"
-          release_minor: "5.7"
-          latest_release: "5.7"
-          concourse_smoke_deployment_name: "concourse-smoke-5-7"
-          use_external_linker: false
-          bin_smoke_use_https: "true"
-      - name: release-6.0.x
-        team: main
-        exposed: true
-        config_file: pipelines/pipelines/release.yml
-        vars:
-          release_major: "6"
-          release_minor: "6.0"
-          latest_release: "5"
-          concourse_smoke_deployment_name: "concourse-smoke-6-0"
-          use_external_linker: false
-          bin_smoke_use_https: "true"
-      - name: algorithm-v3
-        team: main
-        config_file: pipelines/pipelines/branch.yml
-        vars:
-          branch_name: algorithm-v3
-          environment: algorithm
-      - name: runtime-drills
-        team: main
-        config_file: pipelines/pipelines/branch.yml
-        vars:
-          branch_name: master
-          environment: runtime-drills
-      - name: set-zstd-drills-env
-        team: main
-        config_file: pipelines/pipelines/branch.yml
-        vars:
-          branch_name: use_zstd
-          environment: use-zstd
-      - name: enterprise-helm-chart
-        team: main
-        config_file: concourse-for-k8s/ci/pipeline.yml
-        vars:
-          concourse_chart_branch: release/5.5.x
-          concourse_minor: "5.5"
-      - name: prod-db-backup
-        team: main
-        config_file: pipelines/pipelines/prod-db-backup.yml
-      - name: prod-db-restore-verify
-        team: main
-        config_file: pipelines/pipelines/prod-db-restore-verify.yml
+  - set_pipeline: reconfigure-pipelines
+    file: pipelines/pipelines/reconfigure.yml
+  - set_pipeline: concourse
+    file: pipelines/pipelines/concourse.yml
+  - set_pipeline: prs
+    file: pipelines/pipelines/prs.yml
+  - set_pipeline: helm-prs
+    file: pipelines/pipelines/helm-prs.yml
+    vars:
+      pr_base_branch: master
+      concourse_base_branch: master
+      concourse_image_name: concourse/concourse-rc
+      concourse_image_tag: latest
+  - set_pipeline: helm-prs-5.5.x
+    file: pipelines/pipelines/helm-prs.yml
+    vars:
+      pr_base_branch: release/5.5.x
+      concourse_base_branch: release/5.5.x
+      concourse_image_name: concourse/concourse
+      concourse_image_tag: 5.5
+  - set_pipeline: helm-prs-5.7.x
+    file: pipelines/pipelines/helm-prs.yml
+    vars:
+      pr_base_branch: release/5.7.x
+      concourse_base_branch: release/5.7.x
+      concourse_image_name: concourse/concourse
+      concourse_image_tag: 5.7
+  - set_pipeline: baggageclaim
+    file: baggageclaim-ci/ci/pipeline.yml
+  - set_pipeline: bosh-cleanup
+    file: pipelines/pipelines/bosh-cleanup.yml
+  - set_pipeline: wings
+    file: pipelines/pipelines/wings.yml
+  - set_pipeline: norsk-mirror
+    file: pipelines/pipelines/norsk-mirror.yml
+  - set_pipeline: release-5.2.x
+    file: pipelines/pipelines/release.yml
+    vars:
+      release_major: "5"
+      release_minor: "5.2"
+      latest_release: "5.2"
+      concourse_smoke_deployment_name: "concourse-smoke-5-2"
+      use_external_linker: true
+      bin_smoke_use_https: "false"
+  - set_pipeline: release-5.5.x
+    file: pipelines/pipelines/release.yml
+    vars:
+      release_major: "5"
+      release_minor: "5.5"
+      latest_release: "5.5"
+      concourse_smoke_deployment_name: "concourse-smoke-5-5"
+      use_external_linker: false
+      bin_smoke_use_https: "true"
+  - set_pipeline: release-5.7.x
+    file: pipelines/pipelines/release.yml
+    vars:
+      release_major: "5"
+      release_minor: "5.7"
+      latest_release: "5.7"
+      concourse_smoke_deployment_name: "concourse-smoke-5-7"
+      use_external_linker: false
+      bin_smoke_use_https: "true"
+  - set_pipeline: release-6.0.x
+    file: pipelines/pipelines/release.yml
+    vars:
+      release_major: "6"
+      release_minor: "6.0"
+      latest_release: "5"
+      concourse_smoke_deployment_name: "concourse-smoke-6-0"
+      use_external_linker: false
+      bin_smoke_use_https: "true"
+  - set_pipeline: algorithm-v3
+    file: pipelines/pipelines/branch.yml
+    vars:
+      branch_name: algorithm-v3
+      environment: algorithm
+  - set_pipeline: runtime-drills
+    file: pipelines/pipelines/branch.yml
+    vars:
+      branch_name: master
+      environment: runtime-drills
+  - set_pipeline: set-zstd-drills-env
+    file: pipelines/pipelines/branch.yml
+    vars:
+      branch_name: use_zstd
+      environment: use-zstd
+  - set_pipeline: enterprise-helm-chart
+    file: concourse-for-k8s/ci/pipeline.yml
+    vars:
+      concourse_chart_branch: release/5.5.x
+      concourse_minor: "5.5"
+  - set_pipeline: prod-db-backup
+    file: pipelines/pipelines/prod-db-backup.yml
+  - set_pipeline: prod-db-restore-verify
+    file: pipelines/pipelines/prod-db-restore-verify.yml
 
 - name: reconfigure-monitoring-pipeline
   plan:
@@ -288,19 +223,14 @@ jobs:
         - -c
         - |
           erb monitor.yml > gen-monitor.yml
-  - put: prod
-    params:
-      pipelines:
-      - name: monitoring-stats
-        team: monitoring-hush-house
-        config_file: oxygen-mask/gen-monitor.yml
-        vars:
-          atc_url: https://hush-house.pivotal.io
-          interval: 30s
-          username: ((basic_auth.username))
-          password: ((basic_auth.password))
-          team_name: main
-          pipeline_name: monitoring
-          datadog_api_key: ((datadog_api_key))
-          github_access_token: ((concourse_github_dummy.access_token))
-
+  - set_pipeline: monitoring-stats
+    file: oxygen-mask/gen-monitor.yml
+    vars:
+      atc_url: https://hush-house.pivotal.io
+      interval: 30s
+      username: ((basic_auth.username))
+      password: ((basic_auth.password))
+      team_name: main
+      pipeline_name: monitoring
+      datadog_api_key: ((datadog_api_key))
+      github_access_token: ((concourse_github_dummy.access_token))
