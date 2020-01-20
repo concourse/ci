@@ -17,8 +17,8 @@ RUN add-apt-repository "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_relea
 RUN apt-get update && apt-get -y install postgresql-11
 ENV PATH $PATH:/usr/lib/postgresql/11/bin
 
-# install Node 8.x
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
+# install Node 12.x
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
 RUN apt-get update && apt-get install -y nodejs
 
 # install Yarn for web UI tests
