@@ -6,15 +6,13 @@ set -e -x
 export GOPATH=$PWD/gopath
 export PATH=$PWD/gopath/bin:$PATH
 
-if [ "$#" -lt 1 ]; then
-  echo "usage: $0 <platform>" >&2
+if [ -z "${PLATFORM}" ]; then
+  echo "usage: export PLATFORM=<platform> $0" >&2
   exit 1
 fi
 
-platform="$1"
-
 sha="$(git -C concourse rev-parse HEAD)"
-archive=concourse-${sha}-${platform}-amd64.tgz
+archive=concourse-${sha}-${PLATFORM}-amd64.tgz
 
 final_version=""
 ldflags=""
@@ -32,7 +30,7 @@ pushd concourse
   fi
 popd
 
-output=concourse-${platform}
+output=concourse-${PLATFORM}
 
 mkdir $output/concourse
 
