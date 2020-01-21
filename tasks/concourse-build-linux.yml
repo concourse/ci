@@ -27,6 +27,8 @@ caches:
 outputs:
 - name: concourse-linux
 
+params:
+  PLATFORM: linux
+
 run:
   path: ci/tasks/scripts/concourse-build
-  args: [linux]
