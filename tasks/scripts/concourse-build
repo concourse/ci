@@ -7,7 +7,7 @@ export GOPATH=$PWD/gopath
 export PATH=$PWD/gopath/bin:$PATH
 
 if [ -z "${PLATFORM}" ]; then
-  echo "usage: export PLATFORM=<platform> $0" >&2
+  echo "usage: PLATFORM=<platform> $0" >&2
   exit 1
 fi
 
