@@ -1413,7 +1413,7 @@ resources:
   type: github-release
   icon: *release-icon
   source:
-    owner: concourse
+    owner: cloudfoundry-community
     repository: cf-resource
     access_token: ((concourse_github_dummy.access_token))
 
