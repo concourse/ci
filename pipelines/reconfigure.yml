@@ -48,7 +48,7 @@ jobs:
   - get: pipelines-and-tasks
     trigger: true
   - task: render-resource-templates
-    file: pipelines/tasks/render-resource-pipeline-templates.yml
+    file: pipelines-and-tasks/tasks/render-resource-pipeline-templates.yml
     params:
       RESOURCES: |
         git
@@ -109,27 +109,27 @@ jobs:
   - get: concourse-for-k8s
     trigger: true
   - set_pipeline: reconfigure-pipelines
-    file: pipelines/pipelines/reconfigure.yml
+    file: pipelines-and-tasks/pipelines/reconfigure.yml
   - set_pipeline: concourse
-    file: pipelines/pipelines/concourse.yml
+    file: pipelines-and-tasks/pipelines/concourse.yml
   - set_pipeline: prs
-    file: pipelines/pipelines/prs.yml
+    file: pipelines-and-tasks/pipelines/prs.yml
   - set_pipeline: helm-prs
-    file: pipelines/pipelines/helm-prs.yml
+    file: pipelines-and-tasks/pipelines/helm-prs.yml
     vars:
       pr_base_branch: master
       concourse_base_branch: master
       concourse_image_name: concourse/concourse-rc
       concourse_image_tag: latest
   - set_pipeline: helm-prs-5.5.x
-    file: pipelines/pipelines/helm-prs.yml
+    file: pipelines-and-tasks/pipelines/helm-prs.yml
     vars:
       pr_base_branch: release/5.5.x
       concourse_base_branch: release/5.5.x
       concourse_image_name: concourse/concourse
       concourse_image_tag: 5.5
   - set_pipeline: helm-prs-5.7.x
-    file: pipelines/pipelines/helm-prs.yml
+    file: pipelines-and-tasks/pipelines/helm-prs.yml
     vars:
       pr_base_branch: release/5.7.x
       concourse_base_branch: release/5.7.x
@@ -138,13 +138,13 @@ jobs:
   - set_pipeline: baggageclaim
     file: baggageclaim-ci/ci/pipeline.yml
   - set_pipeline: bosh-cleanup
-    file: pipelines/pipelines/bosh-cleanup.yml
+    file: pipelines-and-tasks/pipelines/bosh-cleanup.yml
   - set_pipeline: wings
-    file: pipelines/pipelines/wings.yml
+    file: pipelines-and-tasks/pipelines/wings.yml
   - set_pipeline: norsk-mirror
-    file: pipelines/pipelines/norsk-mirror.yml
+    file: pipelines-and-tasks/pipelines/norsk-mirror.yml
   - set_pipeline: release-5.2.x
-    file: pipelines/pipelines/release.yml
+    file: pipelines-and-tasks/pipelines/release.yml
     vars:
       release_major: "5"
       release_minor: "5.2"
@@ -153,7 +153,7 @@ jobs:
       use_external_linker: true
       bin_smoke_use_https: "false"
   - set_pipeline: release-5.5.x
-    file: pipelines/pipelines/release.yml
+    file: pipelines-and-tasks/pipelines/release.yml
     vars:
       release_major: "5"
       release_minor: "5.5"
@@ -162,7 +162,7 @@ jobs:
       use_external_linker: false
       bin_smoke_use_https: "true"
   - set_pipeline: release-5.7.x
-    file: pipelines/pipelines/release.yml
+    file: pipelines-and-tasks/pipelines/release.yml
     vars:
       release_major: "5"
       release_minor: "5.7"
@@ -171,7 +171,7 @@ jobs:
       use_external_linker: false
       bin_smoke_use_https: "true"
   - set_pipeline: release-6.0.x
-    file: pipelines/pipelines/release.yml
+    file: pipelines-and-tasks/pipelines/release.yml
     vars:
       release_major: "6"
       release_minor: "6.0"
@@ -180,17 +180,17 @@ jobs:
       use_external_linker: false
       bin_smoke_use_https: "true"
   - set_pipeline: algorithm-v3
-    file: pipelines/pipelines/branch.yml
+    file: pipelines-and-tasks/pipelines/branch.yml
     vars:
       branch_name: algorithm-v3
       environment: algorithm
   - set_pipeline: runtime-drills
-    file: pipelines/pipelines/branch.yml
+    file: pipelines-and-tasks/pipelines/branch.yml
     vars:
       branch_name: master
       environment: runtime-drills
   - set_pipeline: set-zstd-drills-env
-    file: pipelines/pipelines/branch.yml
+    file: pipelines-and-tasks/pipelines/branch.yml
     vars:
       branch_name: use_zstd
       environment: use-zstd
@@ -200,9 +200,9 @@ jobs:
       concourse_chart_branch: release/5.5.x
       concourse_minor: "5.5"
   - set_pipeline: prod-db-backup
-    file: pipelines/pipelines/prod-db-backup.yml
+    file: pipelines-and-tasks/pipelines/prod-db-backup.yml
   - set_pipeline: prod-db-restore-verify
-    file: pipelines/pipelines/prod-db-restore-verify.yml
+    file: pipelines-and-tasks/pipelines/prod-db-restore-verify.yml
 
 - name: reconfigure-monitoring-pipeline
   plan:
