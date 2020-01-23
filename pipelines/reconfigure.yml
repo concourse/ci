@@ -67,6 +67,7 @@ jobs:
         pool
         datadog-event
         mock
+    input_mapping: {pipelines: pipelines-and-tasks}
   - set_pipeline: git
     file: rendered_pipelines/git.yml
   - set_pipeline: time
