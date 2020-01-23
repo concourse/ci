@@ -694,14 +694,12 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
-      passed: [bosh-check-props]
       trigger: true
     - get: unit-image
     - get: version
       trigger: true
-      passed: [bosh-check-props]
     - get: linux-rc-ubuntu
-      passed: [build-rc, bosh-check-props]
+      passed: [build-rc]
       trigger: true
     - get: windows-rc
       passed: [build-rc]
@@ -829,6 +827,7 @@ jobs:
     - build-rc
     - bosh-smoke
     - bosh-topgun
+    - bosh-check-props
   - get: unit-image
     passed:
     - build-rc
@@ -841,10 +840,11 @@ jobs:
     - build-rc
     - bosh-smoke
     - bosh-topgun
+    - bosh-check-props
   - get: linux-rc
     passed: [build-rc]
   - get: linux-rc-ubuntu
-    passed: [build-rc]
+    passed: [build-rc, bosh-check-props]
   - get: windows-rc
     passed: [build-rc]
   - get: darwin-rc
