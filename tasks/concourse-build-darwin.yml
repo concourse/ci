@@ -16,7 +16,7 @@ inputs:
   optional: true
 
 outputs:
-- name: concourse-darwin
+- name: concourse-tarball
 
 caches:
 - path: gopath

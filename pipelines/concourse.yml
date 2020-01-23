@@ -662,20 +662,21 @@ jobs:
         params:
           PLATFORM: linux
         input_mapping: {concourse: built-concourse, resource-types: resource-types-alpine}
-        output_mapping: {concourse-linux: concourse-linux-alpine}
+        output_mapping: {concourse-tarball: concourse-linux-alpine}
       - task: concourse-linux-ubuntu
         image: unit-image
         params:
           PLATFORM: linux-ubuntu
         file: ci/tasks/concourse-build-linux.yml
         input_mapping: {concourse: built-concourse, resource-types: resource-types-ubuntu}
-        output_mapping: {concourse-linux: concourse-linux-ubuntu}
+        output_mapping: {concourse-tarball: concourse-linux-ubuntu}
       - task: concourse-windows
         file: ci/tasks/concourse-build-windows.yml
         input_mapping: {concourse: built-concourse}
       - task: concourse-darwin
         file: ci/tasks/concourse-build-darwin.yml
         input_mapping: {concourse: built-concourse}
+        output_mapping: {concourse-tarball: concourse-darwin}
   - in_parallel:
     - put: linux-rc
       params: {file: concourse-linux-alpine/concourse-*.tgz}

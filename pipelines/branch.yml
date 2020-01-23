@@ -399,16 +399,18 @@ jobs:
       image: unit-image
       file: ci/tasks/concourse-build-linux.yml
       input_mapping: {concourse: built-concourse}
+      output_mapping: {concourse-tarball: concourse-linux-alpine}
     - task: concourse-windows
       file: ci/tasks/concourse-build-windows.yml
       input_mapping: {concourse: built-concourse}
     - task: concourse-darwin
       file: ci/tasks/concourse-build-darwin.yml
       input_mapping: {concourse: built-concourse}
+      output_mapping: {concourse-tarball: concourse-darwin}
   - in_parallel:
     - put: linux-rc
       params: {file: concourse-linux/concourse-*.tgz}
-      inputs: [concourse-linux]
+      inputs: [concourse-linux-alpine]
     - put: windows-rc
       params: {file: concourse-windows/concourse-*.zip}
       inputs: [concourse-windows]

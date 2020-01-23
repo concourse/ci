@@ -30,7 +30,7 @@ pushd concourse
   fi
 popd
 
-output=concourse-${PLATFORM}
+output=concourse-tarball
 
 mkdir $output/concourse
 

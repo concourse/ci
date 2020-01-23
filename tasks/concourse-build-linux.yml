@@ -25,7 +25,7 @@ caches:
 - path: gopath
 
 outputs:
-- name: concourse-linux
+- name: concourse-tarball
 
 params:
   PLATFORM: linux
