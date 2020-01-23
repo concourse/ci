@@ -5,13 +5,14 @@ resource_types:
     repository: concourse/concourse-pipeline-resource
 
 resources:
-- name: pipelines
+- name: pipelines-and-tasks
   type: git
   icon: github-circle
   source:
     uri: https://github.com/concourse/ci
     paths:
     - pipelines
+    - tasks
 
 - name: baggageclaim-ci
   type: git
@@ -44,7 +45,7 @@ resources:
 jobs:
 - name: reconfigure-resource-pipelines
   plan:
-  - get: pipelines
+  - get: pipelines-and-tasks
     trigger: true
   - task: render-resource-templates
     file: pipelines/tasks/render-resource-pipeline-templates.yml
@@ -101,7 +102,7 @@ jobs:
 
 - name: reconfigure-pipelines
   plan:
-  - get: pipelines
+  - get: pipelines-and-tasks
     trigger: true
   - get: baggageclaim-ci
     trigger: true
