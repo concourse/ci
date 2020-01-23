@@ -21,6 +21,8 @@ outputs:
 caches:
 - path: gopath
 
+params:
+  PLATFORM: darwin
+
 run:
   path: ci/tasks/scripts/concourse-build
-  args: [darwin]
