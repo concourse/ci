@@ -949,14 +949,18 @@ jobs:
     - do:
       - task: docker-semver-tags
         file: ci/tasks/docker-semver-tags.yml
+        output_mapping: {tags: alpine-tags}
+
       - put: concourse-image
-        inputs: [concourse-rc-image, tags]
+        inputs: [concourse-rc-image, alpine-tags]
         params:
           image: concourse-rc-image/image.tar
-          additional_tags: tags/tags
+          additional_tags: alpine-tags/tags
+
     - do:
       - task: docker-semver-tags
         file: ci/tasks/docker-semver-tags.yml
+        output_mapping: {tags: ubuntu-tags}
         params: {SUFFIX: ubuntu}
 
       - task: generate-dpkg-list
@@ -969,10 +973,10 @@ jobs:
         params: {file: "dpkg-list/concourse-*.txt"}
 
       - put: concourse-image-ubuntu
-        inputs: [concourse-rc-image-ubuntu, tags]
+        inputs: [concourse-rc-image-ubuntu, ubuntu-tags]
         params:
           image: concourse-rc-image-ubuntu/image.tar
-          additional_tags: tags/tags
+          additional_tags: ubuntu-tags/tags
 
 - name: publish-docs
   public: true

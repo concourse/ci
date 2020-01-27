@@ -1288,36 +1288,36 @@ jobs:
     - do:
       - task: docker-semver-tags
         file: ci/tasks/docker-semver-tags.yml
-        input_mapping:
-          latest-of-same-major-version: latest-version
+        input_mapping: {latest-of-same-major-version: latest-version}
+        output_mapping: {tags: alpine-tags}
+
       - put: concourse-image
-        inputs: [concourse-rc-image, tags]
+        inputs: [concourse-rc-image, alpine-tags]
         params:
           image: concourse-rc-image/image.tar
-          additional_tags: tags/tags
+          additional_tags: alpine-tags/tags
+
     - do:
       - task: docker-semver-tags
         file: ci/tasks/docker-semver-tags.yml
-        input_mapping:
-          latest-of-same-major-version: latest-version
+        input_mapping: {latest-of-same-major-version: latest-version}
+        output_mapping: {tags: ubuntu-tags}
         params: {SUFFIX: ubuntu}
+
       - put: concourse-image-ubuntu
-        inputs: [concourse-rc-image-ubuntu, tags]
+        inputs: [concourse-rc-image-ubuntu, ubuntu-tags]
         params:
           image: concourse-rc-image-ubuntu/image.tar
-          additional_tags: tags/tags
+          additional_tags: ubuntu-tags/tags
+
       - task: generate-dpkg-list
         file: ci/tasks/generate-dpkg-list.yml
         image: concourse-rc-image-ubuntu-rootfs
         params: {COMPONENT_NAME: "concourse"}
+
       - put: concourse-image-dpkg-list
         inputs: [dpkg-list]
         params: {file: "dpkg-list/concourse-*.txt"}
-      - put: concourse-image-ubuntu
-        inputs: [concourse-rc-image-ubuntu, tags]
-        params:
-          image: concourse-rc-image-ubuntu/image.tar
-          additional_tags: tags/tags
 
 - name: publish-docs
   public: true
@@ -1492,6 +1492,7 @@ resources:
   icon: *image-icon
   source:
     repository: concourse/concourse
+    tag: latest
     username: ((docker.username))
     password: ((docker.password))
 
