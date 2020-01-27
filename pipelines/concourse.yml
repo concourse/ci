@@ -2057,6 +2057,7 @@ resources:
     owner: concourse
     repository: concourse
     access_token: ((concourse_github_release.access_token))
+    release: false
     pre_release: true
 
 - name: concourse-boshio
