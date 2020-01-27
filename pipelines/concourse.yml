@@ -1153,12 +1153,6 @@ jobs:
       passed: [k8s-topgun, k8s-check-helm-params]
     - get: concourse-rc-image-ubuntu
       passed: [k8s-topgun, k8s-check-helm-params]
-    - get: concourse-release
-      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
-    - get: bpm-release
-      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
-    - get: postgres-release
-      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
   - put: version
     params: {file: final-version/version}
 
