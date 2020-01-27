@@ -73,6 +73,9 @@ groups:
   - publish-chart
   - chart-major
   - chart-minor
+  - pre
+  - publish-pre-binaries
+  - publish-pre-image
 
 - name: workers
   jobs:
@@ -1158,6 +1161,156 @@ jobs:
   - put: version
     params: {file: final-version/version}
 
+- name: pre
+  public: true
+  plan:
+  - get: concourse
+    passed:
+    - build-rc
+    - k8s-topgun
+    - bosh-smoke
+    - bosh-topgun-core
+    - bosh-topgun-runtime
+    - bosh-topgun-both
+    - bosh-topgun-pcf
+  - get: unit-image
+    passed:
+    - build-rc
+    - k8s-topgun
+    - bosh-smoke
+    - bosh-topgun-core
+    - bosh-topgun-runtime
+    - bosh-topgun-both
+    - bosh-topgun-pcf
+  - get: version
+    passed:
+    - build-rc
+    - k8s-topgun
+    - bosh-smoke
+    - bosh-topgun-core
+    - bosh-topgun-runtime
+    - bosh-topgun-both
+    - bosh-topgun-pcf
+  - get: linux-rc
+    passed: [build-rc]
+  - get: linux-rc-ubuntu
+    passed: [build-rc]
+  - get: windows-rc
+    passed: [build-rc]
+  - get: darwin-rc
+    passed: [build-rc]
+  - get: concourse-rc-image
+    passed: [k8s-topgun]
+  - get: concourse-rc-image-ubuntu
+    passed: [k8s-topgun]
+  - get: concourse-release
+    passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
+  - get: bpm-release
+    passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
+  - get: postgres-release
+    passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
+
+- name: publish-pre-binaries
+  serial: true
+  plan:
+  - in_parallel:
+    - get: version
+      passed: [pre]
+      trigger: true
+      params:
+        pre: pre
+        pre_without_version: true
+    - get: concourse
+      passed: [pre]
+    - get: unit-image
+      passed: [pre]
+    - get: linux-rc
+      passed: [pre]
+    - get: windows-rc
+      passed: [pre]
+    - get: darwin-rc
+      passed: [pre]
+    - get: ci
+    - get: release-notes
+  - in_parallel:
+    - task: prep-release-assets
+      file: ci/tasks/prep-release-assets.yml
+      image: unit-image
+    - task: build-release-notes
+      file: ci/tasks/build-release-notes.yml
+      image: unit-image
+      params:
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+  - put: concourse-github-pre
+    params:
+      commitish: concourse/.git/ref
+      tag: version/version
+      name: built-notes/release-name
+      body: built-notes/notes.md
+      globs:
+      - concourse-linux/concourse-*.tgz
+      - concourse-windows/concourse-*.zip
+      - concourse-darwin/concourse-*.tgz
+      - fly-linux/fly-*.tgz
+      - fly-windows/fly-*.zip
+      - fly-darwin/fly-*.tgz
+      - concourse-linux/*.sha1
+      - concourse-windows/*.sha1
+      - concourse-darwin/*.sha1
+      - fly-linux/*.sha1
+      - fly-windows/*.sha1
+      - fly-darwin/*.sha1
+
+- name: publish-pre-image
+  serial: true
+  plan:
+  - in_parallel:
+    - get: version
+      passed: [pre]
+      trigger: true
+      params:
+        pre: pre
+        pre_without_version: true
+    - get: concourse
+      passed: [pre]
+    - get: concourse-rc-image
+      passed: [pre]
+      params: {format: oci}
+    - get: concourse-rc-image-ubuntu
+      passed: [pre]
+      params: {format: oci}
+    - get: concourse-rc-image-ubuntu-rootfs
+      resource: concourse-rc-image-ubuntu
+      passed: [pre]
+    - get: latest-version
+    - get: ci
+  - in_parallel:
+    - do:
+      - task: docker-semver-tags
+        file: ci/tasks/docker-semver-tags.yml
+        input_mapping: {latest-of-same-major-version: latest-version}
+        output_mapping: {tags: alpine-tags}
+        params: {SUFFIX: pre}
+
+      - put: concourse-image-pre
+        inputs: [concourse-rc-image, alpine-tags]
+        params:
+          image: concourse-rc-image/image.tar
+          additional_tags: alpine-tags/tags
+
+    - do:
+      - task: docker-semver-tags
+        file: ci/tasks/docker-semver-tags.yml
+        input_mapping: {latest-of-same-major-version: latest-version}
+        output_mapping: {tags: ubuntu-tags}
+        params: {SUFFIX: ubuntu-pre}
+
+      - put: concourse-image-ubuntu-pre
+        inputs: [concourse-rc-image-ubuntu, ubuntu-tags]
+        params:
+          image: concourse-rc-image-ubuntu/image.tar
+          additional_tags: ubuntu-tags/tags
+
 - name: publish-binaries
   serial: true
   plan:
@@ -1500,8 +1653,26 @@ resources:
   type: registry-image
   icon: *image-icon
   source:
-    tag: ubuntu
     repository: concourse/concourse
+    tag: ubuntu
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: concourse-image-pre
+  type: registry-image
+  icon: *image-icon
+  source:
+    repository: concourse/concourse
+    tag: pre
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: concourse-image-ubuntu-pre
+  type: registry-image
+  icon: *image-icon
+  source:
+    repository: concourse/concourse
+    tag: ubuntu-pre
     username: ((docker.username))
     password: ((docker.password))
 
@@ -1878,6 +2049,15 @@ resources:
     owner: concourse
     repository: concourse
     access_token: ((concourse_github_release.access_token))
+
+- name: concourse-github-pre
+  type: github-release
+  icon: truck
+  source:
+    owner: concourse
+    repository: concourse
+    access_token: ((concourse_github_release.access_token))
+    pre_release: true
 
 - name: concourse-boshio
   type: bosh-io-release
