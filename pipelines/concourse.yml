@@ -1106,109 +1106,111 @@ jobs:
   public: true
   serial_groups: [version]
   plan:
-  - get: concourse
-    passed:
-    - build-rc
-    - k8s-topgun
-    - k8s-check-helm-params
-    - bosh-smoke
-    - bosh-topgun-core
-    - bosh-topgun-runtime
-    - bosh-topgun-both
-    - bosh-topgun-pcf
-    - bosh-check-props
-  - get: unit-image
-    passed:
-    - build-rc
-    - k8s-topgun
-    - k8s-check-helm-params
-    - bosh-smoke
-    - bosh-topgun-core
-    - bosh-topgun-runtime
-    - bosh-topgun-both
-    - bosh-topgun-pcf
-  - get: final-version
-    resource: version
-    params: {bump: final}
-    passed:
-    - build-rc
-    - k8s-topgun
-    - k8s-check-helm-params
-    - bosh-smoke
-    - bosh-topgun-core
-    - bosh-topgun-runtime
-    - bosh-topgun-both
-    - bosh-topgun-pcf
-    - bosh-check-props
-  - get: linux-rc
-    passed: [build-rc]
-  - get: linux-rc-ubuntu
-    passed: [build-rc, bosh-check-props]
-  - get: windows-rc
-    passed: [build-rc]
-  - get: darwin-rc
-    passed: [build-rc]
-  - get: concourse-rc-image
-    passed: [k8s-topgun, k8s-check-helm-params]
-  - get: concourse-rc-image-ubuntu
-    passed: [k8s-topgun, k8s-check-helm-params]
-  - get: concourse-release
-    passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
-  - get: bpm-release
-    passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
-  - get: postgres-release
-    passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
+  - in_parallel:
+    - get: concourse
+      passed:
+      - build-rc
+      - k8s-topgun
+      - k8s-check-helm-params
+      - bosh-smoke
+      - bosh-topgun-core
+      - bosh-topgun-runtime
+      - bosh-topgun-both
+      - bosh-topgun-pcf
+      - bosh-check-props
+    - get: unit-image
+      passed:
+      - build-rc
+      - k8s-topgun
+      - k8s-check-helm-params
+      - bosh-smoke
+      - bosh-topgun-core
+      - bosh-topgun-runtime
+      - bosh-topgun-both
+      - bosh-topgun-pcf
+    - get: final-version
+      resource: version
+      params: {bump: final}
+      passed:
+      - build-rc
+      - k8s-topgun
+      - k8s-check-helm-params
+      - bosh-smoke
+      - bosh-topgun-core
+      - bosh-topgun-runtime
+      - bosh-topgun-both
+      - bosh-topgun-pcf
+      - bosh-check-props
+    - get: linux-rc
+      passed: [build-rc]
+    - get: linux-rc-ubuntu
+      passed: [build-rc, bosh-check-props]
+    - get: windows-rc
+      passed: [build-rc]
+    - get: darwin-rc
+      passed: [build-rc]
+    - get: concourse-rc-image
+      passed: [k8s-topgun, k8s-check-helm-params]
+    - get: concourse-rc-image-ubuntu
+      passed: [k8s-topgun, k8s-check-helm-params]
+    - get: concourse-release
+      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
+    - get: bpm-release
+      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
+    - get: postgres-release
+      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
   - put: version
     params: {file: final-version/version}
 
 - name: pre
   public: true
   plan:
-  - get: concourse
-    passed:
-    - build-rc
-    - k8s-topgun
-    - bosh-smoke
-    - bosh-topgun-core
-    - bosh-topgun-runtime
-    - bosh-topgun-both
-    - bosh-topgun-pcf
-  - get: unit-image
-    passed:
-    - build-rc
-    - k8s-topgun
-    - bosh-smoke
-    - bosh-topgun-core
-    - bosh-topgun-runtime
-    - bosh-topgun-both
-    - bosh-topgun-pcf
-  - get: version
-    passed:
-    - build-rc
-    - k8s-topgun
-    - bosh-smoke
-    - bosh-topgun-core
-    - bosh-topgun-runtime
-    - bosh-topgun-both
-    - bosh-topgun-pcf
-  - get: linux-rc
-    passed: [build-rc]
-  - get: linux-rc-ubuntu
-    passed: [build-rc]
-  - get: windows-rc
-    passed: [build-rc]
-  - get: darwin-rc
-    passed: [build-rc]
-  - get: concourse-rc-image
-    passed: [k8s-topgun]
-  - get: concourse-rc-image-ubuntu
-    passed: [k8s-topgun]
-  - get: concourse-release
-    passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
-  - get: bpm-release
-    passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
-  - get: postgres-release
-    passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
+  - in_parallel:
+    - get: concourse
+      passed:
+      - build-rc
+      - k8s-topgun
+      - bosh-smoke
+      - bosh-topgun-core
+      - bosh-topgun-runtime
+      - bosh-topgun-both
+      - bosh-topgun-pcf
+    - get: unit-image
+      passed:
+      - build-rc
+      - k8s-topgun
+      - bosh-smoke
+      - bosh-topgun-core
+      - bosh-topgun-runtime
+      - bosh-topgun-both
+      - bosh-topgun-pcf
+    - get: version
+      passed:
+      - build-rc
+      - k8s-topgun
+      - bosh-smoke
+      - bosh-topgun-core
+      - bosh-topgun-runtime
+      - bosh-topgun-both
+      - bosh-topgun-pcf
+    - get: linux-rc
+      passed: [build-rc]
+    - get: linux-rc-ubuntu
+      passed: [build-rc]
+    - get: windows-rc
+      passed: [build-rc]
+    - get: darwin-rc
+      passed: [build-rc]
+    - get: concourse-rc-image
+      passed: [k8s-topgun]
+    - get: concourse-rc-image-ubuntu
+      passed: [k8s-topgun]
+    - get: concourse-release
+      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
+    - get: bpm-release
+      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
+    - get: postgres-release
+      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
 
 - name: publish-pre-binaries
   serial: true

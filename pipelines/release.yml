@@ -822,42 +822,43 @@ jobs:
   public: true
   serial_groups: [version]
   plan:
-  - get: concourse
-    passed:
-    - build-rc
-    - bosh-smoke
-    - bosh-topgun
-    - bosh-check-props
-  - get: unit-image
-    passed:
-    - build-rc
-    - bosh-smoke
-    - bosh-topgun
-  - get: final-version
-    resource: version
-    params: {bump: final}
-    passed:
-    - build-rc
-    - bosh-smoke
-    - bosh-topgun
-    - bosh-check-props
-  - get: linux-rc
-    passed: [build-rc]
-  - get: linux-rc-ubuntu
-    passed: [build-rc, bosh-check-props]
-  - get: windows-rc
-    passed: [build-rc]
-  - get: darwin-rc
-    passed: [build-rc]
-  - get: concourse-rc-image
-    passed: [k8s-smoke]
-  - get: concourse-rc-image-ubuntu
-  - get: concourse-release
-    passed: [bosh-smoke, bosh-topgun]
-  - get: bpm-release
-    passed: [bosh-smoke, bosh-topgun]
-  - get: postgres-release
-    passed: [bosh-smoke, bosh-topgun]
+  - in_parallel:
+    - get: concourse
+      passed:
+      - build-rc
+      - bosh-smoke
+      - bosh-topgun
+      - bosh-check-props
+    - get: unit-image
+      passed:
+      - build-rc
+      - bosh-smoke
+      - bosh-topgun
+    - get: final-version
+      resource: version
+      params: {bump: final}
+      passed:
+      - build-rc
+      - bosh-smoke
+      - bosh-topgun
+      - bosh-check-props
+    - get: linux-rc
+      passed: [build-rc]
+    - get: linux-rc-ubuntu
+      passed: [build-rc, bosh-check-props]
+    - get: windows-rc
+      passed: [build-rc]
+    - get: darwin-rc
+      passed: [build-rc]
+    - get: concourse-rc-image
+      passed: [k8s-smoke]
+    - get: concourse-rc-image-ubuntu
+    - get: concourse-release
+      passed: [bosh-smoke, bosh-topgun]
+    - get: bpm-release
+      passed: [bosh-smoke, bosh-topgun]
+    - get: postgres-release
+      passed: [bosh-smoke, bosh-topgun]
   - put: version
     params: {file: final-version/version}
 
