@@ -1232,8 +1232,8 @@ jobs:
     - task: prep-release-assets
       file: ci/tasks/prep-release-assets.yml
       image: unit-image
-    - task: build-release-notes
-      file: ci/tasks/build-release-notes.yml
+    - task: build-prerelease-notes
+      file: ci/tasks/build-prerelease-notes.yml
       image: unit-image
       params:
         GITHUB_TOKEN: ((concourse_github_dummy.access_token))
@@ -1264,9 +1264,7 @@ jobs:
     - get: version
       passed: [pre]
       trigger: true
-      params:
-        pre: pre
-        pre_without_version: true
+      params: {bump: final} # final bump; '-pre' is done via SUFFIX
     - get: concourse
       passed: [pre]
     - get: concourse-rc-image
