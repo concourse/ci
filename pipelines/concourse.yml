@@ -835,9 +835,11 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
+      passed: [build-rc]
       trigger: true
     - get: unit-image
     - get: version
+      passed: [build-rc]
     - get: linux-rc-ubuntu
       passed: [build-rc]
       trigger: true
