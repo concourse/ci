@@ -75,7 +75,6 @@ groups:
   - chart-minor
   - pre
   - publish-pre-binaries
-  - publish-pre-image
 
 - name: workers
   jobs:
@@ -1601,24 +1600,6 @@ resources:
   source:
     repository: concourse/concourse
     tag: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: concourse-image-pre
-  type: registry-image
-  icon: *image-icon
-  source:
-    repository: concourse/concourse
-    tag: pre
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: concourse-image-ubuntu-pre
-  type: registry-image
-  icon: *image-icon
-  source:
-    repository: concourse/concourse
-    tag: ubuntu-pre
     username: ((docker.username))
     password: ((docker.password))
 
