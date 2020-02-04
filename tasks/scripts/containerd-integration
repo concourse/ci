@@ -9,22 +9,7 @@ source ci/tasks/scripts/cgroup-helpers.sh
 
 main() {
   sanitize_cgroups
-  start_containerd
   run_test
-}
-
-start_containerd() {
-  mkdir -p /scratch/containerd
-
-  PATH=/usr/local/concourse/bin containerd --config ./ci/deployments/containerd.toml >/tmp/containerd.log 2>&1 &
-  echo $! >/tmp/containerd.pid
-
-  sleep 1
-
-  until ctr version >/dev/null 2>&1; do
-    echo "waiting for containerd to come up..."
-    sleep 1
-  done
 }
 
 run_test() {
