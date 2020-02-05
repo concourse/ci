@@ -1943,7 +1943,7 @@ resources:
   icon: *git-icon
   source:
     uri: git@github.com:concourse/concourse-chart.git
-    branch: master
+    branch: dev
     private_key: ((concourse_chart_private_key))
 
 - name: helm-charts
