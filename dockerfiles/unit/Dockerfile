@@ -55,7 +55,7 @@ RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add 
       rm -rf /var/lib/apt/lists/*
 
 # install helm for k8s-related jobs
-RUN curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
+RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
 # install Vault for bosh-topgun
 RUN curl -L https://releases.hashicorp.com/vault/0.7.3/vault_0.7.3_linux_amd64.zip -o /tmp/vault.zip && \

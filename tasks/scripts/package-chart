@@ -24,7 +24,6 @@ pushd concourse
 popd
 
 
-helm init --client-only
 helm repo remove local
 helm repo update
 helm package -u -d ./packaged-chart ./concourse

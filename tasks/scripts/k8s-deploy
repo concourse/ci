@@ -39,9 +39,10 @@ eventually_populate_kube_config() {
 run_helm_deploy() {
   local chart=./concourse-chart
 
-  helm init --upgrade --wait
   helm version
   helm dependency update $chart
+  # sadly helm no longer creates the namespace for us
+  kubectl create namespace "$RELEASE_NAME" --dry-run -o yaml | kubectl apply -f -
   helm upgrade \
     --install \
     --recreate-pods \
