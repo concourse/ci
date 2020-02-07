@@ -8,7 +8,6 @@ image_resource:
 inputs:
 - name: concourse-chart
 - name: chart-repo-index
-- name: chart-version
 - name: concourse-version
 - name: ci
 
