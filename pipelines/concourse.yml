@@ -1457,25 +1457,18 @@ jobs:
       passed: [k8s-topgun]
     - get: unit-image
       passed: [k8s-topgun]
-    - get: final-chart-version
-      resource: chart-version
-      params: {bump: final}
-  - put: chart-version
-    params: {file: final-chart-version/version}
 
 - name: publish-chart
   public: true
   serial: true
   plan:
   - in_parallel:
-    - get: chart-version
-      passed: [ship-chart]
-      trigger: true
     - get: concourse-version
       resource: version
       passed: [ship-chart]
     - get: concourse-chart
       passed: [ship-chart]
+      trigger: true
     - get: unit-image
       passed: [ship-chart]
     - get: chart-repo-index
@@ -1526,20 +1519,6 @@ jobs:
   serial_groups: [version]
   plan:
   - put: version
-    params: {bump: minor, pre: rc}
-
-- name: chart-major
-  public: true
-  serial_groups: [chart-version]
-  plan:
-  - put: chart-version
-    params: {bump: major, pre: rc}
-
-- name: chart-minor
-  public: true
-  serial_groups: [chart-version]
-  plan:
-  - put: chart-version
     params: {bump: minor, pre: rc}
 
 resources:
@@ -1781,15 +1760,6 @@ resources:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
     key: version
-
-- name: chart-version
-  type: semver
-  icon: tag
-  source:
-    driver: gcs
-    bucket: concourse-artifacts
-    json_key: ((concourse_artifacts_json_key))
-    key: chart-version
 
 - name: linux-rc
   type: gcs
