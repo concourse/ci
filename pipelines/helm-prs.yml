@@ -128,18 +128,8 @@ jobs:
     tags: [k8s-topgun]
   - task: version-bump-check
     tags: [k8s-topgun]
+    file: ci/tasks/k8s-version-bump-check.yml
     image: unit-image
-    config:
-      platform: linux
-      inputs:
-      - name: chart-pr
-      run:
-        path: bash
-        args:
-        - -cex
-        - |
-          cd chart-pr
-          git diff master HEAD -- Chart.yaml | egrep '\+version: [0-9]+\.[0-9]+\.[0-9]+'
 
 
 - name: lint-and-install-test
@@ -171,44 +161,10 @@ jobs:
     get_params: {list_changed_files: true}
     tags: [k8s-topgun]
   - in_parallel:
-    - task: lint-check
+    - task: lint-and-install-test
       tags: [k8s-topgun]
-      image: unit-image
-      input_mapping: {concourse: chart-pr}
-      config:
-        platform: linux
-        inputs:
-        - name: concourse
-        run:
-          path: bash
-          args:
-          - -cex
-          - |
-            helm lint concourse
-    - task: basic-install-test
-      tags: [k8s-topgun]
+      file: ci/tasks/k8s-lint-and-install.yml
       image: unit-image
       input_mapping: {concourse: chart-pr}
       params:
         KUBE_CONFIG: ((topgun_kube_config))
-      config:
-        platform: linux
-        inputs:
-        - name: concourse
-        run:
-          path: bash
-          args:
-          - -ceu
-          - |
-            mkdir -p ~/.kube
-
-            if [ ! -f ~/.kube/config ]; then
-              echo "$KUBE_CONFIG" > ~/.kube/config
-            fi
-            releasename="pr-$(cat concourse/.git/resource/pr)-$(head -c 6 concourse/.git/resource/base_sha)"
-            # this needs to be updated for migrating to helm 3
-            helm init --client-only
-            helm dependency update ./concourse
-            helm install ./concourse --name "$releasename"
-            sleep 10
-            helm delete --purge "$releasename"

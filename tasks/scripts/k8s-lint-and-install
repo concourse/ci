@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e -u
+
+mkdir -p ~/.kube
+
+if [ ! -f ~/.kube/config ]; then
+  echo "$KUBE_CONFIG" > ~/.kube/config
+fi
+
+releasename="pr-$(cat concourse/.git/resource/pr)-$(head -c 6 concourse/.git/resource/base_sha)"
+# TODO: this needs to be updated for migrating to helm 3
+helm init --client-only
+helm lint concourse
+helm dependency update ./concourse
+helm install ./concourse --name "$releasename"
+# TODO: actually poke concourse to see that it's up. For now this just ensures helm doesn't exit 1 when installing
+sleep 10
+helm delete --purge "$releasename"
