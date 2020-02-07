@@ -71,8 +71,6 @@ groups:
   - publish-docs
   - ship-chart
   - publish-chart
-  - chart-major
-  - chart-minor
   - pre
   - publish-pre-binaries
 
