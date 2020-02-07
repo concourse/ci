@@ -1,0 +1,12 @@
+---
+platform: linux
+
+params:
+  KUBE_CONFIG:
+
+inputs:
+- name: concourse
+- name: ci
+
+run:
+  path: ci/tasks/scripts/k8s-lint-and-install

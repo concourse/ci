@@ -1,0 +1,13 @@
+---
+platform: linux
+
+inputs:
+- name: chart-pr
+
+run:
+  path: bash
+  args:
+  - -cex
+  - |
+    cd chart-pr
+    git diff master HEAD -- Chart.yaml | egrep '\+version: [0-9]+\.[0-9]+\.[0-9]+'
