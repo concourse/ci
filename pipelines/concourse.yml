@@ -274,6 +274,12 @@ jobs:
           skip_download: true
       - get: gdn
         trigger: true
+      - get: containerd
+        trigger: true
+      - get: runc
+        trigger: true
+      - get: cni
+        trigger: true
       - get: dumb-init
         trigger: true
       - get: resource-types-alpine-image
@@ -624,6 +630,12 @@ jobs:
       passed: [rc]
       params: {bump: final}
     - get: gdn
+      trigger: true
+    - get: containerd
+      trigger: true
+    - get: runc
+      trigger: true
+    - get: cni
       trigger: true
     - get: ci
     - get: resource-types-alpine-image
@@ -1631,6 +1643,30 @@ resources:
   source:
     owner: cloudfoundry
     repository: garden-runc-release
+    access_token: ((concourse_github_dummy.access_token))
+
+- name: containerd
+  type: github-release
+  icon: *release-icon
+  source:
+    owner: containerd
+    repository: containerd
+    access_token: ((concourse_github_dummy.access_token))
+
+- name: runc
+  type: github-release
+  icon: *release-icon
+  source:
+    owner: opencontainers
+    repository: runc
+    access_token: ((concourse_github_dummy.access_token))
+
+- name: cni
+  type: github-release
+  icon: *release-icon
+  source:
+    owner: containernetworking
+    repository: plugins
     access_token: ((concourse_github_dummy.access_token))
 
 - name: mock-resource
