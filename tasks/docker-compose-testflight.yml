@@ -18,6 +18,7 @@ caches:
 
 params:
   BUILD:
+  CONTAINERD:
 
 run:
   path: ci/tasks/scripts/pass-release-notes-only-change
