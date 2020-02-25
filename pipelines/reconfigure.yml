@@ -151,7 +151,6 @@ jobs:
       release_minor: "5.2"
       latest_release: "5.2"
       concourse_smoke_deployment_name: "concourse-smoke-5-2"
-      use_external_linker: true
       bin_smoke_use_https: "false"
   - set_pipeline: release-5.5.x
     file: pipelines-and-tasks/pipelines/release.yml
@@ -160,7 +159,6 @@ jobs:
       release_minor: "5.5"
       latest_release: "5.5"
       concourse_smoke_deployment_name: "concourse-smoke-5-5"
-      use_external_linker: false
       bin_smoke_use_https: "true"
   - set_pipeline: release-5.7.x
     file: pipelines-and-tasks/pipelines/release.yml
@@ -169,7 +167,6 @@ jobs:
       release_minor: "5.7"
       latest_release: "5.7"
       concourse_smoke_deployment_name: "concourse-smoke-5-7"
-      use_external_linker: false
       bin_smoke_use_https: "true"
   - set_pipeline: release-6.0.x
     file: pipelines-and-tasks/pipelines/release.yml
@@ -178,7 +175,6 @@ jobs:
       release_minor: "6.0"
       latest_release: "5"
       concourse_smoke_deployment_name: "concourse-smoke-6-0"
-      use_external_linker: false
       bin_smoke_use_https: "true"
   - set_pipeline: algorithm-v3
     file: pipelines-and-tasks/pipelines/branch.yml

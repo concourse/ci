@@ -4,8 +4,6 @@
 #   ((release_minor))                   the MAJOR.MINOR version, e.g. 5.1
 #                                       concourse matches the desired release version
 #   ((concourse_smoke_deployment_name)) a unique name for the smoke bosh deployment
-#   ((use_external_linker))             whether to use an external linker for go builds;
-#                                       otherwise the built-in go linker will be used.
 #
 # the following git branches need to be created:
 #
@@ -236,8 +234,6 @@ jobs:
       - task: fly-linux
         file: ci/tasks/fly-build-linux.yml
         image: unit-image
-        params:
-          USE_EXTERNAL_LINKER: ((use_external_linker))
       - task: fly-windows
         file: ci/tasks/fly-build-windows.yml
       - task: fly-darwin
@@ -526,8 +522,6 @@ jobs:
   - in_parallel:
     - task: fly-linux
       file: ci/tasks/fly-build-linux.yml
-      params:
-        USE_EXTERNAL_LINKER: ((use_external_linker))
     - task: fly-windows
       file: ci/tasks/fly-build-windows.yml
     - task: fly-darwin
