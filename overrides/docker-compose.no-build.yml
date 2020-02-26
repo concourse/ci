@@ -3,8 +3,8 @@ version: '3'
 services:
   web:
     image: concourse/dev:${CONCOURSE_DEV_TAG}
-    volumes: ["./keys:/concourse-keys"]
+    volumes: ["${CONCOURSE_KEYS}:/concourse-keys"]
 
   worker:
     image: concourse/dev:${CONCOURSE_DEV_TAG}
-    volumes: ["./keys:/concourse-keys"]
+    volumes: ["${CONCOURSE_KEYS}:/concourse-keys"]
