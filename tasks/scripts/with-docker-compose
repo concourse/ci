@@ -11,22 +11,24 @@ start_docker
 
 export CONCOURSE_DEV_TAG=$(cat dev-image/tag)
 
-pushd concourse
-  if [ "$BUILD" = "true" ]; then
-    docker-compose \
-      -f docker-compose.yml \
-      -f ../ci/overrides/docker-compose.ci.yml \
-      up --build -d
-  else
-    ../ci/tasks/scripts/generate-keys
+DOCKER_COMPOSE_FLAGS="-f concourse/docker-compose.yml -f ci/overrides/docker-compose.ci.yml"
 
-    docker-compose \
-      -f docker-compose.yml \
-      -f ../ci/overrides/docker-compose.ci.yml \
-      -f ../ci/overrides/docker-compose.no-build.yml \
-      up --no-build -d
-  fi
-popd
+if [ "$CONTAINERD" = "true" ]; then
+  DOCKER_COMPOSE_FLAGS="$DOCKER_COMPOSE_FLAGS -f concourse/hack/overrides/containerd.yml"
+fi
+
+if [ "$BUILD" = "true" ]; then
+  docker-compose \
+    $DOCKER_COMPOSE_FLAGS \
+    up --build -d
+else
+  ci/tasks/scripts/generate-keys
+
+  docker-compose \
+    $DOCKER_COMPOSE_FLAGS \
+    -f ci/overrides/docker-compose.no-build.yml \
+    up --no-build -d
+fi
 
 trap stop_docker_compose EXIT SIGTERM SIGINT
 function stop_docker_compose() {
