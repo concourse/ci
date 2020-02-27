@@ -1078,7 +1078,10 @@ jobs:
     passed: [shipit]
     trigger: true
   - put: version
-    params: {bump: patch, pre: rc}
+    params:
+      file: version/version
+      bump: patch
+      pre: rc
 
 - name: chart-patch
   public: true
