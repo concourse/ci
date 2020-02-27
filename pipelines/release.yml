@@ -1077,11 +1077,12 @@ jobs:
   - get: version
     passed: [shipit]
     trigger: true
+    params:
+      bump: patch
+      pre: rc
   - put: version
     params:
       file: version/version
-      bump: patch
-      pre: rc
 
 - name: chart-patch
   public: true
