@@ -318,12 +318,13 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
-      passed: [unit]
+      passed: [unit, dev-image]
       trigger: true
-    - get: unit-image
+    - get: dev-image
+      passed: [dev-image]
     - get: ci
   - task: integration
-    image: unit-image
+    image: dev-image
     privileged: true
     timeout: 1h
     file: ci/tasks/containerd-integration.yml
