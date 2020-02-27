@@ -88,6 +88,7 @@ groups:
   - publish-binaries
   - publish-image
   - publish-bosh-release
+  - bump-cbd-versions
   - publish-docs
   - ship-chart
   - publish-chart
@@ -921,6 +922,30 @@ jobs:
       tarball: concourse-release/*.tgz
       version: version/version
 
+- name: bump-cbd-versions
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse-boshio
+      trigger: true
+    - get: unit-image
+      passed: [shipit]
+    - get: cbd
+    - get: version
+      passed: [shipit]
+    - get: bpm-release
+      passed: [shipit]
+    - get: postgres-release
+      passed: [shipit]
+  - task: bump-versions
+    file: cbd/ci/bump-versions.yml
+    input_mapping: {concourse-bosh-deployment: cbd}
+    image: unit-image
+  - put: cbd
+    params:
+      repository: bumped-repo
+      merge: true
+
 - name: publish-image
   serial: true
   plan:
@@ -1314,6 +1339,13 @@ resources:
     repository: concourse
     access_token: ((concourse_github_release.access_token))
 
+- name: concourse-boshio
+  type: bosh-io-release
+  icon: *release-icon
+  source:
+    repository: concourse/concourse-bosh-release
+    regexp: ((release_minor)).*
+
 - name: unit-image
   type: registry-image
   icon: *image-icon
@@ -1328,6 +1360,14 @@ resources:
   type: bosh-io-stemcell
   icon: *release-icon
   source: {name: bosh-google-kvm-ubuntu-xenial-go_agent}
+
+- name: cbd
+  type: git
+  icon: *git-icon
+  source:
+    uri: git@github.com:concourse/concourse-bosh-deployment.git
+    branch: release/((release_minor)).x
+    private_key: ((concourse_deployment_repo_private_key))
 
 - name: postgres-image
   type: registry-image
