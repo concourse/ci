@@ -180,7 +180,7 @@ jobs:
     privileged: true
     file: ci/tasks/docker-compose-testflight.yml
     input_mapping: {concourse: built-concourse}
-    params: {BUILD: true}
+    params: {BUILD: true, DOWNLOAD_CLI: false}
     tags: [pr]
 
 - name: testflight-containerd
