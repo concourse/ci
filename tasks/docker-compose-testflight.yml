@@ -19,6 +19,7 @@ caches:
 params:
   BUILD:
   CONTAINERD:
+  DOWNLOAD_CLI: true
 
 run:
   path: ci/tasks/scripts/pass-release-notes-only-change
