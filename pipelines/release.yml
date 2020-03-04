@@ -770,6 +770,8 @@ jobs:
       trigger: true
     - get: credhub-release
       trigger: true
+    - get: uaa-release
+      trigger: true
     - get: bbr
       trigger: true
     - get: ci
@@ -1399,6 +1401,11 @@ resources:
   type: bosh-io-release
   icon: *release-icon
   source: {repository: pivotal-cf/credhub-release}
+
+- name: uaa-release
+  type: bosh-io-release
+  icon: *release-icon
+  source: {repository: cloudfoundry/uaa-release}
 
 - name: bbr-sdk-release
   type: bosh-io-release

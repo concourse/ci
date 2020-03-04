@@ -25,6 +25,7 @@ inputs:
 - name: concourse
 - name: concourse-release
 - name: credhub-release
+- name: uaa-release
 - name: postgres-release
 - name: stemcell
 - name: vault-release
