@@ -14,6 +14,9 @@ inputs:
 - name: dumb-init
 - name: concourse
 - name: gdn
+- name: containerd
+- name: runc
+- name: cni
 - name: resource-types-image
 - name: fly-linux
 - name: fly-windows

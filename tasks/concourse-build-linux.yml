@@ -9,6 +9,9 @@ inputs:
 - name: concourse
 - name: ci
 - name: gdn
+- name: containerd
+- name: runc
+- name: cni
 - name: resource-types
 - name: version
   optional: true

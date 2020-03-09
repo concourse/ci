@@ -1,8 +1,10 @@
 # used for building concourse/dev. this shortens the dev feedback loop by:
 #
 # * baking in the gdn binary
+# * baking in the containerd binaries (+ runc, cni plugins, iptables)
 # * baking in fly binaries
 # * baking in resource types
+# * build init executable for containerd
 # * warming the module cache
 # * warming the build cache
 
@@ -17,9 +19,26 @@ RUN apt-get update && apt-get -y install \
 COPY dumb-init/dumb-init_*_amd64 /usr/local/bin/dumb-init
 RUN chmod +x /usr/local/bin/dumb-init
 
-# add and install executable dependencies
+# Add container runtime dependencies
+#
+# For guardian backend:
+#   - gdn
+# For containerd backend:
+#   - containerd binaries
+#   - runc
+#   - cni plugins
+#   - iptables (needed by cni plugins)
 COPY gdn/gdn-* /usr/local/concourse/bin/gdn
-RUN chmod +x /usr/local/concourse/bin/gdn
+
+# Copies files from the bin directory of the tarball to /usr/local/concourse/bin
+ADD containerd/containerd-*.linux-amd64.tar.gz /usr/local/concourse
+
+COPY runc/runc.amd64 /usr/local/concourse/bin/runc
+
+ADD cni/cni-plugins-linux-amd64-*.tgz /usr/local/concourse/bin
+RUN apt install -y iptables
+
+RUN chmod -R +x /usr/local/concourse/bin
 
 # add fly executables
 RUN mkdir /usr/local/concourse/fly-assets
@@ -35,6 +54,11 @@ COPY ./resource-types-image/rootfs/usr/local/concourse/resource-types/ /usr/loca
 # nuke /src after to ensure dev builds build from a clean slate (otherwise this
 # can cause build failures if e.g. files are removed locally)
 COPY concourse /src
+
+# build the init executable for containerd
+RUN  set -x && \
+	gcc -O2 -static -o /usr/local/concourse/bin/init /src/cmd/init/init.c
+
 RUN cd /src && \
       go mod download && \
       go install github.com/gobuffalo/packr/packr && \
@@ -60,5 +84,8 @@ ENV CONCOURSE_TSA_WORKER_PRIVATE_KEY  /concourse-keys/worker_key
 
 # set $PATH for convenience
 ENV PATH /usr/local/concourse/bin:${PATH}
+
+# make `ctr` target the default concourse namespace
+ENV CONTAINERD_NAMESPACE=concourse
 
 ENTRYPOINT ["dumb-init", "concourse"]
