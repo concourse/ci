@@ -12,6 +12,7 @@ RUN apt-get update && apt-get -y install \
       iproute2 \
       ca-certificates \
       file \
+      tree \
       btrfs-tools
 
 COPY dumb-init/dumb-init_*_amd64 /usr/local/bin/dumb-init
