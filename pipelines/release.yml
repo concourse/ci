@@ -68,6 +68,7 @@ groups:
   - bin-smoke
   - upgrade
   - downgrade
+  - discover-component-version
 
 - name: k8s
   jobs:
@@ -604,6 +605,37 @@ jobs:
             image: image-ubuntu/image.tar
             additional_tags: version/version
   on_failure: *failed-concourse
+
+- name: discover-component-version
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse
+      passed: [build-rc-image]
+      trigger: true
+    - get: unit-image
+      passed: [build-rc-image]
+      trigger: true
+    - get: version
+      passed: [build-rc-image]
+      trigger: true
+  - task: discover-postgresql-version
+    file: ci/tasks/discover-component-version.yml
+    inputs: [version]
+    output_mapping: {component-version: postgresql-version}
+    params: {COMPONENT_NAME: "postgresql"}
+  - task: discover-helm-version
+    file: ci/tasks/discover-component-version.yml
+    inputs: [version]
+    output_mapping: {component-version: helm-version}
+    params: {COMPONENT_NAME: "helm"}
+  - put: resource-postgresql-version
+    inputs: [postgresql-version]
+    params: {file: "postgresql-version/postgresql-version-*.txt"}
+  - put: resource-helm-version
+    inputs: [helm-version]
+    params: {file: "helm-version/helm-version-*.txt"}
 
 - name: bin-smoke
   public: true
@@ -1532,6 +1564,22 @@ resources:
     bucket: concourse-ubuntu-dpkg-list
     json_key: ((concourse_dpkg_list_json_key))
     regexp: "concourse-dpkg-list-(.*).txt"
+
+- name: resource-postgresql-version
+  type: gcs
+  icon: format-list-bulleted
+  source:
+    bucket: concourse-components-version
+    json_key: ((concourse_components_json_key))
+    regexp: "postgresql-version-(.*).txt"
+
+- name: resource-helm-version
+  type: gcs
+  icon: format-list-bulleted
+  source:
+    bucket: concourse-components-version
+    json_key: ((concourse_components_json_key))
+    regexp: "helm-version-(.*).txt"
 
 - name: chart-repo
   type: gcs
