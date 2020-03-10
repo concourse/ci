@@ -26,7 +26,8 @@ terraform workspace select "$WORKSPACE" || \
 terraform apply \
   --auto-approve \
   --var project=$GCP_PROJECT \
-  --var use_https=$USE_HTTPS
+  --var use_https=$USE_HTTPS \
+  --var use_containerd=$USE_CONTAINERD
 
 {
   terraform output -json | \

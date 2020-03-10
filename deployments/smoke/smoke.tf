@@ -17,6 +17,11 @@ variable "use_https" {
   default = true
 }
 
+variable "use_containerd" {
+  type    = bool
+  default = false
+}
+
 provider "google" {
   credentials = "keys/gcp.json"
   project     = var.project
@@ -168,7 +173,7 @@ resource "null_resource" "rerun" {
 
   provisioner "file" {
     destination = "/etc/systemd/system/concourse-worker.service.d/smoke.conf"
-    source      = "systemd/smoke-worker.conf"
+    source      = var.use_containerd ? "systemd/smoke-worker-containerd.conf" : "systemd/smoke-worker.conf"
   }
 
   provisioner "file" {

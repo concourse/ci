@@ -27,6 +27,7 @@ groups:
   - build-rc
   - build-rc-image
   - bin-smoke
+  - bin-smoke-containerd
   - upgrade
   - downgrade
 
@@ -783,6 +784,39 @@ jobs:
     image: unit-image
     file: ci/tasks/smoke.yml
     input_mapping: {endpoint-info: outputs}
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
+
+- name: bin-smoke-containerd
+  public: true
+  serial: true
+  plan:
+    - in_parallel:
+        - get: concourse
+          passed: [build-rc]
+          trigger: true
+        - get: version
+          passed: [build-rc]
+          trigger: true
+        - get: linux-rc-ubuntu
+          passed: [build-rc]
+          trigger: true
+        - get: unit-image
+        - get: ci
+    - task: terraform-smoke
+      image: unit-image
+      file: ci/tasks/terraform-smoke.yml
+      input_mapping: {linux-rc: linux-rc-ubuntu}
+      params:
+        GCP_PROJECT: cf-concourse-production
+        GCP_KEY: ((concourse_smoke_gcp_key))
+        SSH_KEY: ((concourse_smoke_ssh_key))
+        DEPLOYMENT: smoke
+        USE_CONTAINERD: true
+    - task: smoke
+      image: unit-image
+      file: ci/tasks/smoke.yml
+      input_mapping: {endpoint-info: outputs}
   on_success: *fixed-concourse
   on_failure: *broke-concourse
 
