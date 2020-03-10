@@ -11,7 +11,7 @@ params:
   SSH_KEY:
   WORKSPACE: default
   USE_HTTPS: 'true'
-  USE_CONTAINERD:
+  USE_CONTAINERD: 'false'
 
 inputs:
 - name: concourse
