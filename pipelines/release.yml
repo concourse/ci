@@ -105,6 +105,8 @@ jobs:
       trigger: true
     - get: unit-image
       trigger: true
+    - get: periodic-check
+      trigger: true
     - get: ci
   - task: yarn-test
     image: unit-image
@@ -169,6 +171,8 @@ jobs:
     - get: mock-resource
       trigger: true
     - get: builder
+      trigger: true
+    - get: periodic-check
       trigger: true
     - get: ci
   - in_parallel:
@@ -1555,3 +1559,10 @@ resources:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
     key: chart-version-((release_minor))
+
+- name: periodic-check
+  type: time
+  source:
+    start: 2AM
+    stop: 3AM
+    interval: 1h
