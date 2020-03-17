@@ -31,4 +31,4 @@ params:
   PLATFORM: linux
 
 run:
-  path: ci/tasks/scripts/concourse-build
+  path: ci/tasks/scripts/concourse-build-legacy

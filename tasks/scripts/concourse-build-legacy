@@ -39,11 +39,6 @@ mkdir $bin
 mv concourse/concourse $bin
 [ -d gdn ] && install -m 0755 gdn/gdn* $bin/gdn
 
-if [ "$PLATFORM" = "linux" ]; then
-  # build the init executable for containerd
-  gcc -O2 -static -o $bin/init concourse/cmd/init/init.c
-fi
-
 [ -d resource-types ] && cp -a resource-types $output/concourse
 
 fly_assets=$output/concourse/fly-assets
