@@ -1,0 +1,28 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: concourse/builder}
+
+params:
+  REPOSITORY: concourse/dev
+  DOCKERFILE: ci/dockerfiles/dev/Dockerfile
+
+inputs:
+- name: ci
+- name: dumb-init
+- name: concourse
+- name: gdn
+- name: resource-types-image
+- name: fly-linux
+- name: fly-windows
+- name: fly-darwin
+
+outputs:
+- name: image
+
+caches:
+- path: cache
+
+run: {path: build}
