@@ -1,0 +1,34 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: concourse/unit}
+
+inputs:
+- name: concourse
+- name: ci
+- name: gdn
+- name: resource-types
+- name: version
+  optional: true
+- name: final-version
+  optional: true
+- name: fly-linux
+  optional: true
+- name: fly-windows
+  optional: true
+- name: fly-darwin
+  optional: true
+
+caches:
+- path: gopath
+
+outputs:
+- name: concourse-tarball
+
+params:
+  PLATFORM: linux
+
+run:
+  path: ci/tasks/scripts/concourse-build

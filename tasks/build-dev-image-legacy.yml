@@ -7,7 +7,7 @@ image_resource:
 
 params:
   REPOSITORY: concourse/dev
-  DOCKERFILE: ci/dockerfiles/dev/Dockerfile
+  DOCKERFILE: ci/dockerfiles/dev-legacy/Dockerfile
 
 inputs:
 - name: ci
