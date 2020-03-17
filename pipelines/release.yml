@@ -136,6 +136,7 @@ jobs:
         message_file: message/message
         mode: normal
         alert_type: failed
+  on_error: *failed-concourse
 
 - name: resource-types-images
   public: true
@@ -239,6 +240,7 @@ jobs:
     params: {image: image/image.tar}
     get_params: {format: oci}
   on_failure: *failed-concourse
+  on_error: *failed-concourse
 
 - name: testflight
   public: true
@@ -263,6 +265,7 @@ jobs:
     timeout: 1h
     file: ci/tasks/docker-compose-testflight.yml
   on_failure: *failed-concourse
+  on_error: *failed-concourse
 
 - name: watsjs
   public: true
@@ -287,6 +290,7 @@ jobs:
     timeout: 1h
     file: ci/tasks/docker-compose-watsjs.yml
   on_failure: *failed-concourse
+  on_error: *failed-concourse
 
 - name: upgrade
   public: true
@@ -311,6 +315,7 @@ jobs:
     image: unit-image
     file: ci/tasks/upgrade-test.yml
   on_failure: *failed-concourse
+  on_error: *failed-concourse
 
 - name: downgrade
   public: true
@@ -365,6 +370,7 @@ jobs:
     input_mapping: {distribution: concourse-chart, linux-rc: linux-rc-ubuntu}
     params: {DISTRIBUTION: helm}
   on_failure: *failed-concourse
+  on_error: *failed-concourse
 
 - name: k8s-smoke
   public: true
@@ -420,6 +426,7 @@ jobs:
       RELEASE_NAME: ((concourse_smoke_deployment_name))
       CONCOURSE_IMAGE: concourse/concourse-rc
   on_failure: *failed-concourse
+  on_error: *failed-concourse
 
 - name: k8s-topgun
   public: true
@@ -463,6 +470,7 @@ jobs:
       KUBE_CONFIG: ((kube_config))
       CONCOURSE_IMAGE_NAME: concourse/concourse-rc
   on_failure: *failed-concourse
+  on_error: *failed-concourse
 
 - name: rc
   public: true
@@ -608,6 +616,7 @@ jobs:
             image: image-ubuntu/image.tar
             additional_tags: version/version
   on_failure: *failed-concourse
+  on_error: *failed-concourse
 
 - name: bin-smoke
   public: true
@@ -640,6 +649,7 @@ jobs:
     file: ci/tasks/smoke.yml
     input_mapping: {endpoint-info: outputs}
   on_failure: *failed-concourse
+  on_error: *failed-concourse
 
 - name: bosh-check-props
   public: true
@@ -744,6 +754,7 @@ jobs:
     image: unit-image
     file: ci/tasks/smoke.yml
   on_failure: *failed-concourse
+  on_error: *failed-concourse
 
 - name: bosh-topgun
   public: true
@@ -796,6 +807,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
       SKIP_PACKAGES: "k8s"
   on_failure: *failed-concourse
+  on_error: *failed-concourse
 
 - name: shipit
   public: true
