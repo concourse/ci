@@ -145,7 +145,7 @@ jobs:
   - set_pipeline: norsk-mirror
     file: pipelines-and-tasks/pipelines/norsk-mirror.yml
   - set_pipeline: release-5.2.x
-    file: pipelines-and-tasks/pipelines/release.yml
+    file: pipelines-and-tasks/pipelines/release-legacy.yml
     vars:
       release_major: "5"
       release_minor: "5.2"
@@ -153,7 +153,7 @@ jobs:
       concourse_smoke_deployment_name: "concourse-smoke-5-2"
       bin_smoke_use_https: "false"
   - set_pipeline: release-5.5.x
-    file: pipelines-and-tasks/pipelines/release.yml
+    file: pipelines-and-tasks/pipelines/release-legacy.yml
     vars:
       release_major: "5"
       release_minor: "5.5"
@@ -161,13 +161,21 @@ jobs:
       concourse_smoke_deployment_name: "concourse-smoke-5-5"
       bin_smoke_use_https: "true"
   - set_pipeline: release-5.7.x
-    file: pipelines-and-tasks/pipelines/release.yml
+    file: pipelines-and-tasks/pipelines/release-legacy.yml
     vars:
       release_major: "5"
       release_minor: "5.7"
       latest_release: "5.7"
       concourse_smoke_deployment_name: "concourse-smoke-5-7"
       bin_smoke_use_https: "true"
+  - set_pipeline: release-5.8.x
+      file: pipelines-and-tasks/pipelines/release-legacy.yml
+      vars:
+        release_major: "5"
+        release_minor: "5.8"
+        latest_release: "5.8"
+        concourse_smoke_deployment_name: "concourse-smoke-5-8"
+        bin_smoke_use_https: "true"
   - set_pipeline: release-6.0.x
     file: pipelines-and-tasks/pipelines/release.yml
     vars:
