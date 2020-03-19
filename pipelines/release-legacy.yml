@@ -537,13 +537,13 @@ jobs:
       fail_fast: true
       steps:
       - task: concourse-linux-alpine
-        file: ci/tasks/concourse-build-linux.yml
+        file: ci/tasks/concourse-build-linux-legacy.yml
         image: unit-image
         input_mapping: {concourse: built-concourse, resource-types: resource-types-alpine}
         output_mapping: {concourse-tarball: concourse-linux-alpine}
       - task: concourse-linux-ubuntu
         image: unit-image
-        file: ci/tasks/concourse-build-linux.yml
+        file: ci/tasks/concourse-build-linux-legacy.yml
         input_mapping: {concourse: built-concourse, resource-types: resource-types-ubuntu}
         output_mapping: {concourse-tarball: concourse-linux-ubuntu}
       - task: concourse-windows
