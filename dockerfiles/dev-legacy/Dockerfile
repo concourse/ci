@@ -4,7 +4,6 @@
 # * baking in the containerd binaries (+ runc, cni plugins, iptables)
 # * baking in fly binaries
 # * baking in resource types
-# * build init executable for containerd
 # * warming the module cache
 # * warming the build cache
 
@@ -24,11 +23,6 @@ RUN chmod +x /usr/local/bin/dumb-init
 #
 # For guardian backend:
 #   - gdn
-# For containerd backend:
-#   - containerd binaries
-#   - runc
-#   - cni plugins
-#   - iptables (needed by cni plugins)
 COPY gdn/gdn-* /usr/local/concourse/bin/gdn
 
 RUN chmod -R +x /usr/local/concourse/bin
@@ -47,10 +41,6 @@ COPY ./resource-types-image/rootfs/usr/local/concourse/resource-types/ /usr/loca
 # nuke /src after to ensure dev builds build from a clean slate (otherwise this
 # can cause build failures if e.g. files are removed locally)
 COPY concourse /src
-
-# build the init executable for containerd
-RUN  set -x && \
-	gcc -O2 -static -o /usr/local/concourse/bin/init /src/cmd/init/init.c
 
 RUN cd /src && \
       go mod download && \
