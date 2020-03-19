@@ -18,7 +18,11 @@ echo "$SSH_KEY" > keys/id_rsa
 chmod 0600 keys/id_rsa
 ssh-keygen -y -f keys/id_rsa > keys/id_rsa.pub
 
-terraform init
+if [ "$USE_CONTAINERD" = true ]; then
+  terraform init -backend-config="bucket=concourse-smoke-state-containerd"
+else
+  terraform init -backend-config="bucket=concourse-smoke-state"
+fi
 
 terraform workspace select "$WORKSPACE" || \
   terraform workspace new "$WORKSPACE"

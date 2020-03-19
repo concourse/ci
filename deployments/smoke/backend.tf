@@ -1,7 +1,4 @@
-terraform {
-  backend "gcs" {
-    credentials = "keys/gcp.json"
-    bucket      = "concourse-smoke-state"
-    prefix      = "terraform/state"
-  }
+backend "gcs" {
+  credentials = "keys/gcp.json"
+  prefix      = "terraform/state"
 }

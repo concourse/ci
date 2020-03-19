@@ -758,7 +758,6 @@ jobs:
 - name: bin-smoke
   public: true
   serial: true
-  serial_groups: [bin-smoke]
   plan:
   - in_parallel:
     - get: concourse
@@ -791,7 +790,6 @@ jobs:
 - name: bin-smoke-containerd
   public: true
   serial: true
-  serial_groups: [bin-smoke]
   plan:
     - in_parallel:
         - get: concourse

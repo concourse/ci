@@ -126,6 +126,14 @@ data "template_file" "web_conf" {
   }
 }
 
+data "template_file" "worker_conf" {
+  template = file("systemd/smoke-worker.conf.tpl")
+
+  vars = {
+    use_containerd = var.use_containerd
+  }
+}
+
 resource "null_resource" "rerun" {
   depends_on = [google_compute_instance.smoke]
 
@@ -173,7 +181,7 @@ resource "null_resource" "rerun" {
 
   provisioner "file" {
     destination = "/etc/systemd/system/concourse-worker.service.d/smoke.conf"
-    source      = var.use_containerd ? "systemd/smoke-worker-containerd.conf" : "systemd/smoke-worker.conf"
+    content     = data.template_file.worker_conf.rendered
   }
 
   provisioner "file" {
