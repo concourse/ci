@@ -17,11 +17,6 @@ variable "use_https" {
   default = true
 }
 
-variable "use_containerd" {
-  type    = bool
-  default = false
-}
-
 provider "google" {
   credentials = "keys/gcp.json"
   project     = var.project
@@ -130,7 +125,7 @@ data "template_file" "worker_conf" {
   template = file("systemd/smoke-worker.conf.tpl")
 
   vars = {
-    use_containerd = var.use_containerd
+    workspace = terraform.workspace
   }
 }
 

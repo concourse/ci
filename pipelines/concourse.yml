@@ -812,7 +812,7 @@ jobs:
         GCP_KEY: ((concourse_smoke_gcp_key))
         SSH_KEY: ((concourse_smoke_ssh_key))
         DEPLOYMENT: smoke
-        USE_CONTAINERD: true
+        WORKSPACE: containerd
     - task: smoke
       image: unit-image
       file: ci/tasks/smoke.yml
