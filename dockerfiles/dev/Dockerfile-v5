@@ -68,7 +68,5 @@ ENV CONCOURSE_TSA_WORKER_PRIVATE_KEY  /concourse-keys/worker_key
 # set $PATH for convenience
 ENV PATH /usr/local/concourse/bin:${PATH}
 
-# make `ctr` target the default concourse namespace
-ENV CONTAINERD_NAMESPACE=concourse
 
 ENTRYPOINT ["dumb-init", "concourse"]
