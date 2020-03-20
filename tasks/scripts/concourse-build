@@ -39,14 +39,21 @@ mkdir $bin
 mv concourse/concourse $bin
 [ -d gdn ] && install -m 0755 gdn/gdn* $bin/gdn
 
-[ -d containerd ] && tar -zvxf containerd/containerd-*.linux-amd64.tar.gz -C $bin --strip-components=1
-[ -d runc ] && install -m 0755 runc/runc.amd64 $bin/runc
-[ -d cni ] && tar -zvxf cni/cni-plugins-linux-amd64-*.tgz -C $bin
 
-if [ "$PLATFORM" = "linux" ]; then
-  # build the init executable for containerd
-  gcc -O2 -static -o $bin/init concourse/cmd/init/init.c
-fi
+version=$(cat version/version)
+major_version=$(echo $version | cut -d. -f1)
+# Only include containerd and its dependencies for v6 or higher
+if [ $major_version \> "5" ];
+then
+  [ -d containerd ] && tar -zvxf containerd/containerd-*.linux-amd64.tar.gz -C $bin --strip-components=1
+  [ -d runc ] && install -m 0755 runc/runc.amd64 $bin/runc
+  [ -d cni ] && tar -zvxf cni/cni-plugins-linux-amd64-*.tgz -C $bin
+
+  if [ "$PLATFORM" = "linux" ]; then
+    # build the init executable for containerd
+    gcc -O2 -static -o $bin/init concourse/cmd/init/init.c
+  fi
+fi;
 
 [ -d resource-types ] && cp -a resource-types $output/concourse
 
