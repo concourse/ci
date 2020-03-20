@@ -10,8 +10,11 @@ inputs:
 - name: ci
 - name: gdn
 - name: containerd
+  optional: true
 - name: runc
+  optional: true
 - name: cni
+  optional: true
 - name: resource-types
 - name: version
   optional: true

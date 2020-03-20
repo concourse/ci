@@ -4,6 +4,7 @@
 #   ((release_minor))                   the MAJOR.MINOR version, e.g. 5.1
 #                                       concourse matches the desired release version
 #   ((concourse_smoke_deployment_name)) a unique name for the smoke bosh deployment
+#   ((latest_release))                  the latest concourse/concourse tag for upgrade testing (choose this based on the patch release eg 5.5 for 5.5.x)
 #
 # the following git branches need to be created:
 #
@@ -235,6 +236,8 @@ jobs:
     image: builder
     privileged: true
     input_mapping: {concourse: built-concourse, resource-types-image: resource-types-alpine-image}
+    params:
+      DOCKERFILE: ci/dockerfiles/dev/Dockerfile-v((release_major))
     file: ci/tasks/build-dev-image.yml
   - put: dev-image
     params: {image: image/image.tar}
