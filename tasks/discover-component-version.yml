@@ -1,0 +1,31 @@
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: concourse/unit}
+
+inputs:
+  - name: version
+
+outputs:
+  - name: component-version
+
+params:
+  COMPONENT_NAME: ~
+
+run:
+  path: /bin/bash
+  args:
+    - -cex
+    - |
+
+      if [[ -d ./version ]]; then
+        CONCOURSE_VERSION=$(cat ./version/version)
+      fi
+
+      if [ $COMPONENT_NAME == "helm" ]; then
+        helm version --client --template "{{.Client.SemVer}}" > ./component-version/helm-version-${CONCOURSE_VERSION}.txt
+      else
+        dpkg -l | grep "${COMPONENT_NAME}-[0-9]\.*.*[0-9]*" | awk '$1=="ii" { print $3 }' | cut -d. -f1,2
+          > ./component-version/${COMPONENT_NAME}-version-${CONCOURSE_VERSION}.txt
+      fi
