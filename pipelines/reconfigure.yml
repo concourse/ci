@@ -169,13 +169,13 @@ jobs:
       concourse_smoke_deployment_name: "concourse-smoke-5-7"
       bin_smoke_use_https: "true"
   - set_pipeline: release-5.8.x
-      file: pipelines-and-tasks/pipelines/release.yml
-      vars:
-        release_major: "5"
-        release_minor: "5.8"
-        latest_release: "5.8"
-        concourse_smoke_deployment_name: "concourse-smoke-5-8"
-        bin_smoke_use_https: "true"
+    file: pipelines-and-tasks/pipelines/release.yml
+    vars:
+      release_major: "5"
+      release_minor: "5.8"
+      latest_release: "5.8"
+      concourse_smoke_deployment_name: "concourse-smoke-5-8"
+      bin_smoke_use_https: "true"
   - set_pipeline: release-6.0.x
     file: pipelines-and-tasks/pipelines/release.yml
     vars:
