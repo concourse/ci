@@ -69,7 +69,6 @@ groups:
   - bin-smoke
   - upgrade
   - downgrade
-  - discover-component-version
 
 - name: k8s
   jobs:
@@ -96,6 +95,7 @@ groups:
   - publish-chart
   - patch
   - chart-patch
+  - discover-component-version
 
 jobs:
 - name: unit
@@ -862,6 +862,7 @@ jobs:
   serial: true
   plan:
     - in_parallel:
+      - get: ci
       - get: concourse
         passed: [shipit]
         trigger: true
