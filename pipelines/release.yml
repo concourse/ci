@@ -520,13 +520,13 @@ jobs:
         image: unit-image
         input_mapping: {concourse: built-concourse, resource-types: resource-types-alpine}
         output_mapping: {concourse-tarball: concourse-linux-alpine}
-        params: {platform: linux}
+        params: {PLATFORM: linux}
       - task: concourse-linux-ubuntu
         image: unit-image
         file: ci/tasks/concourse-build-linux.yml
         input_mapping: {concourse: built-concourse, resource-types: resource-types-ubuntu}
         output_mapping: {concourse-tarball: concourse-linux-ubuntu}
-        params: {platform: linux-ubuntu}
+        params: {PLATFORM: linux-ubuntu}
       - task: concourse-windows
         file: ci/tasks/concourse-build-windows.yml
         input_mapping: {concourse: built-concourse}
