@@ -813,6 +813,7 @@ jobs:
         SSH_KEY: ((concourse_smoke_ssh_key))
         DEPLOYMENT: smoke
         WORKSPACE: containerd
+        TF_VAR_USE_CONTAINERD: "true"
     - task: smoke
       image: unit-image
       file: ci/tasks/smoke.yml
