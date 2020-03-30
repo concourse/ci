@@ -49,7 +49,7 @@ then
   [ -d runc ] && install -m 0755 runc/runc.amd64 $bin/runc
   [ -d cni ] && tar -zvxf cni/cni-plugins-linux-amd64-*.tgz -C $bin
 
-  if [ "$PLATFORM" = "linux" ]; then
+  if [[ $PLATFORM = *linux* ]]; then
     # build the init executable for containerd
     gcc -O2 -static -o $bin/init concourse/cmd/init/init.c
   fi

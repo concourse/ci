@@ -17,6 +17,11 @@ variable "use_https" {
   default = true
 }
 
+variable "USE_CONTAINERD" {
+  type    = bool
+  default = false
+}
+
 provider "google" {
   credentials = "keys/gcp.json"
   project     = var.project
@@ -121,6 +126,14 @@ data "template_file" "web_conf" {
   }
 }
 
+data "template_file" "worker_conf" {
+  template = file("systemd/smoke-worker.conf.tpl")
+
+  vars = {
+    use_containerd = var.USE_CONTAINERD
+  }
+}
+
 resource "null_resource" "rerun" {
   depends_on = [google_compute_instance.smoke]
 
@@ -168,7 +181,7 @@ resource "null_resource" "rerun" {
 
   provisioner "file" {
     destination = "/etc/systemd/system/concourse-worker.service.d/smoke.conf"
-    source      = "systemd/smoke-worker.conf"
+    content     = data.template_file.worker_conf.rendered
   }
 
   provisioner "file" {
