@@ -21,6 +21,7 @@ groups:
   - unit
   - dev-image
   - testflight
+  - testflight-containerd
   - containerd-integration
   - watsjs
   - rc
@@ -349,6 +350,31 @@ jobs:
     image: unit-image
     privileged: true
     timeout: 1h
+    file: ci/tasks/docker-compose-testflight.yml
+  on_success: *fixed-concourse
+  on_failure: *broke-concourse
+
+- name: testflight-containerd
+  public: true
+  max_in_flight: 2
+  plan:
+  - in_parallel:
+    - get: concourse
+      passed: [unit, dev-image]
+      trigger: true
+    - get: unit-image
+    - get: dev-image
+      passed: [dev-image]
+      trigger: true
+      params: {format: oci}
+    - get: postgres-image
+      params: {format: oci}
+    - get: ci
+  - task: testflight
+    image: unit-image
+    privileged: true
+    timeout: 1h
+    params: {CONTAINERD: true}
     file: ci/tasks/docker-compose-testflight.yml
   on_success: *fixed-concourse
   on_failure: *broke-concourse
