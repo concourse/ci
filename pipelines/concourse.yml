@@ -70,7 +70,6 @@ groups:
   - promote-cbd
   - bump-cbd-versions
   - publish-docs
-  - ship-chart
   - publish-chart
   - pre
   - publish-pre-binaries
@@ -1485,7 +1484,7 @@ jobs:
       repository: cbd-master
       merge: true
 
-- name: ship-chart
+- name: publish-chart
   public: true
   serial: true
   plan:
@@ -1494,23 +1493,9 @@ jobs:
       resource: version
       passed: [shipit]
     - get: concourse-chart
-      passed: [k8s-topgun]
-    - get: unit-image
-      passed: [k8s-topgun]
-
-- name: publish-chart
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse-version
-      resource: version
-      passed: [ship-chart]
-    - get: concourse-chart
-      passed: [ship-chart]
+      resource: concourse-chart-master
       trigger: true
     - get: unit-image
-      passed: [ship-chart]
     - get: chart-repo-index
     - get: ci
   - task: build-chart
@@ -1979,6 +1964,14 @@ resources:
     uri: https://github.com/concourse/concourse-docker
 
 - name: concourse-chart
+  type: git
+  icon: *git-icon
+  source:
+    uri: git@github.com:concourse/concourse-chart.git
+    branch: dev
+    private_key: ((concourse_chart_private_key))
+
+- name: concourse-chart-master
   type: git
   icon: *git-icon
   source:
