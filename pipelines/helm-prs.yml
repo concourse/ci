@@ -146,7 +146,7 @@ jobs:
     resource: chart-pr
     inputs: [chart-pr]
     params: {path: chart-pr, status: pending, context: version-bump-check}
-    get_params: {list_changed_files: true}
+    get_params: {list_changed_files: true, integration_tool: checkout}
     tags: [k8s-topgun]
   - task: version-bump-check
     tags: [k8s-topgun]
@@ -184,7 +184,7 @@ jobs:
     resource: chart-pr
     inputs: [chart-pr]
     params: {path: chart-pr, status: pending, context: lint-and-install-test}
-    get_params: {list_changed_files: true}
+    get_params: {list_changed_files: true, integration_tool: checkout}
     tags: [k8s-topgun]
   - in_parallel:
     - task: lint-and-install-test
