@@ -66,11 +66,15 @@ jobs:
     put: chart-pr
     inputs: [chart-pr]
     params: {path: chart-pr, status: failure, context: k8s-topgun}
+    get_params:
+      integration_tool: checkout
     tags: [k8s-topgun]
   on_success:
     put: chart-pr
     inputs: [chart-pr]
     params: {path: chart-pr, status: success, context: k8s-topgun}
+    get_params:
+      integration_tool: checkout
     tags: [k8s-topgun]
   plan:
   - in_parallel:
@@ -89,7 +93,7 @@ jobs:
   - put: chart-pr
     inputs: [chart-pr]
     params: {path: chart-pr, status: pending, context: k8s-topgun}
-    get_params: {list_changed_files: true}
+    get_params: {list_changed_files: true, integration_tool: checkout}
     tags: [k8s-topgun]
   - task: k8s-topgun
     tags: [k8s-topgun]
@@ -108,12 +112,22 @@ jobs:
   on_failure:
     put: chart-pr
     inputs: [chart-pr]
-    params: {path: chart-pr, status: failure, context: version-bump-check}
+    params:
+      path: chart-pr
+      status: failure
+      context: version-bump-check
+    get_params:
+      integration_tool: checkout
     tags: [k8s-topgun]
   on_success:
     put: chart-pr
     inputs: [chart-pr]
-    params: {path: chart-pr, status: success, context: version-bump-check}
+    params:
+      path: chart-pr
+      status: success
+      context: version-bump-check
+    get_params:
+      integration_tool: checkout
     tags: [k8s-topgun]
   plan:
   - in_parallel:
@@ -146,11 +160,15 @@ jobs:
     put: chart-pr
     inputs: [chart-pr]
     params: {path: chart-pr, status: failure, context: lint-and-install-test}
+    get_params:
+      integration_tool: checkout
     tags: [k8s-topgun]
   on_success:
     put: chart-pr
     inputs: [chart-pr]
     params: {path: chart-pr, status: success, context: lint-and-install-test}
+    get_params:
+      integration_tool: checkout
     tags: [k8s-topgun]
   plan:
   - in_parallel:
