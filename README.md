@@ -27,5 +27,12 @@ This [pipeline](https://ci.concourse-ci.org/teams/main/pipelines/prs) will autom
 #### `reconfigure.yml`
 Whenever any of these pipeline definitions get changed, the [reconfigure pipeline](https://ci.concourse-ci.org/teams/main/pipelines/reconfigure-pipelines) will run to reconfigure the affected pipelines.
 
+#### `resources/template.jsonnet`
+This is the template that gets used for all of the base resource types that are supported by the Concourse team. Each of those repos follows a similar enough structure that the same template can be used to do the basic PR-testing and shipping tasks for all of them.
+
+The set of resource types for which we automatically test PRs against and ship images to DockerHub is determined by the `RESOURCES` parameter to the [`render-resource-pipeline-templates` task](https://github.com/concourse/ci/blob/master/tasks/render-resource-pipeline-templates.yml).
+
+The source of truth for which resource types are bundled into Concourse is not clearly documented in public right now, but the ultimate source of truth is the set of inputs to the [`resource-types-images` job in the main pipeline](https://ci.concourse-ci.org/teams/main/pipelines/concourse/jobs/resource-types-images).
+
 ## Tasks
 Concourse specific task files, these range from testing the front end to building binaries to sending notifications to Slack.
