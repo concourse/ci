@@ -367,12 +367,12 @@ jobs:
       passed: [dev-image]
       trigger: true
       params: {format: oci}
-    - get: postgres-image
+    - get: postgres-image-legacy
       params: {format: oci}
-      version: {digest: "sha256:766565879aa414055ffb352589f99f74f1bf8b414d0c01911595531099e14cc9"}
     - get: ci
   - task: testflight-postgres
     image: unit-image
+    input_mapping: {postgres-image: postgres-image-legacy}
     privileged: true
     timeout: 1h
     file: ci/tasks/docker-compose-testflight.yml
@@ -1661,6 +1661,11 @@ resources:
   type: registry-image
   icon: *image-icon
   source: {repository: postgres}
+
+- name: postgres-image-legacy
+  type: registry-image
+  icon: *image-icon
+  source: {repository: postgres, tag: 9.5}
 
 - name: dumb-init
   type: github-release
