@@ -16,5 +16,3 @@ Environment=CONCOURSE_POSTGRES_DATABASE=concourse
 Environment=CONCOURSE_POSTGRES_SOCKET=/var/run/postgresql
 Environment=CONCOURSE_ADD_LOCAL_USER=admin:${admin_password},guest:${guest_password}
 Environment=CONCOURSE_MAIN_TEAM_LOCAL_USER=admin
-Environment=CONCOURSE_CLIENT_SECRET=${client_secret}
-Environment=CONCOURSE_TSA_CLIENT_SECRET=${tsa_client_secret}

@@ -115,34 +115,14 @@ resource "random_string" "guest_password" {
   special = false
 }
 
-resource "random_string" "client_secret" {
-  keepers = {
-    regen = uuid()
-  }
-
-  length  = 16
-  special = false
-}
-
-resource "random_string" "tsa_client_secret" {
-  keepers = {
-    regen = uuid()
-  }
-
-  length  = 16
-  special = false
-}
-
 data "template_file" "web_conf" {
   template = file("systemd/smoke-web.conf.tpl")
 
   vars = {
-    instance_ip       = google_compute_address.smoke.address
-    use_https         = var.use_https
-    admin_password    = random_string.admin_password.result
-    guest_password    = random_string.guest_password.result
-    client_secret     = random_string.client_secret.result
-    tsa_client_secret = random_string.tsa_client_secret.result
+    instance_ip    = google_compute_address.smoke.address
+    use_https      = var.use_https
+    admin_password = random_string.admin_password.result
+    guest_password = random_string.guest_password.result
   }
 }
 
