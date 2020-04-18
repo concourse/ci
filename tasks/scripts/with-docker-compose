@@ -13,7 +13,7 @@ export CONCOURSE_DEV_TAG=$(cat dev-image/tag)
 export POSTGRES_TAG=$(cat postgres-image/tag)
 export CONCOURSE_KEYS=$PWD/keys
 
-DOCKER_COMPOSE_FLAGS="-f concourse/docker-compose.yml -f ci/overrides/docker-compose.ci.yml -f ci/overrides/docker-compose.postgres.yml"
+DOCKER_COMPOSE_FLAGS="-f concourse/docker-compose.yml -f ci/overrides/docker-compose.ci.yml"
 
 if [ "$CONTAINERD" = "true" ]; then
   DOCKER_COMPOSE_FLAGS="$DOCKER_COMPOSE_FLAGS -f concourse/hack/overrides/containerd.yml"
