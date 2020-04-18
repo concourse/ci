@@ -254,6 +254,7 @@ local determine_base(distro) =
 local validate_pr(distro) = {
   name: "prs-" + distro,
   serial: true,
+  serial_groups: ["validate"],
   public: true,
   plan: [
     {
