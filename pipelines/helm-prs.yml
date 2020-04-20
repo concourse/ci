@@ -80,6 +80,8 @@ jobs:
   - in_parallel:
     - get: chart-pr
       tags: [k8s-topgun]
+      params:
+        integration_tool: checkout
     - get: helm-charts
       tags: [k8s-topgun]
     - get: concourse
@@ -176,6 +178,8 @@ jobs:
       trigger: true
       version: every
       tags: [k8s-topgun]
+      params:
+        integration_tool: checkout
     - get: ci
       tags: [k8s-topgun]
     - get: unit-image
