@@ -4,7 +4,14 @@ services:
   web:
     image: concourse/dev:${CONCOURSE_DEV_TAG}
     volumes: ["${CONCOURSE_KEYS}:/concourse-keys"]
+    environment:
+      CONCOURSE_SESSION_SIGNING_KEY: /concourse-keys/session_signing_key
+      CONCOURSE_TSA_AUTHORIZED_KEYS: /concourse-keys/authorized_worker_keys
+      CONCOURSE_TSA_HOST_KEY: /concourse-keys/tsa_host_key
 
   worker:
     image: concourse/dev:${CONCOURSE_DEV_TAG}
     volumes: ["${CONCOURSE_KEYS}:/concourse-keys"]
+    environment:
+      CONCOURSE_TSA_PUBLIC_KEY: /concourse-keys/tsa_host_key.pub
+      CONCOURSE_TSA_WORKER_PRIVATE_KEY: /concourse-keys/worker_key
