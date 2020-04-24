@@ -11,8 +11,9 @@ if [ -z "${PLATFORM}" ]; then
   exit 1
 fi
 
+version=$(cat version/version)
 sha="$(git -C concourse rev-parse HEAD)"
-archive=concourse-${sha}-${PLATFORM}-amd64.tgz
+archive=concourse-${version}+${sha}.${PLATFORM}.amd64.tgz
 
 final_version=""
 ldflags=""
@@ -39,8 +40,6 @@ mkdir $bin
 mv concourse/concourse $bin
 [ -d gdn ] && install -m 0755 gdn/gdn* $bin/gdn
 
-
-version=$(cat version/version)
 major_version=$(echo $version | cut -d. -f1)
 # Only include containerd and its dependencies for v6 or higher
 if [ $major_version \> "5" ];
