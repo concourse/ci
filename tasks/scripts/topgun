@@ -15,14 +15,16 @@ export UAA_RELEASE_VERSION="$(cat uaa-release/version)"
 export BACKUP_AND_RESTORE_SDK_RELEASE_VERSION="$(cat bbr-sdk-release/version)"
 export STEMCELL_VERSION="$(cat stemcell/version)"
 
+RELEASE_NAME_SUFFIX=${RELEASE_NAME_SUFFIX:-$SUITE}
+
 function upload_release() {
   release_dir=$PWD/$1
   release=$release_dir/*.tgz
-  if [ ! -z $SUITE ]; then
+  if [ ! -z $RELEASE_NAME_SUFFIX ]; then
     mkdir -p release-unzipped
     tar -C release-unzipped -xzf $release
     rm $release
-    sed -i "s/^name: concourse$/name: concourse-$SUITE/" release-unzipped/release.MF
+    sed -i "s/^name: concourse$/name: concourse-$RELEASE_NAME_SUFFIX/" release-unzipped/release.MF
     pushd release-unzipped
       tar -czf $release_dir/release.tgz *
     popd
