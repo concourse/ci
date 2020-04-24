@@ -1,7 +1,8 @@
 . .\ci\tasks\scripts\go-build.ps1
 
+$version = (Get-Content "version\version")
 $sha = & git -C concourse rev-parse HEAD
-$archive = "concourse-${sha}-windows-amd64.zip"
+$archive = "concourse-${version}+${sha}.windows.amd64.zip"
 
 # can't figure out how to pass an empty string arg in PowerShell, so just
 # configure a noop for the fallback

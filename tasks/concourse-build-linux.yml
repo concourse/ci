@@ -17,7 +17,6 @@ inputs:
   optional: true
 - name: resource-types
 - name: version
-  optional: true
 - name: final-version
   optional: true
 - name: fly-linux
