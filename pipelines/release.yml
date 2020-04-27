@@ -5,6 +5,7 @@
 #                                       concourse matches the desired release version
 #   ((concourse_smoke_deployment_name)) a unique name for the smoke bosh deployment
 #   ((latest_release))                  the latest concourse/concourse tag for upgrade testing (choose this based on the patch release eg 5.5 for 5.5.x)
+#   ((end_of_general_support))          YYYY-MM-dd format when support for this minor line ends
 #
 # the following git branches need to be created:
 #
@@ -29,6 +30,12 @@ resource_types:
 - name: slack-notifier
   type: registry-image
   source: {repository: mockersf/concourse-slack-notifier}
+
+- name: pivnet
+  type: registry-image
+  source:
+    repository: pivotalcf/pivnet-resource
+    tag: latest-final
 
 groups:
 - name: develop
@@ -64,6 +71,7 @@ groups:
   - publish-binaries
   - publish-image
   - publish-bosh-release
+  - publish-pivnet-bosh
   - bump-cbd-versions
   - publish-docs
   - ship-chart
@@ -831,6 +839,8 @@ jobs:
       passed: [bosh-smoke, bosh-topgun]
     - get: postgres-release
       passed: [bosh-smoke, bosh-topgun]
+    - get: gcp-xenial-stemcell
+      passed: [bosh-smoke, bosh-topgun]
   - put: version
     params: {file: final-version/version}
 
@@ -923,6 +933,8 @@ jobs:
       trigger: true
     - get: concourse-release
       passed: [shipit]
+    - get: gcp-xenial-stemcell
+      passed: [shipit]
   - put: concourse-release-final
     params:
       tarball: concourse-release/*.tgz
@@ -951,6 +963,28 @@ jobs:
     params:
       repository: bumped-repo
       merge: true
+
+- name: publish-pivnet-bosh
+  plan:
+  - in_parallel:
+    - get: ci
+    - get: concourse-release-final
+      passed: [publish-bosh-release]
+      trigger: true
+    - get: version
+      passed: [publish-bosh-release]
+    - get: gcp-xenial-stemcell
+      passed: [publish-bosh-release]
+  - task: create-pivnet-metadata
+    file: ci/tasks/create-pivnet-metadata.yml
+  - in_parallel:
+    - put: pivnet-bosh-release
+      inputs:
+        - concourse-release-final
+        - product
+      params:
+        metadata_file: product/metadata.yaml
+        file_glob: concourse-release-final/concourse-*.tgz
 
 - name: publish-image
   serial: true
@@ -1340,6 +1374,15 @@ resources:
   source:
     repository: concourse/concourse-bosh-release
     regexp: ((release_minor)).*
+
+- name: pivnet-bosh-release
+  type: pivnet
+  icon: chart-timeline-variant
+  source:
+    api_token: ((pivnet-token))
+    product_slug: p-concourse
+    copy_metadata: true
+    endpoint: https://network.pivotal.io
 
 - name: unit-image
   type: registry-image

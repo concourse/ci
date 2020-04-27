@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e
+
+echo "release:
+  version: $(echo $(cat version/version) BOSH Deployment | head -c 26)
+  release_type: Developer Release
+  eula_slug: pivotal_software_eula
+  description: |
+    Concourse for VMware Tanzu v$(cat version/version) is a stable and VMware supported version of Concourse. Please refer to Release Notes for breaking changes, features and fixes in this release.
+    
+    Concourse for VMware Tanzu v$(cat version/version) was tested on Stemcell $(cat gcp-xenial-stemcell/version) (Xenial) upon release and supports the 621.* Stemcell family
+    
+    Concourse for VMware Tanzu v$(cat version/version) requires PostgreSQL 9.5+ 
+  release_notes_url: https://docs.pivotal.io/p-concourse/v5/rn/
+  availability: Admins Only
+  end_of_support_date: ((end_of_general_support))
+product_files:
+- file: $(ls concourse-release-final/concourse-*.tgz)
+  upload_as: Concourse BOSH $(cat version/version)
+" > product/metadata.yaml
