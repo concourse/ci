@@ -11,12 +11,18 @@ resources:
     private_key: ((norsk_deploy_key))
     uri: git@github.com:pivotal/oslo-scan-status.git
     paths: [ p-concourse/* ]
-- name: 4.2.X-scan-status
+- name: 4.2.x-scan-status
   type: git
   source:
     private_key: ((norsk_deploy_key))
     uri: git@github.com:pivotal/oslo-scan-status.git
     paths: [ p-concourse-4.2.x/* ]
+- name: 5.5.x-scan-status
+  type: git
+  source:
+    private_key: ((norsk_deploy_key))
+    uri: git@github.com:pivotal/oslo-scan-status.git
+    paths: [ p-concourse-5.5.x/* ]
 - name: ci
   type: git
   icon: github-circle
@@ -68,14 +74,14 @@ jobs:
         mode: normal
         alert_type: broke
 
-- name: check-p-concourse-4.2.X
+- name: check-p-concourse-4.2.x
   plan:
-  - get: 4.2.X-scan-status
+  - get: 4.2.x-scan-status
     trigger: true
   - get: ci
   - task: check-status-file
     file: ci/tasks/check-norsk-status.yml
-    input_mapping: {scan-status: 4.2.X-scan-status}
+    input_mapping: {scan-status: 4.2.x-scan-status}
   on_success:
     do:
     - task: format-slack-message
@@ -103,3 +109,37 @@ jobs:
         mode: normal
         alert_type: broke
 
+- name: check-p-concourse-5.5.x
+  plan:
+    - get: 5.5.x-scan-status
+      trigger: true
+    - get: ci
+    - task: check-status-file
+      file: ci/tasks/check-norsk-status.yml
+      input_mapping: {scan-status: 5.5.x-scan-status}
+  on_success:
+    do:
+      - task: format-slack-message
+        file: ci/tasks/format-slack-message.yml
+        input_mapping: {src: 5.5.x-scan-status}
+        params:
+          GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+          SLACK_TOKEN: ((slack_token))
+      - put: notify
+        params:
+          message_file: message/message
+          mode: normal
+          alert_type: fixed
+  on_failure:
+    do:
+      - task: format-slack-message
+        file: ci/tasks/format-slack-message.yml
+        input_mapping: {src: 5.5.x-scan-status}
+        params:
+          GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+          SLACK_TOKEN: ((slack_token))
+      - put: notify
+        params:
+          message_file: message/message
+          mode: normal
+          alert_type: broke
