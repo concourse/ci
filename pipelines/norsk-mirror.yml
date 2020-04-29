@@ -46,6 +46,8 @@ jobs:
   - get: ci
   - task: check-status-file
     file: ci/tasks/check-norsk-status.yml
+    params:
+      NORSK_PIPELINE: p-concourse
     input_mapping: {scan-status: latest-scan-status}
   on_success:
     do:
@@ -81,6 +83,8 @@ jobs:
   - get: ci
   - task: check-status-file
     file: ci/tasks/check-norsk-status.yml
+    params:
+      NORSK_PIPELINE: p-concourse-4.2.x
     input_mapping: {scan-status: 4.2.x-scan-status}
   on_success:
     do:
@@ -116,6 +120,8 @@ jobs:
     - get: ci
     - task: check-status-file
       file: ci/tasks/check-norsk-status.yml
+      params:
+        NORSK_PIPELINE: p-concourse-5.5.x
       input_mapping: {scan-status: 5.5.x-scan-status}
   on_success:
     do:

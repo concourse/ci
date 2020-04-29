@@ -1,6 +1,6 @@
 #!/bin/bash
 
-status_file=scan-status/p-concourse/status.json
+status_file=scan-status/$NORSK_PIPELINE/status.json
 cat "$status_file"
 
 num_failures="$(grep -c '"status": "failed"' $status_file)"
