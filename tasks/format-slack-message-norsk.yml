@@ -1,0 +1,19 @@
+---
+platform: linux
+image_resource:
+  type: registry-image
+  source:
+    repository: concourse/unit
+
+params:
+  NORSK_PIPELINE:
+
+inputs:
+  - name: ci
+  - name: src
+
+outputs:
+  - name: message
+
+run:
+  path: ci/tasks/scripts/format-slack-message-norsk
