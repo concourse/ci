@@ -1382,7 +1382,6 @@ resources:
     api_token: ((pivnet-token))
     product_slug: p-concourse
     copy_metadata: true
-    endpoint: https://network.pivotal.io
 
 - name: unit-image
   type: registry-image
