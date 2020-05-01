@@ -14,7 +14,7 @@ echo "release:
     Concourse for VMware Tanzu v$(cat version/version) requires PostgreSQL 9.5+ 
   release_notes_url: https://docs.pivotal.io/p-concourse/v5/rn/
   availability: Admins Only
-  end_of_support_date: ((end_of_general_support))
+  end_of_support_date: $END_OF_GENERAL_SUPPORT
 product_files:
 - file: $(ls concourse-release-final/concourse-*.tgz)
   upload_as: Concourse BOSH $(cat version/version)

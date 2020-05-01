@@ -9,5 +9,7 @@ outputs:
 image_resource:
   type: registry-image
   source: { repository: ubuntu }
+params:
+  END_OF_GENERAL_SUPPORT:
 run:
   path: ci/tasks/scripts/create-pivnet-metadata

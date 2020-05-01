@@ -977,6 +977,8 @@ jobs:
       passed: [publish-bosh-release]
   - task: create-pivnet-metadata
     file: ci/tasks/create-pivnet-metadata.yml
+    params:
+      END_OF_GENERAL_SUPPORT: ((end_of_general_support))
   - in_parallel:
     - put: pivnet-bosh-release
       inputs:
