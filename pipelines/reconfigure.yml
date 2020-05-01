@@ -152,6 +152,7 @@ jobs:
       latest_release: "5.2"
       concourse_smoke_deployment_name: "concourse-smoke-5-2"
       bin_smoke_use_https: "false"
+      end_of_general_support: "2020-04-31"
   - set_pipeline: release-5.5.x
     file: pipelines-and-tasks/pipelines/release.yml
     vars:
@@ -160,6 +161,7 @@ jobs:
       latest_release: "5.5"
       concourse_smoke_deployment_name: "concourse-smoke-5-5"
       bin_smoke_use_https: "true"
+      end_of_general_support: "2020-07-31"
   - set_pipeline: release-5.7.x
     file: pipelines-and-tasks/pipelines/release.yml
     vars:
@@ -168,6 +170,7 @@ jobs:
       latest_release: "5.7"
       concourse_smoke_deployment_name: "concourse-smoke-5-7"
       bin_smoke_use_https: "true"
+      end_of_general_support: "N/A"
   - set_pipeline: release-5.8.x
     file: pipelines-and-tasks/pipelines/release.yml
     vars:
@@ -176,6 +179,7 @@ jobs:
       latest_release: "5.8"
       concourse_smoke_deployment_name: "concourse-smoke-5-8"
       bin_smoke_use_https: "true"
+      end_of_general_support: "N/A"
   - set_pipeline: release-6.0.x
     file: pipelines-and-tasks/pipelines/release-v6.yml
     vars:
