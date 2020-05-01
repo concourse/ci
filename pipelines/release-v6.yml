@@ -1287,7 +1287,7 @@ resources:
 
     bucket: concourse-artifacts
     key: version-((release_minor))
-    initial_version: ((release_minor)).1-rc.0
+    initial_version: ((release_minor)).0-rc.0
 
 - name: latest-version
   type: github-release
