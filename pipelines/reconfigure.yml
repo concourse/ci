@@ -193,7 +193,7 @@ jobs:
     vars:
       release_major: "6"
       release_minor: "6.1"
-      latest_release: "6.1"
+      latest_release: "6.0"
       concourse_smoke_deployment_name: "concourse-smoke-6-1"
       bin_smoke_use_https: "true"
   - set_pipeline: algorithm-v3
