@@ -120,6 +120,13 @@ jobs:
     vars:
       pr_base_branch: master
       concourse_base_branch: master
+      concourse_image_name: concourse/concourse
+      concourse_image_tag: latest
+  - set_pipeline: helm-prs-dev
+    file: pipelines-and-tasks/pipelines/helm-prs.yml
+    vars:
+      pr_base_branch: dev
+      concourse_base_branch: master
       concourse_image_name: concourse/concourse-rc
       concourse_image_tag: latest
   - set_pipeline: helm-prs-5.5.x
