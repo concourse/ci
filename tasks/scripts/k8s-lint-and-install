@@ -17,3 +17,4 @@ helm install ./concourse --name "$releasename"
 # TODO: actually poke concourse to see that it's up. For now this just ensures helm doesn't exit 1 when installing
 sleep 10
 helm delete --purge "$releasename"
+kubectl delete --ignore-not-found=true namespace "$releasename-main"
