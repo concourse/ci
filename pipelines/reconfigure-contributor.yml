@@ -1,0 +1,31 @@
+resource_types:
+- name: concourse-pipeline
+  type: registry-image
+  source:
+    repository: concourse/concourse-pipeline-resource
+
+resources:
+- name: pipelines-and-tasks
+  type: git
+  icon: github-circle
+  source:
+    uri: https://github.com/concourse/ci
+    paths:
+    - pipelines
+    - tasks
+
+jobs:
+- name: reconfigure-self
+  plan:
+  - get: pipelines-and-tasks
+    trigger: true
+  - set_pipeline: reconfigure-pipelines
+    file: pipelines-and-tasks/pipelines/reconfigure-contributor.yml
+
+- name: reconfigure-pipelines
+  plan:
+  - get: pipelines-and-tasks
+    trigger: true
+    passed: [reconfigure-self]
+  - set_pipeline: prs
+    file: pipelines-and-tasks/pipelines/prs.yml
