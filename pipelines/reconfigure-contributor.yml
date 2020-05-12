@@ -1,9 +1,3 @@
-resource_types:
-- name: concourse-pipeline
-  type: registry-image
-  source:
-    repository: concourse/concourse-pipeline-resource
-
 resources:
 - name: pipelines-and-tasks
   type: git
