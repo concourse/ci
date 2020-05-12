@@ -120,8 +120,6 @@ jobs:
     trigger: true
   - set_pipeline: concourse
     file: pipelines-and-tasks/pipelines/concourse.yml
-  - set_pipeline: prs
-    file: pipelines-and-tasks/pipelines/prs.yml
   - set_pipeline: helm-prs
     file: pipelines-and-tasks/pipelines/helm-prs.yml
     vars:
