@@ -226,8 +226,8 @@ jobs:
   - set_pipeline: enterprise-helm-chart
     file: concourse-for-k8s/ci/pipeline.yml
     vars:
-      concourse_chart_branch: release/5.5.x
-      concourse_minor: "5.5"
+      concourse_chart_branch: release/6.1.x
+      concourse_minor: "6.1"
   - set_pipeline: prod-db-backup
     file: pipelines-and-tasks/pipelines/prod-db-backup.yml
   - set_pipeline: prod-db-restore-verify
