@@ -190,11 +190,10 @@ jobs:
     params: {path: chart-pr, status: pending, context: lint-and-install-test}
     get_params: {list_changed_files: true, integration_tool: checkout}
     tags: [k8s-topgun]
-  - in_parallel:
-    - task: lint-and-install-test
-      tags: [k8s-topgun]
-      file: ci/tasks/k8s-lint-and-install.yml
-      image: unit-image
-      input_mapping: {concourse: chart-pr}
-      params:
-        KUBE_CONFIG: ((topgun_kube_config))
+  - task: lint-and-install-test
+    tags: [k8s-topgun]
+    file: ci/tasks/k8s-lint-and-install.yml
+    image: unit-image
+    input_mapping: {concourse: chart-pr}
+    params:
+      KUBE_CONFIG: ((topgun_kube_config))
