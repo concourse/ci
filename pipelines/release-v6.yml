@@ -335,7 +335,7 @@ jobs:
       params: {format: oci}
       trigger: true
     - get: unit-image
-    - get: concourse-image
+    - get: latest-concourse-image
       params: {format: oci}
     - get: postgres-image
       params: {format: oci}
@@ -360,7 +360,7 @@ jobs:
       params: {format: oci}
       trigger: true
     - get: unit-image
-    - get: concourse-image
+    - get: latest-concourse-image
       params: {format: oci}
     - get: postgres-image
       params: {format: oci}
@@ -1254,6 +1254,15 @@ resources:
     password: ((docker.password))
     tag: release-((release_minor))-ubuntu
 
+- name: latest-concourse-image
+  type: registry-image
+  icon: *image-icon
+  source:
+    repository: concourse/concourse
+    username: ((docker.username))
+    password: ((docker.password))
+    tag: ((latest_release))
+
 - name: concourse-image
   type: registry-image
   icon: *image-icon
@@ -1264,7 +1273,7 @@ resources:
 
     # avoid tagging as 'latest' in case this is a patch release for an older
     # version
-    tag: ((latest_release))
+    tag: ((release_minor))
 
 - name: concourse-image-ubuntu
   type: registry-image
