@@ -1569,6 +1569,7 @@ jobs:
       params:
         file: packaged-chart/concourse-*.tgz
     - put: concourse-chart
+      resource: concourse-chart-master
       inputs: [concourse]
       params:
         repository: concourse
