@@ -4,6 +4,9 @@ image_resource:
   type: registry-image
   source: { repository: ubuntu }
 
+params:
+  NORSK_PIPELINE:
+
 inputs:
 - name: ci
 - name: scan-status
