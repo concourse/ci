@@ -9,7 +9,6 @@ params:
   SUFFIX:
 
 inputs:
-- name: concourse
 - name: ci
 - name: version
 - name: latest-version
@@ -19,4 +18,14 @@ outputs:
 - name: tags
 
 run:
-  path: ci/tasks/scripts/docker-semver-tags
+  path: bash
+  args:
+  - -c
+  - |
+    go get -d -v ./...
+    go run ci/tasks/scripts/docker-semver-tags.go \
+      --shipit=version/version \
+      --latest=latest-version/version \
+      --latest-of-same-major=latest-of-same-major-version/version \
+      --output=tags/tags
+
