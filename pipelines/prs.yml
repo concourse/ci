@@ -231,6 +231,45 @@ jobs:
       params: {BUILD: true, CONTAINERD: true, DOWNLOAD_CLI: false}
       tags: [pr]
 
+- name: containerd-integration
+  public: true
+  max_in_flight: 3
+  on_failure:
+    put: concourse-pr
+    inputs: [concourse-pr]
+    params: {path: concourse-pr, status: failure, context: containerd-integration}
+    tags: [pr]
+    get_params: {skip_download: true}
+  on_success:
+    put: concourse-pr
+    inputs: [concourse-pr]
+    params: {path: concourse-pr, status: success, context: containerd-integration}
+    tags: [pr]
+    get_params: {skip_download: true}
+  plan:
+  - in_parallel:
+    - get: concourse-pr
+      trigger: true
+      version: every
+      tags: [pr]
+    - get: dev-image
+      tags: [pr]
+    - get: ci
+      tags: [pr]
+  - put: concourse-status-update
+    resource: concourse-pr
+    inputs: [concourse-pr]
+    params: {path: concourse-pr, status: pending, context: containerd-integration}
+    tags: [pr]
+    get_params: {list_changed_files: true, skip_download: true}
+  - task: integration
+    image: dev-image
+    privileged: true
+    timeout: 1h
+    file: ci/tasks/containerd-integration.yml
+    tags: [pr]
+
+
 - name: watsjs
   public: true
   max_in_flight: 3
