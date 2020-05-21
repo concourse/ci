@@ -1,8 +1,7 @@
 resource_types:
-- name: concourse-pipeline
+- name: slack-notifier
   type: registry-image
-  source:
-    repository: concourse/concourse-pipeline-resource
+  source: {repository: mockersf/concourse-slack-notifier}
 
 resources:
 - name: pipelines-and-tasks
@@ -41,6 +40,12 @@ resources:
   icon: github-circle
   source:
     uri: https://github.com/concourse/oxygen-mask
+
+- name: notify
+  type: slack-notifier
+  icon: slack
+  source:
+    url: ((slack_hook))
 
 jobs:
 - name: reconfigure-self
@@ -117,6 +122,11 @@ jobs:
   - task: unit
     file: pipelines-and-tasks/tasks/ci-unit.yml
     input_mapping: {ci: pipelines-and-tasks}
+  on_failure:
+    put: notify
+    params:
+      mode: normal
+      alert_type: failed
 
 - name: reconfigure-pipelines
   plan:
