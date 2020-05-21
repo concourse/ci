@@ -66,7 +66,7 @@ jobs:
       params:
         message_file: message/message
         mode: normal
-        alert_type: broke
+        alert_type: failed
 
 - name: check-p-concourse-4.2.x
   plan:
@@ -95,7 +95,7 @@ jobs:
       params:
         message_file: message/message
         mode: normal
-        alert_type: broke
+        alert_type: failed
 
 - name: check-p-concourse-5.5.x
   plan:
@@ -124,4 +124,4 @@ jobs:
         params:
           message_file: message/message
           mode: normal
-          alert_type: broke
+          alert_type: failed
