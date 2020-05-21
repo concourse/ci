@@ -201,10 +201,6 @@ jobs:
     vars:
       concourse_chart_branch: release/6.1.x
       concourse_minor: "6.1"
-  - set_pipeline: prod-db-backup
-    file: pipelines-and-tasks/pipelines/prod-db-backup.yml
-  - set_pipeline: prod-db-restore-verify
-    file: pipelines-and-tasks/pipelines/prod-db-restore-verify.yml
 
 - name: reconfigure-monitoring-pipeline
   plan:
