@@ -267,6 +267,7 @@ jobs:
     privileged: true
     timeout: 1h
     file: ci/tasks/containerd-integration.yml
+    input_mapping: {concourse: concourse-pr}
     tags: [pr]
 
 
