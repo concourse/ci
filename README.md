@@ -22,7 +22,7 @@ Pipeline definitions live here. Some highlights:
 The crown jewel of this entire repo, [it's how concourse is built, tested, and shipped.](https://ci.concourse-ci.org/teams/main/pipelines/concourse)
 
 #### `prs.yml`
-This [pipeline](https://ci.concourse-ci.org/teams/main/pipelines/prs) will automatically test any opened pull requests, and then update the pull request with the results of the tests.
+This [pipeline](hhttps://ci.concourse-ci.org/teams/contributor/pipelines/prs) will automatically test any opened pull requests, and then update the pull request with the results of the tests.
 
 #### `reconfigure.yml`
 Whenever any of these pipeline definitions get changed, the [reconfigure pipeline](https://ci.concourse-ci.org/teams/main/pipelines/reconfigure-pipelines) will run to reconfigure the affected pipelines.
