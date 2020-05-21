@@ -108,18 +108,10 @@ jobs:
       file: ci/tasks/fly-windows.yml
       timeout: 1h
   on_failure: &failed-concourse
-    do:
-    - task: format-slack-message
-      file: ci/tasks/format-slack-message.yml
-      input_mapping: {src: concourse}
-      params:
-        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
-        SLACK_TOKEN: ((slack_token))
-    - put: notify
-      params:
-        message_file: message/message
-        mode: normal
-        alert_type: failed
+    put: notify
+    params:
+      mode: normal
+      alert_type: failed
   on_error: *failed-concourse
 
 - name: resource-types-images
