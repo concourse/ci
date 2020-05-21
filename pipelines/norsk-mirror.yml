@@ -49,12 +49,6 @@ jobs:
     params:
       NORSK_PIPELINE: p-concourse
     input_mapping: {scan-status: latest-scan-status}
-  on_success:
-    do:
-    - put: notify
-      params:
-        mode: normal
-        alert_type: fixed
   on_failure:
     do:
     - task: format-slack-message-norsk
@@ -78,12 +72,6 @@ jobs:
     params:
       NORSK_PIPELINE: p-concourse-4.2.x
     input_mapping: {scan-status: 4.2.x-scan-status}
-  on_success:
-    do:
-    - put: notify
-      params:
-        mode: normal
-        alert_type: fixed
   on_failure:
     do:
     - task: format-slack-message-norsk
@@ -107,12 +95,6 @@ jobs:
       params:
         NORSK_PIPELINE: p-concourse-5.5.x
       input_mapping: {scan-status: 5.5.x-scan-status}
-  on_success:
-    do:
-      - put: notify
-        params:
-          mode: normal
-          alert_type: fixed
   on_failure:
     do:
       - task: format-slack-message-norsk
