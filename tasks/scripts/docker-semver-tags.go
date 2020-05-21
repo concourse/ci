@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 
@@ -17,6 +18,8 @@ import (
 // optionally the SUFFIX env var can be set
 // populates the file indicated by the `--output` flag with the tags that
 // should be pushed when `version/version` is being shipped
+
+const LATEST = "latest"
 
 func main() {
 	var shipitPath, latestPath, latestOfSameMajorPath, outputPath string
@@ -37,7 +40,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	tags := TagsToPush(shipit, latest, latestOfSameMajor)
+	tags := TagsToPush(shipit, latest, latestOfSameMajor, os.Getenv("SUFFIX"))
 	ioutil.WriteFile(outputPath, []byte(strings.Join(tags, "\n")), 0666)
 }
 
@@ -49,15 +52,29 @@ func readSemver(filePath string) (*version.Version, error) {
 	return version.NewVersion(strings.TrimSpace(string(fileContents)))
 }
 
-func TagsToPush(shipit, latest, latestOfSameMajor *version.Version) []string {
-	tags := []string{shipit.String(), minorTag(shipit)}
+func TagsToPush(shipit, latest, latestOfSameMajor *version.Version, metadata string) []string {
+	tag := tagFactory(metadata)
+	tags := []string{tag(shipit.String())}
+	tags = append(tags, tag(minorTag(shipit)))
 	if shipit.GreaterThanOrEqual(latestOfSameMajor) {
-		tags = append(tags, majorTag(shipit))
+		tags = append(tags, tag(majorTag(shipit)))
 	}
 	if shipit.GreaterThanOrEqual(latest) {
-		tags = append(tags, "latest")
+		tags = append(tags, tag(LATEST))
 	}
 	return tags
+}
+
+func tagFactory(metadata string) func(string) string {
+	return func(tag string) string {
+		if metadata == "" {
+			return tag
+		}
+		if tag == LATEST {
+			return metadata
+		}
+		return tag + "-" + metadata
+	}
 }
 
 func minorTag(semver *version.Version) string {
