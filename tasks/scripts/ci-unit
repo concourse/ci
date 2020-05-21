@@ -1,0 +1,6 @@
+#!/bin/bash
+
+go get github.com/onsi/ginkgo
+go get github.com/onsi/gomega
+go get -d -v ./...
+go test ci/tasks/scripts/{docker-semver-tags.go,scripts_suite_test.go}

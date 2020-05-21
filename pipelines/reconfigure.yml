@@ -109,11 +109,20 @@ jobs:
   - set_pipeline: mock
     file: rendered_pipelines/mock.yml
 
-- name: reconfigure-pipelines
+- name: unit
   plan:
   - get: pipelines-and-tasks
     trigger: true
     passed: [reconfigure-self]
+  - task: unit
+    file: pipelines-and-tasks/tasks/ci-unit.yml
+    input_mapping: {ci: pipelines-and-tasks}
+
+- name: reconfigure-pipelines
+  plan:
+  - get: pipelines-and-tasks
+    trigger: true
+    passed: [unit]
   - get: baggageclaim-ci
     trigger: true
   - get: concourse-for-k8s
