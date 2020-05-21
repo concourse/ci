@@ -109,53 +109,6 @@ jobs:
       KUBE_CONFIG: ((topgun_kube_config))
       CONCOURSE_IMAGE_NAME: ((concourse_image_name))
 
-- name: version-bump-check
-  public: true
-  on_failure:
-    put: chart-pr
-    inputs: [chart-pr]
-    params:
-      path: chart-pr
-      status: failure
-      context: version-bump-check
-    get_params:
-      integration_tool: checkout
-    tags: [k8s-topgun]
-  on_success:
-    put: chart-pr
-    inputs: [chart-pr]
-    params:
-      path: chart-pr
-      status: success
-      context: version-bump-check
-    get_params:
-      integration_tool: checkout
-    tags: [k8s-topgun]
-  plan:
-  - in_parallel:
-    - get: chart-pr
-      trigger: true
-      version: every
-      tags: [k8s-topgun]
-      params:
-        integration_tool: checkout
-    - get: ci
-      tags: [k8s-topgun]
-    - get: unit-image
-      tags: [k8s-topgun]
-    - get: concourse-chart
-  - put: update-pr-status
-    resource: chart-pr
-    inputs: [chart-pr]
-    params: {path: chart-pr, status: pending, context: version-bump-check}
-    get_params: {list_changed_files: true, integration_tool: checkout}
-    tags: [k8s-topgun]
-  - task: version-bump-check
-    tags: [k8s-topgun]
-    file: ci/tasks/k8s-version-bump-check.yml
-    image: unit-image
-
-
 - name: lint-and-install-test
   public: true
   on_failure:
