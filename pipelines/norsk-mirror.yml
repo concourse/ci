@@ -25,7 +25,7 @@ resources:
     paths: [ p-concourse-5.5.x/* ]
 - name: ci
   type: git
-  icon: github-circle
+  icon: github
   source:
     uri: https://github.com/concourse/ci.git
     branch: master

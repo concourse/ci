@@ -15,21 +15,21 @@ resources:
 
 - name: helm-charts
   type: git
-  icon: github-circle
+  icon: github
   source:
     uri: https://github.com/helm/charts.git
     branch: master
 
 - name: concourse
   type: git
-  icon: github-circle
+  icon: github
   source:
     uri: https://github.com/concourse/concourse.git
     branch: ((concourse_base_branch))
 
 - name: ci
   type: git
-  icon: github-circle
+  icon: github
   source:
     uri: https://github.com/concourse/ci.git
     branch: master

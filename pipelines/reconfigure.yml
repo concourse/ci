@@ -6,7 +6,7 @@ resource_types:
 resources:
 - name: pipelines-and-tasks
   type: git
-  icon: github-circle
+  icon: github
   source:
     uri: https://github.com/concourse/ci
     paths:
@@ -15,14 +15,14 @@ resources:
 
 - name: baggageclaim-ci
   type: git
-  icon: github-circle
+  icon: github
   source:
     uri: https://github.com/concourse/baggageclaim
     paths: [ci]
 
 - name: concourse-for-k8s
   type: git
-  icon: github-circle
+  icon: github
   source:
     uri: git@github.com:pivotal/concourse-for-k8s.git
     private_key: ((concourse_for_k8s_token))
@@ -37,7 +37,7 @@ resources:
 
 - name: oxygen-mask
   type: git
-  icon: github-circle
+  icon: github
   source:
     uri: https://github.com/concourse/oxygen-mask
 

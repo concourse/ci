@@ -702,14 +702,14 @@ jobs:
 resources:
 - name: concourse
   type: git
-  icon: &git-icon github-circle
+  icon: &git-icon github
   source:
     uri: https://github.com/concourse/concourse.git
     branch: ((branch_name))
 
 - name: ci
   type: git
-  icon: &git-icon github-circle
+  icon: &git-icon github
   source:
     uri: https://github.com/concourse/ci.git
     branch: master
@@ -751,7 +751,7 @@ resources:
 
 - name: windows-rc
   type: gcs
-  icon: windows
+  icon: microsoft-windows
   source:
     bucket: concourse-branch-artifacts
     json_key: ((concourse_artifacts_json_key))

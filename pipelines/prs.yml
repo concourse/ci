@@ -11,7 +11,7 @@ resource_types:
 resources:
 - name: concourse-master
   type: git
-  icon: github-circle
+  icon: github
   source:
     uri: https://github.com/concourse/concourse
 
@@ -24,7 +24,7 @@ resources:
 
 - name: baggageclaim-master
   type: git
-  icon: github-circle
+  icon: github
   source:
     uri: https://github.com/concourse/baggageclaim
 
@@ -37,7 +37,7 @@ resources:
 
 - name: docs-master
   type: git
-  icon: github-circle
+  icon: github
   source:
     uri: https://github.com/concourse/docs
 
@@ -50,7 +50,7 @@ resources:
 
 - name: ci
   type: git
-  icon: github-circle
+  icon: github
   source:
     uri: https://github.com/concourse/ci
 

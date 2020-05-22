@@ -1,7 +1,7 @@
 resources:
 - name: pipelines-and-tasks
   type: git
-  icon: github-circle
+  icon: github
   source:
     uri: https://github.com/concourse/ci
     paths:

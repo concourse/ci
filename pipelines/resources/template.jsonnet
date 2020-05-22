@@ -392,7 +392,7 @@ local build_image(distro) = {
     {
       name: "resource-repo",
       type: "git",
-      icon: "github-circle",
+      icon: "github",
       source: {
         uri: "git@github.com:concourse/"+resource+"-resource",
         branch: "master",
