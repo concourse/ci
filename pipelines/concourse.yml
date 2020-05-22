@@ -828,6 +828,7 @@ jobs:
     image: unit-image
     input_mapping: {distribution: concourse-release-repo, linux-rc: linux-rc-ubuntu}
     params: {DISTRIBUTION: bosh}
+  on_failure: *failed-concourse
 
 - name: bosh-bump
   public: true
