@@ -545,6 +545,8 @@ jobs:
     - put: darwin-rc
       params: {file: concourse-darwin/concourse-*.tgz}
       inputs: [concourse-darwin]
+  on_failure: *failed-concourse
+  on_error: *failed-concourse
 
 - name: build-rc-image
   public: true
