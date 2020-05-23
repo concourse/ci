@@ -1,0 +1,32 @@
+resource_types:
+- name: rss-resource
+  type: docker-image
+  source:
+    repository: suhlig/concourse-rss-resource
+    tag: latest
+- name: discord-resource
+  type: docker-image
+  source:
+    repository: taylorsilva/discord-resource
+
+resources:
+- name: concourse-blog
+  type: rss-resource
+  source:
+    url: "https://blog.concourse-ci.org/rss/"
+- name: discord-announcement
+  type: discord-resource
+  check_every: 999999h
+  source:
+    token: ((discord_bot_token))
+
+jobs:
+- name: post-blog-post-to-discord
+  plan:
+    - get: concourse-blog
+      trigger: true
+    - put: discord-announcement
+      params:
+        channel: "604321306846167051"
+        title_file: concourse-blog/title
+        message_file: concourse-blog/link

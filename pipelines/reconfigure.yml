@@ -220,6 +220,8 @@ jobs:
     vars:
       concourse_chart_branch: release/6.1.x
       concourse_minor: "6.1"
+  - set_pipeline: blog-post-announcement
+    file: pipelines-and-tasks/pipelines/blog-announcement.yml
 
 - name: reconfigure-monitoring-pipeline
   plan:
