@@ -27,6 +27,7 @@ jobs:
       trigger: true
     - put: discord-announcement
       params:
+        # Posts to the announcement channel
         channel: "604321306846167051"
         title_file: concourse-blog/title
         message_file: concourse-blog/link
