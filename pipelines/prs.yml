@@ -311,6 +311,7 @@ jobs:
     input_mapping: {concourse: concourse-pr}
     tags: [pr]
   - task: watsjs
+    attempts: 3
     timeout: 1h
     privileged: true
     file: ci/tasks/docker-compose-watsjs.yml
