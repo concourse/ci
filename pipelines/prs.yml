@@ -306,6 +306,7 @@ jobs:
     tags: [pr]
     get_params: {list_changed_files: true, skip_download: true}
   - task: yarn-build
+    attempts: 3
     file: ci/tasks/yarn-build.yml
     input_mapping: {concourse: concourse-pr}
     tags: [pr]
