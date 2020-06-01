@@ -336,6 +336,8 @@ jobs:
     privileged: true
     image: unit-image
     file: ci/tasks/upgrade-test.yml
+    input_mapping:
+      concourse-image: latest-concourse-image
   on_failure: *failed-concourse
   on_error: *failed-concourse
 
@@ -361,6 +363,8 @@ jobs:
     privileged: true
     image: unit-image
     file: ci/tasks/downgrade-test.yml
+    input_mapping:
+      concourse-image: latest-concourse-image
 
 - name: k8s-check-helm-params
   public: true
