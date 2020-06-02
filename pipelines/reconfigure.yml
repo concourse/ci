@@ -68,11 +68,34 @@ jobs:
     passed: [reconfigure-self]
   - get: latest-concourse
     trigger: true
-  - load_var: release-version
-    file: latest-concourse/version
+  # - load_var: release-version
+  #   file: latest-concourse/version
+  #
+  # workaround for https://github.com/concourse/concourse/issues/5709
+  - task: prep-var-files
+    config:
+      platform: linux
+
+      image_resource:
+        type: registry-image
+        source: {repository: ubuntu}
+
+      inputs:
+      - name: latest-concourse
+
+      outputs:
+      - name: vars
+
+      run:
+        path: bash
+        args:
+        - -exc
+        - |
+          echo "release_version: $(cat latest-concourse/version)" >> vars/vars.yml
   - set_pipeline: promote
     file: pipelines-and-tasks/pipelines/promote.yml
-    vars: {release_version: ((.:release-version))}
+    var_files:
+    - vars/vars.yml
 
 - name: reconfigure-resource-pipelines
   plan:
