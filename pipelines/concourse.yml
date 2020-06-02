@@ -68,8 +68,6 @@ groups:
   - publish-binaries
   - publish-image
   - publish-bosh-release
-  - promote-cbd
-  - bump-cbd-versions
   - publish-docs
   - publish-chart
   - pre
@@ -1355,49 +1353,6 @@ jobs:
       tarball: concourse-release/*.tgz
       version: version/version
 
-- name: bump-cbd-versions
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse-boshio
-      trigger: true
-    - get: unit-image
-      passed: [shipit]
-    - get: cbd-master
-    - get: version
-      passed: [shipit]
-    - get: bpm-release
-      passed: [shipit]
-    - get: postgres-release
-      passed: [shipit]
-  - task: bump-versions
-    file: cbd-master/ci/bump-versions.yml
-    input_mapping: {concourse-bosh-deployment: cbd-master}
-    image: unit-image
-  - put: cbd-master
-    params:
-      repository: bumped-repo
-      merge: true
-
-- name: promote-cbd
-  serial: true
-  plan:
-  - in_parallel:
-    - get: version
-      passed: [shipit]
-      trigger: true
-    - get: cbd
-    - get: unit-image
-      passed: [shipit]
-    - get: bpm-release
-      passed: [shipit]
-    - get: postgres-release
-      passed: [shipit]
-  - put: cbd-master
-    params:
-      repository: cbd
-      merge: true
-
 - name: publish-image
   serial: true
   plan:
@@ -2022,12 +1977,6 @@ resources:
     access_token: ((concourse_github_release.access_token))
     release: false
     pre_release: true
-
-- name: concourse-boshio
-  type: bosh-io-release
-  icon: *release-icon
-  source:
-    repository: concourse/concourse-bosh-release
 
 - name: latest-version
   type: github-release
