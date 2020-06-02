@@ -47,6 +47,12 @@ resources:
   source:
     url: ((slack_hook))
 
+- name: latest-concourse
+  type: github-release
+  source:
+    owner: concourse
+    repository: concourse
+
 jobs:
 - name: reconfigure-self
   plan:
@@ -54,6 +60,19 @@ jobs:
     trigger: true
   - set_pipeline: reconfigure-pipelines
     file: pipelines-and-tasks/pipelines/reconfigure.yml
+
+- name: reconfigure-promote
+  plan:
+  - get: pipelines-and-tasks
+    trigger: true
+    passed: [reconfigure-self]
+  - get: latest-concourse
+    trigger: true
+  - load_var: release-version
+    file: latest-concourse/version
+  - set_pipeline: promote
+    file: pipelines-and-tasks/pipelines/promote.yml
+    vars: {release_version: ((.:release-version))}
 
 - name: reconfigure-resource-pipelines
   plan:

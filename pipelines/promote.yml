@@ -1,0 +1,52 @@
+---
+jobs:
+- name: promote-concourse
+  serial: true
+  plan:
+  - get: concourse
+    trigger: true
+  - put: concourse-master
+    params:
+      repository: concourse
+      merge: true
+
+- name: promote-cbd
+  serial: true
+  plan:
+  - get: cbd
+    trigger: true
+  - put: cbd-master
+    params:
+      repository: cbd
+      merge: true
+
+resources:
+- name: cbd
+  type: git
+  icon: &git-icon github
+  source:
+    uri: https://github.com/concourse/concourse-bosh-deployment
+    tag_filter: v((release_version))
+
+- name: cbd-master
+  type: git
+  icon: *git-icon
+  source:
+    uri: git@github.com:concourse/concourse-bosh-deployment.git
+    branch: master
+    private_key: ((concourse_deployment_repo_private_key))
+
+- name: concourse
+  type: git
+  icon: *git-icon
+  source:
+    uri: https://github.com/concourse/concourse
+    tag_filter: v((release_version))
+
+- name: concourse-master
+  type: git
+  icon: *git-icon
+  source:
+    uri: git@github.com:concourse/concourse.git
+    branch: master
+    private_key: ((concourse_repo_private_key))
