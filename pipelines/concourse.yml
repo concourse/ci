@@ -52,7 +52,6 @@ groups:
   - bosh-topgun-both
   - bosh-topgun-pcf
   - bosh-check-props
-  - merge-cbd
 
 - name: images
   jobs:
@@ -62,17 +61,8 @@ groups:
 
 - name: publish
   jobs:
-  - major
-  - minor
-  - shipit
-  - publish-binaries
-  - publish-image
-  - publish-bosh-release
-  - publish-docs
-  - publish-chart
   - pre
   - publish-pre-binaries
-  - discover-component-version
 
 - name: workers
   jobs:
@@ -1106,97 +1096,6 @@ jobs:
       SUITE: pcf
   on_failure: *failed-concourse
 
-- name: shipit
-  public: true
-  serial_groups: [version]
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed:
-      - build-rc
-      - k8s-topgun
-      - k8s-check-helm-params
-      - bosh-smoke
-      - bosh-topgun-core
-      - bosh-topgun-runtime
-      - bosh-topgun-both
-      - bosh-topgun-pcf
-      - bosh-check-props
-    - get: unit-image
-      passed:
-      - build-rc
-      - k8s-topgun
-      - k8s-check-helm-params
-      - bosh-smoke
-      - bosh-topgun-core
-      - bosh-topgun-runtime
-      - bosh-topgun-both
-      - bosh-topgun-pcf
-    - get: final-version
-      resource: version
-      params: {bump: final}
-      passed:
-      - build-rc
-      - k8s-topgun
-      - k8s-check-helm-params
-      - bosh-smoke
-      - bosh-topgun-core
-      - bosh-topgun-runtime
-      - bosh-topgun-both
-      - bosh-topgun-pcf
-      - bosh-check-props
-    - get: linux-rc
-      passed: [build-rc]
-    - get: linux-rc-ubuntu
-      passed: [build-rc, bosh-check-props]
-    - get: windows-rc
-      passed: [build-rc]
-    - get: darwin-rc
-      passed: [build-rc]
-    - get: concourse-rc-image
-      passed: [k8s-topgun, k8s-check-helm-params]
-    - get: concourse-rc-image-ubuntu
-      passed: [k8s-topgun, k8s-check-helm-params]
-    - get: concourse-release
-      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
-    - get: bpm-release
-      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
-    - get: postgres-release
-      passed: [bosh-smoke, bosh-topgun-core, bosh-topgun-runtime, bosh-topgun-both, bosh-topgun-pcf]
-  - put: version
-    params: {file: final-version/version}
-
-- name: discover-component-version
-  public: true
-  serial: true
-  plan:
-    - in_parallel:
-      - get: ci
-      - get: concourse
-        passed: [shipit]
-        trigger: true
-      - get: unit-image
-        passed: [shipit]
-        trigger: true
-      - get: version
-        passed: [shipit]
-    - task: discover-postgresql-version
-      file: ci/tasks/discover-component-version.yml
-      inputs: [version]
-      output_mapping: {component-version: postgresql-version}
-      params: {COMPONENT_NAME: "postgresql"}
-    - task: discover-helm-version
-      file: ci/tasks/discover-component-version.yml
-      inputs: [version]
-      output_mapping: {component-version: helm-version}
-      params: {COMPONENT_NAME: "helm"}
-    - put: resource-postgresql-version
-      inputs: [postgresql-version]
-      params: {file: "postgresql-version/postgresql-version-*.txt"}
-    - put: resource-helm-version
-      inputs: [helm-version]
-      params: {file: "helm-version/helm-version-*.txt"}
-
 - name: pre
   public: true
   plan:
@@ -1290,185 +1189,6 @@ jobs:
       - fly-windows/*.sha1
       - fly-darwin/*.sha1
 
-- name: publish-binaries
-  serial: true
-  plan:
-  - in_parallel:
-    - get: version
-      passed: [shipit]
-      trigger: true
-    - get: concourse
-      passed: [shipit]
-    - get: unit-image
-      passed: [shipit]
-    - get: linux-rc
-      passed: [shipit]
-    - get: windows-rc
-      passed: [shipit]
-    - get: darwin-rc
-      passed: [shipit]
-    - get: ci
-    - get: release-notes
-  - in_parallel:
-    - task: prep-release-assets
-      file: ci/tasks/prep-release-assets.yml
-      image: unit-image
-    - task: build-release-notes
-      file: ci/tasks/build-release-notes.yml
-      image: unit-image
-      params:
-        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
-  - put: concourse-github-release
-    params:
-      commitish: concourse/.git/ref
-      tag: version/version
-      tag_prefix: v
-      name: built-notes/release-name
-      body: built-notes/notes.md
-      globs:
-      - concourse-linux/concourse-*.tgz
-      - concourse-windows/concourse-*.zip
-      - concourse-darwin/concourse-*.tgz
-      - fly-linux/fly-*.tgz
-      - fly-windows/fly-*.zip
-      - fly-darwin/fly-*.tgz
-      - concourse-linux/*.sha1
-      - concourse-windows/*.sha1
-      - concourse-darwin/*.sha1
-      - fly-linux/*.sha1
-      - fly-windows/*.sha1
-      - fly-darwin/*.sha1
-
-- name: publish-bosh-release
-  serial: true
-  plan:
-  - in_parallel:
-    - get: version
-      passed: [shipit]
-      trigger: true
-    - get: concourse-release
-      passed: [shipit]
-  - put: concourse-release-final
-    params:
-      tarball: concourse-release/*.tgz
-      version: version/version
-
-- name: publish-image
-  serial: true
-  plan:
-  - in_parallel:
-    - get: version
-      passed: [shipit]
-      trigger: true
-    - get: concourse
-      passed: [shipit]
-    - get: concourse-rc-image
-      passed: [shipit]
-      params: {format: oci}
-    - get: concourse-rc-image-ubuntu
-      passed: [shipit]
-      params: {format: oci}
-    - get: concourse-rc-image-ubuntu-rootfs
-      resource: concourse-rc-image-ubuntu
-      passed: [shipit]
-    - get: latest-version
-    - get: ci
-  - in_parallel:
-    - do:
-      - task: docker-semver-tags
-        file: ci/tasks/docker-semver-tags.yml
-        input_mapping: {latest-of-same-major-version: latest-version}
-        output_mapping: {tags: alpine-tags}
-
-      - put: concourse-image
-        inputs: [concourse-rc-image, alpine-tags]
-        params:
-          image: concourse-rc-image/image.tar
-          additional_tags: alpine-tags/tags
-
-    - do:
-      - task: docker-semver-tags
-        file: ci/tasks/docker-semver-tags.yml
-        input_mapping: {latest-of-same-major-version: latest-version}
-        output_mapping: {tags: ubuntu-tags}
-        params: {SUFFIX: ubuntu}
-
-      - put: concourse-image-ubuntu
-        inputs: [concourse-rc-image-ubuntu, ubuntu-tags]
-        params:
-          image: concourse-rc-image-ubuntu/image.tar
-          additional_tags: ubuntu-tags/tags
-
-      - task: generate-dpkg-list
-        file: ci/tasks/generate-dpkg-list.yml
-        image: concourse-rc-image-ubuntu-rootfs
-        params: {COMPONENT_NAME: "concourse"}
-
-      - put: concourse-image-dpkg-list
-        inputs: [dpkg-list]
-        params: {file: "dpkg-list/concourse-*.txt"}
-
-- name: publish-docs
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse-github-release
-      passed: [publish-binaries]
-      trigger: true
-    - get: docs
-  - task: build-docs
-    file: docs/ci/build.yml
-    params:
-      ANALYTICS_ID: ((analytics_id))
-      GITHUB_TOKEN: ((concourse_github_dummy.access_token))
-  - put: docs-gh-pages
-    params: {repository: built-docs}
-
-- name: merge-cbd
-  public: true
-  serial: true
-  plan:
-  - get: cbd-master
-    trigger: true
-  - put: cbd
-    params:
-      repository: cbd-master
-      merge: true
-
-- name: publish-chart
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse-version
-      resource: version
-      passed: [shipit]
-    - get: concourse-chart
-      resource: concourse-chart-master
-      trigger: true
-    - get: unit-image
-    - get: chart-repo-index
-    - get: ci
-  - task: build-chart
-    image: unit-image
-    file: ci/tasks/package-chart.yml
-  - in_parallel:
-    - put: chart-repo-index
-      inputs: [packaged-chart]
-      params:
-        file: packaged-chart/index.yaml
-    - put: chart-repo
-      inputs: [packaged-chart]
-      params:
-        file: packaged-chart/concourse-*.tgz
-    - put: concourse-chart
-      resource: concourse-chart-master
-      inputs: [concourse]
-      params:
-        repository: concourse
-        merge: true
-
 - name: install-windows-deps
   public: true
   serial: true
@@ -1484,20 +1204,6 @@ jobs:
   - task: install-mingw
     file: ci/tasks/choco-install.yml
     params: {PACKAGE: mingw}
-
-- name: major
-  public: true
-  serial_groups: [version]
-  plan:
-  - put: version
-    params: {bump: major, pre: rc}
-
-- name: minor
-  public: true
-  serial_groups: [version]
-  plan:
-  - put: version
-    params: {bump: minor, pre: rc}
 
 resources:
 - name: concourse
@@ -1548,15 +1254,6 @@ resources:
   source:
     repository: concourse/concourse
     tag: latest
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: concourse-image-ubuntu
-  type: registry-image
-  icon: *image-icon
-  source:
-    repository: concourse/concourse
-    tag: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
@@ -1807,14 +1504,6 @@ resources:
     uri: https://github.com/concourse/docs
     branch: master
 
-- name: docs-gh-pages
-  type: git
-  icon: *git-icon
-  source:
-    uri: git@github.com:concourse/docs
-    branch: gh-pages
-    private_key: ((docs_deploy_key))
-
 - name: concourse-release
   type: bosh-release
   icon: *release-icon
@@ -1828,15 +1517,6 @@ resources:
         options:
           credentials_source: static
           json_key: ((concourse_artifacts_json_key))
-
-- name: concourse-release-final
-  type: bosh-release
-  icon: truck
-  source:
-    uri: git@github.com:concourse/concourse-bosh-release
-    branch: master
-    private_config: *release_private_config
-    private_key: ((concourse_release_deploy_key))
 
 - name: postgres-release
   type: bosh-io-release
@@ -1899,22 +1579,6 @@ resources:
   source:
     name: bosh-google-kvm-ubuntu-xenial-go_agent
 
-- name: cbd
-  type: git
-  icon: *git-icon
-  source:
-    uri: git@github.com:concourse/concourse-bosh-deployment.git
-    branch: develop
-    private_key: ((concourse_deployment_repo_private_key))
-
-- name: cbd-master
-  type: git
-  icon: *git-icon
-  source:
-    uri: git@github.com:concourse/concourse-bosh-deployment.git
-    branch: master
-    private_key: ((concourse_deployment_repo_private_key))
-
 - name: concourse-docker
   type: git
   icon: *git-icon
@@ -1927,14 +1591,6 @@ resources:
   source:
     uri: git@github.com:concourse/concourse-chart.git
     branch: dev
-    private_key: ((concourse_chart_private_key))
-
-- name: concourse-chart-master
-  type: git
-  icon: *git-icon
-  source:
-    uri: git@github.com:concourse/concourse-chart.git
-    branch: master
     private_key: ((concourse_chart_private_key))
 
 - name: helm-charts
@@ -1960,14 +1616,6 @@ resources:
     bucket: golang
     regexp: 'go(\d+\.\d+(\.\d+)?)\.linux-amd64\.tar\.gz'
 
-- name: concourse-github-release
-  type: github-release
-  icon: truck
-  source:
-    owner: concourse
-    repository: concourse
-    access_token: ((concourse_github_release.access_token))
-
 - name: concourse-github-pre
   type: github-release
   icon: truck
@@ -1977,14 +1625,6 @@ resources:
     access_token: ((concourse_github_release.access_token))
     release: false
     pre_release: true
-
-- name: latest-version
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: concourse
-    repository: concourse
-    access_token: ((concourse_github_release.access_token))
 
 - name: resource-types-alpine-image
   type: registry-image
@@ -2019,41 +1659,3 @@ resources:
     tag: ubuntu
     username: ((docker.username))
     password: ((docker.password))
-
-- name: concourse-image-dpkg-list
-  type: gcs
-  icon: format-list-bulleted
-  source:
-    bucket: concourse-ubuntu-dpkg-list
-    json_key: ((concourse_dpkg_list_json_key))
-    regexp: "concourse-dpkg-list-(.*).txt"
-
-- name: resource-postgresql-version
-  type: gcs
-  icon: format-list-bulleted
-  source:
-    bucket: concourse-components-version
-    json_key: ((concourse_components_json_key))
-    regexp: "postgresql-version-(.*).txt"
-
-- name: resource-helm-version
-  type: gcs
-  icon: format-list-bulleted
-  source:
-    bucket: concourse-components-version
-    json_key: ((concourse_components_json_key))
-    regexp: "helm-version-(.*).txt"
-
-- name: chart-repo
-  type: gcs
-  source:
-    bucket: concourse-charts
-    json_key: ((concourse_charts_json_key))
-    regexp: concourse-(.*)\.tgz
-
-- name: chart-repo-index
-  type: gcs
-  source:
-    bucket: concourse-charts
-    json_key: ((concourse_charts_json_key))
-    versioned_file: index.yaml
