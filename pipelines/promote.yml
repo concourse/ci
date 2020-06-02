@@ -20,6 +20,23 @@ jobs:
       repository: cbd
       merge: true
 
+- name: publish-docs
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse
+      trigger: true
+    - get: docs
+  - task: build-docs
+    file: docs/ci/build.yml
+    params:
+      ANALYTICS_ID: ((analytics_id))
+      GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+  - put: docs-gh-pages
+    params: {repository: built-docs}
+
+
 resources:
 - name: cbd
   type: git
@@ -50,3 +67,18 @@ resources:
     uri: git@github.com:concourse/concourse.git
     branch: master
     private_key: ((concourse_repo_private_key))
+
+- name: docs
+  type: git
+  icon: *git-icon
+  source:
+    uri: https://github.com/concourse/docs
+    branch: master
+
+- name: docs-gh-pages
+  type: git
+  icon: *git-icon
+  source:
+    uri: git@github.com:concourse/docs
+    branch: gh-pages
+    private_key: ((docs_deploy_key))

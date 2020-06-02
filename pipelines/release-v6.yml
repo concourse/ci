@@ -68,7 +68,6 @@ groups:
   - publish-image
   - publish-bosh-release
   - bump-cbd-versions
-  - publish-docs
   - ship-chart
   - publish-chart
   - patch
@@ -1090,23 +1089,6 @@ jobs:
           image: concourse-rc-image-ubuntu/image.tar
           additional_tags: ubuntu-tags/tags
 
-- name: publish-docs
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse-github-release
-      passed: [publish-binaries]
-      trigger: true
-    - get: docs
-  - task: build-docs
-    file: docs/ci/build.yml
-    params:
-      ANALYTICS_ID: ((analytics_id))
-      GITHUB_TOKEN: ((concourse_github_dummy.access_token))
-  - put: docs-gh-pages
-    params: {repository: built-docs}
-
 - name: ship-chart
   public: true
   serial: true
@@ -1346,21 +1328,6 @@ resources:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
     regexp: rcs/concourse-(.*)-darwin-amd64.tgz
-
-- name: docs
-  type: git
-  icon: *git-icon
-  source:
-    uri: https://github.com/concourse/docs
-    branch: master
-
-- name: docs-gh-pages
-  type: git
-  icon: *git-icon
-  source:
-    uri: git@github.com:concourse/docs
-    branch: gh-pages
-    private_key: ((docs_deploy_key))
 
 - name: concourse-release
   type: bosh-release
