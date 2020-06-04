@@ -29,6 +29,8 @@ jobs:
       params:
         repository: concourse
         merge: true
+        tag: version/version
+        tag_prefix: v
 
 - name: publish-chart-minor
   public: true

@@ -16,5 +16,4 @@ pushd concourse
 
   git add -A
   git commit -m "bump chart version"
-  git tag -f "v$chart_version"
 popd
