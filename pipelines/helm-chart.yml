@@ -1,0 +1,90 @@
+jobs:
+- name: publish-chart-major
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - put: version
+      params: {bump: major}
+    - get: concourse-chart
+    - get: chart-repo-index
+    - get: ci
+  - task: bump-chart-version
+    file: ci/tasks/bump-chart-version.yml
+  - task: package-chart
+    file: ci/tasks/package-chart.yml
+  - in_parallel:
+    - put: chart-repo-index
+      inputs: [packaged-chart]
+      params:
+        file: packaged-chart/index.yaml
+    - put: chart-repo
+      inputs: [packaged-chart]
+      params:
+        file: packaged-chart/concourse-*.tgz
+    - put: concourse-chart
+      inputs: [concourse-chart]
+      params:
+        repository: concourse
+        merge: true
+
+- name: publish-chart-minor
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - put: version
+      params: {bump: minor}
+    - get: concourse-chart
+    - get: chart-repo-index
+    - get: ci
+  - task: bump-chart-version
+    file: ci/tasks/bump-chart-version.yml
+  - task: package-chart
+    file: ci/tasks/package-chart.yml
+  - in_parallel:
+    - put: chart-repo-index
+      inputs: [packaged-chart]
+      params:
+        file: packaged-chart/index.yaml
+    - put: chart-repo
+      inputs: [packaged-chart]
+      params:
+        file: packaged-chart/concourse-*.tgz
+    - put: concourse-chart
+      inputs: [concourse-chart]
+      params:
+        repository: concourse
+        merge: true
+
+resources:
+- name: version
+  type: semver
+  icon: tag
+  source:
+    driver: gcs
+    bucket: concourse-artifacts
+    json_key: ((concourse_artifacts_json_key))
+    key: chart-version
+
+- name: concourse-chart
+  type: git
+  icon: *git-icon
+  source:
+    uri: git@github.com:concourse/concourse-chart.git
+    branch: master
+    private_key: ((concourse_chart_private_key))
+
+- name: chart-repo
+  type: gcs
+  source:
+    bucket: concourse-charts
+    json_key: ((concourse_charts_json_key))
+    regexp: concourse-(.*)\.tgz
+
+- name: chart-repo-index
+  type: gcs
+  source:
+    bucket: concourse-charts
+    json_key: ((concourse_charts_json_key))
+    versioned_file: index.yaml

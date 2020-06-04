@@ -7,11 +7,12 @@ image_resource:
 
 inputs:
 - name: concourse-chart
-- name: chart-repo-index
+- name: version
 - name: ci
 
 outputs:
-- name: packaged-chart
+- name: concourse-chart
+  path: concourse
 
 run:
-  path: ci/tasks/scripts/package-chart
+  path: ci/tasks/scripts/bump-chart-version

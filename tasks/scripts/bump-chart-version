@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -e -x
+
+# workaround for an issue with `helm package` not liking when the chart name != dirName it's under
+# can be renamed to 'bumped-chart' or something more sensible once we're on helm v3
+git clone ./concourse-chart ./concourse
+
+chart_version=$(cat version/version)
+
+pushd concourse
+  sed -i "s/version: .*/version: ${chart_version}/g" Chart.yaml
+
+  git config --global user.email "ci@localhost"
+  git config --global user.name "CI Bot"
+
+  git add -A
+  git commit -m "bump chart version"
+  git tag -f "v$chart_version"
+popd

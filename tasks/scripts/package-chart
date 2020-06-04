@@ -6,23 +6,6 @@ set -e -x
 # can be renamed to 'bumped-chart' or something more sensible once we're on helm v3
 git clone ./concourse-chart ./concourse
 
-chart_version=$(cat chart-version/version)
-concourse_version=$(cat concourse-version/version)
-
-pushd concourse
-  sed -i "s/version: .*/version: ${chart_version}/g" Chart.yaml
-  sed -i "s/appVersion: .*/appVersion: ${concourse_version}/g" Chart.yaml
-  sed -i "s/imageTag: .*/imageTag: \"${concourse_version}\"/g" values.yaml
-  sed -i "s/Concourse image version | .* |/Concourse image version | \`${concourse_version}\` |/g" README.md
-
-  git config --global user.email "ci@localhost"
-  git config --global user.name "CI Bot"
-
-  git add -A
-  git commit -m "bump chart version"
-  git tag -f "v$chart_version"
-popd
-
 helm init --client-only
 helm repo remove local
 helm repo update
