@@ -124,3 +124,8 @@ resources:
   source:
     uri: https://github.com/concourse/ci.git
     branch: master
+
+resource_types:
+- name: gcs
+  type: registry-image
+  source: {repository: frodenas/gcs-resource}
