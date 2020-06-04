@@ -62,6 +62,8 @@ jobs:
       params:
         repository: concourse
         merge: true
+        tag: version/version
+        tag_prefix: v
 
 - name: publish-chart-patch
   public: true
@@ -93,6 +95,8 @@ jobs:
       params:
         repository: concourse
         merge: true
+        tag: version/version
+        tag_prefix: v
 
 resources:
 - name: version
