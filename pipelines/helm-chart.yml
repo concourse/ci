@@ -57,6 +57,35 @@ jobs:
         repository: concourse
         merge: true
 
+- name: publish-chart-patch
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - put: version
+      params: {bump: patch}
+    - get: concourse-chart
+    - get: chart-repo-index
+    - get: ci
+  - task: bump-chart-version
+    file: ci/tasks/bump-chart-version.yml
+  - task: package-chart
+    file: ci/tasks/package-chart.yml
+  - in_parallel:
+    - put: chart-repo-index
+      inputs: [packaged-chart]
+      params:
+        file: packaged-chart/index.yaml
+    - put: chart-repo
+      inputs: [packaged-chart]
+      params:
+        file: packaged-chart/concourse-*.tgz
+    - put: concourse-chart
+      inputs: [concourse-chart]
+      params:
+        repository: concourse
+        merge: true
+
 resources:
 - name: version
   type: semver
@@ -69,7 +98,7 @@ resources:
 
 - name: concourse-chart
   type: git
-  icon: *git-icon
+  icon: github
   source:
     uri: git@github.com:concourse/concourse-chart.git
     branch: master
@@ -88,3 +117,10 @@ resources:
     bucket: concourse-charts
     json_key: ((concourse_charts_json_key))
     versioned_file: index.yaml
+
+- name: ci
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/ci.git
+    branch: master
