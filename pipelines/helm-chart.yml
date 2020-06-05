@@ -1,15 +1,35 @@
 groups:
+- name: dependencies
+  jobs:
+  - bump-concourse-version
+
 - name: publish
   jobs:
   - publish-chart-major
   - publish-chart-minor
   - publish-chart-patch
 
-- name: dependencies
-  jobs:
-  - bump-concourse-version
 
 jobs:
+- name: bump-concourse-version
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse-release
+      params:
+        globs: [none]
+    - get: concourse-chart-dev
+    - get: ci
+  - task: bump-chart-app-version
+    file: ci/tasks/bump-chart-app-version.yml
+  - put: push-and-merge-to-master
+    resource: concourse-chart
+    inputs: [concourse-chart-dev]
+    params:
+      repository: concourse-chart-dev
+      merge: true
+
 - name: publish-chart-major
   public: true
   serial: true
@@ -38,7 +58,7 @@ jobs:
     - put: concourse-chart
       inputs: [concourse-chart]
       params:
-        repository: concourse
+        repository: concourse-chart
         merge: true
         tag: version/version
         tag_prefix: v
@@ -71,7 +91,7 @@ jobs:
     - put: concourse-chart
       inputs: [concourse-chart]
       params:
-        repository: concourse
+        repository: concourse-chart
         merge: true
         tag: version/version
         tag_prefix: v
@@ -104,28 +124,10 @@ jobs:
     - put: concourse-chart
       inputs: [concourse-chart]
       params:
-        repository: concourse
+        repository: concourse-chart
         merge: true
         tag: version/version
         tag_prefix: v
-
-- name: bump-concourse-version
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse-release
-      params:
-        globs: [none]
-    - get: concourse-chart
-    - get: ci
-  - task: bump-chart-app-version
-    file: ci/tasks/bump-chart-app-version.yml
-  - put: concourse-chart
-    inputs: [concourse-chart]
-    params:
-      repository: concourse
-      merge: true
 
 resources:
 - name: version
@@ -143,6 +145,14 @@ resources:
   source:
     uri: git@github.com:concourse/concourse-chart.git
     branch: master
+    private_key: ((concourse_chart_private_key))
+
+- name: concourse-chart-dev
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:concourse/concourse-chart.git
+    branch: dev
     private_key: ((concourse_chart_private_key))
 
 - name: chart-repo
