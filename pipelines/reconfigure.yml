@@ -182,6 +182,8 @@ jobs:
     trigger: true
   - set_pipeline: concourse
     file: pipelines-and-tasks/pipelines/concourse.yml
+  - set_pipeline: helm-chart
+    file: pipelines-and-tasks/pipelines/helm-chart.yml
   - set_pipeline: helm-prs
     file: pipelines-and-tasks/pipelines/helm-prs.yml
     vars:

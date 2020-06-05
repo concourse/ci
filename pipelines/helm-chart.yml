@@ -1,0 +1,189 @@
+groups:
+- name: dependencies
+  jobs:
+  - bump-concourse-version
+
+- name: publish
+  jobs:
+  - publish-chart-major
+  - publish-chart-minor
+  - publish-chart-patch
+
+
+jobs:
+- name: bump-concourse-version
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse-release
+      params:
+        globs: [none]
+    - get: concourse-chart-dev
+    - get: ci
+  - task: bump-chart-app-version
+    file: ci/tasks/bump-chart-app-version.yml
+  - put: merge-dev-into-master
+    resource: concourse-chart
+    inputs: [concourse-chart-dev]
+    params:
+      repository: concourse-chart-dev
+      merge: true
+
+- name: publish-chart-major
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: version
+      params: {bump: major}
+    - get: concourse-chart
+    - get: chart-repo-index
+    - get: ci
+  - task: bump-chart-version
+    file: ci/tasks/bump-chart-version.yml
+  - task: package-chart
+    file: ci/tasks/package-chart.yml
+  - in_parallel:
+    - put: version
+      params: {file: version/version}
+    - put: chart-repo-index
+      inputs: [packaged-chart]
+      params:
+        file: packaged-chart/index.yaml
+    - put: chart-repo
+      inputs: [packaged-chart]
+      params:
+        file: packaged-chart/concourse-*.tgz
+    - put: concourse-chart
+      inputs: [concourse-chart]
+      params:
+        repository: concourse-chart
+        merge: true
+        tag: version/version
+        tag_prefix: v
+
+- name: publish-chart-minor
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: version
+      params: {bump: minor}
+    - get: concourse-chart
+    - get: chart-repo-index
+    - get: ci
+  - task: bump-chart-version
+    file: ci/tasks/bump-chart-version.yml
+  - task: package-chart
+    file: ci/tasks/package-chart.yml
+  - in_parallel:
+    - put: version
+      params: {file: version/version}
+    - put: chart-repo-index
+      inputs: [packaged-chart]
+      params:
+        file: packaged-chart/index.yaml
+    - put: chart-repo
+      inputs: [packaged-chart]
+      params:
+        file: packaged-chart/concourse-*.tgz
+    - put: concourse-chart
+      inputs: [concourse-chart]
+      params:
+        repository: concourse-chart
+        merge: true
+        tag: version/version
+        tag_prefix: v
+
+- name: publish-chart-patch
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: version
+      params: {bump: patch}
+    - get: concourse-chart
+    - get: chart-repo-index
+    - get: ci
+  - task: bump-chart-version
+    file: ci/tasks/bump-chart-version.yml
+  - task: package-chart
+    file: ci/tasks/package-chart.yml
+  - in_parallel:
+    - put: version
+      params: {file: version/version}
+    - put: chart-repo-index
+      inputs: [packaged-chart]
+      params:
+        file: packaged-chart/index.yaml
+    - put: chart-repo
+      inputs: [packaged-chart]
+      params:
+        file: packaged-chart/concourse-*.tgz
+    - put: concourse-chart
+      inputs: [concourse-chart]
+      params:
+        repository: concourse-chart
+        merge: true
+        tag: version/version
+        tag_prefix: v
+
+resources:
+- name: version
+  type: semver
+  icon: tag
+  source:
+    driver: gcs
+    bucket: concourse-artifacts
+    json_key: ((concourse_artifacts_json_key))
+    key: chart-version
+
+- name: concourse-chart
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:concourse/concourse-chart.git
+    branch: master
+    private_key: ((concourse_chart_private_key))
+
+- name: concourse-chart-dev
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:concourse/concourse-chart.git
+    branch: dev
+    private_key: ((concourse_chart_private_key))
+
+- name: chart-repo
+  type: gcs
+  source:
+    bucket: concourse-charts
+    json_key: ((concourse_charts_json_key))
+    regexp: concourse-(.*)\.tgz
+
+- name: chart-repo-index
+  type: gcs
+  source:
+    bucket: concourse-charts
+    json_key: ((concourse_charts_json_key))
+    versioned_file: index.yaml
+
+- name: ci
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/ci.git
+    branch: master
+
+- name: concourse-release
+  type: github-release
+  source:
+    owner: concourse
+    repository: concourse
+    access_token: ((concourse_github_release.access_token))
+
+resource_types:
+- name: gcs
+  type: registry-image
+  source: {repository: frodenas/gcs-resource}

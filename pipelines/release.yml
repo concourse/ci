@@ -75,7 +75,6 @@ groups:
   - bump-cbd-versions
   - publish-docs
   - ship-chart
-  - publish-chart
   - patch
   - discover-component-version
 
@@ -1067,38 +1066,6 @@ jobs:
       passed: [k8s-topgun]
     - get: unit-image
       passed: [k8s-topgun]
-
-- name: publish-chart
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse-version
-      resource: version
-      passed: [ship-chart]
-    - get: concourse-chart
-      passed: [ship-chart]
-    - get: unit-image
-      passed: [ship-chart]
-    - get: chart-repo-index
-    - get: ci
-  - task: build-chart
-    image: unit-image
-    file: ci/tasks/package-chart.yml
-  - in_parallel:
-    - put: chart-repo-index
-      inputs: [packaged-chart]
-      params:
-        file: packaged-chart/index.yaml
-    - put: chart-repo
-      inputs: [packaged-chart]
-      params:
-        file: packaged-chart/concourse-*.tgz
-    - put: concourse-chart
-      inputs: [concourse]
-      params:
-        repository: concourse
-        merge: true
 
 - name: patch
   public: true
