@@ -74,7 +74,6 @@ groups:
   - publish-pivnet-bosh
   - bump-cbd-versions
   - publish-docs
-  - ship-chart
   - patch
   - discover-component-version
 
@@ -1054,19 +1053,6 @@ jobs:
   - put: docs-gh-pages
     params: {repository: built-docs}
 
-- name: ship-chart
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse-version
-      resource: version
-      passed: [shipit]
-    - get: concourse-chart
-      passed: [k8s-topgun]
-    - get: unit-image
-      passed: [k8s-topgun]
-
 - name: patch
   public: true
   serial_groups: [version]
@@ -1568,20 +1554,6 @@ resources:
     bucket: concourse-components-version
     json_key: ((concourse_components_json_key))
     regexp: "helm-version-(.*).txt"
-
-- name: chart-repo
-  type: gcs
-  source:
-    bucket: concourse-charts
-    json_key: ((concourse_charts_json_key))
-    regexp: concourse-(.*)\.tgz
-
-- name: chart-repo-index
-  type: gcs
-  source:
-    bucket: concourse-charts
-    json_key: ((concourse_charts_json_key))
-    versioned_file: index.yaml
 
 - name: periodic-check
   type: time
