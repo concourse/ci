@@ -12,7 +12,6 @@ inputs:
 
 outputs:
 - name: concourse-chart
-  path: concourse
 
 run:
   path: ci/tasks/scripts/bump-chart-version
