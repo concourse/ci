@@ -1,3 +1,14 @@
+groups:
+- name: publish
+  jobs:
+  - publish-chart-major
+  - publish-chart-minor
+  - publish-chart-patch
+
+- name: dependencies
+  jobs:
+  - bump-concourse-version
+
 jobs:
 - name: publish-chart-major
   public: true
@@ -98,6 +109,24 @@ jobs:
         tag: version/version
         tag_prefix: v
 
+- name: bump-concourse-version
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse-release
+      params:
+        globs: [none]
+    - get: concourse-chart
+    - get: ci
+  - task: bump-chart-app-version
+    file: ci/tasks/bump-chart-app-version.yml
+  - put: concourse-chart
+    inputs: [concourse-chart]
+    params:
+      repository: concourse
+      merge: true
+
 resources:
 - name: version
   type: semver
@@ -136,6 +165,13 @@ resources:
   source:
     uri: https://github.com/concourse/ci.git
     branch: master
+
+- name: concourse-release
+  type: github-release
+  source:
+    owner: concourse
+    repository: concourse
+    access_token: ((concourse_github_release.access_token))
 
 resource_types:
 - name: gcs
