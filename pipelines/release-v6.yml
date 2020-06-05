@@ -68,8 +68,6 @@ groups:
   - publish-image
   - publish-bosh-release
   - bump-cbd-versions
-  - ship-chart
-  - publish-chart
   - patch
   - discover-component-version
 
@@ -1089,51 +1087,6 @@ jobs:
           image: concourse-rc-image-ubuntu/image.tar
           additional_tags: ubuntu-tags/tags
 
-- name: ship-chart
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse-version
-      resource: version
-      passed: [shipit]
-    - get: concourse-chart
-      passed: [k8s-topgun]
-    - get: unit-image
-      passed: [k8s-topgun]
-
-- name: publish-chart
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse-version
-      resource: version
-      passed: [ship-chart]
-    - get: concourse-chart
-      passed: [ship-chart]
-    - get: unit-image
-      passed: [ship-chart]
-    - get: chart-repo-index
-    - get: ci
-  - task: build-chart
-    image: unit-image
-    file: ci/tasks/package-chart.yml
-  - in_parallel:
-    - put: chart-repo-index
-      inputs: [packaged-chart]
-      params:
-        file: packaged-chart/index.yaml
-    - put: chart-repo
-      inputs: [packaged-chart]
-      params:
-        file: packaged-chart/concourse-*.tgz
-    - put: concourse-chart
-      inputs: [concourse]
-      params:
-        repository: concourse
-        merge: true
-
 - name: patch
   public: true
   serial_groups: [version]
@@ -1645,20 +1598,6 @@ resources:
     bucket: concourse-components-version
     json_key: ((concourse_components_json_key))
     regexp: "helm-version-(.*).txt"
-
-- name: chart-repo
-  type: gcs
-  source:
-    bucket: concourse-charts
-    json_key: ((concourse_charts_json_key))
-    regexp: concourse-(.*)\.tgz
-
-- name: chart-repo-index
-  type: gcs
-  source:
-    bucket: concourse-charts
-    json_key: ((concourse_charts_json_key))
-    versioned_file: index.yaml
 
 - name: periodic-check
   type: time
