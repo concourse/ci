@@ -1,13 +1,13 @@
 groups:
-- name: dependencies
-  jobs:
-  - bump-concourse-version
-
 - name: publish
   jobs:
   - publish-chart-major
   - publish-chart-minor
   - publish-chart-patch
+
+- name: dependencies
+  jobs:
+  - bump-concourse-version
 
 
 jobs:
