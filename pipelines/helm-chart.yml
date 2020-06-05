@@ -23,7 +23,7 @@ jobs:
     - get: ci
   - task: bump-chart-app-version
     file: ci/tasks/bump-chart-app-version.yml
-  - put: push-and-merge-to-master
+  - put: merge-dev-into-master
     resource: concourse-chart
     inputs: [concourse-chart-dev]
     params:
