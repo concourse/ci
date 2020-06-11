@@ -271,8 +271,8 @@ jobs:
   - set_pipeline: enterprise-helm-chart
     file: concourse-for-k8s/ci/pipeline.yml
     vars:
-      concourse_chart_branch: release/6.1.x
-      concourse_minor: "6.1"
+      concourse_chart_branch: release/6.3.x
+      concourse_minor: "6.3"
 
 - name: reconfigure-monitoring-pipeline
   plan:
