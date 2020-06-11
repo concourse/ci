@@ -351,7 +351,7 @@ local build_image(distro) = {
     {
       name: "docker-image",
       type: "registry-image",
-      source: {repository: "concourse/docker-image-resource", tag: "1.3.1"},
+      source: {repository: "concourse/docker-image-resource"},
       privileged: true
     },
     {
