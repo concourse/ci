@@ -1,0 +1,28 @@
+#!/bin/bash
+
+WORKDIR=$PWD
+
+# Use Datadog web-api to find dashboard ID based on the dashboard title
+curl -X GET https://api.datadoghq.com/api/v1/dashboard \
+-H "Content-Type: application/json" \
+-H "DD-API-KEY: ${DATADOG_API_KEY}" \
+-H "DD-APPLICATION-KEY: ${DATADOG_APP_KEY}" \
+-s -o all-dashboards.json
+
+DASHBOARD_ID=$(jq -r --arg TITLE "$DASHBOARD_TITLE" '.dashboards[] | select(.title == $TITLE) | .id' all-dashboards.json)
+
+DASHBOARD_TITLE_SYSSTATS="$DASHBOARD_TITLE - System Stats"
+DASHBOARD_ID_SYSSTATS=$(jq -r --arg TITLE "$DASHBOARD_TITLE_SYSSTATS" '.dashboards[] | select(.title == $TITLE) | .id' all-dashboards.json)
+
+# Workaround to use `terraform import` command with modules and dynamic value assignment
+cd greenpeace/terraform
+mv dashboard/main.tf dashboard/main.tf.original
+sed -e "s/var.datadog_api_key/\"$DATADOG_API_KEY\"/g" \
+    -e "s/var.datadog_app_key/\"$DATADOG_APP_KEY\"/g" \
+    dashboard/main.tf.original > dashboard/main.tf
+
+cd production
+terraform init
+terraform import $RESOURCE_ADDRESS $DASHBOARD_ID
+terraform import $RESOURCE_ADDRESS_SYSSTAS $DASHBOARD_ID_SYSSTATS
+cp *.tfstate $WORKDIR/tfstate

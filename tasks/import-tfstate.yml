@@ -1,0 +1,21 @@
+---
+platform: linux
+image_resource:
+  type: registry-image
+  source: {repository: concourse/unit}
+
+inputs:
+  - name: ci
+  - name: greenpeace
+outputs:
+  - name: tfstate
+
+params:
+  RESOURCE_ADDRESS:
+  RESOURCE_ADDRESS_SYSSTAS:
+  DATADOG_API_KEY:
+  DATADOG_APP_KEY:
+  DASHBOARD_TITLE:
+
+run:
+  path: ci/tasks/scripts/import-tfstate
