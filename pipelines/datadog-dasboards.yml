@@ -1,0 +1,91 @@
+jobs:
+- name: ci-dashboard-changes
+  serial: true
+  plan:
+  - get: every-other-day
+    trigger: true
+  - get: ci
+  - get: greenpeace
+  - task: import-tfstate
+    file: ci/tasks/import-tfstate.yml
+    params:
+      RESOURCE_ADDRESS: module.ci_dashboard.datadog_dashboard.concourse
+      RESOURCE_ADDRESS_SYSSTAS: module.ci_dashboard.datadog_dashboard.concourse_systemstats
+      DATADOG_API_KEY: ((datadog_api_key))
+      DATADOG_APP_KEY: ((datadog_app_key))
+      DASHBOARD_TITLE: "Concourse - CI"
+  - task: terraform-plan
+    file: ci/tasks/terraform-plan.yml
+    params:
+      TARGET: module.ci_dashboard
+      DATADOG_API_KEY: ((datadog_api_key))
+      DATADOG_APP_KEY: ((datadog_app_key))
+  on_failure:
+    do:
+    - put: notify
+      params:
+        mode: normal
+        alert_type: failed
+
+- name: hush-house-dashboard-changes
+  serial: true
+  plan:
+  - get: every-other-day
+    trigger: true
+  - get: ci
+  - get: greenpeace
+  - task: import-tfstate
+    file: ci/tasks/import-tfstate.yml
+    params:
+      RESOURCE_ADDRESS: module.hush_house_dashboard.datadog_dashboard.concourse
+      RESOURCE_ADDRESS_SYSSTAS: module.hush_house_dashboard.datadog_dashboard.concourse_systemstats
+      DATADOG_API_KEY: ((datadog_api_key))
+      DATADOG_APP_KEY: ((datadog_app_key))
+      DASHBOARD_TITLE: "Concourse - Hush House"
+  - task: terraform-plan
+    file: ci/tasks/terraform-plan.yml
+    params:
+      TARGET: module.hush_house_dashboard
+      DATADOG_API_KEY: ((datadog_api_key))
+      DATADOG_APP_KEY: ((datadog_app_key))
+  on_failure:
+    do:
+      - put: notify
+        params:
+          mode: normal
+          alert_type: failed
+
+resource_types:
+- name: slack-notifier
+  type: registry-image
+  source: {repository: concourse/concourse-slack-notifier}
+
+resources:
+- name: greenpeace
+  type: git
+  icon: &git-icon github
+  source:
+    uri: git@github.com:concourse/greenpeace.git
+    branch: master
+    private_key: ((concourse_bot_private_key))
+
+- name: ci
+  type: git
+  icon: *git-icon
+  source:
+    uri: https://github.com/concourse/ci.git
+    branch: master
+
+- name: every-other-day
+  type: time
+  source:
+    interval: 48h
+
+- name: notify
+  type: slack-notifier
+  icon: slack
+  source:
+    url: ((slack_hook))
+    username: ((basic_auth.username))
+    password: ((basic_auth.password))
+    concourse_url: https://ci.concourse-ci.org
