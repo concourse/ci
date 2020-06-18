@@ -1,8 +1,17 @@
 . .\ci\tasks\scripts\go-build.ps1
 
-$version = (Get-Content "version\version")
-$sha = & git -C concourse rev-parse HEAD
-$archive = "concourse-${version}+${sha}.windows.amd64.zip"
+$currentRef = & git -C concourse rev-parse --short HEAD
+
+if (Test-Path "version\version") {
+  $version = "$(Get-Content "version\version")+$currentRef"
+} else {
+  $latestTag = & git -C concourse describe --tags --abbrev=0 HEAD
+  $commitsSince = & git -C concourse rev-list "$latestTag..HEAD" --count
+  $latestVersion = $latestTag -replace "v", ""
+  $version = "$latestVersion+dev.$commitsSince.$currentRef"
+}
+
+$archive = "concourse-${version}.windows.amd64.zip"
 
 # can't figure out how to pass an empty string arg in PowerShell, so just
 # configure a noop for the fallback
