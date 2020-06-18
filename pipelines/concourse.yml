@@ -530,6 +530,7 @@ jobs:
   on_failure: *failed-concourse
 
 - name: build-concourse
+  old_name: build-rc
   public: true
   serial: true
   plan:
@@ -614,6 +615,7 @@ jobs:
   on_failure: *failed-concourse
 
 - name: build-image
+  old_name: build-rc-image
   public: true
   serial: true
   plan:
