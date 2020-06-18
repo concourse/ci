@@ -25,9 +25,8 @@ groups:
   - testflight-containerd
   - containerd-integration
   - watsjs
-  - rc
-  - build-rc
-  - build-rc-image
+  - build-concourse
+  - build-image
   - bin-smoke
   - bin-smoke-containerd
   - upgrade
@@ -58,11 +57,6 @@ groups:
   - resource-types-images
   - unit-image
   - build-golang-builder-image
-
-- name: publish
-  jobs:
-  - pre
-  - publish-pre-binaries
 
 - name: workers
   jobs:
@@ -422,18 +416,15 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
-      passed: [build-rc-image]
+      passed: [build-image]
       trigger: true
-    - get: concourse-rc-image
-      passed: [build-rc-image]
+    - get: concourse-dev-alpine-image
+      passed: [build-image]
       params: {format: oci}
       trigger: true
-    - get: concourse-rc-image-ubuntu
-      passed: [build-rc-image]
+    - get: concourse-dev-ubuntu-image
+      passed: [build-image]
       params: {format: oci}
-      trigger: true
-    - get: version
-      passed: [build-rc-image]
       trigger: true
     - get: concourse-chart
       trigger: true
@@ -446,15 +437,15 @@ jobs:
       params:
         KUBE_CONFIG: ((kube_config))
         RELEASE_NAME: concourse-smoke
-        CONCOURSE_IMAGE: concourse/concourse-rc
+        CONCOURSE_IMAGE: concourse/concourse-dev
   - task: deploy
     image: unit-image
-    input_mapping: {image-info: concourse-rc-image}
+    input_mapping: {image-info: concourse-dev-alpine-image}
     file: ci/tasks/k8s-deploy.yml
     params:
       KUBE_CONFIG: ((kube_config))
       RELEASE_NAME: concourse-smoke
-      CONCOURSE_IMAGE: concourse/concourse-rc
+      CONCOURSE_IMAGE: concourse/concourse-dev
   - task: k8s-smoke
     image: unit-image
     file: ci/tasks/k8s-smoke.yml
@@ -468,7 +459,7 @@ jobs:
     params:
       KUBE_CONFIG: ((kube_config))
       RELEASE_NAME: concourse-smoke
-      CONCOURSE_IMAGE: concourse/concourse-rc
+      CONCOURSE_IMAGE: concourse/concourse-dev
   on_failure: *failed-concourse
 
 - name: k8s-topgun
@@ -480,16 +471,12 @@ jobs:
       passed: [k8s-smoke]
       tags: [k8s-topgun]
       trigger: true
-    - get: version
-      passed: [k8s-smoke]
-      tags: [k8s-topgun]
-      trigger: true
-    - get: concourse-rc-image
+    - get: concourse-dev-alpine-image
       params: {format: oci}
       passed: [k8s-smoke]
       tags: [k8s-topgun]
       trigger: true
-    - get: concourse-rc-image-ubuntu
+    - get: concourse-dev-ubuntu-image
       params: {format: oci}
       passed: [k8s-smoke]
       tags: [k8s-topgun]
@@ -511,7 +498,7 @@ jobs:
     params:
       IN_CLUSTER: "true"
       KUBE_CONFIG: ((kube_config))
-      CONCOURSE_IMAGE_NAME: concourse/concourse-rc
+      CONCOURSE_IMAGE_NAME: concourse/concourse-dev
   on_failure: *failed-concourse
 
 - name: k8s-check-helm-params
@@ -520,19 +507,16 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
-      passed: [build-rc-image]
+      passed: [build-image]
       trigger: true
-    - get: concourse-rc-image
-      passed: [build-rc-image]
+    - get: concourse-dev-alpine-image
+      passed: [build-image]
       trigger: true
-    - get: concourse-rc-image-ubuntu
-      passed: [build-rc-image]
+    - get: concourse-dev-ubuntu-image
+      passed: [build-image]
       trigger: true
-    - get: linux-rc-ubuntu
-      passed: [build-rc-image]
-      trigger: true
-    - get: version
-      passed: [build-rc-image]
+    - get: linux-dev-ubuntu
+      passed: [build-image]
       trigger: true
     - get: unit-image
     - get: concourse-chart
@@ -541,42 +525,19 @@ jobs:
   - task: check-params
     file: ci/tasks/check-distribution-env.yml
     image: unit-image
-    input_mapping: {distribution: concourse-chart, linux-rc: linux-rc-ubuntu}
+    input_mapping: {distribution: concourse-chart, linux-rc: linux-dev-ubuntu}
     params: {DISTRIBUTION: helm}
   on_failure: *failed-concourse
 
-- name: rc
-  public: true
-  serial_groups: [version]
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed: [testflight, watsjs, upgrade, downgrade]
-      trigger: true
-    - get: dev-image
-      trigger: true
-      passed: [testflight, watsjs, upgrade, downgrade]
-    - get: unit-image
-    - get: ci
-  - put: version
-    params: {pre: rc}
-
-- name: build-rc
+- name: build-concourse
   public: true
   serial: true
   plan:
   - in_parallel:
     - get: concourse
-      passed: [rc]
+      passed: [testflight, watsjs, upgrade, downgrade]
       trigger: true
     - get: unit-image
-    - get: version
-      passed: [rc]
-      trigger: true
-    - get: final-version
-      resource: version
-      passed: [rc]
-      params: {bump: final}
     - get: gdn
       trigger: true
     - get: containerd
@@ -638,38 +599,35 @@ jobs:
         input_mapping: {concourse: built-concourse}
         output_mapping: {concourse-tarball: concourse-darwin}
   - in_parallel:
-    - put: linux-rc
+    - put: linux-dev-alpine
       params: {file: concourse-linux-alpine/concourse-*.tgz}
       inputs: [concourse-linux-alpine]
-    - put: linux-rc-ubuntu
+    - put: linux-dev-ubuntu
       params: {file: concourse-linux-ubuntu/concourse-*.tgz}
       inputs: [concourse-linux-ubuntu]
-    - put: windows-rc
+    - put: windows-dev
       params: {file: concourse-windows/concourse-*.zip}
       inputs: [concourse-windows]
-    - put: darwin-rc
+    - put: darwin-dev
       params: {file: concourse-darwin/concourse-*.tgz}
       inputs: [concourse-darwin]
   on_failure: *failed-concourse
 
-- name: build-rc-image
+- name: build-image
   public: true
   serial: true
   plan:
   - in_parallel:
     - get: concourse
-      passed: [build-rc]
+      passed: [build-concourse]
       trigger: true
     - get: unit-image
-    - get: version
-      passed: [build-rc]
+    - get: linux-dev-alpine
       trigger: true
-    - get: linux-rc
+      passed: [build-concourse]
+    - get: linux-dev-ubuntu
       trigger: true
-      passed: [build-rc]
-    - get: linux-rc-ubuntu
-      trigger: true
-      passed: [build-rc]
+      passed: [build-concourse]
     - get: concourse-docker
       trigger: true
     - get: oci-build-task
@@ -680,27 +638,26 @@ jobs:
         - task: build-alpine
           file: concourse-docker/ci/build-image.yml
           image: oci-build-task
+          input_mapping: {linux-rc: linux-dev-alpine}
           output_mapping: {image: image-alpine}
           privileged: true
         - task: build-ubuntu
           file: concourse-docker/ci/build-image.yml
           image: oci-build-task
-          input_mapping: {linux-rc: linux-rc-ubuntu}
+          input_mapping: {linux-rc: linux-dev-ubuntu}
           output_mapping: {image: image-ubuntu}
           privileged: true
   - in_parallel:
       fail_fast: true
       steps:
-        - put: concourse-rc-image
-          inputs: [image-alpine, version]
+        - put: concourse-dev-alpine-image
+          inputs: [image-alpine]
           params:
             image: image-alpine/image.tar
-            additional_tags: version/version
-        - put: concourse-rc-image-ubuntu
-          inputs: [image-ubuntu, version]
+        - put: concourse-dev-ubuntu-image
+          inputs: [image-ubuntu]
           params:
             image: image-ubuntu/image.tar
-            additional_tags: version/version
   on_failure: *failed-concourse
 
 - name: bin-smoke
@@ -709,20 +666,17 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
-      passed: [build-rc]
+      passed: [build-concourse]
       trigger: true
-    - get: version
-      passed: [build-rc]
-      trigger: true
-    - get: linux-rc-ubuntu
-      passed: [build-rc]
+    - get: linux-dev-ubuntu
+      passed: [build-concourse]
       trigger: true
     - get: unit-image
     - get: ci
   - task: terraform-smoke
     image: unit-image
     file: ci/tasks/terraform-smoke.yml
-    input_mapping: {linux-rc: linux-rc-ubuntu}
+    input_mapping: {linux-rc: linux-dev-ubuntu}
     params:
       GCP_PROJECT: cf-concourse-production
       GCP_KEY: ((concourse_smoke_gcp_key))
@@ -740,20 +694,17 @@ jobs:
   plan:
     - in_parallel:
         - get: concourse
-          passed: [build-rc]
+          passed: [build-concourse]
           trigger: true
-        - get: version
-          passed: [build-rc]
-          trigger: true
-        - get: linux-rc-ubuntu
-          passed: [build-rc]
+        - get: linux-dev-ubuntu
+          passed: [build-concourse]
           trigger: true
         - get: unit-image
         - get: ci
     - task: terraform-smoke
       image: unit-image
       file: ci/tasks/terraform-smoke.yml
-      input_mapping: {linux-rc: linux-rc-ubuntu}
+      input_mapping: {linux-rc: linux-dev-ubuntu}
       params:
         GCP_PROJECT: cf-concourse-production
         GCP_KEY: ((concourse_smoke_gcp_key))
@@ -773,14 +724,11 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
-      passed: [build-rc-image]
+      passed: [build-image]
       trigger: true
-    - get: concourse-rc-image
-      passed: [build-rc-image]
+    - get: concourse-dev-alpine-image
+      passed: [build-image]
       params: {format: oci}
-      trigger: true
-    - get: version
-      passed: [build-rc-image]
       trigger: true
     - get: unit-image
     - get: ci
@@ -802,10 +750,7 @@ jobs:
       passed: [bin-smoke]
       trigger: true
     - get: unit-image
-    - get: version
-      passed: [bin-smoke]
-      trigger: true
-    - get: linux-rc-ubuntu
+    - get: linux-dev-ubuntu
       passed: [bin-smoke]
       trigger: true
     - get: concourse-release-repo
@@ -814,7 +759,7 @@ jobs:
   - task: check-props
     file: ci/tasks/check-distribution-env.yml
     image: unit-image
-    input_mapping: {distribution: concourse-release-repo, linux-rc: linux-rc-ubuntu}
+    input_mapping: {distribution: concourse-release-repo, linux-rc: linux-dev-ubuntu}
     params: {DISTRIBUTION: bosh}
   on_failure: *failed-concourse
 
@@ -824,23 +769,21 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
-      passed: [build-rc]
+      passed: [build-concourse]
       trigger: true
     - get: unit-image
-    - get: version
-      passed: [build-rc]
-    - get: linux-rc-ubuntu
-      passed: [build-rc]
+    - get: linux-dev-ubuntu
+      passed: [build-concourse]
       trigger: true
-    - get: windows-rc
-      passed: [build-rc]
+    - get: windows-dev
+      passed: [build-concourse]
       trigger: true
     - get: concourse-release-repo
     - get: ci
   - task: bump-concourse-blobs
     file: ci/tasks/bump-concourse-blobs.yml
     image: unit-image
-    input_mapping: { linux-rc: linux-rc-ubuntu }
+    input_mapping: { linux-rc: linux-dev-ubuntu }
     params: {GCP_JSON_KEY: ((concourse_artifacts_json_key))}
   - put: concourse-release-repo
     params: {repository: bumped-concourse-release-repo}
@@ -856,8 +799,6 @@ jobs:
     - get: concourse
       passed: [bosh-bump]
     - get: unit-image
-    - get: version
-      passed: [bosh-bump]
     - get: concourse-release
       trigger: true
     - get: postgres-release
@@ -908,8 +849,6 @@ jobs:
     - get: concourse
       passed: [bosh-bump]
     - get: unit-image
-    - get: version
-      passed: [bosh-bump]
     - get: concourse-release
       trigger: true
     - get: postgres-release
@@ -958,8 +897,6 @@ jobs:
     - get: concourse
       passed: [bosh-bump]
     - get: unit-image
-    - get: version
-      passed: [bosh-bump]
     - get: concourse-release
       trigger: true
     - get: postgres-release
@@ -1008,8 +945,6 @@ jobs:
     - get: concourse
       passed: [bosh-bump]
     - get: unit-image
-    - get: version
-      passed: [bosh-bump]
     - get: concourse-release
       trigger: true
     - get: postgres-release
@@ -1058,8 +993,6 @@ jobs:
     - get: concourse
       passed: [bosh-bump]
     - get: unit-image
-    - get: version
-      passed: [bosh-bump]
     - get: concourse-release
       trigger: true
     - get: postgres-release
@@ -1096,99 +1029,6 @@ jobs:
       SUITE: pcf
   on_failure: *failed-concourse
 
-- name: pre
-  public: true
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed:
-      - build-rc
-      - k8s-topgun
-      - bosh-smoke
-      - bosh-topgun-core
-      - bosh-topgun-runtime
-      - bosh-topgun-both
-      - bosh-topgun-pcf
-    - get: unit-image
-      passed:
-      - build-rc
-      - k8s-topgun
-      - bosh-smoke
-      - bosh-topgun-core
-      - bosh-topgun-runtime
-      - bosh-topgun-both
-      - bosh-topgun-pcf
-    - get: version
-      passed:
-      - build-rc
-      - k8s-topgun
-      - bosh-smoke
-      - bosh-topgun-core
-      - bosh-topgun-runtime
-      - bosh-topgun-both
-      - bosh-topgun-pcf
-    - get: linux-rc
-      passed: [build-rc]
-    - get: linux-rc-ubuntu
-      passed: [build-rc]
-    - get: windows-rc
-      passed: [build-rc]
-    - get: darwin-rc
-      passed: [build-rc]
-    - get: concourse-rc-image
-      passed: [k8s-topgun]
-    - get: concourse-rc-image-ubuntu
-      passed: [k8s-topgun]
-
-- name: publish-pre-binaries
-  serial: true
-  plan:
-  - in_parallel:
-    - get: version
-      passed: [pre]
-      trigger: true
-    - get: concourse
-      passed: [pre]
-    - get: unit-image
-      passed: [pre]
-    - get: linux-rc
-      passed: [pre]
-    - get: windows-rc
-      passed: [pre]
-    - get: darwin-rc
-      passed: [pre]
-    - get: ci
-    - get: release-notes
-  - in_parallel:
-    - task: prep-release-assets
-      file: ci/tasks/prep-release-assets.yml
-      image: unit-image
-    - task: build-prerelease-notes
-      file: ci/tasks/build-prerelease-notes.yml
-      image: unit-image
-      params:
-        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
-  - put: concourse-github-pre
-    params:
-      commitish: concourse/.git/ref
-      tag: version/version
-      tag_prefix: v
-      name: built-notes/release-name
-      body: built-notes/notes.md
-      globs:
-      - concourse-linux/concourse-*.tgz
-      - concourse-windows/concourse-*.zip
-      - concourse-darwin/concourse-*.tgz
-      - fly-linux/fly-*.tgz
-      - fly-windows/fly-*.zip
-      - fly-darwin/fly-*.tgz
-      - concourse-linux/*.sha1
-      - concourse-windows/*.sha1
-      - concourse-darwin/*.sha1
-      - fly-linux/*.sha1
-      - fly-windows/*.sha1
-      - fly-darwin/*.sha1
-
 - name: install-windows-deps
   public: true
   serial: true
@@ -1212,8 +1052,6 @@ resources:
   source:
     uri: https://github.com/concourse/concourse.git
     branch: master
-    ignore_paths:
-    - release-notes/
 
 - name: ci
   type: git
@@ -1221,15 +1059,6 @@ resources:
   source:
     uri: https://github.com/concourse/ci.git
     branch: master
-
-- name: release-notes
-  type: git
-  icon: *git-icon
-  source:
-    uri: https://github.com/concourse/concourse.git
-    branch: master
-    paths:
-    - release-notes/
 
 - name: notify
   type: slack-notifier
@@ -1456,46 +1285,37 @@ resources:
   icon: *image-icon
   source: {repository: vito/oci-build-task}
 
-- name: version
-  type: semver
-  icon: tag
-  source:
-    driver: gcs
-    bucket: concourse-artifacts
-    json_key: ((concourse_artifacts_json_key))
-    key: version
-
-- name: linux-rc
+- name: linux-dev-alpine
   type: gcs
   icon: linux
   source:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
-    regexp: rcs/concourse-(.*)\.linux\.amd64\.tgz
+    regexp: dev/concourse-(.*)\.linux-alpine\.amd64\.tgz
 
-- name: linux-rc-ubuntu
+- name: linux-dev-ubuntu
   type: gcs
   icon: linux
   source:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
-    regexp: rcs/concourse-(.*)\.linux-ubuntu\.amd64\.tgz
+    regexp: dev/concourse-(.*)\.linux-ubuntu\.amd64\.tgz
 
-- name: windows-rc
+- name: windows-dev
   type: gcs
   icon: microsoft-windows
   source:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
-    regexp: rcs/concourse-(.*)\.windows\.amd64\.zip
+    regexp: dev/concourse-(.*)\.windows\.amd64\.zip
 
-- name: darwin-rc
+- name: darwin-dev
   type: gcs
   icon: apple
   source:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
-    regexp: rcs/concourse-(.*)\.darwin\.amd64\.tgz
+    regexp: dev/concourse-(.*)\.darwin\.amd64\.tgz
 
 - name: docs
   type: git
@@ -1616,16 +1436,6 @@ resources:
     bucket: golang
     regexp: 'go(\d+\.\d+(\.\d+)?)\.linux-amd64\.tar\.gz'
 
-- name: concourse-github-pre
-  type: github-release
-  icon: truck
-  source:
-    owner: concourse
-    repository: concourse
-    access_token: ((concourse_github_release.access_token))
-    release: false
-    pre_release: true
-
 - name: resource-types-alpine-image
   type: registry-image
   icon: &image-icon docker
@@ -1643,19 +1453,19 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: concourse-rc-image
+- name: concourse-dev-alpine-image
   type: registry-image
   icon: *image-icon
   source:
-    repository: concourse/concourse-rc
+    repository: concourse/concourse-dev
     username: ((docker.username))
     password: ((docker.password))
 
-- name: concourse-rc-image-ubuntu
+- name: concourse-dev-ubuntu-image
   type: registry-image
   icon: *image-icon
   source:
-    repository: concourse/concourse-rc
+    repository: concourse/concourse-dev
     tag: ubuntu
     username: ((docker.username))
     password: ((docker.password))

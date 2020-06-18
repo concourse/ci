@@ -5,6 +5,7 @@ inputs:
 - name: concourse
 - name: ci
 - name: version
+  optional: true
 - name: final-version
   optional: true
 - name: fly-linux
