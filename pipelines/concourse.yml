@@ -495,6 +495,7 @@ jobs:
     file: ci/tasks/k8s-topgun.yml
     tags: [k8s-topgun]
     image: unit-image
+    input_mapping: {concourse-rc-image: concourse-dev-alpine-image}
     params:
       IN_CLUSTER: "true"
       KUBE_CONFIG: ((kube_config))
@@ -739,6 +740,7 @@ jobs:
     privileged: true
     image: unit-image
     file: ci/tasks/quickstart-smoke.yml
+    input_mapping: {concourse-rc-image: concourse-dev-alpine-image}
     params:
       RELEASE_NAME: concourse-smoke
   on_failure: *failed-concourse
@@ -785,7 +787,7 @@ jobs:
   - task: bump-concourse-blobs
     file: ci/tasks/bump-concourse-blobs.yml
     image: unit-image
-    input_mapping: { linux-rc: linux-dev-ubuntu }
+    input_mapping: { linux-rc: linux-dev-ubuntu, windows-rc: windows-dev }
     params: {GCP_JSON_KEY: ((concourse_artifacts_json_key))}
   - put: concourse-release-repo
     params: {repository: bumped-concourse-release-repo}
