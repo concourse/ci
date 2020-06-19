@@ -10,7 +10,7 @@ jobs:
     file: ci/tasks/import-tfstate.yml
     params:
       RESOURCE_ADDRESS: module.ci_dashboard.datadog_dashboard.concourse
-      RESOURCE_ADDRESS_SYSSTAS: module.ci_dashboard.datadog_dashboard.concourse_systemstats
+      RESOURCE_ADDRESS_SYSSTATS: module.ci_dashboard.datadog_dashboard.concourse_systemstats
       DATADOG_API_KEY: ((datadog_api_key))
       DATADOG_APP_KEY: ((datadog_app_key))
       DASHBOARD_TITLE: "Concourse - CI"
@@ -38,7 +38,7 @@ jobs:
     file: ci/tasks/import-tfstate.yml
     params:
       RESOURCE_ADDRESS: module.hush_house_dashboard.datadog_dashboard.concourse
-      RESOURCE_ADDRESS_SYSSTAS: module.hush_house_dashboard.datadog_dashboard.concourse_systemstats
+      RESOURCE_ADDRESS_SYSSTATS: module.hush_house_dashboard.datadog_dashboard.concourse_systemstats
       DATADOG_API_KEY: ((datadog_api_key))
       DATADOG_APP_KEY: ((datadog_app_key))
       DASHBOARD_TITLE: "Concourse - Hush House"

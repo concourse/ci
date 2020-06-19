@@ -24,5 +24,5 @@ sed -e "s/var.datadog_api_key/\"$DATADOG_API_KEY\"/g" \
 cd production
 terraform init
 terraform import $RESOURCE_ADDRESS $DASHBOARD_ID
-terraform import $RESOURCE_ADDRESS_SYSSTAS $DASHBOARD_ID_SYSSTATS
+terraform import $RESOURCE_ADDRESS_SYSSTATS $DASHBOARD_ID_SYSSTATS
 cp *.tfstate $WORKDIR/tfstate
