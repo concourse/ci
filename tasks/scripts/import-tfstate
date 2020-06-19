@@ -49,8 +49,12 @@ DASHBOARD_TITLE_SYSSTATS="$DASHBOARD_TITLE - System Stats"
 DASHBOARD_ID=$(jq -r --arg TITLE "$DASHBOARD_TITLE" '.dashboards[] | select(.title == $TITLE) | .id' all-dashboards.json)
 DASHBOARD_ID_SYSSTATS=$(jq -r --arg TITLE "$DASHBOARD_TITLE_SYSSTATS" '.dashboards[] | select(.title == $TITLE) | .id' all-dashboards.json)
 
-if [ -z "$DASHBOARD_ID" ] && [ -z "$DASHBOARD_ID_SYSSTATS" ]; then
-  echo "No dashboards named '$DASHBOARD_TITLE' or '$DASHBOARD_TITLE_SYSSTATS' were found"
+if [ -z "$DASHBOARD_ID" ]; then
+  echo "No dashboard named '$DASHBOARD_TITLE' was found."
+  exit 1
+fi
+if [ -z "$DASHBOARD_ID_SYSSTATS" ]; then
+  echo "No dashboard named '$DASHBOARD_TITLE_SYSSTATS' was found."
   exit 1
 fi
 
