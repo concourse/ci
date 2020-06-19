@@ -2,6 +2,13 @@
 
 set -e
 WORKDIR=$PWD
+
+main() {
+  check_required_parameters
+  retrieve_dashboard_id
+  create_tfstate_from_datadog_infrastructure
+}
+
 check_required_parameters() {
   if [[ -z $DATADOG_API_KEY ]]; then
     echo "DATADOG_API_KEY environment variable must be specified"
@@ -29,44 +36,48 @@ check_required_parameters() {
   fi
 }
 
-check_required_parameters
+retrieve_dashboard_id() {
+  # Use Datadog web-api to find dashboard ID based on the dashboard title
+  api_response=$(curl -X GET https://api.datadoghq.com/api/v1/dashboard \
+  -H "Content-Type: application/json" \
+  -H "DD-API-KEY: ${DATADOG_API_KEY}" \
+  -H "DD-APPLICATION-KEY: ${DATADOG_APP_KEY}" \
+  -w "%{http_code}\n" \
+  -s -o all-dashboards.json)
 
-# Use Datadog web-api to find dashboard ID based on the dashboard title
-api_response=$(curl -X GET https://api.datadoghq.com/api/v1/dashboard \
--H "Content-Type: application/json" \
--H "DD-API-KEY: ${DATADOG_API_KEY}" \
--H "DD-APPLICATION-KEY: ${DATADOG_APP_KEY}" \
--w "%{http_code}\n" \
--s -o all-dashboards.json)
+  if [[ $api_response -lt 200 || $api_response -ge 300 ]]; then
+    echo "Error response from Datadog API: HTTP $api_response"
+    exit 1
+  fi
 
-if [[ $api_response -lt 200 || $api_response -ge 300 ]]; then
-  echo "Error response from Datadog API: HTTP $api_response"
-  exit 1
-fi
+  DASHBOARD_TITLE_SYSSTATS="$DASHBOARD_TITLE - System Stats"
 
-DASHBOARD_TITLE_SYSSTATS="$DASHBOARD_TITLE - System Stats"
+  DASHBOARD_ID=$(jq -r --arg TITLE "$DASHBOARD_TITLE" '.dashboards[] | select(.title == $TITLE) | .id' all-dashboards.json)
+  DASHBOARD_ID_SYSSTATS=$(jq -r --arg TITLE "$DASHBOARD_TITLE_SYSSTATS" '.dashboards[] | select(.title == $TITLE) | .id' all-dashboards.json)
 
-DASHBOARD_ID=$(jq -r --arg TITLE "$DASHBOARD_TITLE" '.dashboards[] | select(.title == $TITLE) | .id' all-dashboards.json)
-DASHBOARD_ID_SYSSTATS=$(jq -r --arg TITLE "$DASHBOARD_TITLE_SYSSTATS" '.dashboards[] | select(.title == $TITLE) | .id' all-dashboards.json)
+  if [ -z "$DASHBOARD_ID" ]; then
+    echo "No dashboard named '$DASHBOARD_TITLE' was found."
+    exit 1
+  fi
+  if [ -z "$DASHBOARD_ID_SYSSTATS" ]; then
+    echo "No dashboard named '$DASHBOARD_TITLE_SYSSTATS' was found."
+    exit 1
+  fi
+}
 
-if [ -z "$DASHBOARD_ID" ]; then
-  echo "No dashboard named '$DASHBOARD_TITLE' was found."
-  exit 1
-fi
-if [ -z "$DASHBOARD_ID_SYSSTATS" ]; then
-  echo "No dashboard named '$DASHBOARD_TITLE_SYSSTATS' was found."
-  exit 1
-fi
+create_tfstate_from_datadog_infrastructure() {
+  # Workaround to use `terraform import` command with modules and dynamic value assignment
+  cd greenpeace/terraform
+  mv dashboard/main.tf dashboard/main.tf.original
+  sed -e "s/var.datadog_api_key/\"$DATADOG_API_KEY\"/g" \
+      -e "s/var.datadog_app_key/\"$DATADOG_APP_KEY\"/g" \
+      dashboard/main.tf.original > dashboard/main.tf
 
-# Workaround to use `terraform import` command with modules and dynamic value assignment
-cd greenpeace/terraform
-mv dashboard/main.tf dashboard/main.tf.original
-sed -e "s/var.datadog_api_key/\"$DATADOG_API_KEY\"/g" \
-    -e "s/var.datadog_app_key/\"$DATADOG_APP_KEY\"/g" \
-    dashboard/main.tf.original > dashboard/main.tf
+  cd production
+  terraform init
+  terraform import $RESOURCE_ADDRESS $DASHBOARD_ID
+  terraform import $RESOURCE_ADDRESS_SYSSTATS $DASHBOARD_ID_SYSSTATS
+  cp *.tfstate $WORKDIR/tfstate
+}
 
-cd production
-terraform init
-terraform import $RESOURCE_ADDRESS $DASHBOARD_ID
-terraform import $RESOURCE_ADDRESS_SYSSTATS $DASHBOARD_ID_SYSSTATS
-cp *.tfstate $WORKDIR/tfstate
+main
