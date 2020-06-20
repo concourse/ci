@@ -1,0 +1,62 @@
+resources:
+- name: concourse-github-release
+  type: github-release
+  icon: &release-icon package-variant-closed
+  source:
+    owner: concourse
+    repository: concourse
+    access_token: ((concourse_github_release.access_token))
+
+- name: concourse-boshio
+  type: bosh-io-release
+  icon: *release-icon
+  source:
+    repository: concourse/concourse-bosh-release
+
+
+- name: concourse-alpine-image
+  type: registry-image
+  icon: &image-icon docker
+  source:
+    repository: concourse/concourse
+    tag: latest
+
+- name: concourse-ubuntu-image
+  type: registry-image
+  icon: *image-icon
+  source:
+    repository: concourse/concourse
+    tag: ubuntu
+
+- name: cbd-github-release
+  type: github-release
+  icon: *release-icon
+  source:
+    owner: concourse
+    repository: concourse
+    access_token: ((concourse_github_release.access_token))
+
+- name: ci
+  type: git
+  icon: &git-icon github
+  source:
+    uri: https://github.com/concourse/ci
+    branch: master
+
+jobs:
+- name: validate
+  plan:
+  - in_parallel:
+    - get: concourse-github-release
+      trigger: true
+    - get: cbd-github-release
+      trigger: true
+    - get: concourse-boshio
+      trigger: true
+    - get: concourse-alpine-image
+      trigger: true
+    - get: concourse-ubuntu-image
+      trigger: true
+    - get: ci
+  - task: validate
+    file: ci/tasks/validate-release.yml

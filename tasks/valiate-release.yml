@@ -1,0 +1,27 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: concourse/unit}
+
+inputs:
+- name: ci
+- name: concourse-github-release
+- name: cbd-github-release
+- name: concourse-boshio
+- name: concourse-alpine-image
+- name: concourse-ubuntu-image
+
+run:
+  path: bash
+  args:
+  - -c
+  - |
+    go get -d -v ./...
+    go run ci/tasks/scripts/validate-release.go \
+      --semver-file=concourse-github-release/version \
+      --semver-file=concourse-boshio/version \
+      --semver-file=cbd-github-release/version \
+      --docker-digest=concourse-ubuntu-image/digest \
+      --docker-digest=concourse-alpine-image/digest
