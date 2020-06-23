@@ -15,6 +15,6 @@ func TestScripts(t *testing.T) {
 var _ = Describe("ValidateDockerDigests", func() {
 	It("includes the version being shipped", func() {
 		err := ValidateDockerDigests([]string{"blah"}, nil)
-		Expect(err).ToNot(HaveOccurred())
+		Expect(err).To(HaveOccurred())
 	})
 })
