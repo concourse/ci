@@ -23,7 +23,7 @@ run:
   - -c
   - |
     go get -d -v ./...
-    go run ci/tasks/scripts/docker-semver-tags.go \
+    go run ci/tasks/scripts/docker-semver-tags/docker_semver_tags.go \
       --shipit=version/version \
       --latest=latest-version/version \
       --latest-of-same-major=latest-of-same-major-version/version \
