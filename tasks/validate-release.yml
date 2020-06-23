@@ -19,7 +19,7 @@ run:
   - -c
   - |
     go get -d -v ./...
-    go run ci/tasks/scripts/validate-release.go \
+    go run ci/tasks/scripts/validate-release/validate-release.go \
       --semver-file=concourse-github-release/version \
       --semver-file=concourse-boshio/version \
       --semver-file=cbd-github-release/version \
