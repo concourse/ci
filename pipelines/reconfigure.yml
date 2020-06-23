@@ -273,6 +273,8 @@ jobs:
     vars:
       concourse_chart_branch: release/6.3.x
       concourse_minor: "6.3"
+  - set_pipeline: datadog-dashboards
+    file: pipelines-and-tasks/pipelines/datadog-dashboards.yml
 
 - name: reconfigure-monitoring-pipeline
   plan:
