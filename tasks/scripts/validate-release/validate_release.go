@@ -36,28 +36,9 @@ func main() {
 	flag.Var(&dockerDigestPaths, "docker-digest", "path to file containing docker digest")
 	flag.Parse()
 
-	versions := make(map[string]string)
-	var releaseVersion string
-
-	for _, semverFilePath := range semverFilePaths {
-		semverVersion, err := readFile(semverFilePath)
-		if err != nil {
-			panic(err)
-		}
-
-		fmt.Printf("fetched semver version %s from %s\n", semverVersion, semverFilePath)
-
-		releaseVersion = semverVersion
-		versions[semverVersion] = semverFilePath
-	}
-
-	if len(versions) > 1 {
-		v, err := json.Marshal(versions)
-		if err != nil {
-			panic(err)
-		}
-
-		panic(fmt.Errorf("release versions not unique in %v", string(v)))
+	releaseVersion, err := ValidateSemverVerions(semverFilePaths)
+	if err != nil {
+		panic(err)
 	}
 
 	fmt.Printf("release versions validation pass...\n")
@@ -72,7 +53,7 @@ func main() {
 		digests[digest] = dockerDigestPath
 	}
 
-	err := ValidateDockerDigests([]string{releaseVersion, releaseVersion + "-ubuntu"}, digests)
+	err = ValidateDockerDigests([]string{releaseVersion, releaseVersion + "-ubuntu"}, digests)
 	if err != nil {
 		panic(err)
 	}
@@ -87,6 +68,34 @@ func readFile(filePath string) (string, error) {
 	}
 
 	return strings.TrimSpace(string(fileContents)), nil
+}
+
+func ValidateSemverVerions(versionFilePaths []string) (string, error) {
+	versions := make(map[string]string)
+	var releaseVersion string
+
+	for _, path := range versionFilePaths {
+		version, err := readFile(path)
+		if err != nil {
+			return "", err
+		}
+
+		fmt.Printf("fetched semver version %s from %s\n", version, path)
+
+		releaseVersion = version
+		versions[version] = path
+	}
+
+	if len(versions) > 1 {
+		v, err := json.Marshal(versions)
+		if err != nil {
+			panic(err)
+		}
+
+		return "", fmt.Errorf("release versions not unique in %v", string(v))
+	}
+
+	return releaseVersion, nil
 }
 
 func ValidateDockerDigests(tags []string, digestMap map[string]string) error {
