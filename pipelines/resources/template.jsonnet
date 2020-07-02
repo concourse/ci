@@ -69,6 +69,17 @@ local extra_resources =
         }
       }
     ]
+  else if resource == "docker-image" then
+    [
+      {
+        name: "oci-build-task",
+        type: "registry-image",
+        source: {
+          repository: "vito/oci-build-task"
+        }
+      }
+    ]
+
   else
     [];
 
@@ -86,6 +97,49 @@ local extra_gets =
       {
         get: "fly",
         params: {globs: ["fly-*-linux-amd64.tgz"]}
+      }
+    ]
+  else if resource == "docker-image" then
+    [
+      {
+        get: "oci-build-task"
+      }
+    ]
+  else
+    [];
+
+local extra_steps(distro) =
+  if resource == "docker-image" then
+    [
+      {
+        task: "build-smoke-test-image",
+        file: "docker-image-resource/ci/build-smoke-test-image.yml",
+        privileged: true,
+        image: "oci-build-task",
+        params: {"DOCKERFILE": "dockerfiles/"+distro+"/Dockerfile"},
+        output_mapping: {"image": "built-resource-image"}
+      },
+
+      # run the built image's 'in' action
+      {
+        task: "smoke-test",
+        file: "docker-image-resource/ci/smoke-test.yml",
+        privileged: true,
+        image: "built-resource-image",
+        params: {"REPOSITORY": "busybox"},
+        output_mapping: {"fetched-image": "busybox"}
+      },
+
+      # try using the image that was fetched by 'in'
+      {
+        task: "use-fetched-image",
+        image: "busybox",
+        config: {
+          platform: "linux",
+          run: {
+            path: "/bin/true"
+          }
+        }
       }
     ]
   else
@@ -146,6 +200,7 @@ local create_release = {
     ]
   }
 };
+
 local generate_dpkg_list = {
   platform: "linux",
   inputs: [
@@ -306,7 +361,7 @@ local validate_pr(distro) = {
         }
       }
     }
-  ]
+  ] + extra_steps(distro)
 };
 
 local build_image(distro) = {
@@ -333,7 +388,7 @@ local build_image(distro) = {
         dockerfile: resource+"-resource/dockerfiles/" + distro + "/Dockerfile",
       } + build_params
     }
-  ]
+  ] + extra_steps(distro)
 };
 
 {
