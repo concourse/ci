@@ -65,6 +65,7 @@ groups:
   jobs:
   - shipit
   - publish-binaries
+  - publish-test-image
   - publish-image
   - publish-bosh-release
   - bump-cbd-versions
@@ -1033,24 +1034,68 @@ jobs:
       repository: bumped-repo
       merge: true
 
+- name: publish-test-image
+  serial: true
+  plan:
+    - in_parallel:
+      - get: version
+        passed: [shipit]
+        trigger: true
+      - get: concourse
+        passed: [shipit]
+      - get: concourse-rc-image
+        passed: [shipit]
+        params: {format: oci}
+      - get: concourse-rc-image-ubuntu
+        passed: [shipit]
+        params: {format: oci}
+      - get: concourse-rc-image-ubuntu-rootfs
+        resource: concourse-rc-image-ubuntu
+        passed: [shipit]
+      - get: latest-version
+      - get: latest-of-same-major-version
+      - get: ci
+    - in_parallel:
+      - do:
+        - task: docker-semver-tags
+          file: ci/tasks/docker-semver-tags.yml
+          output_mapping: {tags: alpine-tags}
+        - put: concourse-test-image
+          inputs: [concourse-rc-image, alpine-tags]
+          params:
+            image: concourse-rc-image/image.tar
+            additional_tags: alpine-tags/tags
+
+      - do:
+        - task: docker-semver-tags
+          file: ci/tasks/docker-semver-tags.yml
+          output_mapping: {tags: ubuntu-tags}
+          params: {SUFFIX: ubuntu}
+
+        - put: concourse-test-image-ubuntu
+          inputs: [concourse-rc-image-ubuntu, ubuntu-tags]
+          params:
+            image: concourse-rc-image-ubuntu/image.tar
+            additional_tags: ubuntu-tags/tags
+
 - name: publish-image
   serial: true
   plan:
   - in_parallel:
     - get: version
-      passed: [shipit]
+      passed: [publish-test-image]
       trigger: true
     - get: concourse
-      passed: [shipit]
+      passed: [publish-test-image]
     - get: concourse-rc-image
-      passed: [shipit]
+      passed: [publish-test-image]
       params: {format: oci}
     - get: concourse-rc-image-ubuntu
-      passed: [shipit]
+      passed: [publish-test-image]
       params: {format: oci}
     - get: concourse-rc-image-ubuntu-rootfs
       resource: concourse-rc-image-ubuntu
-      passed: [shipit]
+      passed: [publish-test-image]
     - get: latest-version
     - get: latest-of-same-major-version
     - get: ci
@@ -1220,6 +1265,24 @@ resources:
 
     # avoid tagging as 'latest' in case this is a patch release for an older
     # version
+    tag: ((release_minor))-ubuntu
+
+- name: concourse-test-image
+  type: registry-image
+  icon: *image-icon
+  source:
+    repository: concourse/concourse-test-release
+    username: ((docker.username))
+    password: ((docker.password))
+    tag: ((release_minor))
+
+- name: concourse-test-image-ubuntu
+  type: registry-image
+  icon: *image-icon
+  source:
+    repository: concourse/concourse-test-release
+    username: ((docker.username))
+    password: ((docker.password))
     tag: ((release_minor))-ubuntu
 
 - name: version
