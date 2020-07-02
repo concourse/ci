@@ -337,13 +337,17 @@ local validate_pr(distro) = {
       get_params: {fetch_merge: true}
     },
     {
-      put: "resource-image-dev-" + distro,
-      params: {
-        load_base: determine_base(distro),
-        tag: resource+"-resource/.git/id",
-        tag_prefix: "pr-" + distro + "-",
-        dockerfile: resource+"-resource/dockerfiles/" + distro + "/Dockerfile",
-      } + build_params,
+      do: [
+        {
+          put: "resource-image-dev-" + distro,
+          params: {
+            load_base: determine_base(distro),
+            tag: resource+"-resource/.git/id",
+            tag_prefix: "pr-" + distro + "-",
+            dockerfile: resource+"-resource/dockerfiles/" + distro + "/Dockerfile",
+          } + build_params,
+        }
+      ] + extra_steps(distro),
       on_failure: {
         put: "resource-pr",
         params: {
@@ -361,7 +365,7 @@ local validate_pr(distro) = {
         }
       }
     }
-  ] + extra_steps(distro)
+  ]
 };
 
 local build_image(distro) = {
