@@ -839,6 +839,7 @@ jobs:
     tags: [bosh]
     image: unit-image
     file: ci/tasks/smoke.yml
+    timeout: 1h
   on_failure: *failed-concourse
 
 - name: bosh-topgun-core
