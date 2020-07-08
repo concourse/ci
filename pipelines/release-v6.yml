@@ -913,6 +913,10 @@ jobs:
       passed: [bosh-smoke, bosh-topgun]
     - get: postgres-release
       passed: [bosh-smoke, bosh-topgun]
+    - get: credhub-release
+      passed: [bosh-topgun]
+    - get: uaa-release
+      passed: [bosh-topgun]
   - put: version
     params: {file: final-version/version}
 
@@ -1024,6 +1028,10 @@ jobs:
     - get: bpm-release
       passed: [shipit]
     - get: postgres-release
+      passed: [shipit]
+    - get: credhub-release
+      passed: [shipit]
+    - get: uaa-release
       passed: [shipit]
   - task: bump-versions
     file: cbd/ci/bump-versions.yml
