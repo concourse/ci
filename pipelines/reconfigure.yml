@@ -253,6 +253,14 @@ jobs:
       latest_release: "6.2"
       concourse_smoke_deployment_name: "concourse-smoke-6-3"
       bin_smoke_use_https: "true"
+  - set_pipeline: release-6.4.x
+    file: pipelines-and-tasks/pipelines/release-v6.yml
+    vars:
+      release_major: "6"
+      release_minor: "6.4"
+      latest_release: "6.3"
+      concourse_smoke_deployment_name: "concourse-smoke-6-4"
+      bin_smoke_use_https: "true"
   - set_pipeline: algorithm-v3
     file: pipelines-and-tasks/pipelines/branch.yml
     vars:
