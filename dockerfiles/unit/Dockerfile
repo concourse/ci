@@ -42,7 +42,7 @@ RUN add-apt-repository "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ 
 RUN apt-get update && apt-get -y install google-chrome-unstable --no-install-recommends
 
 # install BOSH CLI for bosh-smoke, bosh-topgun
-RUN curl -L "https://github.com/cloudfoundry/bosh-cli/releases/download/v5.3.1/bosh-cli-5.3.1-linux-amd64" \
+RUN curl -L "https://github.com/cloudfoundry/bosh-cli/releases/download/v6.3.0/bosh-cli-6.3.0-linux-amd64" \
       -o /usr/local/bin/bosh && \
       chmod +x /usr/local/bin/bosh
 
