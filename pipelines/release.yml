@@ -462,6 +462,8 @@ jobs:
     - get: unit-image
       passed: [testflight, watsjs, upgrade, downgrade]
       trigger: true
+    - get: gdn
+      trigger: true
   - put: version
     params: {pre: rc}
 
@@ -482,6 +484,7 @@ jobs:
       passed: [rc]
       params: {bump: final}
     - get: gdn
+      passed: [rc]
       trigger: true
     - get: ci
     - get: resource-types-alpine-image
