@@ -2,7 +2,7 @@
 resource_types:
 - name: slack-notifier
   type: registry-image
-  source: {repository: concourse/concourse-slack-notifier}
+  source: {repository: mockersf/concourse-slack-notifier}
 
 resources:
 - name: latest-scan-status
