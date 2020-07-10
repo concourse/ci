@@ -939,12 +939,10 @@ jobs:
         passed: [shipit]
     - task: discover-postgresql-version
       file: ci/tasks/discover-component-version.yml
-      inputs: [version]
       output_mapping: {component-version: postgresql-version}
       params: {COMPONENT_NAME: "postgresql"}
     - task: discover-helm-version
       file: ci/tasks/discover-component-version.yml
-      inputs: [version]
       output_mapping: {component-version: helm-version}
       params: {COMPONENT_NAME: "helm"}
     - put: resource-postgresql-version
