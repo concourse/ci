@@ -2,7 +2,6 @@
 #@ load("@ytt:template", "template")
 #@ load("@ytt:assert", "assert")
 
-#! expects a --data-value called "resource" to be passed in
 #@ resource_name = data.values.resource_name or assert.fail("resource name must be specified")
 
 #@ def build_params(resource_name):
