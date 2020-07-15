@@ -54,7 +54,7 @@ get_concourse_variables() {
     $linux_rc/concourse/bin/concourse $subcommand --help 2>&1 |
       grep -o '\[\$.*\]' |
       tr -d \[\]\$
-  done | filter_list ignored-in-concourse
+  done | filter_list ignored-in-concourse | filter_list experimental-in-concourse
 }
 
 filter_list() {
