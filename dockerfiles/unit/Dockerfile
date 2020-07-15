@@ -36,10 +36,14 @@ RUN curl -L "https://github.com/docker/compose/releases/download/1.22.0/docker-c
       -o /usr/local/bin/docker-compose && \
       chmod +x /usr/local/bin/docker-compose
 
-# install Chrome for Puppeteer (watsjs)
+# install Chrome for Puppeteer (watsjs/upgrade/downgrade/smoke)
 RUN curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 RUN add-apt-repository "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main"
 RUN apt-get update && apt-get -y install google-chrome-unstable --no-install-recommends
+# ensure that Puppeteer uses this Chrome instead of downloading on demand;
+# this makes us resilient to breaking changes to the APT dependencies
+ENV PUPPETEER_SKIP_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-unstable
 
 # install BOSH CLI for bosh-smoke, bosh-topgun
 RUN curl -L "https://github.com/cloudfoundry/bosh-cli/releases/download/v6.3.0/bosh-cli-6.3.0-linux-amd64" \
