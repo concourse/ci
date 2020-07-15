@@ -29,6 +29,12 @@ resources:
     paths:
     - ci
 
+- name: flight-attendant
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/flight-attendant
+
 - name: ruby-alpine-image
   type: registry-image
   source:
@@ -180,6 +186,8 @@ jobs:
     trigger: true
   - get: concourse-for-k8s
     trigger: true
+  - get: flight-attendant
+    trigger: true
   - set_pipeline: concourse
     file: pipelines-and-tasks/pipelines/concourse.yml
   - set_pipeline: helm-chart
@@ -283,6 +291,8 @@ jobs:
       concourse_minor: "6.3"
   - set_pipeline: datadog-dashboards
     file: pipelines-and-tasks/pipelines/datadog-dashboards.yml
+  - set_pipeline: flight-attendant
+    file: flight-attendant/ci/pipeline.yml
 
 - name: reconfigure-monitoring-pipeline
   plan:
