@@ -4,7 +4,7 @@ set -e -u
 
 PRNUMBER=$(cat concourse-pr/.git/resource/pr)
 
-validator/release-me validate \
+validator/releaseme validate \
     --github-token=$GITHUB_TOKEN \
     --github-owner=concourse \
     --github-repo=concourse \
