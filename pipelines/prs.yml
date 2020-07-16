@@ -41,6 +41,13 @@ resources:
   source:
     uri: https://github.com/concourse/docs
 
+- name: validator 
+  type: github-release
+  icon: github
+  source:
+    owner: clarafu
+    repository: release-me
+
 - name: docs-pr
   type: pull-request
   icon: source-pull
@@ -182,6 +189,44 @@ jobs:
     input_mapping: {concourse: built-concourse}
     params: {BUILD: true, DOWNLOAD_CLI: false}
     tags: [pr]
+
+- name: validate-labels
+  public: true
+  max_in_flight: 3
+  on_failure:
+    put: concourse-pr
+    inputs: [concourse-pr]
+    params: {path: concourse-pr, status: failure, context: validate-labels}
+    tags: [pr]
+    get_params: {skip_download: true}
+  on_success:
+    put: concourse-pr
+    inputs: [concourse-pr]
+    params: {path: concourse-pr, status: success, context: validate-labels}
+    tags: [pr]
+    get_params: {skip_download: true}
+  plan:
+  - in_parallel:
+    - get: concourse-pr
+      trigger: true
+      version: every
+      tags: [pr]
+    - get: ci
+      tags: [pr]
+    - get: validator
+      tags: [pr]
+  - put: concourse-status-update
+    resource: concourse-pr
+    inputs: [concourse-pr]
+    params: {path: concourse-pr, status: pending, context: validate-labels}
+    tags: [pr]
+    get_params: {list_changed_files: true, skip_download: true}
+  - task: validate-pr
+    timeout: 5m
+    file: ci/tasks/validate-pr.yml
+    tags: [pr]
+    params:
+      GITHUB_TOKEN: ((concourse_github_dummy.access_token))
 
 - name: testflight-containerd
   public: true
