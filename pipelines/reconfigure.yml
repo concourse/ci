@@ -171,7 +171,7 @@ jobs:
   - task: unit
     file: pipelines-and-tasks/tasks/ci-unit.yml
     input_mapping: {ci: pipelines-and-tasks}
-  on_failure:
+  on_failure: &notify
     put: notify
     params:
       mode: normal
@@ -293,6 +293,8 @@ jobs:
     file: pipelines-and-tasks/pipelines/datadog-dashboards.yml
   - set_pipeline: flight-attendant
     file: flight-attendant/ci/pipeline.yml
+  on_failure: *notify
+  on_error: *notify
 
 - name: reconfigure-monitoring-pipeline
   plan:
