@@ -29,6 +29,12 @@ resources:
     paths:
     - ci
 
+- name: concourse-for-platform-automation
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/pivotal/concourse-for-platform-automation.git
+
 - name: flight-attendant-ci
   type: git
   icon: github
@@ -172,6 +178,21 @@ jobs:
     file: rendered_pipelines/datadog-event.yml
   - set_pipeline: mock
     file: rendered_pipelines/mock.yml
+
+- name: reconfigure-platform-automation
+  plan:
+  - get: pipelines-and-tasks
+    passed: [reconfigure-self]
+    trigger: true
+  - get: concourse-for-platform-automation
+    trigger: true
+  - task: render-platform-automation
+    params:
+      PIPELINES: pipeline.yml
+    input_mapping: {pipelines: concourse-for-platform-automation}
+    file: pipelines-and-tasks/tasks/render-ytt.yml
+  - set_pipeline: concourse-for-platform-automation
+    file: rendered_pipelines/pipeline.yml
 
 - name: unit
   plan:
