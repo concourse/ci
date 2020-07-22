@@ -191,7 +191,7 @@ jobs:
       PIPELINES: pipeline.yml
     input_mapping: {pipelines: concourse-for-platform-automation}
     file: pipelines-and-tasks/tasks/render-ytt.yml
-  - set_pipeline: concourse-for-platform-automation
+  - set_pipeline: enterprise-platform-automation
     file: rendered_pipelines/pipeline.yml
 
 - name: unit
