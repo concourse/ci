@@ -5,7 +5,7 @@ set -e -u
 
 for pipeline in $PIPELINES; do
   echo "rendering '$pipeline' pipeline config..."
-  ytt -f pipelines/$pipeline  -f deployments.yml \
+  ytt -f pipelines/$pipeline  -f pipelines/deployments.yml \
     > rendered_pipelines/$pipeline
   echo ""
 done
