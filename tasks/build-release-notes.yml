@@ -8,12 +8,14 @@ image_resource:
 inputs:
 - name: release-me
 - name: ci
+- name: concourse
 
 outputs:
 - name: built-notes
 
 params:
   GITHUB_TOKEN:
+  GITHUB_BRANCH:
 
 run:
   path: ci/tasks/scripts/build-release-notes
