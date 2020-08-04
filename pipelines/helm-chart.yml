@@ -164,14 +164,6 @@ resources:
     branch: dev
     private_key: ((concourse_chart_private_key))
 
-- name: concourse-chart-release-((latest_release)).x
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:concourse/concourse-chart.git
-    branch: release/((latest_release)).x
-    private_key: ((concourse_chart_private_key))
-
 - name: chart-repo
   type: gcs
   source:
