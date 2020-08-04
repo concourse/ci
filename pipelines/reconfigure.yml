@@ -225,6 +225,8 @@ jobs:
     file: pipelines-and-tasks/pipelines/concourse.yml
   - set_pipeline: helm-chart
     file: pipelines-and-tasks/pipelines/helm-chart.yml
+    vars:
+      latest_release: "6.4"
   - set_pipeline: prs
     team: contributor
     file: pipelines-and-tasks/pipelines/prs.yml
@@ -242,20 +244,6 @@ jobs:
       concourse_base_branch: master
       concourse_image_name: concourse/concourse-rc
       concourse_image_tag: latest
-  - set_pipeline: helm-prs-5.5.x
-    file: pipelines-and-tasks/pipelines/helm-prs.yml
-    vars:
-      pr_base_branch: release/5.5.x
-      concourse_base_branch: release/5.5.x
-      concourse_image_name: concourse/concourse
-      concourse_image_tag: 5.5
-  - set_pipeline: helm-prs-5.7.x
-    file: pipelines-and-tasks/pipelines/helm-prs.yml
-    vars:
-      pr_base_branch: release/5.7.x
-      concourse_base_branch: release/5.7.x
-      concourse_image_name: concourse/concourse
-      concourse_image_tag: 5.7
   - set_pipeline: baggageclaim
     file: baggageclaim-ci/ci/pipeline.yml
   - set_pipeline: bosh-cleanup

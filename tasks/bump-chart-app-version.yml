@@ -6,12 +6,13 @@ image_resource:
   source: {repository: concourse/unit}
 
 inputs:
-- name: concourse-chart-dev
+- name: concourse-chart
 - name: concourse-release
 - name: ci
 
 outputs:
-- name: concourse-chart-dev
+- name: concourse-chart-bumped
+  path: concourse-chart
 
 run:
   path: ci/tasks/scripts/bump-chart-app-version

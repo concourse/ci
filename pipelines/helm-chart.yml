@@ -7,11 +7,12 @@ groups:
 
 - name: dependencies
   jobs:
-  - bump-concourse-version
+  - concourse-major-minor-bump
+  - concourse-patch-bump
 
 
 jobs:
-- name: bump-concourse-version
+- name: concourse-major-minor-bump
   public: true
   serial: true
   plan:
@@ -19,15 +20,36 @@ jobs:
     - get: concourse-release
       params:
         globs: [none]
-    - get: concourse-chart-dev
+    - get: concourse-chart
+      resource: concourse-chart-dev
     - get: ci
   - task: bump-chart-app-version
     file: ci/tasks/bump-chart-app-version.yml
   - put: merge-dev-into-master
     resource: concourse-chart
-    inputs: [concourse-chart-dev]
+    inputs: [concourse-chart-bumped]
     params:
-      repository: concourse-chart-dev
+      repository: concourse-chart-bumped
+      merge: true
+
+- name: concourse-patch-bump
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse-release
+      params:
+        globs: [none]
+    - get: concourse-chart
+      resource: concourse-chart-release-((latest_release)).x
+    - get: ci
+  - task: bump-chart-app-version
+    file: ci/tasks/bump-chart-app-version.yml
+  - put: merge-((latest_release)).x-into-master
+    resource: concourse-chart
+    inputs: [concourse-chart-bumped]
+    params:
+      repository: concourse-chart-bumped
       merge: true
 
 - name: publish-chart-major
@@ -150,6 +172,14 @@ resources:
   source:
     uri: git@github.com:concourse/concourse-chart.git
     branch: dev
+    private_key: ((concourse_chart_private_key))
+
+- name: concourse-chart-release-((latest_release)).x
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:concourse/concourse-chart.git
+    branch: release/((latest_release)).x
     private_key: ((concourse_chart_private_key))
 
 - name: chart-repo
