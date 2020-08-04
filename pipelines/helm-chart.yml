@@ -7,12 +7,12 @@ groups:
 
 - name: dependencies
   jobs:
-  - concourse-major-minor-bump
-  - concourse-patch-bump
+  - concourse-app-bump
+  - merge-dev-into-master
 
 
 jobs:
-- name: concourse-major-minor-bump
+- name: concourse-app-bump
   public: true
   serial: true
   plan:
@@ -21,35 +21,25 @@ jobs:
       params:
         globs: [none]
     - get: concourse-chart
-      resource: concourse-chart-dev
     - get: ci
   - task: bump-chart-app-version
     file: ci/tasks/bump-chart-app-version.yml
-  - put: merge-dev-into-master
-    resource: concourse-chart
+  - put: concourse-chart
     inputs: [concourse-chart-bumped]
     params:
       repository: concourse-chart-bumped
       merge: true
 
-- name: concourse-patch-bump
+- name: merge-dev-into-master
   public: true
   serial: true
   plan:
-  - in_parallel:
-    - get: concourse-release
-      params:
-        globs: [none]
-    - get: concourse-chart
-      resource: concourse-chart-release-((latest_release)).x
-    - get: ci
-  - task: bump-chart-app-version
-    file: ci/tasks/bump-chart-app-version.yml
-  - put: merge-((latest_release)).x-into-master
+  - get: concourse-chart-dev
+  - put: merge-dev-into-master
     resource: concourse-chart
-    inputs: [concourse-chart-bumped]
+    inputs: [concourse-chart-dev]
     params:
-      repository: concourse-chart-bumped
+      repository: concourse-chart-dev
       merge: true
 
 - name: publish-chart-major
