@@ -43,11 +43,11 @@ resources:
     paths:
     - ci
 
-- name: ctop-ci
+- name: ft-ci
   type: git
   icon: github
   source:
-    uri: https://github.com/concourse/ctop
+    uri: https://github.com/concourse/ft
     paths:
     - ci
 
@@ -219,7 +219,7 @@ jobs:
     trigger: true
   - get: flight-attendant-ci
     trigger: true
-  - get: ctop-ci
+  - get: ft-ci
     trigger: true
   - set_pipeline: concourse
     file: pipelines-and-tasks/pipelines/concourse.yml
@@ -315,8 +315,8 @@ jobs:
     file: pipelines-and-tasks/pipelines/datadog-dashboards.yml
   - set_pipeline: flight-attendant
     file: flight-attendant-ci/ci/pipeline.yml
-  - set_pipeline: ctop
-    file: ctop-ci/ci/pipeline.yml
+  - set_pipeline: ft
+    file: ft-ci/ci/pipeline.yml
   on_failure: *notify
   on_error: *notify
 
