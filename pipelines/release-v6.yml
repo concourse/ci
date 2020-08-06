@@ -883,7 +883,6 @@ jobs:
     - get: release-me
     - get: ci
     - get: concourse
-      trigger: true
       passed:
       - build-rc
       - bosh-smoke
@@ -897,39 +896,11 @@ jobs:
       - bosh-smoke
       - bosh-topgun
       - bosh-check-props
-  - in_parallel:
-    - task: build-release-name
-      file: ci/tasks/build-release-name.yml
-    - task: build-release-notes
-      file: ci/tasks/build-release-notes.yml
-      params:
-        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
-        GITHUB_BRANCH: release/((release_minor)).x
-  - put: concourse-draft-release
-    params:
-      commitish: concourse/.git/ref
-      tag: version/version
-      tag_prefix: v
-      name: release-name/release-name
-      body: built-notes/notes.md
-
-
-- name: shipit
-  public: true
-  serial_groups: [version]
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed: [create-draft-release]
     - get: unit-image
       passed:
       - build-rc
       - bosh-smoke
       - bosh-topgun
-    - get: final-version
-      resource: version
-      params: {bump: final}
-      passed: [create-draft-release]
     - get: linux-rc
       passed: [build-rc]
     - get: linux-rc-ubuntu
@@ -951,6 +922,60 @@ jobs:
       passed: [bosh-topgun]
     - get: uaa-release
       passed: [bosh-topgun]
+  - in_parallel:
+    - task: build-release-name
+      file: ci/tasks/build-release-name.yml
+      input_mapping: {version: final-version}
+    - task: build-release-notes
+      file: ci/tasks/build-release-notes.yml
+      params:
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+        GITHUB_BRANCH: release/((release_minor)).x
+  - put: concourse-draft-release
+    inputs: [concourse, final-version, release-name, built-notes]
+    params:
+      commitish: concourse/.git/ref
+      tag: final-version/version
+      tag_prefix: v
+      name: release-name/release-name
+      body: built-notes/notes.md
+
+
+- name: shipit
+  public: true
+  serial_groups: [version]
+  plan:
+  - in_parallel:
+    - get: concourse
+      passed: [create-draft-release]
+    - get: unit-image
+      passed: [create-draft-release]
+    - get: final-version
+      resource: version
+      params: {bump: final}
+      passed: [create-draft-release]
+    - get: linux-rc
+      passed: [create-draft-release]
+    - get: linux-rc-ubuntu
+      passed: [create-draft-release]
+    - get: windows-rc
+      passed: [create-draft-release]
+    - get: darwin-rc
+      passed: [create-draft-release]
+    - get: concourse-rc-image
+      passed: [create-draft-release]
+    - get: concourse-rc-image-ubuntu
+      passed: [create-draft-release]
+    - get: concourse-release
+      passed: [create-draft-release]
+    - get: bpm-release
+      passed: [create-draft-release]
+    - get: postgres-release
+      passed: [create-draft-release]
+    - get: credhub-release
+      passed: [create-draft-release]
+    - get: uaa-release
+      passed: [create-draft-release]
   - put: version
     params: {file: final-version/version}
 
