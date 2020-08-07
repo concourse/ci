@@ -73,7 +73,7 @@ create_tfstate_from_datadog_infrastructure() {
       -e "s/var.datadog_app_key/\"$DATADOG_APP_KEY\"/g" \
       dashboard/main.tf.original > dashboard/main.tf
 
-  cd production
+  cd dd_dashboard
   terraform init
   terraform import $RESOURCE_ADDRESS $DASHBOARD_ID
   terraform import $RESOURCE_ADDRESS_SYSSTATS $DASHBOARD_ID_SYSSTATS
