@@ -26,7 +26,7 @@ $inputs/ci/tasks/scripts/generate-keys
 # start with latest release and set up
 docker-compose \
   -f docker-compose.yml \
-  -f $inputs/ci/overrides/docker-compose.ci.yml \
+  -f $inputs/ci/overrides/docker-compose.ci-guardian.yml \
   -f $inputs/ci/overrides/docker-compose.no-build.yml \
   -f $inputs/ci/overrides/docker-compose.latest.yml \
   up --no-build -d
@@ -43,7 +43,7 @@ $inputs/ci/tasks/scripts/create-upgrade-downgrade-pipeline
 # upgrade and verify
 docker-compose \
   -f docker-compose.yml \
-  -f $inputs/ci/overrides/docker-compose.ci.yml \
+  -f $inputs/ci/overrides/docker-compose.ci-guardian.yml \
   -f $inputs/ci/overrides/docker-compose.no-build.yml \
   up --no-build -d
 
