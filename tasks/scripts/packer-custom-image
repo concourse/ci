@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -e -u
+
+image_name="u16k44"
+outputs=$PWD/image-name
+
+echo "$image_name" > outputs/image-name
+
+tar -xzvf linux-kernel-44/linux-kernel-v4.4*.tgz -C ./ci/deployments/legacy-kernel
+
+cd ci/deployments/legacy-kernel
+
+echo "$GCP_KEY" > gcp.json
+export GOOGLE_APPLICATION_CREDENTIALS=gcp.json
+
+packer build \
+  -var region="us-west1" \
+  -var machine_type="n1-standard-1" \
+  -var zone="us-west1-b" \
+  -var project_id=$GCP_PROJECT \
+  -var image_name=$image_name \
+  -force packer.json

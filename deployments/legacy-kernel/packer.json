@@ -3,7 +3,8 @@
     "machine_type": "var",
     "region": "var",
     "zone": "var",
-    "project_id": "var"
+    "project_id": "var",
+    "image_name":"var"
   },
   "builders": [
     {
@@ -14,7 +15,7 @@
       "region": "{{user `region`}}",
       "zone": "{{user `zone`}}",
       "image_description": "Ubuntu 16.04 LTS with kernel 4.4",
-      "image_name": "u16k44",
+      "image_name": "{{user `image_name`}}",
       "disk_size": 16,
       "disk_type": "pd-ssd",
       "ssh_username": "root"
