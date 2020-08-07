@@ -71,9 +71,6 @@ RUN cd /src && \
 VOLUME /worker-state
 ENV CONCOURSE_WORK_DIR /worker-state
 
-# enable DNS proxy to support Docker's 127.x.x.x DNS server
-ENV CONCOURSE_GARDEN_DNS_PROXY_ENABLE true
-
 # set $PATH for convenience
 ENV PATH /usr/local/concourse/bin:${PATH}
 
