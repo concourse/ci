@@ -63,6 +63,7 @@ groups:
 
 - name: publish
   jobs:
+  - create-draft-release
   - shipit
   - publish-binaries
   - publish-image
@@ -875,12 +876,21 @@ jobs:
   on_failure: *failed-concourse
   on_error: *failed-concourse
 
-- name: shipit
+- name: create-draft-release
   public: true
-  serial_groups: [version]
   plan:
   - in_parallel:
+    - get: release-me
+    - get: ci
     - get: concourse
+      passed:
+      - build-rc
+      - bosh-smoke
+      - bosh-topgun
+      - bosh-check-props
+    - get: final-version
+      resource: version
+      params: {bump: final}
       passed:
       - build-rc
       - bosh-smoke
@@ -891,14 +901,6 @@ jobs:
       - build-rc
       - bosh-smoke
       - bosh-topgun
-    - get: final-version
-      resource: version
-      params: {bump: final}
-      passed:
-      - build-rc
-      - bosh-smoke
-      - bosh-topgun
-      - bosh-check-props
     - get: linux-rc
       passed: [build-rc]
     - get: linux-rc-ubuntu
@@ -920,6 +922,60 @@ jobs:
       passed: [bosh-topgun]
     - get: uaa-release
       passed: [bosh-topgun]
+  - in_parallel:
+    - task: build-release-name
+      file: ci/tasks/build-release-name.yml
+      input_mapping: {version: final-version}
+    - task: build-release-notes
+      file: ci/tasks/build-release-notes.yml
+      params:
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+        GITHUB_BRANCH: release/((release_minor)).x
+  - put: concourse-draft-release
+    inputs: [concourse, final-version, release-name, built-notes]
+    params:
+      commitish: concourse/.git/ref
+      tag: final-version/version
+      tag_prefix: v
+      name: release-name/release-name
+      body: built-notes/notes.md
+
+
+- name: shipit
+  public: true
+  serial_groups: [version]
+  plan:
+  - in_parallel:
+    - get: concourse
+      passed: [create-draft-release]
+    - get: unit-image
+      passed: [create-draft-release]
+    - get: final-version
+      resource: version
+      params: {bump: final}
+      passed: [create-draft-release]
+    - get: linux-rc
+      passed: [create-draft-release]
+    - get: linux-rc-ubuntu
+      passed: [create-draft-release]
+    - get: windows-rc
+      passed: [create-draft-release]
+    - get: darwin-rc
+      passed: [create-draft-release]
+    - get: concourse-rc-image
+      passed: [create-draft-release]
+    - get: concourse-rc-image-ubuntu
+      passed: [create-draft-release]
+    - get: concourse-release
+      passed: [create-draft-release]
+    - get: bpm-release
+      passed: [create-draft-release]
+    - get: postgres-release
+      passed: [create-draft-release]
+    - get: credhub-release
+      passed: [create-draft-release]
+    - get: uaa-release
+      passed: [create-draft-release]
   - put: version
     params: {file: final-version/version}
 
@@ -970,23 +1026,19 @@ jobs:
     - get: darwin-rc
       passed: [shipit]
     - get: ci
-    - get: release-notes
   - in_parallel:
     - task: prep-release-assets
       file: ci/tasks/prep-release-assets.yml
       image: unit-image
-    - task: build-release-notes
-      file: ci/tasks/build-release-notes.yml
+    - task: build-release-name
+      file: ci/tasks/build-release-name.yml
       image: unit-image
-      params:
-        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
   - put: concourse-github-release
     params:
       commitish: concourse/.git/ref
       tag: version/version
       tag_prefix: v
-      name: built-notes/release-name
-      body: built-notes/notes.md
+      name: release-name/release-name
       globs:
       - concourse-linux/concourse-*.tgz
       - concourse-windows/concourse-*.zip
@@ -1127,15 +1179,6 @@ resources:
   source:
     uri: https://github.com/concourse/ci.git
     branch: master
-
-- name: release-notes
-  type: git
-  icon: *git-icon
-  source:
-    uri: https://github.com/concourse/concourse.git
-    branch: release/((release_minor)).x
-    paths:
-    - release-notes/
 
 - name: concourse-docker
   type: git
@@ -1348,6 +1391,15 @@ resources:
   source:
     uri: https://github.com/helm/charts
     branch: master
+
+- name: concourse-draft-release
+  type: github-release
+  icon: *release-icon
+  source:
+    drafts: true
+    owner: concourse
+    repository: concourse
+    access_token: ((concourse_github_release.access_token))
 
 - name: concourse-github-release
   type: github-release
@@ -1613,3 +1665,9 @@ resources:
   type: time
   source:
     interval: 24h
+
+- name: release-me
+  type: github-release
+  source:
+    owner: clarafu
+    repository: release-me

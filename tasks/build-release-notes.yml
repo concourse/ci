@@ -6,13 +6,16 @@ image_resource:
   source: {repository: concourse/unit}
 
 inputs:
-- name: release-notes
-- name: version
-  optional: true
+- name: release-me
 - name: ci
+- name: concourse
 
 outputs:
 - name: built-notes
+
+params:
+  GITHUB_TOKEN:
+  GITHUB_BRANCH:
 
 run:
   path: ci/tasks/scripts/build-release-notes

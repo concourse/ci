@@ -1,14 +1,12 @@
 #!/bin/bash
 
-if [ -d version ]; then
-  version=v$(cat version/version)
-elif [ "$#" -eq 1 ]; then
-  version=$1
-else
-  echo "version must be specified, either as an argument or an input" >&2
-  exit 1
-fi
+LAST_COMMIT_SHA = $(cat concourse/.git/ref)
 
-echo "$version" > ./built-notes/release-name
-# if this fails, it's because we forgot to manually promote latest.md to $version.md
-cp release-notes/release-notes/"$version".md ./built-notes/notes.md
+chmod +x release-me/releaseme
+./release-me/releaseme generate \
+  --github-token=$GITHUB_TOKEN \
+  --github-owner=concourse \
+  --github-repo=concourse \
+  --github-branch=$GITHUB_BRANCH \
+  --last-commit-SHA=$LAST_COMMIT_SHA \
+  > built-notes/notes.md
