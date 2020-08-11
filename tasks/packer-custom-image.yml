@@ -6,8 +6,8 @@ image_resource:
   source: {repository: hashicorp/packer}
 
 params:
-  GCP_PROJECT: cf-concourse-production
-  GCP_KEY: ((concourse_smoke_gcp_key))
+  GCP_PROJECT:
+  GCP_KEY:
 
 inputs:
 - name: ci

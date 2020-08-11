@@ -20,4 +20,4 @@ packer build \
   -var zone="us-west1-b" \
   -var project_id=$GCP_PROJECT \
   -var image_name=$image_name \
-  -force packer.json
+  packer.json
