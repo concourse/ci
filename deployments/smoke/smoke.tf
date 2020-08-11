@@ -18,13 +18,18 @@ variable "use_https" {
 }
 
 variable "image" {
-  type = string
+  type    = string
   default = "ubuntu-1804-bionic-v20181003"
 }
 
-variable "USE_CONTAINERD" {
+variable "ENABLE_CONTAINERD" {
   type    = bool
   default = false
+}
+
+variable "HAS_RUNTIME_FLAG" {
+  type    = bool
+  default = true
 }
 
 provider "google" {
@@ -135,7 +140,8 @@ data "template_file" "worker_conf" {
   template = file("systemd/smoke-worker.conf.tpl")
 
   vars = {
-    use_containerd = var.USE_CONTAINERD
+    enable_containerd = var.ENABLE_CONTAINERD
+    has_runtime_flag  = var.HAS_RUNTIME_FLAG
   }
 }
 
