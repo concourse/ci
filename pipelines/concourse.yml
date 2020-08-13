@@ -715,6 +715,7 @@ jobs:
     image: unit-image
     file: ci/tasks/terraform-smoke.yml
     input_mapping: {linux-rc: linux-dev-ubuntu}
+    output_mapping: {outputs: packer-image}
     params:
       GCP_PROJECT: cf-concourse-production
       GCP_KEY: ((concourse_smoke_gcp_key))
