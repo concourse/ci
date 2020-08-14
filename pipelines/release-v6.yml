@@ -873,6 +873,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
       AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
       SKIP_PACKAGES: "k8s"
+      RELEASE_NAME_SUFFIX: ((release_minor))
   on_failure: *failed-concourse
   on_error: *failed-concourse
 
