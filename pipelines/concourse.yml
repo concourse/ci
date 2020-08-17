@@ -708,6 +708,7 @@ jobs:
     - get: linux-kernel-44
   - task: packer-custom-image
     file: ci/tasks/packer-custom-image.yml
+    output_mapping: {outputs: packer-image}
     params:
       GCP_PROJECT: cf-concourse-production
       GCP_KEY: ((concourse_smoke_gcp_key))
@@ -715,7 +716,6 @@ jobs:
     image: unit-image
     file: ci/tasks/terraform-smoke.yml
     input_mapping: {linux-rc: linux-dev-ubuntu}
-    output_mapping: {outputs: packer-image}
     params:
       GCP_PROJECT: cf-concourse-production
       GCP_KEY: ((concourse_smoke_gcp_key))
