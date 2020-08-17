@@ -707,7 +707,7 @@ jobs:
         GCP_KEY: ((concourse_smoke_gcp_key))
         SSH_KEY: ((concourse_smoke_ssh_key))
         DEPLOYMENT: smoke
-        WORKSPACE: containerd
+        WORKSPACE: release-((release_minor))-containerd
         TF_VAR_USE_CONTAINERD: "true"
     - task: smoke
       image: unit-image
