@@ -261,9 +261,9 @@ jobs:
       file: ci/tasks/fly-build-windows.yml
     - task: fly-darwin
       file: ci/tasks/fly-build-darwin.yml
-  - task: hoist-linux-dependencies
+  - task: hoist-linux-resource-types
     image: resource-types-alpine-image
-    file: ci/tasks/hoist-linux-dependencies.yml
+    file: ci/tasks/hoist-linux-resource-types.yml
   - task: yarn-build
     image: unit-image
     file: ci/tasks/yarn-build.yml

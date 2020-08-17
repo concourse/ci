@@ -13,4 +13,4 @@ outputs:
 - name: resource-types
 
 run:
-  path: ci/tasks/scripts/hoist-linux-dependencies
+  path: ci/tasks/scripts/hoist-linux-resource-types

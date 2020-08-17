@@ -550,11 +550,11 @@ jobs:
       fail_fast: true
       steps:
         - task: hoist-resource-types-alpine
-          file: ci/tasks/hoist-linux-dependencies.yml
+          file: ci/tasks/hoist-linux-resource-types.yml
           image: resource-types-alpine-image
           output_mapping: {resource-types: resource-types-alpine}
         - task: hoist-resource-types-ubuntu
-          file: ci/tasks/hoist-linux-dependencies.yml
+          file: ci/tasks/hoist-linux-resource-types.yml
           image: resource-types-ubuntu-image
           output_mapping: {resource-types: resource-types-ubuntu}
         - task: yarn-build
