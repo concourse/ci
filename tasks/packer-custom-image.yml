@@ -1,0 +1,20 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: hashicorp/packer}
+
+params:
+  GCP_PROJECT:
+  GCP_KEY:
+
+inputs:
+- name: ci
+- name: linux-kernel-44
+
+outputs:
+- name: packer-image
+
+run:
+  path: ci/tasks/scripts/packer-custom-image

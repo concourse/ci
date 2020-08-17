@@ -1,0 +1,56 @@
+{
+  "variables": {
+    "machine_type": "var",
+    "region": "var",
+    "zone": "var",
+    "project_id": "var",
+    "image_name":"var"
+  },
+  "builders": [
+    {
+      "type": "googlecompute",
+      "project_id": "{{user `project_id`}}",
+      "machine_type": "{{user `machine_type`}}",
+      "source_image_family": "ubuntu-1604-lts",
+      "region": "{{user `region`}}",
+      "zone": "{{user `zone`}}",
+      "image_description": "Ubuntu 16.04 LTS with kernel 4.4",
+      "image_name": "{{user `image_name`}}",
+      "disk_size": 10,
+      "disk_type": "pd-ssd",
+      "ssh_username": "root"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "./linux-headers-all",
+      "destination": "/tmp/linux-headers-all.deb"
+    },
+    {
+      "type": "file",
+      "source": "./linux-headers-generic",
+      "destination": "/tmp/linux-headers-generic.deb"
+    },
+    {
+      "type": "file",
+      "source": "./linux-image-unsigned",
+      "destination": "/tmp/linux-image-unsigned.deb"
+    },
+    {
+      "type": "file",
+      "source": "./linux-modules-generic",
+      "destination": "/tmp/linux-modules-generic.deb"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "echo 'deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main' >> /etc/apt/sources.list.d/pgdg.list",
+        "wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -",
+        "rm /boot/*-gcp",
+        "dpkg -i /tmp/linux-*.deb",
+        "update-grub"
+      ]
+    }
+  ]
+}
