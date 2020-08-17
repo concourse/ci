@@ -23,10 +23,16 @@ terraform init
 terraform workspace select "$WORKSPACE" || \
   terraform workspace new "$WORKSPACE"
 
+if [ ! -z "$IMAGE" ]
+then
+  $image_var = "-var image=$IMAGE"
+fi
+
 terraform apply \
   --auto-approve \
   --var project=$GCP_PROJECT \
-  --var use_https=$USE_HTTPS
+  --var use_https=$USE_HTTPS \
+  $image_var
 
 {
   terraform output -json | \

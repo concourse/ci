@@ -17,7 +17,7 @@ variable "use_https" {
   default = true
 }
 
-variable "IMAGE" {
+variable "image" {
   type = string
   default = "ubuntu-1804-bionic-v20181003"
 }
@@ -64,7 +64,7 @@ resource "google_compute_instance" "smoke" {
 
   boot_disk {
     initialize_params {
-      image = var.IMAGE
+      image = var.image
       size  = "10"
     }
   }
