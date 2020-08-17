@@ -227,6 +227,9 @@ jobs:
       - get: resource-types-alpine-image
         passed: [resource-types-images]
         trigger: true
+      - get: resource-types-ubuntu-image
+        passed: [resource-types-images]
+        trigger: true
       - get: oci-build-task
       - get: ci
   - in_parallel:
@@ -543,9 +546,9 @@ jobs:
     - get: unit-image
     - get: ci
     - get: resource-types-alpine-image
-      passed: [resource-types-images]
+      passed: [dev-image]
     - get: resource-types-ubuntu-image
-      passed: [resource-types-images]
+      passed: [dev-image]
   - in_parallel:
     - task: fly-linux
       file: ci/tasks/fly-build-linux.yml
