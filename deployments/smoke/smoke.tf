@@ -28,6 +28,7 @@ variable "USE_CONTAINERD" {
 }
 
 provider "google" {
+  version     = "~> 3.34.0"
   credentials = "keys/gcp.json"
   project     = var.project
   region      = var.region
