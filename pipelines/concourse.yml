@@ -721,7 +721,7 @@ jobs:
       GCP_KEY: ((concourse_smoke_gcp_key))
       SSH_KEY: ((concourse_smoke_ssh_key))
       WORKSPACE: legacy-kernel
-      IMAGE: outputs/image-name
+      TF_VAR_IMAGE: outputs/image-name
   - task: smoke
     image: unit-image
     file: ci/tasks/smoke.yml
