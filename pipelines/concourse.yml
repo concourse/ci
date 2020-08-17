@@ -708,7 +708,7 @@ jobs:
     - get: linux-kernel-44
   - task: packer-custom-image
     file: ci/tasks/packer-custom-image.yml
-    output_mapping: {outputs: packer-image}
+    output_mapping: {packer-image: outputs}
     params:
       GCP_PROJECT: cf-concourse-production
       GCP_KEY: ((concourse_smoke_gcp_key))
@@ -721,7 +721,6 @@ jobs:
       GCP_KEY: ((concourse_smoke_gcp_key))
       SSH_KEY: ((concourse_smoke_ssh_key))
       WORKSPACE: legacy-kernel
-      IMAGE: outputs/image-name
   - task: smoke
     image: unit-image
     file: ci/tasks/smoke.yml

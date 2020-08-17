@@ -14,7 +14,7 @@ inputs:
 - name: linux-kernel-44
 
 outputs:
-- name: packer-image
+- name: outputs
 
 run:
   path: ci/tasks/scripts/packer-custom-image

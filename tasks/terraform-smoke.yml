@@ -9,7 +9,6 @@ params:
   GCP_PROJECT:
   GCP_KEY:
   SSH_KEY:
-  IMAGE:
   WORKSPACE: default
   USE_HTTPS: 'true'
   TF_VAR_USE_CONTAINERD: "false"
@@ -17,6 +16,8 @@ params:
 inputs:
 - name: concourse
 - name: ci
+- name: packer-image
+  optional: true
 - name: linux-rc
   optional: true
 

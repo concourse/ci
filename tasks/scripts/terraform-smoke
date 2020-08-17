@@ -23,9 +23,8 @@ terraform init
 terraform workspace select "$WORKSPACE" || \
   terraform workspace new "$WORKSPACE"
 
-if [ ! -z "$IMAGE" ]
-then
-  image_var="-var image=$IMAGE"
+if [ -d packer-image ]; then
+  image_var="-var image=$(cat 'packer-image/image-name')"
 fi
 
 terraform apply \

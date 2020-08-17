@@ -4,7 +4,7 @@ set -e -u
 
 image_name="u16k44"
 
-echo "$image_name" > packer-image/image-name
+echo "$image_name" > outputs/image-name
 
 tar -xzvf linux-kernel-44/linux-kernel-v4.4*.tgz -C ./ci/deployments/legacy-kernel
 
