@@ -58,7 +58,7 @@ get_concourse_variables() {
 }
 
 filter_list() {
-  local filter="$(cat $distro_scripts/$1 | xargs | tr ' ' '|')"
+  local filter="$(cat $distro_dir/packaging-state/$1 | xargs | tr ' ' '|')"
 
   if [ -z "$filter" ]; then
     tee
