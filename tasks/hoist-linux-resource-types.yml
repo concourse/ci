@@ -6,7 +6,6 @@ image_resource:
   source: {repository: concourse/resource-type-image}
 
 inputs:
-- name: concourse
 - name: ci
 
 outputs:

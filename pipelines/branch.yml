@@ -376,8 +376,6 @@ jobs:
     - get: dev-image
       passed: [rc]
       trigger: true
-    - get: gdn
-      trigger: true
     - get: ci
   - in_parallel:
     - task: fly-linux
@@ -388,6 +386,9 @@ jobs:
       file: ci/tasks/fly-build-windows.yml
     - task: fly-darwin
       file: ci/tasks/fly-build-darwin.yml
+  - task: hoist-linux-dependencies
+    file: ci/tasks/hoist-linux-dependencies.yml
+    image: dev-image
   - task: hoist-linux-resource-types
     image: dev-image
     file: ci/tasks/hoist-linux-resource-types.yml

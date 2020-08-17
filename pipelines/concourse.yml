@@ -541,14 +541,6 @@ jobs:
       passed: [testflight, watsjs, upgrade, downgrade]
       trigger: true
     - get: unit-image
-    - get: gdn
-      trigger: true
-    - get: containerd
-      trigger: true
-    - get: runc
-      trigger: true
-    - get: cni
-      trigger: true
     - get: ci
     - get: resource-types-alpine-image
       passed: [resource-types-images]
@@ -566,6 +558,9 @@ jobs:
   - in_parallel:
       fail_fast: true
       steps:
+        - task: hoist-linux-dependencies
+          file: ci/tasks/hoist-linux-dependencies.yml
+          image: dev-image
         - task: hoist-resource-types-alpine
           file: ci/tasks/hoist-linux-resource-types.yml
           image: resource-types-alpine-image

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+set -e -x
+
+cp -a /usr/local/concourse/bin/* linux-dependencies/
