@@ -7,7 +7,7 @@ This is where you'll find the all the CI related files for Concourse.
 Currently the repo is split into five main sections:
 
 ## Deployments 
-BOSH deployment related files.
+Configuration files for BOSH- and terraform-managed deployments used in testing.
 
 ## Dockerfiles
 A lot of Dockerfiles are used throughout the Concourse automation. Many of those are in the `/dockerfiles` folder.
