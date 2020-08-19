@@ -259,22 +259,6 @@ jobs:
       concourse_smoke_deployment_name: "concourse-smoke-5-5"
       bin_smoke_use_https: "true"
       end_of_general_support: "2020-07-31"
-  - set_pipeline: release-6.0.x
-    file: pipelines-and-tasks/pipelines/release-v6.yml
-    vars:
-      release_major: "6"
-      release_minor: "6.0"
-      latest_release: "6.0"
-      concourse_smoke_deployment_name: "concourse-smoke-6-0"
-      bin_smoke_use_https: "true"
-  - set_pipeline: release-6.1.x
-    file: pipelines-and-tasks/pipelines/release-v6.yml
-    vars:
-      release_major: "6"
-      release_minor: "6.1"
-      latest_release: "6.0"
-      concourse_smoke_deployment_name: "concourse-smoke-6-1"
-      bin_smoke_use_https: "true"
   - set_pipeline: release-6.3.x
     file: pipelines-and-tasks/pipelines/release-v6.yml
     vars:
@@ -283,13 +267,13 @@ jobs:
       latest_release: "6.2"
       concourse_smoke_deployment_name: "concourse-smoke-6-3"
       bin_smoke_use_https: "true"
-  - set_pipeline: release-6.4.x
+  - set_pipeline: release-6.5.x
     file: pipelines-and-tasks/pipelines/release-v6.yml
     vars:
       release_major: "6"
-      release_minor: "6.4"
-      latest_release: "6.3"
-      concourse_smoke_deployment_name: "concourse-smoke-6-4"
+      release_minor: "6.5"
+      latest_release: "6.4"
+      concourse_smoke_deployment_name: "concourse-smoke-6-5"
       bin_smoke_use_https: "true"
   - set_pipeline: algorithm-v3
     file: pipelines-and-tasks/pipelines/branch.yml
