@@ -12,22 +12,11 @@ inputs:
   optional: true
 - name: final-version
   optional: true
-- name: gdn
-  optional: true
+- name: linux-dependencies
 - name: resource-types
-  optional: true
-- name: containerd
-  optional: true
-- name: runc
-  optional: true
-- name: cni
-  optional: true
 - name: fly-linux
-  optional: true
 - name: fly-windows
-  optional: true
 - name: fly-darwin
-  optional: true
 
 caches:
 - path: gopath

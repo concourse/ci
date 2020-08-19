@@ -1,0 +1,15 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: concourse/resource-type-image}
+
+inputs:
+- name: ci
+
+outputs:
+- name: resource-types
+
+run:
+  path: ci/tasks/scripts/hoist-linux-resource-types

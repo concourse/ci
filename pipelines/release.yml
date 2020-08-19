@@ -190,6 +190,9 @@ jobs:
       - get: resource-types-alpine-image
         passed: [resource-types-images]
         trigger: true
+      - get: resource-types-ubuntu-image
+        passed: [resource-types-images]
+        trigger: true
       - get: builder
       - get: ci
   - in_parallel:
@@ -462,8 +465,6 @@ jobs:
     - get: unit-image
       passed: [testflight, watsjs, upgrade, downgrade]
       trigger: true
-    - get: gdn
-      trigger: true
   - put: version
     params: {pre: rc}
 
@@ -483,14 +484,11 @@ jobs:
       resource: version
       passed: [rc]
       params: {bump: final}
-    - get: gdn
-      passed: [rc]
-      trigger: true
     - get: ci
     - get: resource-types-alpine-image
-      passed: [resource-types-images]
+      passed: [dev-image]
     - get: resource-types-ubuntu-image
-      passed: [resource-types-images]
+      passed: [dev-image]
   - in_parallel:
     - task: fly-linux
       file: ci/tasks/fly-build-linux.yml
@@ -501,12 +499,15 @@ jobs:
   - in_parallel:
       fail_fast: true
       steps:
-        - task: hoist-resource-types-alpine
+        - task: hoist-linux-dependencies
           file: ci/tasks/hoist-linux-dependencies.yml
+          image: dev-image
+        - task: hoist-resource-types-alpine
+          file: ci/tasks/hoist-linux-resource-types.yml
           image: resource-types-alpine-image
           output_mapping: {resource-types: resource-types-alpine}
         - task: hoist-resource-types-ubuntu
-          file: ci/tasks/hoist-linux-dependencies.yml
+          file: ci/tasks/hoist-linux-resource-types.yml
           image: resource-types-ubuntu-image
           output_mapping: {resource-types: resource-types-ubuntu}
         - task: yarn-build
