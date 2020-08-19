@@ -9,11 +9,8 @@ inputs:
 - name: final-version
   optional: true
 - name: fly-linux
-  optional: true
 - name: fly-windows
-  optional: true
 - name: fly-darwin
-  optional: true
 
 outputs:
 - name: concourse-tarball

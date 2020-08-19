@@ -47,7 +47,7 @@ mkdir $output/concourse
 
 bin=$output/concourse/bin
 mkdir $bin
-cp -a linux-dependencies/* $bin
+[ -d linux-dependencies ] && cp -a linux-dependencies/* $bin
 mv concourse/concourse $bin
 
 cp -a resource-types $output/concourse
