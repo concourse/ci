@@ -247,6 +247,10 @@ jobs:
       passed: [rc]
       trigger: true
     - get: unit-image
+      passed: [rc]
+    - get: dev-image
+      passed: [rc]
+      trigger: true
     - get: resource-types-alpine-image
       passed: [dev-image]
     - get: ci

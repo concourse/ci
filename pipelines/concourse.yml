@@ -544,6 +544,10 @@ jobs:
       passed: [testflight, watsjs, upgrade, downgrade]
       trigger: true
     - get: unit-image
+      passed: [dev-image]
+    - get: dev-image
+      passed: [dev-image]
+      trigger: true
     - get: ci
     - get: resource-types-alpine-image
       passed: [dev-image]
