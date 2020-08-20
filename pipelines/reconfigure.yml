@@ -275,24 +275,6 @@ jobs:
       latest_release: "6.4"
       concourse_smoke_deployment_name: "concourse-smoke-6-5"
       bin_smoke_use_https: "true"
-  - set_pipeline: algorithm-v3
-    file: pipelines-and-tasks/pipelines/branch.yml
-    vars:
-      branch_name: algorithm-v3
-      environment: algorithm
-      compatibility_version: 6.0.0
-  - set_pipeline: runtime-drills
-    file: pipelines-and-tasks/pipelines/branch.yml
-    vars:
-      branch_name: master
-      environment: runtime-drills
-      compatibility_version: dev
-  - set_pipeline: set-zstd-drills-env
-    file: pipelines-and-tasks/pipelines/branch.yml
-    vars:
-      branch_name: use_zstd
-      environment: use-zstd
-      compatibility_version: 6.0.0
   - set_pipeline: enterprise-helm-chart
     file: concourse-for-k8s/ci/pipeline.yml
     vars:
