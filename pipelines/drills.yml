@@ -4,6 +4,7 @@
 #   ((environment)): a name for the bosh-deployed drills testing environment
 #   ((admin_username)),
 #   ((admin_password)): credentials for the admin user
+#   ((compatibility_version)): different versions might require different env vars; 'dev', '6.5.0', etc
 #
 # the branch name must not have any funny characters, and must exist on the
 # following repos:
@@ -342,6 +343,7 @@ jobs:
       GCP_KEY: ((concourse_smoke_gcp_key))
       SSH_KEY: ((concourse_smoke_ssh_key))
       WORKSPACE: branch-((branch_name))
+      CONCOURSE_VERSION: ((compatibility_version))
   - task: smoke
     image: unit-image
     file: ci/tasks/smoke.yml

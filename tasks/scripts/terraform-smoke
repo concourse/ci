@@ -10,6 +10,29 @@ if [ -d linux-rc ]; then
   cp linux-rc/concourse-*.tgz $deployment_path/concourse.tgz
 fi
 
+# takes 2 semver of form x.y.z[-rc.123] and returns
+# 0: =
+# 1: <
+# 2: >
+cmp() {
+  # strip pre-release (-rc) or build (+123) from semver
+  v1=$(echo $1 | sed -e 's/[-+].*$//g')
+  v2=$(echo $2 | sed -e 's/[-+].*$//g')
+
+  if [[ $v1 == $v2 ]]; then
+    echo "0"
+    return
+  fi
+
+  # use the magic of sort to figure out which version is smaller
+  smaller=$(echo -e "$v1\n$v2" | sort -t "." -k 1,1 -k 2,2 -k 3,3 -g | head -n1)
+  if [[ $smaller == $v1 ]]; then
+    echo "1"
+    return
+  fi
+  echo "2"
+}
+
 cd $deployment_path
 
 echo "$GCP_KEY" > keys/gcp.json
@@ -17,6 +40,13 @@ echo "$GCP_KEY" > keys/gcp.json
 echo "$SSH_KEY" > keys/id_rsa
 chmod 0600 keys/id_rsa
 ssh-keygen -y -f keys/id_rsa > keys/id_rsa.pub
+
+if [[ $CONCOURSE_VERSION != "dev" ]]; then
+  res=$(cmp $CONCOURSE_VERSION "6.5.0")
+  case $res in  # <
+    1) TF_VAR_HAS_RUNTIME_FLAG="false";;
+  esac
+fi
 
 terraform init
 

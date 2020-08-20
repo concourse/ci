@@ -11,7 +11,10 @@ params:
   SSH_KEY:
   WORKSPACE: default
   USE_HTTPS: 'true'
-  TF_VAR_USE_CONTAINERD: "false"
+  CONCOURSE_VERSION: "dev"
+  # variables consumed by terraform and their default values
+  # TF_VAR_ENABLE_CONTAINERD: "false"
+  # TF_VAR_HAS_RUNTIME_FLAG: "true"
 
 inputs:
 - name: concourse

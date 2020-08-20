@@ -622,6 +622,8 @@ jobs:
       trigger: true
     - get: unit-image
     - get: ci
+  - load_var: concourse_version
+    file: version/version
   - task: terraform-smoke
     image: unit-image
     file: ci/tasks/terraform-smoke.yml
@@ -632,6 +634,7 @@ jobs:
       SSH_KEY: ((concourse_smoke_ssh_key))
       WORKSPACE: release-((release_minor))
       USE_HTTPS: ((bin_smoke_use_https))
+      CONCOURSE_VERSION: ((.:concourse_version))
   - task: smoke
     image: unit-image
     file: ci/tasks/smoke.yml
