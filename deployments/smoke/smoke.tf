@@ -69,7 +69,7 @@ resource "google_compute_instance" "smoke" {
   boot_disk {
     initialize_params {
       image = var.image
-      size  = "10"
+      size  = "30"
     }
   }
 
