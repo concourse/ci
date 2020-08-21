@@ -51,8 +51,7 @@ docker-compose \
   -f $inputs/ci/overrides/docker-compose.latest.yml \
   up --no-build -d
 
-# This is done temporarily to bypass fly issue https://github.com/concourse/concourse/issues/5938
-$inputs/ci/tasks/scripts/verify-downgraded-pipeline-temporary
+$inputs/ci/tasks/scripts/verify-upgrade-downgrade-pipeline
 
 # upgrade back and verify
 docker-compose \
