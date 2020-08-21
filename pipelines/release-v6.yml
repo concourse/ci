@@ -286,7 +286,7 @@ jobs:
     image: unit-image
     privileged: true
     timeout: 1h
-    params: {CONTAINERD: true}
+    params: {RUNTIME: containerd}
     file: ci/tasks/docker-compose-testflight.yml
   on_failure: *failed-concourse
   on_error: *failed-concourse

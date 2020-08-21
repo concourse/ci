@@ -19,7 +19,7 @@ caches:
 
 params:
   BUILD:
-  CONTAINERD:
+  RUNTIME: guardian
 
 run:
   path: ci/tasks/scripts/pass-release-notes-only-change

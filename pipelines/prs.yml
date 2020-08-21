@@ -273,7 +273,7 @@ jobs:
       privileged: true
       file: ci/tasks/docker-compose-testflight.yml
       input_mapping: {concourse: built-concourse}
-      params: {BUILD: true, CONTAINERD: true, DOWNLOAD_CLI: false}
+      params: {BUILD: true, RUNTIME: containerd, DOWNLOAD_CLI: false}
       tags: [pr]
 
 - name: containerd-integration
