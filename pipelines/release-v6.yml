@@ -258,35 +258,17 @@ jobs:
     - get: postgres-image
       params: {format: oci}
     - get: ci
-  - task: testflight
+  - across:
+    - var: runtime
+      values:
+      - guardian
+      - containerd
+      max_in_flight: all
+    task: testflight
     image: unit-image
     privileged: true
     timeout: 1h
-    file: ci/tasks/docker-compose-testflight.yml
-  on_failure: *failed-concourse
-  on_error: *failed-concourse
-
-- name: testflight-containerd
-  public: true
-  max_in_flight: 2
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed: [unit, dev-image]
-      trigger: true
-    - get: unit-image
-    - get: dev-image
-      passed: [dev-image]
-      trigger: true
-      params: {format: oci}
-    - get: postgres-image
-      params: {format: oci}
-    - get: ci
-  - task: testflight
-    image: unit-image
-    privileged: true
-    timeout: 1h
-    params: {RUNTIME: containerd}
+    params: {RUNTIME: ((.:runtime))}
     file: ci/tasks/docker-compose-testflight.yml
   on_failure: *failed-concourse
   on_error: *failed-concourse
