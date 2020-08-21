@@ -52,7 +52,7 @@ docker-compose \
   up --no-build -d
 
 # This is done temporarily to bypass fly issue https://github.com/concourse/concourse/issues/5938
-$inputs/ci/tasks/scripts/verify-downgraded-pipeline-temporary
+$inputs/ci/tasks/scripts/verify-upgrade-downgraded-pipeline-temporary
 
 # upgrade back and verify
 docker-compose \
