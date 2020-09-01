@@ -20,6 +20,7 @@ params:
   BUILD:
   CONTAINERD:
   DOWNLOAD_CLI: true
+  HAS_RUNTIME_FLAG: true
 
 run:
   path: ci/tasks/scripts/pass-release-notes-only-change

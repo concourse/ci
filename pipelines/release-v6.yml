@@ -5,6 +5,7 @@
 #                                       concourse matches the desired release version
 #   ((concourse_smoke_deployment_name)) a unique name for the smoke bosh deployment
 #   ((latest_release))                  the latest concourse/concourse tag for upgrade testing (choose this based on the patch release eg 5.5 for 5.5.x)
+#   ((has_runtime_flag))                whether the CONCOURSE_RUNTIME flag is supported by this version (determines how to deploy containerd-backed workers)
 #
 # the following git branches need to be created:
 #
@@ -286,7 +287,9 @@ jobs:
     image: unit-image
     privileged: true
     timeout: 1h
-    params: {CONTAINERD: true}
+    params:
+      CONTAINERD: true
+      HAS_RUNTIME_FLAG: ((has_runtime_flag))
     file: ci/tasks/docker-compose-testflight.yml
   on_failure: *failed-concourse
   on_error: *failed-concourse
@@ -684,6 +687,7 @@ jobs:
       WORKSPACE: release-((release_minor))
       USE_HTTPS: ((bin_smoke_use_https))
       CONCOURSE_VERSION: ((.:concourse_version))
+      TF_VAR_HAS_RUNTIME_FLAG: ((has_runtime_flag))
   - task: smoke
     image: unit-image
     file: ci/tasks/smoke.yml
@@ -720,6 +724,7 @@ jobs:
         DEPLOYMENT: smoke
         WORKSPACE: release-((release_minor))-containerd
         TF_VAR_ENABLE_CONTAINERD: "true"
+        TF_VAR_HAS_RUNTIME_FLAG: ((has_runtime_flag))
         CONCOURSE_VERSION: ((.:concourse_version))
     - task: smoke
       image: unit-image
