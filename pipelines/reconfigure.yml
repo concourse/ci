@@ -257,7 +257,6 @@ jobs:
       release_minor: "5.5"
       latest_release: "5.5"
       concourse_smoke_deployment_name: "concourse-smoke-5-5"
-      bin_smoke_use_https: "true"
       end_of_general_support: "2020-07-31"
       has_runtime_flag: "false"
   - set_pipeline: release-6.3.x
@@ -267,7 +266,6 @@ jobs:
       release_minor: "6.3"
       latest_release: "6.2"
       concourse_smoke_deployment_name: "concourse-smoke-6-3"
-      bin_smoke_use_https: "true"
       has_runtime_flag: "false"
   - set_pipeline: release-6.5.x
     file: pipelines-and-tasks/pipelines/release-v6.yml
@@ -276,7 +274,6 @@ jobs:
       release_minor: "6.5"
       latest_release: "6.4"
       concourse_smoke_deployment_name: "concourse-smoke-6-5"
-      bin_smoke_use_https: "true"
       has_runtime_flag: "true"
   - set_pipeline: enterprise-helm-chart
     file: concourse-for-k8s/ci/pipeline.yml
