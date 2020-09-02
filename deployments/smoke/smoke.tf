@@ -12,11 +12,6 @@ variable "region" {
   default = "us-central1"
 }
 
-variable "use_https" {
-  type    = bool
-  default = true
-}
-
 variable "image" {
   type    = string
   default = "ubuntu-1804-bionic-v20181003"
@@ -130,7 +125,6 @@ data "template_file" "web_conf" {
 
   vars = {
     instance_ip    = google_compute_address.smoke.address
-    use_https      = var.use_https
     admin_password = random_string.admin_password.result
     guest_password = random_string.guest_password.result
   }
@@ -219,7 +213,7 @@ resource "null_resource" "rerun" {
 }
 
 output "instance_url" {
-  value = var.use_https ? "https://${google_compute_address.smoke.address}.xip.io" : "http://${google_compute_address.smoke.address}:8080"
+  value = "https://${google_compute_address.smoke.address}.xip.io"
 }
 
 output "admin_password" {
