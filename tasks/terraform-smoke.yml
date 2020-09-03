@@ -10,7 +10,6 @@ params:
   GCP_KEY:
   SSH_KEY:
   WORKSPACE: default
-  USE_HTTPS: 'true'
   CONCOURSE_VERSION: "dev"
   # variables consumed by terraform and their default values
   # TF_VAR_ENABLE_CONTAINERD: "false"

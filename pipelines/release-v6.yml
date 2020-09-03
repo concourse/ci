@@ -685,7 +685,6 @@ jobs:
       GCP_KEY: ((concourse_smoke_gcp_key))
       SSH_KEY: ((concourse_smoke_ssh_key))
       WORKSPACE: release-((release_minor))
-      USE_HTTPS: ((bin_smoke_use_https))
       CONCOURSE_VERSION: ((.:concourse_version))
       TF_VAR_HAS_RUNTIME_FLAG: ((has_runtime_flag))
   - task: smoke
