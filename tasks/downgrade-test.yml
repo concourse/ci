@@ -11,7 +11,7 @@ params:
 inputs:
 - name: concourse
 - name: ci
-  # Mandatory if BUILD != true
+  # Required if BUILD != true
 - name: dev-image
   optional: true
 - name: concourse-image
