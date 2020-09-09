@@ -14,8 +14,12 @@ start_docker
 [ -d concourse-image ] && docker load -i concourse-image/image.tar
 [ -d postgres-image ] && docker load -i postgres-image/image.tar
 
-export CONCOURSE_DEV_TAG=$(cat dev-image/tag)
-export CONCOURSE_LATEST_TAG=$(cat concourse-image/tag)
+[ -f dev-image/tag ] && export CONCOURSE_DEV_TAG=$(cat dev-image/tag)
+if [ -f concourse-image/tag ]; then
+  export CONCOURSE_LATEST_TAG=$(cat concourse-image/tag)
+else
+  export CONCOURSE_LATEST_TAG=latest
+fi
 
 cd concourse
 
@@ -23,12 +27,19 @@ cd concourse
 export CONCOURSE_KEYS=$PWD/keys
 $inputs/ci/tasks/scripts/generate-keys
 
+DOCKER_COMPOSE_FLAGS=" -f docker-compose.yml -f $inputs/ci/overrides/docker-compose.ci-guardian.yml"
+
 # start with rc and set up
-docker-compose \
-  -f docker-compose.yml \
-  -f $inputs/ci/overrides/docker-compose.ci-guardian.yml \
-  -f $inputs/ci/overrides/docker-compose.no-build.yml \
-  up --no-build -d
+if [ "$BUILD" = "true" ]; then
+  docker-compose \
+    $DOCKER_COMPOSE_FLAGS \
+    up --build -d
+else
+  docker-compose \
+    $DOCKER_COMPOSE_FLAGS \
+    -f $inputs/ci/overrides/docker-compose.no-build.yml \
+    up --no-build -d
+fi
 
 trap stop_docker_compose EXIT SIGTERM SIGINT
 function stop_docker_compose() {

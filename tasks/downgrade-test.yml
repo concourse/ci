@@ -5,9 +5,13 @@ image_resource:
   type: registry-image
   source: {repository: concourse/unit}
 
+params:
+  BUILD:
+
 inputs:
 - name: concourse
 - name: ci
+  # Mandatory if BUILD != true
 - name: dev-image
   optional: true
 - name: concourse-image
