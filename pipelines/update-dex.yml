@@ -1,0 +1,23 @@
+resources:
+- name: dex-github-release
+  type: github-release
+  source:
+    owner: concourse
+    repository: concourse
+    access_token: ((concourse_github_release.access_token))
+
+- name: concourse-dex
+  type: git
+  source:
+    uri: https://github.com/concourse/dex
+    branch: rebase-upstream-dex
+
+jobs:
+  - name: update-dex-prs
+    plan:
+      - in_parallel:
+#        - get: dex-github-release
+#          trigger: true
+        - get: concourse-dex
+      - task: update-prs
+        file: ci/tasks/update-dex-prs.yml

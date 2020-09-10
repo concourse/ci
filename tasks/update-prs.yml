@@ -1,0 +1,9 @@
+#!/usr/bin/bash
+
+set -ex
+
+pushd dex
+  git co maintenance
+  ./rebase-all-prs
+#  ./push-all-prs
+popd
