@@ -65,11 +65,16 @@ docker-compose \
 $inputs/ci/tasks/scripts/verify-upgrade-downgraded-pipeline-temporary
 
 # upgrade back and verify
-docker-compose \
-  -f docker-compose.yml \
-  -f $inputs/ci/overrides/docker-compose.ci-guardian.yml \
-  -f $inputs/ci/overrides/docker-compose.no-build.yml \
-  up --no-build -d
+if [ "$BUILD" = "true" ]; then
+  docker-compose \
+    $DOCKER_COMPOSE_FLAGS \
+    up --no-build -d
+else
+  docker-compose \
+    $DOCKER_COMPOSE_FLAGS \
+    -f $inputs/ci/overrides/docker-compose.no-build.yml \
+    up --no-build -d
+fi
 
 $inputs/ci/tasks/scripts/verify-upgrade-downgrade-pipeline
 
