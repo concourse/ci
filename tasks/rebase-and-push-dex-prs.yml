@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -ex
+
+pushd dex
+  ./rebase-all-prs
+#  ./push-all-prs
+popd
