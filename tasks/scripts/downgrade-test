@@ -54,6 +54,12 @@ $inputs/ci/tasks/scripts/create-upgrade-downgrade-pipeline
 downgrade_to=$(docker run concourse/concourse:latest migrate --supported-db-version)
 docker-compose exec web concourse migrate --migrate-db-to-version $downgrade_to
 
+# this is needed so that the worker unregisters with the ATC.
+# docker-compose seems to recreate the web before recreating the worker,
+# and the worker is unable to unregister with the ATC since the ATC may
+# not be ready to receive requests.
+docker-compose stop worker
+
 # downgrade and verify
 docker-compose \
   $DOCKER_COMPOSE_FLAGS \
@@ -63,6 +69,12 @@ docker-compose \
 
 # This is done temporarily to bypass fly issue https://github.com/concourse/concourse/issues/5938
 $inputs/ci/tasks/scripts/verify-upgrade-downgraded-pipeline-temporary
+
+# this is needed so that the worker unregisters with the ATC.
+# docker-compose seems to recreate the web before recreating the worker,
+# and the worker is unable to unregister with the ATC since the ATC may
+# not be ready to receive requests.
+docker-compose stop worker
 
 # upgrade back and verify
 if [ "$BUILD" = "true" ]; then
