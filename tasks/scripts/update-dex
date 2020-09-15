@@ -2,7 +2,7 @@
 
 set -ex
 
-pushd dex
+pushd concourse-dex
   ./rebase-all-prs
 #  ./push-all-prs
 popd
