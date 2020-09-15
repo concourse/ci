@@ -7,6 +7,7 @@ image_resource:
 
 inputs:
   - name: ci
+  - name: concourse-dex
 
 run:
   path: ci/tasks/scripts/update-dex
