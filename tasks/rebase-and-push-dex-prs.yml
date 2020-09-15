@@ -1,8 +1,12 @@
-#!/bin/bash
+---
+platform: linux
 
-set -ex
+image_resource:
+  type: registry-image
+  source: {repository: concourse/unit}
 
-pushd dex
-  ./rebase-all-prs
-#  ./push-all-prs
-popd
+inputs:
+  - name: ci
+
+run:
+  path: ci/tasks/scripts/update-dex
