@@ -14,8 +14,12 @@ start_docker
 [ -d concourse-image ] && docker load -i concourse-image/image.tar
 [ -d postgres-image ] && docker load -i postgres-image/image.tar
 
-export CONCOURSE_DEV_TAG=$(cat dev-image/tag)
-export CONCOURSE_LATEST_TAG=$(cat concourse-image/tag)
+[ -f dev-image/tag ] && export CONCOURSE_DEV_TAG=$(cat dev-image/tag)
+if [ -f concourse-image/tag ]; then
+  export CONCOURSE_LATEST_TAG=$(cat concourse-image/tag)
+else
+  export CONCOURSE_LATEST_TAG=latest
+fi
 
 cd concourse
 
@@ -23,12 +27,19 @@ cd concourse
 export CONCOURSE_KEYS=$PWD/keys
 $inputs/ci/tasks/scripts/generate-keys
 
+DOCKER_COMPOSE_FLAGS="-f docker-compose.yml -f $inputs/ci/overrides/docker-compose.ci-guardian.yml"
+
 # start with rc and set up
-docker-compose \
-  -f docker-compose.yml \
-  -f $inputs/ci/overrides/docker-compose.ci-guardian.yml \
-  -f $inputs/ci/overrides/docker-compose.no-build.yml \
-  up --no-build -d
+if [ "$BUILD" = "true" ]; then
+  docker-compose \
+    $DOCKER_COMPOSE_FLAGS \
+    up --build -d
+else
+  docker-compose \
+    $DOCKER_COMPOSE_FLAGS \
+    -f $inputs/ci/overrides/docker-compose.no-build.yml \
+    up --no-build -d
+fi
 
 trap stop_docker_compose EXIT SIGTERM SIGINT
 function stop_docker_compose() {
@@ -43,10 +54,15 @@ $inputs/ci/tasks/scripts/create-upgrade-downgrade-pipeline
 downgrade_to=$(docker run concourse/concourse:latest migrate --supported-db-version)
 docker-compose exec web concourse migrate --migrate-db-to-version $downgrade_to
 
+# this is needed so that the worker unregisters with the ATC.
+# docker-compose seems to recreate the web before recreating the worker,
+# and the worker is unable to unregister with the ATC since the ATC may
+# not be ready to receive requests.
+docker-compose stop worker
+
 # downgrade and verify
 docker-compose \
-  -f docker-compose.yml \
-  -f $inputs/ci/overrides/docker-compose.ci-guardian.yml \
+  $DOCKER_COMPOSE_FLAGS \
   -f $inputs/ci/overrides/docker-compose.no-build.yml \
   -f $inputs/ci/overrides/docker-compose.latest.yml \
   up --no-build -d
@@ -54,12 +70,23 @@ docker-compose \
 # This is done temporarily to bypass fly issue https://github.com/concourse/concourse/issues/5938
 $inputs/ci/tasks/scripts/verify-upgrade-downgraded-pipeline-temporary
 
+# this is needed so that the worker unregisters with the ATC.
+# docker-compose seems to recreate the web before recreating the worker,
+# and the worker is unable to unregister with the ATC since the ATC may
+# not be ready to receive requests.
+docker-compose stop worker
+
 # upgrade back and verify
-docker-compose \
-  -f docker-compose.yml \
-  -f $inputs/ci/overrides/docker-compose.ci-guardian.yml \
-  -f $inputs/ci/overrides/docker-compose.no-build.yml \
-  up --no-build -d
+if [ "$BUILD" = "true" ]; then
+  docker-compose \
+    $DOCKER_COMPOSE_FLAGS \
+    up --no-build -d
+else
+  docker-compose \
+    $DOCKER_COMPOSE_FLAGS \
+    -f $inputs/ci/overrides/docker-compose.no-build.yml \
+    up --no-build -d
+fi
 
 $inputs/ci/tasks/scripts/verify-upgrade-downgrade-pipeline
 

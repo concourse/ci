@@ -61,6 +61,15 @@ resources:
   source:
     uri: https://github.com/concourse/ci
 
+- name: concourse-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: concourse/concourse
+    tag: latest
+    username: ((docker.username))
+    password: ((docker.password))
+
 - name: dev-image
   type: registry-image
   icon: docker
@@ -363,6 +372,96 @@ jobs:
     input_mapping: {concourse: built-concourse}
     params: {BUILD: true}
     tags: [pr]
+
+- name: upgrade
+  public: true
+  max_in_flight: 3
+  on_failure:
+    put: concourse-pr
+    inputs: [concourse-pr]
+    params: {path: concourse-pr, status: failure, context: upgrade}
+    tags: [pr]
+    get_params: {skip_download: true}
+  on_success:
+    put: concourse-pr
+    inputs: [concourse-pr]
+    params: {path: concourse-pr, status: success, context: upgrade}
+    tags: [pr]
+    get_params: {skip_download: true}
+  plan:
+  - in_parallel:
+    - get: concourse-pr
+      trigger: true
+      version: every
+      tags: [pr]
+    - get: concourse-image
+      params: {format: oci}
+      tags: [pr]
+    - get: postgres-image
+      params: {format: oci}
+      tags: [pr]
+    - get: ci
+  - put: concourse-status-update
+    resource: concourse-pr
+    inputs: [concourse-pr]
+    params: {path: concourse-pr, status: pending, context: upgrade}
+    tags: [pr]
+    get_params: {list_changed_files: true, skip_download: true}
+  - task: yarn-build
+    attempts: 3
+    file: ci/tasks/yarn-build.yml
+    input_mapping: {concourse: concourse-pr}
+    tags: [pr]
+  - task: upgrade-test
+    privileged: true
+    params: {BUILD: true}
+    input_mapping: {concourse: built-concourse}
+    file: ci/tasks/upgrade-test.yml
+
+- name: downgrade
+  public: true
+  max_in_flight: 3
+  on_failure:
+    put: concourse-pr
+    inputs: [concourse-pr]
+    params: {path: concourse-pr, status: failure, context: downgrade}
+    tags: [pr]
+    get_params: {skip_download: true}
+  on_success:
+    put: concourse-pr
+    inputs: [concourse-pr]
+    params: {path: concourse-pr, status: success, context: downgrade}
+    tags: [pr]
+    get_params: {skip_download: true}
+  plan:
+  - in_parallel:
+    - get: concourse-pr
+      trigger: true
+      version: every
+      tags: [pr]
+    - get: concourse-image
+      params: {format: oci}
+      tags: [pr]
+    - get: postgres-image
+      params: {format: oci}
+      tags: [pr]
+    - get: ci
+  - put: concourse-status-update
+    resource: concourse-pr
+    inputs: [concourse-pr]
+    params: {path: concourse-pr, status: pending, context: downgrade}
+    tags: [pr]
+    get_params: {list_changed_files: true, skip_download: true}
+  - task: yarn-build
+    attempts: 3
+    file: ci/tasks/yarn-build.yml
+    input_mapping: {concourse: concourse-pr}
+    tags: [pr]
+  - task: downgrade-test
+    privileged: true
+    params: {BUILD: true}
+    input_mapping: {concourse: built-concourse}
+    file: ci/tasks/downgrade-test.yml
 
 - name: baggageclaim
   public: true
