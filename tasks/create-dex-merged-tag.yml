@@ -9,5 +9,8 @@ inputs:
   - name: ci
   - name: concourse-dex
 
+outputs:
+  - name: concourse-dex-tag
+
 run:
   path: ci/tasks/scripts/create-dex-merged-tag

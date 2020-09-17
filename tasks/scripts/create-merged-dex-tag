@@ -4,4 +4,5 @@ set -ex
 
 pushd concourse-dex
   ./update-merged-branch
+  cp tag_name concourse-dex-tag
 popd
