@@ -7,5 +7,7 @@ pushd concourse-dex
     git config --global user.name "CI Bot"
 
   ./rebase-all-prs
-#  ./push-all-prs
+  ./push-all-prs
+
+  ./update-merged-branch
 popd

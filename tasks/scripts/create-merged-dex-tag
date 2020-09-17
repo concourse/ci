@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -ex
+
+pushd concourse-dex
+  ./update-merged-branch
+popd

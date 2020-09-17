@@ -10,4 +10,4 @@ inputs:
   - name: concourse-dex
 
 run:
-  path: ci/tasks/scripts/update-dex-prs
+  path: ci/tasks/scripts/create-dex-merged-tag
