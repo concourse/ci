@@ -51,6 +51,13 @@ resources:
     paths:
     - ci
 
+- name: resource-types-website-ci
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/resource-types-website
+    paths: [ci]
+
 - name: ruby-alpine-image
   type: registry-image
   source:
@@ -221,6 +228,8 @@ jobs:
     trigger: true
   - get: ft-ci
     trigger: true
+  - get: resource-types-website-ci
+    trigger: true
   - set_pipeline: concourse
     file: pipelines-and-tasks/pipelines/concourse.yml
   - set_pipeline: helm-chart
@@ -244,6 +253,9 @@ jobs:
       concourse_image_tag: latest
   - set_pipeline: baggageclaim
     file: baggageclaim-ci/ci/pipeline.yml
+  - set_pipeline: dutyfree
+    team: dutyfree
+    file: resource-types-website-ci/ci/pipeline.yml
   - set_pipeline: bosh-cleanup
     file: pipelines-and-tasks/pipelines/bosh-cleanup.yml
   - set_pipeline: wings
