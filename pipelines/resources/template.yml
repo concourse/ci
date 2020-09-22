@@ -219,6 +219,8 @@ plan:
   params:
     GITHUB_OWNER: concourse
     GITHUB_REPO: #@ resource_name
+    GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+    GITHUB_BRANCH: master
   input_mapping:
     repo: resource-repo
 - task: generate-dpkg-list
