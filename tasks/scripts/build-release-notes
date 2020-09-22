@@ -1,12 +1,12 @@
 #!/bin/bash
 
-LAST_COMMIT_SHA = $(cat concourse/.git/ref)
+LAST_COMMIT_SHA = $(cat repo/.git/ref)
 
 chmod +x release-me/releaseme
 ./release-me/releaseme generate \
   --github-token=$GITHUB_TOKEN \
-  --github-owner=concourse \
-  --github-repo=concourse \
+  --github-owner=$GITHUB_OWNER \
+  --github-repo=$GITHUB_REPO \
   --github-branch=$GITHUB_BRANCH \
   --last-commit-SHA=$LAST_COMMIT_SHA \
   > built-notes/notes.md

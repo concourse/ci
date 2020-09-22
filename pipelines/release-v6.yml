@@ -945,7 +945,11 @@ jobs:
       input_mapping: {version: final-version}
     - task: build-release-notes
       file: ci/tasks/build-release-notes.yml
+      input_mapping:
+        repo: concourse
       params:
+        GITHUB_OWNER: concourse
+        GITHUB_REPO: concourse
         GITHUB_TOKEN: ((concourse_github_dummy.access_token))
         GITHUB_BRANCH: release/((release_minor)).x
   - put: concourse-draft-release
