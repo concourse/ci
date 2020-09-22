@@ -156,6 +156,8 @@ plan:
     passed:
     - build-alpine
     - build-ubuntu
+  - get: ci
+  - get: release-me
   - get: resource-image-dev-alpine
     passed: [build-alpine]
     params: {save: true}
@@ -212,6 +214,13 @@ plan:
           tar -czf rootfs.tgz -C rootfs .
           tar -czf ../release/(@= resource_name @)-resource-${version}-ubuntu.tgz rootfs.tgz resource_metadata.json
         popd
+- task: build-release-notes
+  file: ci/tasks/build-release-notes.yml
+  params:
+    GITHUB_OWNER: concourse
+    GITHUB_REPO: #@ resource_name
+  input_mapping:
+    repo: resource-repo
 - task: generate-dpkg-list
   image: resource-image-dev-ubuntu
   config:
@@ -242,6 +251,7 @@ plan:
   - put: resource-repo-release
     params:
       commitish: resource-repo/.git/ref
+      body: built-notes/notes.md
       globs:
       - release/*.tgz
       name: release/name
@@ -397,6 +407,20 @@ resources:
     bucket: concourse-ubuntu-dpkg-list
     json_key: ((concourse_dpkg_list_json_key))
     regexp: #@ resource_name + "-dpkg-list-(.*).txt"
+
+- name: ci
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/ci.git
+    branch: master
+
+- name: release-me
+  type: github-release
+  icon: package-down
+  source:
+    owner: clarafu
+    repository: release-me
 
 #@ if resource_name == "cf":
 - name: cf-cli
