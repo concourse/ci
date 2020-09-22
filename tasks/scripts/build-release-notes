@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LAST_COMMIT_SHA = $(cat repo/.git/ref)
+LAST_COMMIT_SHA=$(cat repo/.git/ref)
 
 chmod +x release-me/releaseme
 ./release-me/releaseme generate \
