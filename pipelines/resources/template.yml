@@ -218,7 +218,7 @@ plan:
   file: ci/tasks/build-release-notes.yml
   params:
     GITHUB_OWNER: concourse
-    GITHUB_REPO: #@ resource_name
+    GITHUB_REPO: #@ resource_name + "-resource"
     GITHUB_TOKEN: ((concourse_github_dummy.access_token))
     GITHUB_BRANCH: master
   input_mapping:
