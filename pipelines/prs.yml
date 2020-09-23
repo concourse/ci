@@ -413,6 +413,7 @@ jobs:
     input_mapping: {concourse: concourse-pr}
     tags: [pr]
   - task: upgrade-test
+    timeout: 1h
     privileged: true
     params: {BUILD: true}
     input_mapping: {concourse: built-concourse}
@@ -458,6 +459,7 @@ jobs:
     input_mapping: {concourse: concourse-pr}
     tags: [pr]
   - task: downgrade-test
+    timeout: 1h
     privileged: true
     params: {BUILD: true}
     input_mapping: {concourse: built-concourse}
