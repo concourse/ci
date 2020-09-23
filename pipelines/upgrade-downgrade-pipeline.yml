@@ -14,8 +14,5 @@ jobs:
       platform: linux
 
       run:
-        path: bash
-        args:
-        - -exc
-        - |
-          echo hello
+        path: echo
+        args: [hello]
