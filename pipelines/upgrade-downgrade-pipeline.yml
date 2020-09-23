@@ -4,19 +4,12 @@ resources:
   type: mock
   source: {mirror_self: true}
 
-- name: test-image
-  type: registry-image
-  icon: docker
-  source:
-    repository: ubuntu
-
 jobs:
 - name: test-job
   plan:
   - get: test-resource
-  - get: test-image
   - task: test-task
-    image: test-image
+    image: test-resource
     config:
       platform: linux
 
