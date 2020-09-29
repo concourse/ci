@@ -287,6 +287,14 @@ jobs:
       latest_release: "6.4"
       concourse_smoke_deployment_name: "concourse-smoke-6-5"
       has_runtime_flag: "true"
+  - set_pipeline: release-6.6.x
+    file: pipelines-and-tasks/pipelines/release-v6.yml
+    vars:
+      release_major: "6"
+      release_minor: "6.6"
+      latest_release: "6.5"
+      concourse_smoke_deployment_name: "concourse-smoke-6-6"
+      has_runtime_flag: "true"
   - set_pipeline: enterprise-helm-chart
     file: concourse-for-k8s/ci/pipeline.yml
     vars:
