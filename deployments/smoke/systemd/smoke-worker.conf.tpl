@@ -5,6 +5,7 @@ Environment=CONCOURSE_TSA_WORKER_PRIVATE_KEY=/etc/concourse/worker_key
 %{ if enable_containerd ~}
   %{~ if has_runtime_flag ~}
 Environment=CONCOURSE_RUNTIME=containerd
+Environment=CONCOURSE_CONTAINERD_DNS_SERVER=8.8.8.8,4.4.4.4
   %{~ else ~}
 Environment=CONCOURSE_GARDEN_USE_CONTAINERD="true"
   %{~ endif ~}
