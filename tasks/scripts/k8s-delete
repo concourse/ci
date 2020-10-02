@@ -29,9 +29,8 @@ eventually_populate_kube_config() {
 }
 
 delete_release() {
-  helm init --upgrade --wait
   helm version
-  helm delete --purge $RELEASE_NAME
+  helm delete "$RELEASE_NAME" --namespace "$RELEASE_NAME"
 }
 
 main "$@"

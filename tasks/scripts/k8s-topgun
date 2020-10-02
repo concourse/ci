@@ -14,6 +14,13 @@ if [ ! -f ~/.kube/config ]; then
   echo "$KUBE_CONFIG" > ~/.kube/config
 fi
 
+# TODO: tech-debt for maintaining 6.3.x version of the chart which uses Helm v2
+# Remove when 6.3.x no longer needs to be supported
+if [[ $HELM_VERSION -eq 2 ]]; then
+    alias helm=helm2
+fi
+# END of tech-debt
+
 export CONCOURSE_IMAGE_DIGEST="$(cat concourse-rc-image/digest)"
 export CONCOURSE_IMAGE_TAG="$(cat concourse-rc-image/tag)"
 export HELM_CHARTS_DIR="$(realpath ./helm-charts)"

@@ -2,12 +2,5 @@
 
 set -e -x
 
-# workaround for an issue with `helm package` not liking when the chart name != dirName it's under
-# can be renamed to 'bumped-chart' or something more sensible once we're on helm v3
-git clone ./concourse-chart ./concourse
-
-helm init --client-only
-helm repo remove local
-helm repo update
-helm package -u -d ./packaged-chart ./concourse
+helm package -u -d ./packaged-chart ./concourse-chart
 helm repo index --merge chart-repo-index/index.yaml ./packaged-chart
