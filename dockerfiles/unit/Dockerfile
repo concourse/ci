@@ -61,6 +61,12 @@ RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add 
 # install helm for k8s-related jobs
 RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
+# TODO: tech-debt for maintaining 6.3.x version of the chart which uses Helm v2
+# Remove when 6.3.x no longer needs to be supported
+RUN curl https://get.helm.sh/helm-v2.16.12-linux-amd64.tar.gz -o helm-v2.tar.gz && \
+        tar xzf helm-v2.tar.gz && \
+        mv linux-amd64/helm /usr/local/bin/helm2
+
 # install Vault for bosh-topgun
 RUN curl -L https://releases.hashicorp.com/vault/0.7.3/vault_0.7.3_linux_amd64.zip -o /tmp/vault.zip && \
       unzip /tmp/vault.zip -d /usr/local/bin && \

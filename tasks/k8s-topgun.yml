@@ -20,5 +20,8 @@ inputs:
 caches:
 - path: gopath
 
+params:
+  HELM_VERSION: 3
+
 run:
   path: ci/tasks/scripts/k8s-topgun
