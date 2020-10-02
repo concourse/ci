@@ -1,5 +1,5 @@
 display:
-  background_image: https://storage.googleapis.com/concourse-media-assets/concourse-emi-background.png
+  background_image: https://storage.googleapis.com/concourse-media-assets/concourse-emi-background-corner.png
 
 resource_types:
 - name: gcs
