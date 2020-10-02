@@ -58,6 +58,13 @@ resources:
     uri: https://github.com/concourse/resource-types-website
     paths: [ci]
 
+- name: boarding-pass-ci
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/boarding-pass
+    paths: [ci]
+
 - name: ruby-alpine-image
   type: registry-image
   source:
@@ -230,6 +237,8 @@ jobs:
     trigger: true
   - get: resource-types-website-ci
     trigger: true
+  - get: boarding-pass-ci
+    trigger: true
   - set_pipeline: concourse
     file: pipelines-and-tasks/pipelines/concourse.yml
   - set_pipeline: helm-chart
@@ -306,6 +315,8 @@ jobs:
     file: flight-attendant-ci/ci/pipeline.yml
   - set_pipeline: ft
     file: ft-ci/ci/pipeline.yml
+  - set_pipeline: boarding-pass
+    file: boarding-pass-ci/ci/pipeline.yml
   on_failure: *notify
   on_error: *notify
 
