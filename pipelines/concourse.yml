@@ -73,6 +73,8 @@ jobs:
   plan:
   - in_parallel:
     - get: ci
+      resource: ci-unit-image
+      trigger: true
     - get: oci-build-task
     - get: golang-builder-trigger
       trigger: true
@@ -1105,6 +1107,15 @@ resources:
   source:
     uri: https://github.com/concourse/ci.git
     branch: master
+
+- name: ci-unit-image
+  type: git
+  icon: *git-icon
+  source:
+    uri: https://github.com/concourse/ci.git
+    branch: master
+    paths:
+    - dockerfiles/unit
 
 - name: notify
   type: slack-notifier
