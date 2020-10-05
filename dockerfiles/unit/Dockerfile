@@ -61,6 +61,10 @@ RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add 
 # install helm for k8s-related jobs
 RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
+# install yq
+RUN wget https://github.com/mikefarah/yq/releases/download/3.4.0/yq_linux_amd64 -O /usr/bin/yq &&\
+    chmod +x /usr/bin/yq
+
 # TODO: tech-debt for maintaining 6.3.x version of the chart which uses Helm v2
 # Remove when 6.3.x no longer needs to be supported
 RUN curl https://get.helm.sh/helm-v2.16.12-linux-amd64.tar.gz -o helm-v2.tar.gz && \

@@ -5,7 +5,7 @@ set -e -x
 chart_version=$(cat version/version)
 
 pushd concourse-chart
-  sed -i "s/version: .*/version: ${chart_version}/" Chart.yaml
+  yq w --inplace concourse-chart/Chart.yaml 'version' ${chart_version}
 
   git config --global user.email "ci@localhost"
   git config --global user.name "CI Bot"
