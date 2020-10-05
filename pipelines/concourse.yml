@@ -50,6 +50,7 @@ groups:
   jobs:
   - bosh-bump
   - bosh-smoke
+  - bosh-smoke-containerd
   - bosh-topgun-core
   - bosh-topgun-runtime
   - bosh-topgun-both
@@ -877,6 +878,57 @@ jobs:
       BOSH_CLIENT: ((testing_bosh_client.id))
       BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
       BOSH_DEPLOYMENT: concourse-smoke
+      BOSH_INSTANCE_GROUP: concourse
+  - task: smoke
+    tags: [bosh]
+    image: unit-image
+    file: ci/tasks/smoke.yml
+    timeout: 1h
+  on_failure: *failed-concourse
+
+- name: bosh-smoke-containerd
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    # these don't trigger, to ensure that the job gets triggered by
+    # concourse-release, which is unfortunately decoupled from the resource
+    # that we 'put' to.
+    - get: concourse
+      passed: [bosh-bump]
+    - get: unit-image
+    - get: concourse-release
+      trigger: true
+    - get: postgres-release
+      trigger: true
+    - get: bpm-release
+      trigger: true
+    - get: gcp-xenial-stemcell
+      trigger: true
+    - get: ci
+  - put: smoke-deployment
+    tags: [bosh]
+    params:
+      manifest: ci/deployments/bosh-smoke.yml
+      ops_files: ci/deployments/bosh-operations/runtime-containerd.yml
+      releases:
+      - concourse-release/*.tgz
+      - postgres-release/*.tgz
+      - bpm-release/*.tgz
+      stemcells:
+      - gcp-xenial-stemcell/*.tgz
+      vars:
+        deployment_name: concourse-smoke-containerd
+  - task: discover-bosh-endpoint-info
+    tags: [bosh]
+    file: ci/tasks/discover-bosh-endpoint-info.yml
+    image: unit-image
+    params:
+      BOSH_ENVIRONMENT: https://10.0.0.6:25555
+      BOSH_CA_CERT: ((testing_bosh_ca_cert))
+      BOSH_CLIENT: ((testing_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
+      BOSH_DEPLOYMENT: concourse-smoke-containerd
       BOSH_INSTANCE_GROUP: concourse
   - task: smoke
     tags: [bosh]
