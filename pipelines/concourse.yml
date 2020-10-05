@@ -910,7 +910,8 @@ jobs:
     tags: [bosh]
     params:
       manifest: ci/deployments/bosh-smoke.yml
-      ops_files: ci/deployments/bosh-operations/runtime-containerd.yml
+      ops_files:
+      - ci/deployments/bosh-operations/runtime-containerd.yml
       releases:
       - concourse-release/*.tgz
       - postgres-release/*.tgz
