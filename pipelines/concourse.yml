@@ -906,7 +906,7 @@ jobs:
     - get: gcp-xenial-stemcell
       trigger: true
     - get: ci
-  - put: smoke-deployment
+  - put: smoke-deployment-containerd
     tags: [bosh]
     params:
       manifest: ci/deployments/bosh-smoke.yml
@@ -1510,6 +1510,17 @@ resources:
     client_secret: ((testing_bosh_client.secret))
     ca_cert: ((testing_bosh_ca_cert))
     deployment: concourse-smoke
+
+- name: smoke-deployment-containerd
+  tags: [bosh]
+  type: bosh-deployment
+  icon: fire
+  source:
+    target: https://10.0.0.6:25555
+    client: ((testing_bosh_client.id))
+    client_secret: ((testing_bosh_client.secret))
+    ca_cert: ((testing_bosh_ca_cert))
+    deployment: concourse-smoke-containerd
 
 - name: gcp-xenial-stemcell
   type: bosh-io-stemcell
