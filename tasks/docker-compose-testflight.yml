@@ -11,6 +11,8 @@ inputs:
 - name: dev-image
   optional: true
 - name: postgres-image
+- name: postgres-image-legacy
+  optional: true
 
 caches:
 - path: gopath
@@ -20,6 +22,7 @@ params:
   CONTAINERD:
   DOWNLOAD_CLI: true
   HAS_RUNTIME_FLAG: true
+  POSTGRES_IMAGE: postgres-image
 
 run:
   path: ci/tasks/scripts/pass-release-notes-only-change

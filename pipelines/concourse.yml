@@ -303,10 +303,11 @@ jobs:
       max_in_flight: 2
     task: testflight
     image: unit-image
-    input_mapping: {postgres-image: ((.:postgres-image))}
     privileged: true
     timeout: 1h
-    params: {CONTAINERD: ((.:enable-containerd))}
+    params:
+      CONTAINERD: ((.:enable-containerd))}
+      POSTGRES_IMAGE: ((.:postgres-image))}
     file: ci/tasks/docker-compose-testflight.yml
   on_failure: *failed-concourse
 
