@@ -306,8 +306,8 @@ jobs:
     privileged: true
     timeout: 1h
     params:
-      CONTAINERD: ((.:enable-containerd))}
-      POSTGRES_IMAGE: ((.:postgres-image))}
+      CONTAINERD: ((.:enable-containerd))
+      POSTGRES_IMAGE: ((.:postgres-image))
     file: ci/tasks/docker-compose-testflight.yml
   on_failure: *failed-concourse
 
