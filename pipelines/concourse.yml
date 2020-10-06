@@ -24,8 +24,6 @@ groups:
   - unit
   - dev-image
   - testflight
-  - testflight-postgres
-  - testflight-containerd
   - containerd-integration
   - watsjs
   - build-concourse
@@ -293,59 +291,22 @@ jobs:
       params: {format: oci}
     - get: postgres-image
       params: {format: oci}
-    - get: ci
-  - task: testflight
-    image: unit-image
-    privileged: true
-    timeout: 1h
-    file: ci/tasks/docker-compose-testflight.yml
-  on_failure: *failed-concourse
-
-- name: testflight-postgres
-  public: true
-  max_in_flight: 2
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed: [unit, dev-image]
-      trigger: true
-    - get: unit-image
-    - get: dev-image
-      passed: [dev-image]
-      trigger: true
-      params: {format: oci}
     - get: postgres-image-legacy
       params: {format: oci}
     - get: ci
-  - task: testflight-postgres
+  - across:
+    - var: postgres-image
+      values: [postgres-image, postgres-image-legacy]
+      max_in_flight: 2
+    - var: enable-containerd
+      values: ["true", "false"]
+      max_in_flight: 2
+    task: testflight
     image: unit-image
-    input_mapping: {postgres-image: postgres-image-legacy}
+    input_mapping: {postgres-image: ((.:postgres-image))}
     privileged: true
     timeout: 1h
-    file: ci/tasks/docker-compose-testflight.yml
-  on_failure: *failed-concourse
-
-- name: testflight-containerd
-  public: true
-  max_in_flight: 2
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed: [unit, dev-image]
-      trigger: true
-    - get: unit-image
-    - get: dev-image
-      passed: [dev-image]
-      trigger: true
-      params: {format: oci}
-    - get: postgres-image
-      params: {format: oci}
-    - get: ci
-  - task: testflight
-    image: unit-image
-    privileged: true
-    timeout: 1h
-    params: {CONTAINERD: true}
+    params: {CONTAINERD: ((.:enable-containerd))}
     file: ci/tasks/docker-compose-testflight.yml
   on_failure: *failed-concourse
 
