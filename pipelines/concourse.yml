@@ -821,6 +821,7 @@ jobs:
   - put: smoke-deployment
     tags: [bosh]
     params:
+      recreate: true
       manifest: ci/deployments/bosh-smoke.yml
       releases:
       - concourse-release/*.tgz
@@ -871,6 +872,7 @@ jobs:
   - put: smoke-deployment-containerd
     tags: [bosh]
     params:
+      recreate: true
       manifest: ci/deployments/bosh-smoke.yml
       ops_files:
       - ci/deployments/bosh-operations/runtime-containerd.yml
