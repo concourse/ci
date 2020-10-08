@@ -16,7 +16,7 @@ fi
 
 # TODO: tech-debt for maintaining 6.3.x version of the chart which uses Helm v2
 # Remove when 6.3.x no longer needs to be supported
-if [[ $HELM_VERSION -eq 2 ]]; then
+if [[ $HELM_VERSION == "2" ]]; then
     alias helm=helm2
 fi
 # END of tech-debt
