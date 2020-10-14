@@ -22,7 +22,7 @@ helm dependency update ./concourse
 helm install \
   "$releasename" \
   ./concourse \
-  --set=concourse.web.kubernetes.keepNamespaces=false \   # cleanup namespaces created by team secrets
+  --set=concourse.web.kubernetes.keepNamespaces=false \
   --namespace "$releasename" \
   --create-namespace
 # TODO: actually poke concourse to see that it's up. For now this just ensures helm doesn't exit 1 when installing
