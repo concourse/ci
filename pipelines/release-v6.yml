@@ -723,7 +723,7 @@ jobs:
         SSH_KEY: ((concourse_smoke_ssh_key))
         DEPLOYMENT: smoke
         WORKSPACE: release-((release_minor))-containerd
-        TF_VAR_ENABLE_CONTAINERD: "true"
+        TF_VAR_RUNTIME_TYPE: "containerd"
         TF_VAR_HAS_RUNTIME_FLAG: ((has_runtime_flag))
         CONCOURSE_VERSION: ((.:concourse_version))
     - task: smoke

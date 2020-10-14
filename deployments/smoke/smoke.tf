@@ -17,9 +17,9 @@ variable "image" {
   default = "ubuntu-1804-bionic-v20181003"
 }
 
-variable "ENABLE_CONTAINERD" {
-  type    = bool
-  default = false
+variable "RUNTIME_TYPE" {
+  type    = string
+  default = "guardian"
 }
 
 variable "HAS_RUNTIME_FLAG" {
@@ -134,8 +134,8 @@ data "template_file" "worker_conf" {
   template = file("systemd/smoke-worker.conf.tpl")
 
   vars = {
-    enable_containerd = var.ENABLE_CONTAINERD
-    has_runtime_flag  = var.HAS_RUNTIME_FLAG
+    runtime_type     = var.RUNTIME_TYPE
+    has_runtime_flag = var.HAS_RUNTIME_FLAG
   }
 }
 

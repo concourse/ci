@@ -647,69 +647,21 @@ jobs:
       trigger: true
     - get: unit-image
     - get: ci
-  - task: terraform-smoke
-    image: unit-image
-    file: ci/tasks/terraform-smoke.yml
-    input_mapping: {linux-rc: linux-dev-ubuntu}
-    params:
-      GCP_PROJECT: cf-concourse-production
-      GCP_KEY: ((concourse_smoke_gcp_key))
-      SSH_KEY: ((concourse_smoke_ssh_key))
-      DEPLOYMENT: smoke
-  - task: smoke
-    image: unit-image
-    file: ci/tasks/smoke.yml
-    input_mapping: {endpoint-info: outputs}
-  on_failure: *failed-concourse
-
-- name: bin-smoke-kernel
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed: [build-concourse]
-      trigger: true
-    - get: linux-dev-ubuntu
-      passed: [build-concourse]
-      trigger: true
-    - get: unit-image
-    - get: ci
     - get: linux-kernel-44
   - task: packer-custom-image
     file: ci/tasks/packer-custom-image.yml
-    output_mapping: {packer-image: outputs}
+    output_mapping: {outputs: packer-image}
     params:
       GCP_PROJECT: cf-concourse-production
       GCP_KEY: ((concourse_smoke_gcp_key))
-  - task: terraform-smoke
-    image: unit-image
-    file: ci/tasks/terraform-smoke.yml
-    input_mapping: {linux-rc: linux-dev-ubuntu}
-    params:
-      GCP_PROJECT: cf-concourse-production
-      GCP_KEY: ((concourse_smoke_gcp_key))
-      SSH_KEY: ((concourse_smoke_ssh_key))
-      WORKSPACE: legacy-kernel
-  - task: smoke
-    image: unit-image
-    file: ci/tasks/smoke.yml
-    input_mapping: {endpoint-info: outputs}
-  on_failure: *failed-concourse
-
-- name: bin-smoke-containerd
-  public: true
-  serial: true
-  plan:
-    - in_parallel:
-        - get: concourse
-          passed: [build-concourse]
-          trigger: true
-        - get: linux-dev-ubuntu
-          passed: [build-concourse]
-          trigger: true
-        - get: unit-image
-        - get: ci
+  - across:
+    - var: kernel
+      values: ["default", "legacy"]
+      max_in_flight: 2
+    - var: runtime
+      values: ["guardian", "containerd"]
+      max_in_flight: 2
+    do:
     - task: terraform-smoke
       image: unit-image
       file: ci/tasks/terraform-smoke.yml
@@ -718,9 +670,9 @@ jobs:
         GCP_PROJECT: cf-concourse-production
         GCP_KEY: ((concourse_smoke_gcp_key))
         SSH_KEY: ((concourse_smoke_ssh_key))
-        DEPLOYMENT: smoke
-        WORKSPACE: containerd
-        TF_VAR_USE_CONTAINERD: "true"
+        WORKSPACE: ((.:kernel))-kernel-((.:runtime))
+        KERNEL: ((.:kernel))
+        TF_VAR_RUNTIME_TYPE: ((.:runtime))
     - task: smoke
       image: unit-image
       file: ci/tasks/smoke.yml
