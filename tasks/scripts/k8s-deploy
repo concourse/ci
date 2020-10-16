@@ -39,7 +39,6 @@ eventually_populate_kube_config() {
 run_helm_deploy() {
   local chart=./concourse-chart
 
-  helm init --upgrade --wait
   helm version
   helm dependency update $chart
   helm upgrade \
@@ -47,6 +46,7 @@ run_helm_deploy() {
     --recreate-pods \
     --wait \
     --namespace "$RELEASE_NAME" \
+    --create-namespace \
     --set "concourse.web.auth.mainTeam.localUser=admin" \
     --set "concourse.web.kubernetes.enabled=false" \
     --set "concourse.worker.baggageclaim.driver=naive" \

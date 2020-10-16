@@ -12,19 +12,14 @@ variable "region" {
   default = "us-central1"
 }
 
-variable "use_https" {
-  type    = bool
-  default = true
-}
-
 variable "image" {
   type    = string
   default = "ubuntu-1804-bionic-v20181003"
 }
 
-variable "ENABLE_CONTAINERD" {
-  type    = bool
-  default = false
+variable "RUNTIME_TYPE" {
+  type    = string
+  default = "guardian"
 }
 
 variable "HAS_RUNTIME_FLAG" {
@@ -130,7 +125,6 @@ data "template_file" "web_conf" {
 
   vars = {
     instance_ip    = google_compute_address.smoke.address
-    use_https      = var.use_https
     admin_password = random_string.admin_password.result
     guest_password = random_string.guest_password.result
   }
@@ -140,8 +134,8 @@ data "template_file" "worker_conf" {
   template = file("systemd/smoke-worker.conf.tpl")
 
   vars = {
-    enable_containerd = var.ENABLE_CONTAINERD
-    has_runtime_flag  = var.HAS_RUNTIME_FLAG
+    runtime_type     = var.RUNTIME_TYPE
+    has_runtime_flag = var.HAS_RUNTIME_FLAG
   }
 }
 
@@ -219,7 +213,7 @@ resource "null_resource" "rerun" {
 }
 
 output "instance_url" {
-  value = var.use_https ? "https://${google_compute_address.smoke.address}.xip.io" : "http://${google_compute_address.smoke.address}:8080"
+  value = "https://${google_compute_address.smoke.address}.nip.io"
 }
 
 output "admin_password" {

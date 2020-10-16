@@ -1,3 +1,6 @@
+display:
+  background_image: https://storage.googleapis.com/concourse-media-assets/concourse-emi-background-clean.png
+
 resource_types:
 - name: gcs
   type: registry-image
@@ -45,6 +48,7 @@ groups:
   jobs:
   - bosh-bump
   - bosh-smoke
+  - bosh-smoke-containerd
   - bosh-topgun-core
   - bosh-topgun-runtime
   - bosh-topgun-both
@@ -68,6 +72,8 @@ jobs:
   plan:
   - in_parallel:
     - get: ci
+    - get: ci-unit-image #have this here for auto-triggering of this job
+      trigger: true
     - get: oci-build-task
     - get: golang-builder-trigger
       trigger: true
@@ -304,8 +310,10 @@ jobs:
     image: unit-image
     privileged: true
     timeout: 1h
-    params: {RUNTIME: ((.:runtime))}
-    input_mapping: {postgres-image: postgres-image-((.:postgres))}
+    params: 
+      RUNTIME: ((.:runtime))
+    input_mapping: 
+      postgres-image: postgres-image-((.:postgres))
     file: ci/tasks/docker-compose-testflight.yml
   on_failure: *failed-concourse
 
@@ -645,69 +653,25 @@ jobs:
       trigger: true
     - get: unit-image
     - get: ci
-  - task: terraform-smoke
-    image: unit-image
-    file: ci/tasks/terraform-smoke.yml
-    input_mapping: {linux-rc: linux-dev-ubuntu}
-    params:
-      GCP_PROJECT: cf-concourse-production
-      GCP_KEY: ((concourse_smoke_gcp_key))
-      SSH_KEY: ((concourse_smoke_ssh_key))
-      DEPLOYMENT: smoke
-  - task: smoke
-    image: unit-image
-    file: ci/tasks/smoke.yml
-    input_mapping: {endpoint-info: outputs}
-  on_failure: *failed-concourse
-
-- name: bin-smoke-kernel
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed: [build-concourse]
-      trigger: true
-    - get: linux-dev-ubuntu
-      passed: [build-concourse]
-      trigger: true
-    - get: unit-image
-    - get: ci
     - get: linux-kernel-44
   - task: packer-custom-image
     file: ci/tasks/packer-custom-image.yml
-    output_mapping: {packer-image: outputs}
+    output_mapping: {outputs: packer-image}
     params:
       GCP_PROJECT: cf-concourse-production
       GCP_KEY: ((concourse_smoke_gcp_key))
-  - task: terraform-smoke
-    image: unit-image
-    file: ci/tasks/terraform-smoke.yml
-    input_mapping: {linux-rc: linux-dev-ubuntu}
-    params:
-      GCP_PROJECT: cf-concourse-production
-      GCP_KEY: ((concourse_smoke_gcp_key))
-      SSH_KEY: ((concourse_smoke_ssh_key))
-      WORKSPACE: legacy-kernel
-  - task: smoke
-    image: unit-image
-    file: ci/tasks/smoke.yml
-    input_mapping: {endpoint-info: outputs}
-  on_failure: *failed-concourse
-
-- name: bin-smoke-containerd
-  public: true
-  serial: true
-  plan:
-    - in_parallel:
-        - get: concourse
-          passed: [build-concourse]
-          trigger: true
-        - get: linux-dev-ubuntu
-          passed: [build-concourse]
-          trigger: true
-        - get: unit-image
-        - get: ci
+  - across:
+    - var: kernel
+      values: 
+      - default
+      - legacy
+      max_in_flight: all
+    - var: runtime
+      values:
+      - guardian
+      - containerd
+      max_in_flight: all
+    do:
     - task: terraform-smoke
       image: unit-image
       file: ci/tasks/terraform-smoke.yml
@@ -716,9 +680,9 @@ jobs:
         GCP_PROJECT: cf-concourse-production
         GCP_KEY: ((concourse_smoke_gcp_key))
         SSH_KEY: ((concourse_smoke_ssh_key))
-        DEPLOYMENT: smoke
-        WORKSPACE: containerd
-        TF_VAR_USE_CONTAINERD: "true"
+        WORKSPACE: ((.:kernel))-kernel-((.:runtime))
+        KERNEL: ((.:kernel))
+        TF_VAR_RUNTIME_TYPE: ((.:runtime))
     - task: smoke
       image: unit-image
       file: ci/tasks/smoke.yml
@@ -819,6 +783,7 @@ jobs:
   - put: smoke-deployment
     tags: [bosh]
     params:
+      recreate: true
       manifest: ci/deployments/bosh-smoke.yml
       releases:
       - concourse-release/*.tgz
@@ -838,6 +803,59 @@ jobs:
       BOSH_CLIENT: ((testing_bosh_client.id))
       BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
       BOSH_DEPLOYMENT: concourse-smoke
+      BOSH_INSTANCE_GROUP: concourse
+  - task: smoke
+    tags: [bosh]
+    image: unit-image
+    file: ci/tasks/smoke.yml
+    timeout: 1h
+  on_failure: *failed-concourse
+
+- name: bosh-smoke-containerd
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    # these don't trigger, to ensure that the job gets triggered by
+    # concourse-release, which is unfortunately decoupled from the resource
+    # that we 'put' to.
+    - get: concourse
+      passed: [bosh-bump]
+    - get: unit-image
+    - get: concourse-release
+      trigger: true
+    - get: postgres-release
+      trigger: true
+    - get: bpm-release
+      trigger: true
+    - get: gcp-xenial-stemcell
+      trigger: true
+    - get: ci
+  - put: smoke-deployment-containerd
+    tags: [bosh]
+    params:
+      recreate: true
+      manifest: ci/deployments/bosh-smoke.yml
+      ops_files:
+      - ci/deployments/bosh-operations/runtime-containerd.yml
+      releases:
+      - concourse-release/*.tgz
+      - postgres-release/*.tgz
+      - bpm-release/*.tgz
+      stemcells:
+      - gcp-xenial-stemcell/*.tgz
+      vars:
+        deployment_name: concourse-smoke-containerd
+  - task: discover-bosh-endpoint-info
+    tags: [bosh]
+    file: ci/tasks/discover-bosh-endpoint-info.yml
+    image: unit-image
+    params:
+      BOSH_ENVIRONMENT: https://10.0.0.6:25555
+      BOSH_CA_CERT: ((testing_bosh_ca_cert))
+      BOSH_CLIENT: ((testing_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
+      BOSH_DEPLOYMENT: concourse-smoke-containerd
       BOSH_INSTANCE_GROUP: concourse
   - task: smoke
     tags: [bosh]
@@ -1068,6 +1086,15 @@ resources:
   source:
     uri: https://github.com/concourse/ci.git
     branch: master
+
+- name: ci-unit-image
+  type: git
+  icon: *git-icon
+  source:
+    uri: https://github.com/concourse/ci.git
+    branch: master
+    paths:
+    - dockerfiles/unit
 
 - name: notify
   type: slack-notifier
@@ -1409,6 +1436,17 @@ resources:
     client_secret: ((testing_bosh_client.secret))
     ca_cert: ((testing_bosh_ca_cert))
     deployment: concourse-smoke
+
+- name: smoke-deployment-containerd
+  tags: [bosh]
+  type: bosh-deployment
+  icon: fire
+  source:
+    target: https://10.0.0.6:25555
+    client: ((testing_bosh_client.id))
+    client_secret: ((testing_bosh_client.secret))
+    ca_cert: ((testing_bosh_ca_cert))
+    deployment: concourse-smoke-containerd
 
 - name: gcp-xenial-stemcell
   type: bosh-io-stemcell

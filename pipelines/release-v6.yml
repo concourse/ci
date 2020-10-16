@@ -5,6 +5,7 @@
 #                                       concourse matches the desired release version
 #   ((concourse_smoke_deployment_name)) a unique name for the smoke bosh deployment
 #   ((latest_release))                  the latest concourse/concourse tag for upgrade testing (choose this based on the patch release eg 5.5 for 5.5.x)
+#   ((has_runtime_flag))                whether the CONCOURSE_RUNTIME flag is supported by this version (determines how to deploy containerd-backed workers)
 #
 # the following git branches need to be created:
 #
@@ -37,14 +38,12 @@ groups:
   - resource-types-images
   - dev-image
   - testflight
-  - testflight-containerd
   - containerd-integration
   - watsjs
   - rc
   - build-rc
   - build-rc-image
   - bin-smoke
-  - bin-smoke-containerd
   - upgrade
   - downgrade
 
@@ -268,7 +267,9 @@ jobs:
     image: unit-image
     privileged: true
     timeout: 1h
-    params: {RUNTIME: ((.:runtime))}
+    params:
+      RUNTIME: ((.:runtime))
+      HAS_RUNTIME_FLAG: ((has_runtime_flag))
     file: ci/tasks/docker-compose-testflight.yml
   on_failure: *failed-concourse
   on_error: *failed-concourse
@@ -479,6 +480,7 @@ jobs:
       IN_CLUSTER: "true"
       KUBE_CONFIG: ((kube_config))
       CONCOURSE_IMAGE_NAME: concourse/concourse-rc
+      HELM_VERSION: ((helm_version))
   on_failure: *failed-concourse
   on_error: *failed-concourse
 
@@ -664,8 +666,8 @@ jobs:
       GCP_KEY: ((concourse_smoke_gcp_key))
       SSH_KEY: ((concourse_smoke_ssh_key))
       WORKSPACE: release-((release_minor))
-      USE_HTTPS: ((bin_smoke_use_https))
       CONCOURSE_VERSION: ((.:concourse_version))
+      TF_VAR_HAS_RUNTIME_FLAG: ((has_runtime_flag))
   - task: smoke
     image: unit-image
     file: ci/tasks/smoke.yml
@@ -701,7 +703,8 @@ jobs:
         SSH_KEY: ((concourse_smoke_ssh_key))
         DEPLOYMENT: smoke
         WORKSPACE: release-((release_minor))-containerd
-        TF_VAR_ENABLE_CONTAINERD: "true"
+        TF_VAR_RUNTIME_TYPE: "containerd"
+        TF_VAR_HAS_RUNTIME_FLAG: ((has_runtime_flag))
         CONCOURSE_VERSION: ((.:concourse_version))
     - task: smoke
       image: unit-image
@@ -923,7 +926,11 @@ jobs:
       input_mapping: {version: final-version}
     - task: build-release-notes
       file: ci/tasks/build-release-notes.yml
+      input_mapping:
+        repo: concourse
       params:
+        GITHUB_OWNER: concourse
+        GITHUB_REPO: concourse
         GITHUB_TOKEN: ((concourse_github_dummy.access_token))
         GITHUB_BRANCH: release/((release_minor)).x
   - put: concourse-draft-release

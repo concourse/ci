@@ -51,6 +51,20 @@ resources:
     paths:
     - ci
 
+- name: resource-types-website-ci
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/resource-types-website
+    paths: [ci]
+
+- name: boarding-pass-ci
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/boarding-pass
+    paths: [ci]
+
 - name: ruby-alpine-image
   type: registry-image
   source:
@@ -221,6 +235,10 @@ jobs:
     trigger: true
   - get: ft-ci
     trigger: true
+  - get: resource-types-website-ci
+    trigger: true
+  - get: boarding-pass-ci
+    trigger: true
   - set_pipeline: concourse
     file: pipelines-and-tasks/pipelines/concourse.yml
   - set_pipeline: helm-chart
@@ -244,6 +262,9 @@ jobs:
       concourse_image_tag: latest
   - set_pipeline: baggageclaim
     file: baggageclaim-ci/ci/pipeline.yml
+  - set_pipeline: dutyfree
+    team: dutyfree
+    file: resource-types-website-ci/ci/pipeline.yml
   - set_pipeline: bosh-cleanup
     file: pipelines-and-tasks/pipelines/bosh-cleanup.yml
   - set_pipeline: wings
@@ -257,8 +278,8 @@ jobs:
       release_minor: "5.5"
       latest_release: "5.5"
       concourse_smoke_deployment_name: "concourse-smoke-5-5"
-      bin_smoke_use_https: "true"
       end_of_general_support: "2020-07-31"
+      has_runtime_flag: "false"
   - set_pipeline: release-6.3.x
     file: pipelines-and-tasks/pipelines/release-v6.yml
     vars:
@@ -266,7 +287,8 @@ jobs:
       release_minor: "6.3"
       latest_release: "6.2"
       concourse_smoke_deployment_name: "concourse-smoke-6-3"
-      bin_smoke_use_https: "true"
+      has_runtime_flag: "false"
+      helm_version: "2" # tech-debt for this pipeline only
   - set_pipeline: release-6.5.x
     file: pipelines-and-tasks/pipelines/release-v6.yml
     vars:
@@ -274,7 +296,15 @@ jobs:
       release_minor: "6.5"
       latest_release: "6.4"
       concourse_smoke_deployment_name: "concourse-smoke-6-5"
-      bin_smoke_use_https: "true"
+      has_runtime_flag: "true"
+  - set_pipeline: release-6.6.x
+    file: pipelines-and-tasks/pipelines/release-v6.yml
+    vars:
+      release_major: "6"
+      release_minor: "6.6"
+      latest_release: "6.5"
+      concourse_smoke_deployment_name: "concourse-smoke-6-6"
+      has_runtime_flag: "true"
   - set_pipeline: enterprise-helm-chart
     file: concourse-for-k8s/ci/pipeline.yml
     vars:
@@ -286,6 +316,8 @@ jobs:
     file: flight-attendant-ci/ci/pipeline.yml
   - set_pipeline: ft
     file: ft-ci/ci/pipeline.yml
+  - set_pipeline: boarding-pass
+    file: boarding-pass-ci/ci/pipeline.yml
   on_failure: *notify
   on_error: *notify
 

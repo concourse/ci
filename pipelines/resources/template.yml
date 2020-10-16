@@ -8,30 +8,30 @@
   #@ if resource_name == "registry-image":
 build: #@ resource_name + "-resource"
 build_args:
-  DOCKER_PRIVATE_PASSWORD: "((registry_image_resource_docker.password))"
-  DOCKER_PRIVATE_REPO: "((registry_image_resource_docker.private_repo))"
-  DOCKER_PRIVATE_USERNAME: "((registry_image_resource_docker.username))"
-  DOCKER_PUSH_PASSWORD: "((registry_image_resource_docker.password))"
-  DOCKER_PUSH_REPO: "((registry_image_resource_docker.push_repo))"
-  DOCKER_PUSH_USERNAME: "((registry_image_resource_docker.username))"
+  DOCKER_PRIVATE_PASSWORD: ((registry_image_resource_docker.password))
+  DOCKER_PRIVATE_REPO: ((registry_image_resource_docker.private_repo))
+  DOCKER_PRIVATE_USERNAME: ((registry_image_resource_docker.username))
+  DOCKER_PUSH_PASSWORD: ((registry_image_resource_docker.password))
+  DOCKER_PUSH_REPO: ((registry_image_resource_docker.push_repo))
+  DOCKER_PUSH_USERNAME: ((registry_image_resource_docker.username))
   #@ elif resource_name == "semver":
 build: #@ resource_name + "-resource"
 build_args:
-  SEMVER_TESTING_ACCESS_KEY_ID: "((semver_resource_bucket.access_key))"
-  SEMVER_TESTING_BUCKET: "((semver_resource.bucket))"
-  SEMVER_TESTING_REGION: "((semver_resource.region))"
-  SEMVER_TESTING_SECRET_ACCESS_KEY: "((semver_resource_bucket.secret_key))"
+  SEMVER_TESTING_ACCESS_KEY_ID: ((semver_resource_bucket.access_key))
+  SEMVER_TESTING_BUCKET: ((semver_resource.bucket))
+  SEMVER_TESTING_REGION: ((semver_resource.region))
+  SEMVER_TESTING_SECRET_ACCESS_KEY: ((semver_resource_bucket.secret_key))
   #@ elif resource_name == "s3":
 build: #@ resource_name + "-resource"
 build_args:
-  S3_TESTING_ACCESS_KEY_ID: "((s3_resource_bucket.access_key))"
-  S3_TESTING_SECRET_ACCESS_KEY: "((s3_resource_bucket.secret_key))"
-  S3_TESTING_BUCKET: "((s3_resource.bucket))"
-  S3_VERSIONED_TESTING_BUCKET: "((s3_resource.versioned_bucket))"
-  S3_TESTING_REGION: "((s3_resource.region))"
-  S3_ENDPOINT: "https://s3.amazonaws.com"
+  S3_TESTING_ACCESS_KEY_ID: ((s3_resource_bucket.access_key))
+  S3_TESTING_SECRET_ACCESS_KEY: ((s3_resource_bucket.secret_key))
+  S3_TESTING_BUCKET: ((s3_resource.bucket))
+  S3_VERSIONED_TESTING_BUCKET: ((s3_resource.versioned_bucket))
+  S3_TESTING_REGION: ((s3_resource.region))
+  S3_ENDPOINT: https://s3.amazonaws.com
   #@ elif resource_name == "concourse-pipeline":
-build: "."
+build: .
   #@ else:
 build: #@ resource_name + "-resource"
   #@ end
@@ -55,28 +55,28 @@ plan:
 
 #@ def extra_steps(distro):
   #@ if resource_name == "docker-image":
-- task: "build-smoke-test-image"
-  file: "docker-image-resource/ci/build-smoke-test-image.yml"
+- task: build-smoke-test-image
+  image: oci-build-task
+  file: docker-image-resource/ci/build-smoke-test-image.yml
   privileged: true
-  image: "oci-build-task"
   params:
     DOCKERFILE: #@ "dockerfiles/{}/Dockerfile".format(distro)
   output_mapping:
-    image: "built-resource-image"
-- task: "smoke-test"
-  file: "docker-image-resource/ci/smoke-test.yml"
+    image: built-resource-image
+- task: smoke-test
+  image: built-resource-image
+  file: docker-image-resource/ci/smoke-test.yml
   privileged: true
-  image: "built-resource-image"
   params:
-    REPOSITORY: "busybox"
+    REPOSITORY: busybox
   output_mapping:
-    fetched-image: "busybox"
-- task: "use-fetched-image"
-  image: "busybox"
+    fetched-image: busybox
+- task: use-fetched-image
+  image: busybox
   config:
-    platform: "linux"
+    platform: linux
     run:
-      path: "/bin/true"
+      path: /bin/true
   #@ else: return []
 #@ end
 
@@ -118,36 +118,33 @@ plan:
       tag_prefix: #@ "pr-" + distro + "-"
   - #@ template.replace(extra_steps(distro))
   on_failure:
+    put: resource-pr
     params:
       context: #@ "status-" + distro
       path: resource-pr
       status: failure
-    put: resource-pr
   on_success:
+    put: resource-pr
     params:
       context: #@ "status-" + distro
       path: resource-pr
       status: success
-    put: resource-pr
 #@ end
 
 
 #@ def get_steps(distro):
 - get: #@ determine_base(distro)
-  params:
-    save: true
   trigger: true
+  params: {save: true}
 #@ if resource_name == "cf":
-- get: "cf-cli"
+- get: cf-cli
   trigger: true
-  params:
-    globs: ["cf-cli*linux*"]
+  params: {globs: ["cf-cli*linux*"]}
 #@ elif resource_name == "concourse-pipeline":
-- get: "fly"
-  params:
-    globs: ["fly-*-linux-amd64.tgz"]
+- get: fly
+  params: {globs: ["fly-*-linux-amd64.tgz"]}
 #@ elif resource_name == "docker-image":
-- get: "oci-build-task"
+- get: oci-build-task
 #@ end
 #@ end
 
@@ -159,21 +156,20 @@ plan:
     passed:
     - build-alpine
     - build-ubuntu
+  - get: ci
+  - get: release-me
   - get: resource-image-dev-alpine
-    params:
-      save: true
-    passed:
-    - build-alpine
+    passed: [build-alpine]
+    params: {save: true}
   - get: resource-image-dev-ubuntu
-    params:
-      save: true
-    passed:
-    - build-ubuntu
+    params: {save: true}
+    passed: [build-ubuntu]
   - get: version
     params:
       bump: #@ bump
 - task: create-release
   config:
+    platform: linux
     image_resource:
       type: registry-image
       source:
@@ -185,8 +181,8 @@ plan:
     outputs:
     - name: release
     - name: docker
-    platform: linux
     run:
+      path: bash
       args:
       - "-exc"
       #@yaml/text-templated-strings
@@ -218,16 +214,25 @@ plan:
           tar -czf rootfs.tgz -C rootfs .
           tar -czf ../release/(@= resource_name @)-resource-${version}-ubuntu.tgz rootfs.tgz resource_metadata.json
         popd
-      path: bash
+- task: build-release-notes
+  file: ci/tasks/build-release-notes.yml
+  params:
+    GITHUB_OWNER: concourse
+    GITHUB_REPO: #@ resource_name + "-resource"
+    GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+    GITHUB_BRANCH: master
+  input_mapping:
+    repo: resource-repo
 - task: generate-dpkg-list
-  image: "resource-image-dev-ubuntu"
+  image: resource-image-dev-ubuntu
   config:
+    platform: linux
     inputs:
     - name: version
     outputs:
     - name: dpkg-file
-    platform: linux
     run:
+      path: bash
       args:
       - "-exc"
       #@yaml/text-templated-strings
@@ -236,30 +241,30 @@ plan:
         RESOURCE="(@= resource_name @)"
         DPKG_FILE="${RESOURCE}-dpkg-list-${VERSION}.txt"
         dpkg -l > "dpkg-file/${DPKG_FILE}"
-      path: bash
 - in_parallel:
-  - params:
+  - put: resource-image-alpine
+    params:
       additional_tags: docker/tags
       load: resource-image-dev-alpine
       tag_as_latest: true
-    put: resource-image-alpine
-  - params:
+  - put: resource-image-ubuntu
+    params:
       load: resource-image-dev-ubuntu
-    put: resource-image-ubuntu
-  - params:
+  - put: resource-repo-release
+    params:
       commitish: resource-repo/.git/ref
+      body: built-notes/notes.md
       globs:
       - release/*.tgz
       name: release/name
       tag: version/version
       tag_prefix: v
-    put: resource-repo-release
-- params:
+- put: dpkg-list-store
+  params:
     file: #@ "dpkg-file/" + resource_name + "-dpkg-list-*.txt"
-  put: dpkg-list-store
-- params:
+- put: version
+  params:
     file: version/version
-  put: version
 #@ end
 
 #@ def unique_version_history():
@@ -292,8 +297,8 @@ resource_types:
     repository: concourse/semver-resource
 
 - name: docker-image
-  privileged: true
   type: registry-image
+  privileged: true
   source:
     repository: concourse/docker-image-resource
 
@@ -314,114 +319,128 @@ resource_types:
 
 
 resources:
-- icon: docker
-  name: alpine-edge
+- name: alpine-edge
+  type: docker-image
+  icon: docker
   source:
     repository: alpine
     tag: edge
-  type: docker-image
 
-- icon: docker
-  name: ubuntu-bionic
+- name: ubuntu-bionic
+  type: docker-image
+  icon: docker
   source:
     repository: ubuntu
     tag: bionic
-  type: docker-image
 
-- icon: github
-  name: resource-repo
+- name: resource-repo
+  type: git
+  icon: github
   source:
     branch: master
-    private_key: "((concourse_bot_private_key))"
+    private_key: ((concourse_bot_private_key))
     uri: #@ "git@github.com:concourse/" + resource_name + "-resource"
-  type: git
 
-- icon: package-variant-closed
-  name: resource-repo-release
+- name: resource-repo-release
+  type: github-release
+  icon: package-variant-closed
   source:
-    access_token: "((concourse_bot_access_token))"
+    access_token: ((concourse_bot_access_token))
     owner: concourse
     repository: #@ resource_name + "-resource"
-  type: github-release
 
-- icon: tag
-  name: version
+- name: version
+  type: semver
+  icon: tag
   source:
     branch: version
     driver: git
     file: version
-    private_key: "((concourse_bot_private_key))"
+    private_key: ((concourse_bot_private_key))
     uri: #@ "git@github.com:concourse/" + resource_name + "-resource"
-  type: semver
 
-- icon: source-pull
-  name: resource-pr
+- name: resource-pr
+  type: pull-request
+  icon: source-pull
   source:
-    access_token: "((pull_requests_access_token))"
+    access_token: ((pull_requests_access_token))
     base: master
     repo: #@ "concourse/" + resource_name + "-resource"
-  type: pull-request
 
-- icon: docker
-  name: resource-image-alpine
+- name: resource-image-alpine
+  type: docker-image
+  icon: docker
   source:
-    password: "((docker.password))"
+    password: ((docker.password))
     repository: #@ "concourse/" + resource_name + "-resource"
     tag: alpine
-    username: "((docker.username))"
-  type: docker-image
+    username: ((docker.username))
 
-- icon: docker
-  name: resource-image-ubuntu
+- name: resource-image-ubuntu
+  type: docker-image
+  icon: docker
   source:
-    password: "((docker.password))"
+    password: ((docker.password))
     repository: #@ "concourse/" + resource_name + "-resource"
     tag: ubuntu
-    username: "((docker.username))"
-  type: docker-image
+    username: ((docker.username))
 
-- icon: docker
-  name: resource-image-dev-alpine
+- name: resource-image-dev-alpine
+  type: docker-image
+  icon: docker
   source:
-    password: "((docker.password))"
+    password: ((docker.password))
     repository: #@ "concourse/" + resource_name + "-resource"
     tag: dev
-    username: "((docker.username))"
-  type: docker-image
+    username: ((docker.username))
 
-- icon: docker
-  name: resource-image-dev-ubuntu
+- name: resource-image-dev-ubuntu
+  type: docker-image
+  icon: docker
   source:
-    password: "((docker.password))"
+    password: ((docker.password))
     repository: #@ "concourse/" + resource_name + "-resource"
     tag: dev-ubuntu
-    username: "((docker.username))"
-  type: docker-image
+    username: ((docker.username))
 
 - name: dpkg-list-store
+  type: gcs
   source:
     bucket: concourse-ubuntu-dpkg-list
-    json_key: "((concourse_dpkg_list_json_key))"
+    json_key: ((concourse_dpkg_list_json_key))
     regexp: #@ resource_name + "-dpkg-list-(.*).txt"
-  type: gcs
+
+- name: ci
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/ci.git
+    branch: master
+
+- name: release-me
+  type: github-release
+  icon: package-down
+  source:
+    owner: clarafu
+    repository: release-me
 
 #@ if resource_name == "cf":
-- name: "cf-cli"
-  type: "s3"
+- name: cf-cli
+  type: s3
   source:
-    bucket: "cf-cli-releases"
+    bucket: cf-cli-releases
     regexp: "releases/v([\\d\\.]+)/cf-cli_.*_linux_x86-64.tgz"
-    region_name: "us-west-1"
+    region_name: us-west-1
 #@ elif resource_name == "concourse-pipeline":
-- name: "fly"
-  type: "github-release"
+- name: fly
+  type: github-release
   source:
-    user: "concourse"
-    repository: "concourse"
-    access_token: "((concourse_github_dummy.access_token))"
+    user: concourse
+    repository: concourse
+    access_token: ((concourse_github_dummy.access_token))
 #@ elif resource_name == "docker-image":
-- name: "oci-build-task"
-  type: "registry-image"
+- name: oci-build-task
+  type: registry-image
   source:
-    repository: "vito/oci-build-task"
+    repository: vito/oci-build-task
 #@ end

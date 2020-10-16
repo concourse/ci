@@ -6,8 +6,8 @@ releasename="pr-$(cat concourse/.git/resource/pr)-$(head -c 6 concourse/.git/res
 
 function cleanup {
     sleep 10
-    helm delete --purge "$releasename" || true
-    kubectl delete --ignore-not-found=true namespace "$releasename-main"
+    helm delete "$releasename" --namespace "$releasename" || true
+    kubectl delete --ignore-not-found=true namespace "$releasename"
 }
 trap cleanup EXIT
 
@@ -17,9 +17,12 @@ if [ ! -f ~/.kube/config ]; then
   echo "$KUBE_CONFIG" > ~/.kube/config
 fi
 
-# TODO: this needs to be updated for migrating to helm 3
-helm init --client-only
 helm lint concourse
 helm dependency update ./concourse
-helm install ./concourse --name "$releasename"
+helm install \
+  "$releasename" \
+  ./concourse \
+  --set=concourse.web.kubernetes.keepNamespaces=false \   # cleanup namespaces created by team secrets
+  --namespace "$releasename" \
+  --create-namespace
 # TODO: actually poke concourse to see that it's up. For now this just ensures helm doesn't exit 1 when installing

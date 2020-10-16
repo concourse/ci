@@ -13,7 +13,11 @@ export CONCOURSE_DEV_TAG=$(cat dev-image/tag)
 export POSTGRES_TAG=$(cat postgres-image/tag)
 export CONCOURSE_KEYS=$PWD/keys
 
-DOCKER_COMPOSE_FLAGS="-f concourse/docker-compose.yml -f ci/overrides/docker-compose.ci-$RUNTIME.yml"
+if [ "$RUNTIME" = "containerd" && "$HAS_RUNTIME_FLAG" = "false" ]; then
+  DOCKER_COMPOSE_FLAGS="-f concourse/docker-compose.yml -f ci/overrides/docker-compose.ci-containerd-legacy.yml"
+else
+  DOCKER_COMPOSE_FLAGS="-f concourse/docker-compose.yml -f ci/overrides/docker-compose.ci-$RUNTIME.yml"
+fi
 
 if [ "$BUILD" = "true" ]; then
   docker-compose \

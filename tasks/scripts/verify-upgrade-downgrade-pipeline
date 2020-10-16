@@ -47,13 +47,6 @@ fly -t local builds \
 fly -t local watch -j "test-pipeline/test-job" \
   | grep "succeeded"
 
-# TODO pre-5.6 fly check-resource outputs 'checked'
-# for a succussful check when since 5.6 it outputs
-# `1 test-resource succeeded`. Thus it needs to consider
-# a case when downgrade to any version under 5.6.
-# Once 5.6 has shiped it then doesn't need to
-# grep 'checked' anymore
-
 # test that we can check our resources
 fly -t local check-resource -r "test-pipeline/test-resource" \
-  | grep -E "(test-resource.*succeeded|checked)"
+  | grep "succeeded"

@@ -11,6 +11,7 @@ inputs:
 - name: dev-image
   optional: true
 - name: postgres-image
+- name: postgres-image-legacy
   optional: true
 
 caches:
@@ -20,6 +21,7 @@ params:
   BUILD:
   RUNTIME: guardian
   DOWNLOAD_CLI: true
+  HAS_RUNTIME_FLAG: true
 
 run:
   path: ci/tasks/scripts/pass-release-notes-only-change
