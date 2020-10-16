@@ -17,7 +17,7 @@ variable "image" {
   default = "ubuntu-1804-bionic-v20181003"
 }
 
-variable "RUNTIME_TYPE" {
+variable "RUNTIME" {
   type    = string
   default = "guardian"
 }
@@ -134,7 +134,7 @@ data "template_file" "worker_conf" {
   template = file("systemd/smoke-worker.conf.tpl")
 
   vars = {
-    runtime_type     = var.RUNTIME_TYPE
+    runtime          = var.RUNTIME
     has_runtime_flag = var.HAS_RUNTIME_FLAG
   }
 }

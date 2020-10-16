@@ -680,7 +680,7 @@ jobs:
         SSH_KEY: ((concourse_smoke_ssh_key))
         WORKSPACE: ((.:kernel))-kernel-((.:runtime))
         KERNEL: ((.:kernel))
-        TF_VAR_RUNTIME_TYPE: ((.:runtime))
+        TF_VAR_RUNTIME: ((.:runtime))
     - task: smoke
       image: unit-image
       file: ci/tasks/smoke.yml

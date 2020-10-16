@@ -673,7 +673,7 @@ jobs:
       SSH_KEY: ((concourse_smoke_ssh_key))
       WORKSPACE: release-((release_minor))-((.:runtime))
       CONCOURSE_VERSION: ((.:concourse_version))
-      TF_VAR_RUNTIME_TYPE: ((.:runtime))
+      TF_VAR_RUNTIME: ((.:runtime))
       TF_VAR_HAS_RUNTIME_FLAG: ((has_runtime_flag))
   - task: smoke
     image: unit-image

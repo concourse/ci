@@ -13,7 +13,7 @@ params:
   CONCOURSE_VERSION: "dev"
   KERNEL: "default"
   # variables consumed by terraform and their default values
-  # TF_VAR_RUNTIME_TYPE: "guardian"
+  # TF_VAR_RUNTIME: "guardian"
   # TF_VAR_HAS_RUNTIME_FLAG: "true"
 
 inputs:
