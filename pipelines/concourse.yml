@@ -29,8 +29,6 @@ groups:
   - build-concourse
   - build-image
   - bin-smoke
-  - bin-smoke-containerd
-  - bin-smoke-kernel
   - upgrade
   - downgrade
 
