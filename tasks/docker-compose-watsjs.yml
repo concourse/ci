@@ -20,6 +20,7 @@ caches:
 params:
   BUILD:
   RUNTIME: guardian
+  POSTGRES_IMAGE: postgres-image
 
 run:
   path: ci/tasks/scripts/pass-release-notes-only-change
