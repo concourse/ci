@@ -1,7 +1,5 @@
 #!/bin/bash
 
-POSTGRES_IMAGE=${POSTGRES_IMAGE:-postgres-image}
-
 set -e -u
 
 source ci/tasks/scripts/docker-helpers.sh
@@ -9,21 +7,16 @@ source ci/tasks/scripts/docker-helpers.sh
 start_docker
 
 [ -d dev-image ] && docker load -i dev-image/image.tar
-[ -d "$POSTGRES_IMAGE" ] && docker load -i $POSTGRES_IMAGE/image.tar
+[ -d "$POSTGRES_IMAGE" ] && docker load -i "$POSTGRES_IMAGE/image.tar"
 
 export CONCOURSE_DEV_TAG=$(cat dev-image/tag)
-export POSTGRES_TAG=$(cat $POSTGRES_IMAGE/tag)
+export POSTGRES_TAG=$(cat "$POSTGRES_IMAGE/tag")
 export CONCOURSE_KEYS=$PWD/keys
 
-DOCKER_COMPOSE_FLAGS=""
-
-if [ "$CONTAINERD" = "true" ]; then
-  DOCKER_COMPOSE_FLAGS="-f concourse/docker-compose.yml -f ci/overrides/docker-compose.ci-containerd.yml"
-  if [ "$HAS_RUNTIME_FLAG" = "false" ]; then
-    DOCKER_COMPOSE_FLAGS="-f concourse/docker-compose.yml -f ci/overrides/docker-compose.ci-containerd-legacy.yml"
-  fi
+if [ "$RUNTIME" = "containerd" && "$HAS_RUNTIME_FLAG" = "false" ]; then
+  DOCKER_COMPOSE_FLAGS="-f concourse/docker-compose.yml -f ci/overrides/docker-compose.ci-containerd-legacy.yml"
 else
-  DOCKER_COMPOSE_FLAGS="-f concourse/docker-compose.yml -f ci/overrides/docker-compose.ci-guardian.yml"
+  DOCKER_COMPOSE_FLAGS="-f concourse/docker-compose.yml -f ci/overrides/docker-compose.ci-$RUNTIME.yml"
 fi
 
 if [ "$BUILD" = "true" ]; then

@@ -38,14 +38,12 @@ groups:
   - resource-types-images
   - dev-image
   - testflight
-  - testflight-containerd
   - containerd-integration
   - watsjs
   - rc
   - build-rc
   - build-rc-image
   - bin-smoke
-  - bin-smoke-containerd
   - upgrade
   - downgrade
 
@@ -259,36 +257,18 @@ jobs:
     - get: postgres-image
       params: {format: oci}
     - get: ci
-  - task: testflight
-    image: unit-image
-    privileged: true
-    timeout: 1h
-    file: ci/tasks/docker-compose-testflight.yml
-  on_failure: *failed-concourse
-  on_error: *failed-concourse
-
-- name: testflight-containerd
-  public: true
-  max_in_flight: 2
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed: [unit, dev-image]
-      trigger: true
-    - get: unit-image
-    - get: dev-image
-      passed: [dev-image]
-      trigger: true
-      params: {format: oci}
-    - get: postgres-image
-      params: {format: oci}
-    - get: ci
-  - task: testflight
+  - across:
+    - var: runtime
+      values:
+      - guardian
+      - containerd
+      max_in_flight: all
+    task: testflight
     image: unit-image
     privileged: true
     timeout: 1h
     params:
-      CONTAINERD: true
+      RUNTIME: ((.:runtime))
       HAS_RUNTIME_FLAG: ((has_runtime_flag))
     file: ci/tasks/docker-compose-testflight.yml
   on_failure: *failed-concourse
@@ -677,7 +657,13 @@ jobs:
     - get: ci
   - load_var: concourse_version
     file: version/version
-  - task: terraform-smoke
+  - across:
+    - var: runtime
+      values:
+      - guardian
+      - containerd
+      max_in_flight: all
+    task: terraform-smoke
     image: unit-image
     file: ci/tasks/terraform-smoke.yml
     input_mapping: {linux-rc: linux-rc-ubuntu}
@@ -685,8 +671,9 @@ jobs:
       GCP_PROJECT: cf-concourse-production
       GCP_KEY: ((concourse_smoke_gcp_key))
       SSH_KEY: ((concourse_smoke_ssh_key))
-      WORKSPACE: release-((release_minor))
+      WORKSPACE: release-((release_minor))-((.:runtime))
       CONCOURSE_VERSION: ((.:concourse_version))
+      TF_VAR_RUNTIME: ((.:runtime))
       TF_VAR_HAS_RUNTIME_FLAG: ((has_runtime_flag))
   - task: smoke
     image: unit-image
@@ -694,43 +681,6 @@ jobs:
     input_mapping: {endpoint-info: outputs}
   on_failure: *failed-concourse
   on_error: *failed-concourse
-
-- name: bin-smoke-containerd
-  public: true
-  serial: true
-  plan:
-    - in_parallel:
-      - get: concourse
-        passed: [build-rc]
-        trigger: true
-      - get: version
-        passed: [build-rc]
-        trigger: true
-      - get: linux-rc-ubuntu
-        passed: [build-rc]
-        trigger: true
-      - get: unit-image
-      - get: ci
-    - load_var: concourse_version
-      file: version/version
-    - task: terraform-smoke
-      image: unit-image
-      file: ci/tasks/terraform-smoke.yml
-      input_mapping: {linux-rc: linux-rc-ubuntu}
-      params:
-        GCP_PROJECT: cf-concourse-production
-        GCP_KEY: ((concourse_smoke_gcp_key))
-        SSH_KEY: ((concourse_smoke_ssh_key))
-        DEPLOYMENT: smoke
-        WORKSPACE: release-((release_minor))-containerd
-        TF_VAR_ENABLE_CONTAINERD: "true"
-        TF_VAR_HAS_RUNTIME_FLAG: ((has_runtime_flag))
-        CONCOURSE_VERSION: ((.:concourse_version))
-    - task: smoke
-      image: unit-image
-      file: ci/tasks/smoke.yml
-      input_mapping: {endpoint-info: outputs}
-  on_failure: *failed-concourse
 
 - name: bosh-check-props
   public: true

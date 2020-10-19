@@ -11,8 +11,9 @@ params:
   SSH_KEY:
   WORKSPACE: default
   CONCOURSE_VERSION: "dev"
+  KERNEL: "default"
   # variables consumed by terraform and their default values
-  # TF_VAR_ENABLE_CONTAINERD: "false"
+  # TF_VAR_RUNTIME: "guardian"
   # TF_VAR_HAS_RUNTIME_FLAG: "true"
 
 inputs:
