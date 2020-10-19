@@ -658,9 +658,10 @@ jobs:
       GCP_KEY: ((concourse_smoke_gcp_key))
   - across:
     - var: kernel
-      values: 
+      values:
       - default
-      - legacy
+      # TODO: revisit this once we figure out what our testing strategy regarding older kernels is
+      # - legacy
       max_in_flight: all
     - var: runtime
       values:
@@ -683,6 +684,7 @@ jobs:
       image: unit-image
       file: ci/tasks/smoke.yml
       input_mapping: {endpoint-info: outputs}
+    timeout: 20m
   on_failure: *failed-concourse
 
 - name: quickstart-smoke
