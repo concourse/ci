@@ -7,10 +7,10 @@ source ci/tasks/scripts/docker-helpers.sh
 start_docker
 
 [ -d dev-image ] && docker load -i dev-image/image.tar
-[ -d postgres-image ] && docker load -i postgres-image/image.tar
+[ -d "$POSTGRES_IMAGE" ] && docker load -i "$POSTGRES_IMAGE/image.tar"
 
 export CONCOURSE_DEV_TAG=$(cat dev-image/tag)
-export POSTGRES_TAG=$(cat postgres-image/tag)
+export POSTGRES_TAG=$(cat "$POSTGRES_IMAGE/tag")
 export CONCOURSE_KEYS=$PWD/keys
 
 if [ "$RUNTIME" = "containerd" && "$HAS_RUNTIME_FLAG" = "false" ]; then

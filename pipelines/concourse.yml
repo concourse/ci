@@ -287,8 +287,7 @@ jobs:
       passed: [dev-image]
       trigger: true
       params: {format: oci}
-    - get: postgres-image-latest
-      resource: postgres-image
+    - get: postgres-image
       params: {format: oci}
     - get: postgres-image-legacy
       params: {format: oci}
@@ -299,19 +298,18 @@ jobs:
       - guardian
       - containerd
       max_in_flight: all
-    - var: postgres
+    - var: postgres-image
       values:
-      - latest
-      - legacy
+      - postgres-image
+      - postgres-image-legacy
       max_in_flight: all
     task: testflight
     image: unit-image
     privileged: true
     timeout: 1h
-    params: 
+    params:
       RUNTIME: ((.:runtime))
-    input_mapping: 
-      postgres-image: postgres-image-((.:postgres))
+      POSTGRES_IMAGE: ((.:postgres-image))
     file: ci/tasks/docker-compose-testflight.yml
   on_failure: *failed-concourse
 
