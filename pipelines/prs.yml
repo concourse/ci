@@ -41,7 +41,7 @@ resources:
   source:
     uri: https://github.com/concourse/docs
 
-- name: validator 
+- name: validator
   type: github-release
   icon: github
   source:
