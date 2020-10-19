@@ -305,6 +305,7 @@ jobs:
       latest_release: "6.5"
       concourse_smoke_deployment_name: "concourse-smoke-6-6"
       has_runtime_flag: "true"
+      helm_version: "3"
   - set_pipeline: enterprise-helm-chart
     file: concourse-for-k8s/ci/pipeline.yml
     vars:
