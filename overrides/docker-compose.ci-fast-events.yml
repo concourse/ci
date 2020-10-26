@@ -1,0 +1,6 @@
+version: '3'
+
+services:
+  web:
+    environment:
+      CONCOURSE_BUILD_EVENTS_BIGINT_INTERVAL: 1s

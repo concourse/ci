@@ -27,7 +27,7 @@ cd concourse
 export CONCOURSE_KEYS=$PWD/keys
 $inputs/ci/tasks/scripts/generate-keys
 
-DOCKER_COMPOSE_FLAGS="-f docker-compose.yml -f $inputs/ci/overrides/docker-compose.ci-guardian.yml"
+DOCKER_COMPOSE_FLAGS="-f docker-compose.yml -f $inputs/ci/overrides/docker-compose.ci-guardian.yml -f $inputs/ci/overrides/docker-compose.ci-fast-events.yml"
 
 # start with latest release and set up
 docker-compose \

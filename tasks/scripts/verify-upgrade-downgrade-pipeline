@@ -43,10 +43,12 @@ fly -t local set-pipeline -n \
 fly -t local builds \
   | grep "test-pipeline/test-job.*1.*succeeded"
 
-# test that we can still read build logs
-fly -t local watch -j "test-pipeline/test-job" \
-  | grep "succeeded"
-
 # test that we can check our resources
 fly -t local check-resource -r "test-pipeline/test-resource" \
+  | grep "succeeded"
+
+sleep 10
+
+# test that we can still read build logs
+fly -t local watch -j "test-pipeline/test-job" \
   | grep "succeeded"
