@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e -u
+set -e -u -x
 
 source ci/tasks/scripts/docker-helpers.sh
 
