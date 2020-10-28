@@ -3,4 +3,4 @@
 go get github.com/onsi/ginkgo/ginkgo
 go get github.com/onsi/gomega
 go get -d -v ./...
-ginkgo -r ci/tasks/scripts
+ginkgo -flakeAttempts=3 -r ci/tasks/scripts
