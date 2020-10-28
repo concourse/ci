@@ -30,6 +30,7 @@ $inputs/ci/tasks/scripts/generate-keys
 DOCKER_COMPOSE_FLAGS="-f docker-compose.yml -f $inputs/ci/overrides/docker-compose.ci-guardian.yml -f $inputs/ci/overrides/docker-compose.ci-fast-events.yml"
 
 # start with rc and set up
+echo "Deploying Concourse RC"
 if [ "$BUILD" = "true" ]; then
   docker-compose \
     $DOCKER_COMPOSE_FLAGS \
@@ -51,6 +52,7 @@ function stop_docker_compose() {
 $inputs/ci/tasks/scripts/create-upgrade-downgrade-pipeline
 
 # perform down migrations
+echo "Migrating Concourse DB to $downgrade_to"
 downgrade_to=$(docker run concourse/concourse:latest migrate --supported-db-version)
 docker-compose exec web concourse migrate --migrate-db-to-version $downgrade_to
 
@@ -61,6 +63,7 @@ docker-compose exec web concourse migrate --migrate-db-to-version $downgrade_to
 docker-compose stop worker
 
 # downgrade and verify
+echo "Deploying Concourse released version"
 docker-compose \
   $DOCKER_COMPOSE_FLAGS \
   -f $inputs/ci/overrides/docker-compose.no-build.yml \
