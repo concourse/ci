@@ -52,8 +52,8 @@ function stop_docker_compose() {
 $inputs/ci/tasks/scripts/create-upgrade-downgrade-pipeline
 
 # perform down migrations
-echo "Migrating Concourse DB to $downgrade_to"
 downgrade_to=$(docker run concourse/concourse:latest migrate --supported-db-version)
+echo "Migrating Concourse DB to $downgrade_to"
 docker-compose exec web concourse migrate --migrate-db-to-version $downgrade_to
 
 # this is needed so that the worker unregisters with the ATC.
