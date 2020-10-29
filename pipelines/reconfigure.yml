@@ -289,15 +289,6 @@ jobs:
       concourse_smoke_deployment_name: "concourse-smoke-6-3"
       has_runtime_flag: "false"
       helm_version: "2" # tech-debt for this pipeline only
-  - set_pipeline: release-6.6.x
-    file: pipelines-and-tasks/pipelines/release-v6.yml
-    vars:
-      release_major: "6"
-      release_minor: "6.6"
-      latest_release: "6.5"
-      concourse_smoke_deployment_name: "concourse-smoke-6-6"
-      has_runtime_flag: "true"
-      helm_version: "2" # tech-debt for this pipeline only
   - set_pipeline: release-6.7.x
     file: pipelines-and-tasks/pipelines/release-v6.yml
     vars:
