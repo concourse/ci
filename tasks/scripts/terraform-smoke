@@ -10,10 +10,6 @@ if [ -d linux-rc ]; then
   cp linux-rc/concourse-*.tgz $deployment_path/concourse.tgz
 fi
 
-if [ $KERNEL == "legacy" ]; then
-  image_var="-var image=$(cat 'packer-image/image-name')"
-fi
-
 cd $deployment_path
 
 echo "$GCP_KEY" > keys/gcp.json
@@ -30,7 +26,6 @@ terraform workspace select "$WORKSPACE" || \
 terraform apply \
   --auto-approve \
   --var project=$GCP_PROJECT \
-  ${image_var:-}
 
 {
   terraform output -json | \

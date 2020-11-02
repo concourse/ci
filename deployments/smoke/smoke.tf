@@ -12,19 +12,16 @@ variable "region" {
   default = "us-central1"
 }
 
-variable "image" {
+variable "GCP_IMAGE" {
   type    = string
-  default = "ubuntu-1804-bionic-v20181003"
 }
 
 variable "RUNTIME" {
   type    = string
-  default = "guardian"
 }
 
 variable "HAS_RUNTIME_FLAG" {
   type    = bool
-  default = true
 }
 
 provider "google" {
@@ -63,7 +60,7 @@ resource "google_compute_instance" "smoke" {
 
   boot_disk {
     initialize_params {
-      image = var.image
+      image = var.GCP_IMAGE
       size  = "30"
     }
   }

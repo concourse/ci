@@ -11,10 +11,10 @@ params:
   SSH_KEY:
   WORKSPACE: default
   CONCOURSE_VERSION: "dev"
-  KERNEL: "default"
   # variables consumed by terraform and their default values
-  # TF_VAR_RUNTIME: "guardian"
-  # TF_VAR_HAS_RUNTIME_FLAG: "true"
+  TF_VAR_GCP_IMAGE: "ubuntu-2004-lts"
+  TF_VAR_RUNTIME: "guardian"
+  TF_VAR_HAS_RUNTIME_FLAG: "true"
 
 inputs:
 - name: concourse
