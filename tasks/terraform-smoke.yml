@@ -19,8 +19,6 @@ params:
 inputs:
 - name: concourse
 - name: ci
-- name: packer-image
-  optional: true
 - name: linux-rc
   optional: true
 

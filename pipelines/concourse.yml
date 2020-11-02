@@ -649,13 +649,6 @@ jobs:
       trigger: true
     - get: unit-image
     - get: ci
-    - get: linux-kernel-44
-  - task: packer-custom-image
-    file: ci/tasks/packer-custom-image.yml
-    output_mapping: {outputs: packer-image}
-    params:
-      GCP_PROJECT: cf-concourse-production
-      GCP_KEY: ((concourse_smoke_gcp_key))
   - across:
     - var: kernel
       values:
@@ -1350,14 +1343,6 @@ resources:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
     regexp: dev/concourse-(.*)\.darwin\.amd64\.tgz
-
-- name: linux-kernel-44
-  type: gcs
-  icon: linux
-  source:
-    bucket: concourse-artifacts
-    json_key: ((concourse_artifacts_json_key))
-    regexp: kernel/linux-kernel-v4.4.(.*)\.tgz
 
 - name: docs
   type: git
