@@ -883,6 +883,7 @@ jobs:
     - get: concourse-rc-image-ubuntu
     - get: concourse-release
       passed: [bosh-smoke, bosh-topgun]
+      params: {tarball: false}
     - get: bpm-release
       passed: [bosh-smoke, bosh-topgun]
     - get: postgres-release
@@ -941,6 +942,7 @@ jobs:
       passed: [create-draft-release]
     - get: concourse-release
       passed: [create-draft-release]
+      params: {tarball: false}
     - get: bpm-release
       passed: [create-draft-release]
     - get: postgres-release
