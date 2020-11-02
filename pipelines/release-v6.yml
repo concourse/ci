@@ -658,6 +658,12 @@ jobs:
   - load_var: concourse_version
     file: version/version
   - across:
+    - var: gcp-image
+      values:
+      - ubuntu-1604-lts
+      - ubuntu-1804-lts
+      - ubuntu-2004-lts
+      max_in_flight: 1
     - var: runtime
       values:
       - guardian
@@ -674,6 +680,7 @@ jobs:
           SSH_KEY: ((concourse_smoke_ssh_key))
           WORKSPACE: release-((release_minor))-((.:runtime))
           CONCOURSE_VERSION: ((.:concourse_version))
+          TF_VAR_GCP_IMAGE: ((.:gcp-image))
           TF_VAR_RUNTIME: ((.:runtime))
           TF_VAR_HAS_RUNTIME_FLAG: ((has_runtime_flag))
       - task: smoke
