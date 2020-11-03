@@ -5,7 +5,7 @@
 #                                       concourse matches the desired release version
 #   ((concourse_smoke_deployment_name)) a unique name for the smoke bosh deployment
 #   ((latest_release))                  the latest concourse/concourse tag for upgrade testing (choose this based on the patch release eg 5.5 for 5.5.x)
-#   ((end_of_general_support))          YYYY-MM-dd format when support for this minor line ends
+#   ((has_runtime_flag))                whether the CONCOURSE_RUNTIME flag is supported by this version (determines how to deploy containerd-backed workers)
 #
 # the following git branches need to be created:
 #
@@ -31,12 +31,6 @@ resource_types:
   type: registry-image
   source: {repository: mockersf/concourse-slack-notifier}
 
-- name: pivnet
-  type: registry-image
-  source:
-    repository: pivotalcf/pivnet-resource
-    tag: latest-final
-
 groups:
 - name: develop
   jobs:
@@ -44,6 +38,7 @@ groups:
   - resource-types-images
   - dev-image
   - testflight
+  - containerd-integration
   - watsjs
   - rc
   - build-rc
@@ -67,13 +62,12 @@ groups:
 
 - name: publish
   jobs:
+  - create-draft-release
   - shipit
   - publish-binaries
   - publish-image
   - publish-bosh-release
-  - publish-pivnet-bosh
   - bump-cbd-versions
-  - publish-docs
   - patch
   - discover-component-version
 
@@ -185,6 +179,12 @@ jobs:
         trigger: true
       - get: gdn
         trigger: true
+      - get: containerd
+        trigger: true
+      - get: runc
+        trigger: true
+      - get: cni
+        trigger: true
       - get: dumb-init
         trigger: true
       - get: resource-types-alpine-image
@@ -221,6 +221,25 @@ jobs:
   on_failure: *failed-concourse
   on_error: *failed-concourse
 
+- name: containerd-integration
+  public: true
+  max_in_flight: 1
+  plan:
+  - in_parallel:
+    - get: concourse
+      passed: [unit, dev-image]
+      trigger: true
+    - get: dev-image
+      passed: [dev-image]
+      trigger: true
+    - get: ci
+  - task: integration
+    image: dev-image
+    privileged: true
+    timeout: 1h
+    file: ci/tasks/containerd-integration.yml
+  on_failure: *failed-concourse
+
 - name: testflight
   public: true
   max_in_flight: 2
@@ -238,10 +257,19 @@ jobs:
     - get: postgres-image
       params: {format: oci}
     - get: ci
-  - task: testflight
+  - across:
+    - var: runtime
+      values:
+      - guardian
+      - containerd
+      max_in_flight: all
+    task: testflight
     image: unit-image
     privileged: true
     timeout: 1h
+    params:
+      RUNTIME: ((.:runtime))
+      HAS_RUNTIME_FLAG: ((has_runtime_flag))
     file: ci/tasks/docker-compose-testflight.yml
   on_failure: *failed-concourse
   on_error: *failed-concourse
@@ -284,7 +312,7 @@ jobs:
       params: {format: oci}
       trigger: true
     - get: unit-image
-    - get: concourse-image
+    - get: latest-concourse-image
       params: {format: oci}
     - get: postgres-image
       params: {format: oci}
@@ -293,6 +321,8 @@ jobs:
     privileged: true
     image: unit-image
     file: ci/tasks/upgrade-test.yml
+    input_mapping:
+      concourse-image: latest-concourse-image
   on_failure: *failed-concourse
   on_error: *failed-concourse
 
@@ -309,7 +339,7 @@ jobs:
       params: {format: oci}
       trigger: true
     - get: unit-image
-    - get: concourse-image
+    - get: latest-concourse-image
       params: {format: oci}
     - get: postgres-image
       params: {format: oci}
@@ -318,6 +348,8 @@ jobs:
     privileged: true
     image: unit-image
     file: ci/tasks/downgrade-test.yml
+    input_mapping:
+      concourse-image: latest-concourse-image
 
 - name: k8s-check-helm-params
   public: true
@@ -448,6 +480,7 @@ jobs:
       IN_CLUSTER: "true"
       KUBE_CONFIG: ((kube_config))
       CONCOURSE_IMAGE_NAME: concourse/concourse-rc
+      HELM_VERSION: ((helm_version))
   on_failure: *failed-concourse
   on_error: *failed-concourse
 
@@ -624,20 +657,29 @@ jobs:
     - get: ci
   - load_var: concourse_version
     file: version/version
-  - task: terraform-smoke
-    image: unit-image
-    file: ci/tasks/terraform-smoke.yml
-    input_mapping: {linux-rc: linux-rc-ubuntu}
-    params:
-      GCP_PROJECT: cf-concourse-production
-      GCP_KEY: ((concourse_smoke_gcp_key))
-      SSH_KEY: ((concourse_smoke_ssh_key))
-      WORKSPACE: release-((release_minor))
-      CONCOURSE_VERSION: ((.:concourse_version))
-  - task: smoke
-    image: unit-image
-    file: ci/tasks/smoke.yml
-    input_mapping: {endpoint-info: outputs}
+  - across:
+    - var: runtime
+      values:
+      - guardian
+      - containerd
+      max_in_flight: all
+    do:
+      - task: terraform-smoke
+        image: unit-image
+        file: ci/tasks/terraform-smoke.yml
+        input_mapping: {linux-rc: linux-rc-ubuntu}
+        params:
+          GCP_PROJECT: cf-concourse-production
+          GCP_KEY: ((concourse_smoke_gcp_key))
+          SSH_KEY: ((concourse_smoke_ssh_key))
+          WORKSPACE: release-((release_minor))-((.:runtime))
+          CONCOURSE_VERSION: ((.:concourse_version))
+          TF_VAR_RUNTIME: ((.:runtime))
+          TF_VAR_HAS_RUNTIME_FLAG: ((has_runtime_flag))
+      - task: smoke
+        image: unit-image
+        file: ci/tasks/smoke.yml
+        input_mapping: {endpoint-info: outputs}
   on_failure: *failed-concourse
   on_error: *failed-concourse
 
@@ -803,12 +845,21 @@ jobs:
   on_failure: *failed-concourse
   on_error: *failed-concourse
 
-- name: shipit
+- name: create-draft-release
   public: true
-  serial_groups: [version]
   plan:
   - in_parallel:
+    - get: release-me
+    - get: ci
     - get: concourse
+      passed:
+      - build-rc
+      - bosh-smoke
+      - bosh-topgun
+      - bosh-check-props
+    - get: final-version
+      resource: version
+      params: {bump: final}
       passed:
       - build-rc
       - bosh-smoke
@@ -819,14 +870,6 @@ jobs:
       - build-rc
       - bosh-smoke
       - bosh-topgun
-    - get: final-version
-      resource: version
-      params: {bump: final}
-      passed:
-      - build-rc
-      - bosh-smoke
-      - bosh-topgun
-      - bosh-check-props
     - get: linux-rc
       passed: [build-rc]
     - get: linux-rc-ubuntu
@@ -840,12 +883,74 @@ jobs:
     - get: concourse-rc-image-ubuntu
     - get: concourse-release
       passed: [bosh-smoke, bosh-topgun]
+      params: {tarball: false}
     - get: bpm-release
       passed: [bosh-smoke, bosh-topgun]
     - get: postgres-release
       passed: [bosh-smoke, bosh-topgun]
-    - get: gcp-xenial-stemcell
-      passed: [bosh-smoke, bosh-topgun]
+    - get: credhub-release
+      passed: [bosh-topgun]
+    - get: uaa-release
+      passed: [bosh-topgun]
+  - in_parallel:
+    - task: build-release-name
+      file: ci/tasks/build-release-name.yml
+      input_mapping: {version: final-version}
+    - task: build-release-notes
+      file: ci/tasks/build-release-notes.yml
+      input_mapping:
+        repo: concourse
+      params:
+        GITHUB_OWNER: concourse
+        GITHUB_REPO: concourse
+        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+        GITHUB_BRANCH: release/((release_minor)).x
+  - put: concourse-draft-release
+    inputs: [concourse, final-version, release-name, built-notes]
+    params:
+      commitish: concourse/.git/ref
+      tag: final-version/version
+      tag_prefix: v
+      name: release-name/release-name
+      body: built-notes/notes.md
+
+
+- name: shipit
+  public: true
+  serial_groups: [version]
+  plan:
+  - in_parallel:
+    - get: concourse
+      passed: [create-draft-release]
+    - get: unit-image
+      passed: [create-draft-release]
+    - get: final-version
+      resource: version
+      params: {bump: final}
+      passed: [create-draft-release]
+    - get: linux-rc
+      passed: [create-draft-release]
+    - get: linux-rc-ubuntu
+      passed: [create-draft-release]
+    - get: windows-rc
+      passed: [create-draft-release]
+    - get: darwin-rc
+      passed: [create-draft-release]
+    - get: concourse-rc-image
+      passed: [create-draft-release]
+    - get: concourse-rc-image-ubuntu
+      passed: [create-draft-release]
+    - get: concourse-release
+      passed: [create-draft-release]
+      params: {tarball: false}
+    - get: bpm-release
+      passed: [create-draft-release]
+    - get: postgres-release
+      passed: [create-draft-release]
+    - get: credhub-release
+      passed: [create-draft-release]
+    - get: uaa-release
+      passed: [create-draft-release]
   - put: version
     params: {file: final-version/version}
 
@@ -896,23 +1001,19 @@ jobs:
     - get: darwin-rc
       passed: [shipit]
     - get: ci
-    - get: release-notes
   - in_parallel:
     - task: prep-release-assets
       file: ci/tasks/prep-release-assets.yml
       image: unit-image
-    - task: build-release-notes
-      file: ci/tasks/build-release-notes.yml
+    - task: build-release-name
+      file: ci/tasks/build-release-name.yml
       image: unit-image
-      params:
-        GITHUB_TOKEN: ((concourse_github_dummy.access_token))
   - put: concourse-github-release
     params:
       commitish: concourse/.git/ref
       tag: version/version
       tag_prefix: v
-      name: built-notes/release-name
-      body: built-notes/notes.md
+      name: release-name/release-name
       globs:
       - concourse-linux/concourse-*.tgz
       - concourse-windows/concourse-*.zip
@@ -936,8 +1037,6 @@ jobs:
       trigger: true
     - get: concourse-release
       passed: [shipit]
-    - get: gcp-xenial-stemcell
-      passed: [shipit]
   - put: concourse-release-final
     params:
       tarball: concourse-release/*.tgz
@@ -958,6 +1057,10 @@ jobs:
       passed: [shipit]
     - get: postgres-release
       passed: [shipit]
+    - get: credhub-release
+      passed: [shipit]
+    - get: uaa-release
+      passed: [shipit]
   - task: bump-versions
     file: cbd/ci/bump-versions.yml
     input_mapping: {concourse-bosh-deployment: cbd}
@@ -966,30 +1069,6 @@ jobs:
     params:
       repository: bumped-repo
       merge: true
-
-- name: publish-pivnet-bosh
-  plan:
-  - in_parallel:
-    - get: ci
-    - get: concourse-release-final
-      passed: [publish-bosh-release]
-      trigger: true
-    - get: version
-      passed: [publish-bosh-release]
-    - get: gcp-xenial-stemcell
-      passed: [publish-bosh-release]
-  - task: create-pivnet-metadata
-    file: ci/tasks/create-pivnet-metadata.yml
-    params:
-      END_OF_GENERAL_SUPPORT: ((end_of_general_support))
-  - in_parallel:
-    - put: pivnet-bosh-release
-      inputs:
-        - concourse-release-final
-        - product
-      params:
-        metadata_file: product/metadata.yaml
-        file_glob: concourse-release-final/concourse-*.tgz
 
 - name: publish-image
   serial: true
@@ -1045,23 +1124,6 @@ jobs:
           image: concourse-rc-image-ubuntu/image.tar
           additional_tags: ubuntu-tags/tags
 
-- name: publish-docs
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse-github-release
-      passed: [publish-binaries]
-      trigger: true
-    - get: docs
-  - task: build-docs
-    file: docs/ci/build.yml
-    params:
-      ANALYTICS_ID: ((analytics_id))
-      GITHUB_TOKEN: ((concourse_github_dummy.access_token))
-  - put: docs-gh-pages
-    params: {repository: built-docs}
-
 - name: patch
   public: true
   serial_groups: [version]
@@ -1092,15 +1154,6 @@ resources:
   source:
     uri: https://github.com/concourse/ci.git
     branch: master
-
-- name: release-notes
-  type: git
-  icon: *git-icon
-  source:
-    uri: https://github.com/concourse/concourse.git
-    branch: release/((release_minor)).x
-    paths:
-    - release-notes/
 
 - name: concourse-docker
   type: git
@@ -1164,6 +1217,15 @@ resources:
     password: ((docker.password))
     tag: release-((release_minor))-ubuntu
 
+- name: latest-concourse-image
+  type: registry-image
+  icon: *image-icon
+  source:
+    repository: concourse/concourse
+    username: ((docker.username))
+    password: ((docker.password))
+    tag: ((latest_release))
+
 - name: concourse-image
   type: registry-image
   icon: *image-icon
@@ -1174,7 +1236,7 @@ resources:
 
     # avoid tagging as 'latest' in case this is a patch release for an older
     # version
-    tag: ((latest_release))
+    tag: ((release_minor))
 
 - name: concourse-image-ubuntu
   type: registry-image
@@ -1197,7 +1259,7 @@ resources:
 
     bucket: concourse-artifacts
     key: version-((release_minor))
-    initial_version: ((release_minor)).1-rc.0
+    initial_version: ((release_minor)).0-rc.0
 
 - name: latest-version
   type: github-release
@@ -1222,7 +1284,7 @@ resources:
   source:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
-    regexp: rcs/concourse-(.*)\.linux\.amd64\.tgz
+    regexp: rcs/concourse-(.*)-linux-amd64.tgz
 
 - name: linux-rc-ubuntu
   type: gcs
@@ -1230,7 +1292,7 @@ resources:
   source:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
-    regexp: rcs/concourse-(.*)\.linux-ubuntu\.amd64\.tgz
+    regexp: rcs/concourse-(.*)-linux-ubuntu-amd64.tgz
 
 - name: windows-rc
   type: gcs
@@ -1238,7 +1300,7 @@ resources:
   source:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
-    regexp: rcs/concourse-(.*)\.windows\.amd64\.zip
+    regexp: rcs/concourse-(.*)-windows-amd64.zip
 
 - name: darwin-rc
   type: gcs
@@ -1246,22 +1308,7 @@ resources:
   source:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
-    regexp: rcs/concourse-(.*)\.darwin\.amd64\.tgz
-
-- name: docs
-  type: git
-  icon: *git-icon
-  source:
-    uri: https://github.com/concourse/docs
-    branch: master
-
-- name: docs-gh-pages
-  type: git
-  icon: *git-icon
-  source:
-    uri: git@github.com:concourse/docs
-    branch: gh-pages
-    private_key: ((docs_deploy_key))
+    regexp: rcs/concourse-(.*)-darwin-amd64.tgz
 
 - name: concourse-release
   type: bosh-release
@@ -1320,6 +1367,15 @@ resources:
     uri: https://github.com/helm/charts
     branch: master
 
+- name: concourse-draft-release
+  type: github-release
+  icon: *release-icon
+  source:
+    drafts: true
+    owner: concourse
+    repository: concourse
+    access_token: ((concourse_github_release.access_token))
+
 - name: concourse-github-release
   type: github-release
   icon: *release-icon
@@ -1334,14 +1390,6 @@ resources:
   source:
     repository: concourse/concourse-bosh-release
     regexp: ((release_minor)).*
-
-- name: pivnet-bosh-release
-  type: pivnet
-  icon: chart-timeline-variant
-  source:
-    api_token: ((pivnet-token))
-    product_slug: p-concourse
-    copy_metadata: true
 
 - name: unit-image
   type: registry-image
@@ -1393,6 +1441,30 @@ resources:
   source:
     owner: cloudfoundry
     repository: garden-runc-release
+    access_token: ((concourse_github_dummy.access_token))
+
+- name: containerd
+  type: github-release
+  icon: *release-icon
+  source:
+    owner: containerd
+    repository: containerd
+    access_token: ((concourse_github_dummy.access_token))
+
+- name: runc
+  type: github-release
+  icon: *release-icon
+  source:
+    owner: opencontainers
+    repository: runc
+    access_token: ((concourse_github_dummy.access_token))
+
+- name: cni
+  type: github-release
+  icon: *release-icon
+  source:
+    owner: containernetworking
+    repository: plugins
     access_token: ((concourse_github_dummy.access_token))
 
 - name: postgres-release
@@ -1567,6 +1639,10 @@ resources:
 - name: periodic-check
   type: time
   source:
-    start: 2AM
-    stop: 3AM
-    interval: 1h
+    interval: 24h
+
+- name: release-me
+  type: github-release
+  source:
+    owner: clarafu
+    repository: release-me
