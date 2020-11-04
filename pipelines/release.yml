@@ -690,13 +690,18 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
-      passed: [build-concourse]
+      passed: [build-rc]
       trigger: true
-    - get: linux-dev-ubuntu
-      passed: [build-concourse]
+    - get: version
+      passed: [build-rc]
+      trigger: true
+    - get: linux-rc-ubuntu
+      passed: [build-rc]
       trigger: true
     - get: unit-image
     - get: ci
+  - load_var: concourse_version
+    file: version/version
   - across:
     - var: gcp-image
       values:
@@ -713,7 +718,7 @@ jobs:
     - task: terraform-smoke
       image: unit-image
       file: ci/tasks/terraform-smoke.yml
-      input_mapping: {linux-rc: linux-dev-ubuntu}
+      input_mapping: {linux-rc: linux-rc-ubuntu}
       params:
         GCP_PROJECT: cf-concourse-production
         GCP_KEY: ((concourse_smoke_gcp_key))
@@ -729,6 +734,7 @@ jobs:
       input_mapping: {endpoint-info: outputs}
     timeout: 20m
   on_failure: *failed-concourse
+  on_error: *failed-concourse
 
 - name: bosh-check-props
   public: true
