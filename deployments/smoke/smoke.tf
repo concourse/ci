@@ -89,7 +89,7 @@ resource "google_compute_instance" "smoke" {
       "set -e -x",
       "until [ -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done",
       "apt-get update",
-      "apt-get -y install postgresql-10",
+      "apt-get -y install postgresql",
       "sudo -i -u postgres createuser concourse",
       "sudo -i -u postgres createdb --owner=concourse concourse",
       "adduser --system --group concourse",
