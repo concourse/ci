@@ -271,17 +271,8 @@ jobs:
     file: pipelines-and-tasks/pipelines/wings.yml
   - set_pipeline: norsk-mirror
     file: pipelines-and-tasks/pipelines/norsk-mirror.yml
-  - set_pipeline: release-5.5.x
-    file: pipelines-and-tasks/pipelines/release.yml
-    vars:
-      release_major: "5"
-      release_minor: "5.5"
-      latest_release: "5.5"
-      concourse_smoke_deployment_name: "concourse-smoke-5-5"
-      end_of_general_support: "2020-07-31"
-      has_runtime_flag: "false"
   - set_pipeline: release-6.3.x
-    file: pipelines-and-tasks/pipelines/release-v6.yml
+    file: pipelines-and-tasks/pipelines/release.yml
     vars:
       release_major: "6"
       release_minor: "6.3"
@@ -290,7 +281,7 @@ jobs:
       has_runtime_flag: "false"
       helm_version: "2" # tech-debt for this pipeline only
   - set_pipeline: release-6.7.x
-    file: pipelines-and-tasks/pipelines/release-v6.yml
+    file: pipelines-and-tasks/pipelines/release.yml
     vars:
       release_major: "6"
       release_minor: "6.7"
