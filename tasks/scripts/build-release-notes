@@ -1,6 +1,7 @@
 #!/bin/bash
 
 LAST_COMMIT_SHA=$(cat repo/.git/ref)
+RELEASE_VERSION=$(cat version/version)
 
 chmod +x release-me/releaseme
 ./release-me/releaseme generate \
@@ -9,4 +10,5 @@ chmod +x release-me/releaseme
   --github-repo=$GITHUB_REPO \
   --github-branch=$GITHUB_BRANCH \
   --last-commit-SHA=$LAST_COMMIT_SHA \
+  --release-version=$RELEASE_VERSION \
   > built-notes/notes.md

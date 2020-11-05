@@ -9,6 +9,7 @@ inputs:
 - name: release-me
 - name: ci
 - name: repo
+- name: version
 
 outputs:
 - name: built-notes

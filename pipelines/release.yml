@@ -954,6 +954,7 @@ jobs:
       file: ci/tasks/build-release-notes.yml
       input_mapping:
         repo: concourse
+        version: final-version
       params:
         GITHUB_OWNER: concourse
         GITHUB_REPO: concourse
