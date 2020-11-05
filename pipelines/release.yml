@@ -214,7 +214,7 @@ jobs:
     privileged: true
     input_mapping: {concourse: built-concourse, resource-types-image: resource-types-alpine-image}
     params:
-      DOCKERFILE: ci/dockerfiles/dev/Dockerfile-v((release_major))
+      DOCKERFILE: ci/dockerfiles/dev/Dockerfile
     file: ci/tasks/build-dev-image.yml
   - put: dev-image
     params: {image: image/image.tar}
