@@ -1,16 +1,21 @@
 # the following vars must be specified:
 #
-#   ((release_major))                   the MAJOR version, e.g. 5
-#   ((release_minor))                   the MAJOR.MINOR version, e.g. 5.1
+#   ((release_major))                   the MAJOR version, e.g. 6
+#   ((release_minor))                   the MAJOR.MINOR version, e.g. 6.1
 #                                       concourse matches the desired release version
 #   ((concourse_smoke_deployment_name)) a unique name for the smoke bosh deployment
-#   ((latest_release))                  the latest concourse/concourse tag for upgrade testing (choose this based on the patch release eg 5.5 for 5.5.x)
+#   ((latest_release))                  the latest concourse/concourse tag for upgrade testing.
+#                                       e.g. 6.6.x -> 6.5, 7.0.x -> 6.7
 #   ((has_runtime_flag))                whether the CONCOURSE_RUNTIME flag is supported by this version (determines how to deploy containerd-backed workers)
+#   ((slack_channel))                   the slack channel to send failure notifications to. should be set to
+#                                       concourse-private for LTS versions, and concourse-interrupt for OSS-only ones
 #
 # the following git branches need to be created:
 #
 #   concourse/concourse                 release/((release_minor)).x
 #   concourse/concourse-bosh-release    release/((release_minor)).x
+#   concourse/concourse-bosh-deployment release/((release_minor)).x
+#   concourse/concourse-chart           release/((release_minor)).x
 #
 # everything else will be managed by the pipeline
 
@@ -1222,6 +1227,7 @@ resources:
   icon: slack
   source:
     url: ((slack_hook))
+    channel: ((slack_channel))
     username: ((basic_auth.username))
     password: ((basic_auth.password))
     concourse_url: https://ci.concourse-ci.org

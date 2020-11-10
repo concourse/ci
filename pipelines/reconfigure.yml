@@ -280,6 +280,7 @@ jobs:
       concourse_smoke_deployment_name: "concourse-smoke-6-3"
       has_runtime_flag: "false"
       helm_version: "2" # tech-debt for this pipeline only
+      slack_channel: concourse-private
   - set_pipeline: release-6.7.x
     file: pipelines-and-tasks/pipelines/release.yml
     vars:
@@ -289,6 +290,7 @@ jobs:
       concourse_smoke_deployment_name: "concourse-smoke-6-7"
       has_runtime_flag: "true"
       helm_version: "3"
+      slack_channel: concourse-interrupt
   - set_pipeline: enterprise-helm-chart
     file: concourse-for-k8s/ci/pipeline.yml
     vars:
