@@ -7,8 +7,8 @@
 #   ((latest_release))                  the latest concourse/concourse tag for upgrade testing.
 #                                       e.g. 6.6.x -> 6.5, 7.0.x -> 6.7
 #   ((has_runtime_flag))                whether the CONCOURSE_RUNTIME flag is supported by this version (determines how to deploy containerd-backed workers)
-#   ((slack_channel))                   the slack channel to send failure notifications to. should be set to
-#                                       concourse-private for LTS versions, and concourse-interrupt for OSS-only ones
+#   ((slack_hook))                      the slack hook to use for sending the notification (one slack hook per channel)
+#                                       concourse-private hook for LTS versions, and concourse-interrupt hook for OSS-only ones
 #
 # the following git branches need to be created:
 #
@@ -1227,7 +1227,6 @@ resources:
   icon: slack
   source:
     url: ((slack_hook))
-    channel: ((slack_channel))
     username: ((basic_auth.username))
     password: ((basic_auth.password))
     concourse_url: https://ci.concourse-ci.org
