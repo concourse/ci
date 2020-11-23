@@ -13,8 +13,8 @@ $securityProtocolSettingsOriginal = [System.Net.ServicePointManager]::SecurityPr
 # installed (.NET 4.5 is an in-place upgrade).
 [System.Net.ServicePointManager]::SecurityProtocol = 3072 -bor 768 -bor 192 -bor 48
 
-Set-ExecutionPolicy Bypass -Scope LocalMachine -Force
-Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+Set-ExecutionPolicy Bypass -Scope Process -Force
+iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 
 [System.Net.ServicePointManager]::SecurityProtocol = $securityProtocolSettingsOriginal
 
