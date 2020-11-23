@@ -1,0 +1,19 @@
+$ProgressPreference="SilentlyContinue"
+
+Invoke-WebRequest -Uri https://storage.googleapis.com/concourse-artifacts/dev/concourse-6.7.0+dev.409.cc6d4a1a0.windows.amd64.zip -OutFile concourse.zip
+
+Expand-Archive -LiteralPath concourse.zip -DestinationPath . -Force
+
+@'
+${tsa_host_public_key}
+'@ | Out-File -Encoding ASCII .\tsa-host-public-key
+
+@'
+${worker_key}
+'@ | Out-File -Encoding ASCII .\worker-key
+
+& .\concourse\bin\concourse.exe worker `
+  /work-dir .\work `
+  /tsa-host ci.concourse-ci.org:2222 `
+  /tsa-public-key .\tsa-host-public-key `
+  /tsa-worker-private-key .\worker-key
