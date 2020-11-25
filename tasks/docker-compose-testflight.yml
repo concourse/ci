@@ -25,7 +25,5 @@ params:
   POSTGRES_IMAGE: postgres-image
 
 run:
-  path: ci/tasks/scripts/pass-release-notes-only-change
-  args:
-  - ci/tasks/scripts/with-docker-compose
-  - ci/tasks/scripts/testflight
+  path: ci/tasks/scripts/with-docker-compose
+  args: [ci/tasks/scripts/testflight]

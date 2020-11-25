@@ -13,6 +13,4 @@ caches:
 - path: gopath
 
 run:
-  path: ci/tasks/scripts/pass-release-notes-only-change
-  args:
-  - ci/tasks/scripts/containerd-integration
+  path: ci/tasks/scripts/containerd-integration
