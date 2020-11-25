@@ -1,6 +1,0 @@
-#!/bin/bash
-
-version=v$(cat version/version)
-
-echo "$version" > ./built-notes/release-name
-cp release-notes/release-notes/latest.md ./built-notes/notes.md
