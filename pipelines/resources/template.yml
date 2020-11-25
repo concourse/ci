@@ -6,35 +6,54 @@
 
 #@ def build_params(resource_name):
   #@ if resource_name == "registry-image":
-build: #@ resource_name + "-resource"
-build_args:
-  DOCKER_PRIVATE_PASSWORD: ((registry_image_resource_docker.password))
-  DOCKER_PRIVATE_REPO: ((registry_image_resource_docker.private_repo))
-  DOCKER_PRIVATE_USERNAME: ((registry_image_resource_docker.username))
-  DOCKER_PUSH_PASSWORD: ((registry_image_resource_docker.password))
-  DOCKER_PUSH_REPO: ((registry_image_resource_docker.push_repo))
-  DOCKER_PUSH_USERNAME: ((registry_image_resource_docker.username))
+CONTEXT: #@ resource_name + "-resource"
+BUILD_ARG_DOCKER_PRIVATE_PASSWORD: ((registry_image_resource_docker.password))
+BUILD_ARG_DOCKER_PRIVATE_REPO: ((registry_image_resource_docker.private_repo))
+BUILD_ARG_DOCKER_PRIVATE_USERNAME: ((registry_image_resource_docker.username))
+BUILD_ARG_DOCKER_PUSH_PASSWORD: ((registry_image_resource_docker.password))
+BUILD_ARG_DOCKER_PUSH_REPO: ((registry_image_resource_docker.push_repo))
+BUILD_ARG_DOCKER_PUSH_USERNAME: ((registry_image_resource_docker.username))
   #@ elif resource_name == "semver":
-build: #@ resource_name + "-resource"
-build_args:
-  SEMVER_TESTING_ACCESS_KEY_ID: ((semver_resource_bucket.access_key))
-  SEMVER_TESTING_BUCKET: ((semver_resource.bucket))
-  SEMVER_TESTING_REGION: ((semver_resource.region))
-  SEMVER_TESTING_SECRET_ACCESS_KEY: ((semver_resource_bucket.secret_key))
+CONTEXT: #@ resource_name + "-resource"
+BUILD_ARG_SEMVER_TESTING_ACCESS_KEY_ID: ((semver_resource_bucket.access_key))
+BUILD_ARG_SEMVER_TESTING_BUCKET: ((semver_resource.bucket))
+BUILD_ARG_SEMVER_TESTING_REGION: ((semver_resource.region))
+BUILD_ARG_SEMVER_TESTING_SECRET_ACCESS_KEY: ((semver_resource_bucket.secret_key))
   #@ elif resource_name == "s3":
-build: #@ resource_name + "-resource"
-build_args:
-  S3_TESTING_ACCESS_KEY_ID: ((s3_resource_bucket.access_key))
-  S3_TESTING_SECRET_ACCESS_KEY: ((s3_resource_bucket.secret_key))
-  S3_TESTING_BUCKET: ((s3_resource.bucket))
-  S3_VERSIONED_TESTING_BUCKET: ((s3_resource.versioned_bucket))
-  S3_TESTING_REGION: ((s3_resource.region))
-  S3_ENDPOINT: https://s3.amazonaws.com
+CONTEXT: #@ resource_name + "-resource"
+BUILD_ARG_S3_TESTING_ACCESS_KEY_ID: ((s3_resource_bucket.access_key))
+BUILD_ARG_S3_TESTING_SECRET_ACCESS_KEY: ((s3_resource_bucket.secret_key))
+BUILD_ARG_S3_TESTING_BUCKET: ((s3_resource.bucket))
+BUILD_ARG_S3_VERSIONED_TESTING_BUCKET: ((s3_resource.versioned_bucket))
+BUILD_ARG_S3_TESTING_REGION: ((s3_resource.region))
+BUILD_ARG_S3_ENDPOINT: https://s3.amazonaws.com
   #@ elif resource_name == "concourse-pipeline":
-build: .
+CONTEXT: .
+  #@ elif resource_name == "docker-image":
+CONTEXT: #@ resource_name + "-resource"
+UNPACK_ROOTFS: 'true'
   #@ else:
-build: #@ resource_name + "-resource"
+CONTEXT: #@ resource_name + "-resource"
   #@ end
+#@ end
+
+#@ def build_task(resource_name, distro):
+task: build
+privileged: true
+image: oci-build-task
+config:
+  platform: linux
+  inputs:
+  - name: #@ resource_name + "-resource"
+  outputs:
+  - name: built-resource-image
+    path: image
+  params:
+    DOCKERFILE: #@ resource_name + "-resource/dockerfiles/" + distro + "/Dockerfile"
+    _: #@ template.replace(build_params(resource_name))
+    #! TODO: use pre-fetched base image once the build task supports it,
+    #! i.e. load_base: #@ determine_base(distro)
+  run: {path: build}
 #@ end
 
 #@ def build_image(distro):
@@ -44,25 +63,19 @@ plan:
   - get: #@ resource_name + "-resource"
     resource: resource-repo
     trigger: true
-  - #@ template.replace(get_steps(distro))
-- put: #@ "resource-image-dev-" + distro
-  params:
-    _: #@ template.replace(build_params(resource_name))
-    dockerfile: #@ resource_name + "-resource/dockerfiles/" + distro + "/Dockerfile"
-    load_base: #@ determine_base(distro)
+  - get: #@ determine_base(distro)
+    trigger: true
+    params: {format: oci}
+  - get: oci-build-task
+  - #@ template.replace(extra_get_steps(distro))
+- #@ build_task(resource_name, distro)
 - #@ template.replace(extra_steps(distro))
+- put: #@ "resource-image-dev-" + distro
+  params: {image: built-resource-image/image.tar}
 #@ end
 
 #@ def extra_steps(distro):
   #@ if resource_name == "docker-image":
-- task: build-smoke-test-image
-  image: oci-build-task
-  file: docker-image-resource/ci/build-smoke-test-image.yml
-  privileged: true
-  params:
-    DOCKERFILE: #@ "dockerfiles/{}/Dockerfile".format(distro)
-  output_mapping:
-    image: built-resource-image
 - task: smoke-test
   image: built-resource-image
   file: docker-image-resource/ci/smoke-test.yml
@@ -99,7 +112,11 @@ plan:
   - get: resource-pr
     trigger: true
     version: every
-  - #@ template.replace(get_steps(distro))
+  - get: #@ determine_base(distro)
+    trigger: true
+    params: {format: oci}
+  - get: oci-build-task
+  - #@ template.replace(extra_get_steps(distro))
 - put: #@ resource_name + "-resource"
   resource: resource-pr
   params:
@@ -109,13 +126,7 @@ plan:
   get_params:
     fetch_merge: true
 - do:
-  - put: #@ "resource-image-dev-" + distro
-    params:
-      _: #@ template.replace(build_params(resource_name))
-      dockerfile: #@ resource_name + "-resource/dockerfiles/" + distro + "/Dockerfile"
-      load_base: #@ determine_base(distro)
-      tag: #@ "{}-resource/.git/id".format(resource_name)
-      tag_prefix: #@ "pr-" + distro + "-"
+  - #@ build_task(resource_name, distro)
   - #@ template.replace(extra_steps(distro))
   on_failure:
     put: resource-pr
@@ -132,20 +143,15 @@ plan:
 #@ end
 
 
-#@ def get_steps(distro):
-- get: #@ determine_base(distro)
-  trigger: true
-  params: {format: oci}
-#@ if resource_name == "cf":
+#@ def extra_get_steps(distro):
+  #@ if resource_name == "cf":
 - get: cf-cli
   trigger: true
   params: {globs: ["cf-cli*linux*"]}
-#@ elif resource_name == "concourse-pipeline":
+  #@ elif resource_name == "concourse-pipeline":
 - get: fly
   params: {globs: ["fly-*-linux-amd64.tgz"]}
-#@ elif resource_name == "docker-image":
-- get: oci-build-task
-#@ end
+  #@ else: return []
 #@ end
 
 #@ def publish_job(bump):
@@ -161,9 +167,17 @@ plan:
   - get: resource-image-dev-alpine
     passed: [build-alpine]
     params: {format: oci}
+  - get: resource-image-dev-alpine-rootfs
+    resource: resource-image-dev-alpine
+    passed: [build-alpine]
+    params: {format: rootfs}
   - get: resource-image-dev-ubuntu
-    params: {format: oci}
     passed: [build-ubuntu]
+    params: {format: oci}
+  - get: resource-image-dev-ubuntu-rootfs
+    resource: resource-image-dev-ubuntu
+    passed: [build-ubuntu]
+    params: {format: rootfs}
   - get: version
     params:
       bump: #@ bump
@@ -176,8 +190,8 @@ plan:
         repository: ubuntu
     inputs:
     - name: version
-    - name: resource-image-dev-alpine
-    - name: resource-image-dev-ubuntu
+    - name: resource-image-dev-alpine-rootfs
+    - name: resource-image-dev-ubuntu-rootfs
     outputs:
     - name: release
     run:
@@ -198,13 +212,13 @@ plan:
         version="$(cat version/number)"
         echo "v${version}" > release/name
 
-        pushd resource-image-dev-alpine
+        pushd resource-image-dev-alpine-rootfs
           cp ../resource_metadata.json .
           tar -czf rootfs.tgz -C rootfs .
           tar -czf ../release/(@= resource_name @)-resource-${version}-alpine.tgz rootfs.tgz resource_metadata.json
         popd
 
-        pushd resource-image-dev-ubuntu
+        pushd resource-image-dev-ubuntu-rootfs
           cp ../resource_metadata.json .
           tar -czf rootfs.tgz -C rootfs .
           tar -czf ../release/(@= resource_name @)-resource-${version}-ubuntu.tgz rootfs.tgz resource_metadata.json
@@ -219,7 +233,7 @@ plan:
   input_mapping:
     repo: resource-repo
 - task: generate-dpkg-list
-  image: resource-image-dev-ubuntu
+  image: resource-image-dev-ubuntu-rootfs
   config:
     platform: linux
     inputs:
@@ -241,16 +255,19 @@ plan:
 - in_parallel:
   - put: resource-image
     params:
+      image: resource-image-dev-alpine/image.tar
       version: ((.:version))
-      load: resource-image-dev-alpine
+      bump_aliases: true
   - put: resource-image-alpine
     params:
+      image: resource-image-dev-alpine/image.tar
       version: ((.:version))
-      load: resource-image-dev-alpine
+      bump_aliases: true
   - put: resource-image-ubuntu
     params:
+      image: resource-image-dev-ubuntu/image.tar
       version: ((.:version))
-      load: resource-image-dev-ubuntu
+      bump_aliases: true
   - put: resource-repo-release
     params:
       commitish: resource-repo/.git/ref
@@ -422,6 +439,12 @@ resources:
     owner: clarafu
     repository: release-me
 
+- name: oci-build-task
+  type: registry-image
+  icon: docker
+  source:
+    repository: vito/oci-build-task
+
 #@ if resource_name == "cf":
 - name: cf-cli
   type: s3
@@ -436,9 +459,4 @@ resources:
     user: concourse
     repository: concourse
     access_token: ((concourse_github_dummy.access_token))
-#@ elif resource_name == "docker-image":
-- name: oci-build-task
-  type: registry-image
-  source:
-    repository: vito/oci-build-task
 #@ end
