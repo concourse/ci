@@ -135,7 +135,7 @@ plan:
 #@ def get_steps(distro):
 - get: #@ determine_base(distro)
   trigger: true
-  params: {save: true}
+  params: {format: oci}
 #@ if resource_name == "cf":
 - get: cf-cli
   trigger: true
@@ -160,9 +160,9 @@ plan:
   - get: release-me
   - get: resource-image-dev-alpine
     passed: [build-alpine]
-    params: {save: true}
+    params: {format: oci}
   - get: resource-image-dev-ubuntu
-    params: {save: true}
+    params: {format: oci}
     passed: [build-ubuntu]
   - get: version
     params:
