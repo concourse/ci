@@ -180,7 +180,6 @@ plan:
     - name: resource-image-dev-ubuntu
     outputs:
     - name: release
-    - name: docker
     run:
       path: bash
       args:
@@ -198,10 +197,6 @@ plan:
 
         version="$(cat version/number)"
         echo "v${version}" > release/name
-
-        echo $version | cut -d. -f1      > docker/tags
-        echo $version | cut -d. -f1,2   >> docker/tags
-        echo $version | cut -d. -f1,2,3 >> docker/tags
 
         pushd resource-image-dev-alpine
           cp ../resource_metadata.json .
@@ -241,14 +236,20 @@ plan:
         RESOURCE="(@= resource_name @)"
         DPKG_FILE="${RESOURCE}-dpkg-list-${VERSION}.txt"
         dpkg -l > "dpkg-file/${DPKG_FILE}"
+- load_var: version
+  file: version/version
 - in_parallel:
+  - put: resource-image
+    params:
+      version: ((.:version))
+      load: resource-image-dev-alpine
   - put: resource-image-alpine
     params:
-      additional_tags: docker/tags
+      version: ((.:version))
       load: resource-image-dev-alpine
-      tag_as_latest: true
   - put: resource-image-ubuntu
     params:
+      version: ((.:version))
       load: resource-image-dev-ubuntu
   - put: resource-repo-release
     params:
@@ -296,21 +297,10 @@ resource_types:
   source:
     repository: concourse/semver-resource
 
-- name: docker-image
-  type: registry-image
-  privileged: true
-  source:
-    repository: concourse/docker-image-resource
-
-- name: github-release
+- name: registry-image
   type: registry-image
   source:
-    repository: concourse/github-release-resource
-
-- name: s3
-  type: registry-image
-  source:
-    repository: concourse/s3-resource
+    repository: concourse/registry-image-resource
 
 - name: gcs
   type: registry-image
@@ -320,14 +310,14 @@ resource_types:
 
 resources:
 - name: alpine-edge
-  type: docker-image
+  type: registry-image
   icon: docker
   source:
     repository: alpine
     tag: edge
 
 - name: ubuntu-bionic
-  type: docker-image
+  type: registry-image
   icon: docker
   source:
     repository: ubuntu
@@ -367,35 +357,43 @@ resources:
     base: master
     repo: #@ "concourse/" + resource_name + "-resource"
 
-- name: resource-image-alpine
-  type: docker-image
+- name: resource-image
+  type: registry-image
   icon: docker
   source:
-    password: ((docker.password))
     repository: #@ "concourse/" + resource_name + "-resource"
-    tag: alpine
     username: ((docker.username))
+    password: ((docker.password))
+
+- name: resource-image-alpine
+  type: registry-image
+  icon: docker
+  source:
+    repository: #@ "concourse/" + resource_name + "-resource"
+    variant: alpine
+    username: ((docker.username))
+    password: ((docker.password))
 
 - name: resource-image-ubuntu
-  type: docker-image
+  type: registry-image
   icon: docker
   source:
-    password: ((docker.password))
     repository: #@ "concourse/" + resource_name + "-resource"
-    tag: ubuntu
+    variant: ubuntu
     username: ((docker.username))
+    password: ((docker.password))
 
 - name: resource-image-dev-alpine
-  type: docker-image
+  type: registry-image
   icon: docker
   source:
-    password: ((docker.password))
     repository: #@ "concourse/" + resource_name + "-resource"
     tag: dev
+    password: ((docker.password))
     username: ((docker.username))
 
 - name: resource-image-dev-ubuntu
-  type: docker-image
+  type: registry-image
   icon: docker
   source:
     password: ((docker.password))
