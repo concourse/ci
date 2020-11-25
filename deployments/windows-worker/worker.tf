@@ -46,7 +46,7 @@ resource "google_compute_instance" "windows_worker" {
   boot_disk {
     initialize_params {
       image = "windows-server-2004-dc-core-v20201110"
-      size  = "32"
+      size  = "64"
     }
   }
 
