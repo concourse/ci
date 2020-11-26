@@ -1,7 +1,34 @@
+$ErrorActionPreference = "Stop"
+trap { $host.SetShouldExit(1) }
+
 $ProgressPreference="SilentlyContinue"
 
-Invoke-WebRequest -Uri https://storage.googleapis.com/concourse-artifacts/dev/concourse-6.7.0+dev.409.cc6d4a1a0.windows.amd64.zip -OutFile concourse.zip
+cd C:\
 
+# install StackDriver monitoring agent so we can get memory and disk metrics in
+# the GCP console
+Invoke-WebRequest -Uri https://repo.stackdriver.com/windows/StackdriverMonitoring-GCM-46.exe -OutFile StackDriverMonitoring.exe
+Start-Process -FilePath ./StackDriverMonitoring.exe -ArgumentList "/S" -Wait -PassThru
+rm StackDriverMonitoring.exe
+
+# install Go
+Invoke-WebRequest -Uri https://golang.org/dl/go1.15.5.windows-amd64.msi -OutFile go.msi
+Start-Process -FilePath ./go.msi -ArgumentList "/passive /norestart" -Wait -PassThru
+rm go.msi
+
+# install Chocolatey
+Set-ExecutionPolicy Bypass -Scope Process -Force
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+# install build dependencies
+choco install --no-progress -r -y git mingw
+
+# refresh $env:Path so Windows tasks don't have to set it themselves
+refreshenv
+
+# install Concourse
+Invoke-WebRequest -Uri https://storage.googleapis.com/concourse-artifacts/dev/concourse-6.7.0+dev.409.cc6d4a1a0.windows.amd64.zip -OutFile concourse.zip
 Expand-Archive -LiteralPath concourse.zip -DestinationPath . -Force
 
 @'

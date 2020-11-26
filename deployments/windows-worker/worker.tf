@@ -62,6 +62,15 @@ resource "google_compute_instance" "windows_worker" {
   metadata = {
     windows-startup-script-ps1 = data.template_file.startup_script.rendered
   }
+
+  service_account {
+    scopes = [
+      "logging-write",
+      "monitoring"
+    ]
+  }
+
+  allow_stopping_for_update = true
 }
 
 data "template_file" "startup_script" {

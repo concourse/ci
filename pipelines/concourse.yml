@@ -60,10 +60,6 @@ groups:
   - unit-image
   - build-golang-builder-image
 
-- name: workers
-  jobs:
-  - install-windows-deps
-
 jobs:
 - name: unit-image
   public: true
@@ -1085,22 +1081,6 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
       SUITE: pcf
   on_failure: *failed-concourse
-
-- name: install-windows-deps
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: golang-windows
-    - get: ci
-  - task: install-go
-    file: ci/tasks/install-go-windows.yml
-  - task: install-git
-    file: ci/tasks/choco-install.yml
-    params: {PACKAGE: git}
-  - task: install-mingw
-    file: ci/tasks/choco-install.yml
-    params: {PACKAGE: mingw}
 
 resources:
 - name: concourse
