@@ -39,7 +39,7 @@ resource "google_compute_firewall" "windows_worker" {
 
 resource "google_compute_instance" "windows_worker" {
   name         = "windows-worker"
-  machine_type = "custom-8-8192"
+  machine_type = "custom-8-16384"
   zone         = data.google_compute_zones.available.names[0]
   tags         = ["windows-worker"]
 
@@ -47,6 +47,7 @@ resource "google_compute_instance" "windows_worker" {
     initialize_params {
       image = "windows-server-2004-dc-core-v20201110"
       size  = "64"
+      type = "pd-ssd"
     }
   }
 
