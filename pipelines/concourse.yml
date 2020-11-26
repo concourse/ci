@@ -1477,14 +1477,6 @@ resources:
     uri: https://github.com/helm/charts.git
     branch: master
 
-- name: golang-windows
-  type: s3
-  icon: language-go
-  source:
-    endpoint: storage.googleapis.com
-    bucket: golang
-    regexp: 'go(\d+\.\d+(\.\d+)?)\.windows-amd64\.msi'
-
 - name: golang-linux
   type: s3
   icon: language-go
