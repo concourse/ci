@@ -10,6 +10,7 @@ inputs:
 - name: ci
 - name: repo
 - name: version
+- name: resource-versions
 
 outputs:
 - name: built-notes
