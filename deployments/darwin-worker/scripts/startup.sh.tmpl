@@ -1,0 +1,49 @@
+#!/bin/bash
+
+set -eu
+
+run_sudo () {
+ echo "${password}" | sudo -S -k $@
+}
+
+curl -L "${concourse_bundle_url}" -o concourse.tgz
+tar -xzf concourse.tgz
+
+tmp_daemon_config="/Users/administrator/worker.plist"
+daemon_config="/Library/LaunchDaemons/org.concourse-ci.worker.plist"
+
+cat > $tmp_daemon_config <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>org.concourse-ci.worker</string>
+    <key>Program</key>
+    <string>/Users/administrator/concourse.sh</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+    <key>WorkingDirectory</key>
+    <string>/Users/administrator</string>
+    <key>StandardOutPath</key>
+    <string>/Users/administrator/concourse.stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/administrator/concourse.stderr.log</string>
+  </dict>
+</plist>
+EOF
+
+if [ -f $daemon_config ]; then
+  run_sudo launchctl stop -w $daemon_config || true
+  run_sudo launchctl unload -w $daemon_config || true
+fi
+
+run_sudo mv $tmp_daemon_config $daemon_config
+run_sudo chown root:wheel $daemon_config
+
+run_sudo launchctl load -w $daemon_config

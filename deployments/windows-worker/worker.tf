@@ -1,11 +1,6 @@
 variable "project" {
-  type = string
-  default = "cf-concourse-production"
-}
-
-variable "concourse_tarball" {
   type    = string
-  default = "concourse.tgz"
+  default = "cf-concourse-production"
 }
 
 variable "region" {
@@ -47,7 +42,7 @@ resource "google_compute_instance" "windows_worker" {
     initialize_params {
       image = "windows-server-2004-dc-core-v20201110"
       size  = "64"
-      type = "pd-ssd"
+      type  = "pd-ssd"
     }
   }
 
@@ -78,6 +73,6 @@ data "template_file" "startup_script" {
 
   vars = {
     tsa_host_public_key = file("keys/tsa_host_key.pub")
-    worker_key = file("keys/worker_key")
+    worker_key          = file("keys/worker_key")
   }
 }
