@@ -6,11 +6,38 @@ run_sudo () {
  echo "${password}" | sudo -S -k $@
 }
 
+# Allow running sudo without a password
+echo 'administrator		ALL = (ALL) NOPASSWD: ALL' > /tmp/administrator_sudo
+chmod 400 /tmp/administrator_sudo
+run_sudo visudo -c -q -f /tmp/administrator_sudo
+run_sudo chown root:wheel /tmp/administrator_sudo
+run_sudo mv /tmp/administrator_sudo /etc/sudoers.d/administrator
+
+set -x
+
+# Install brew
+CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+export PATH="/usr/local/bin:$PATH"
+
+# Install dependencies
+brew install git
+brew install go
+
+# Download concourse
 curl -L "${concourse_bundle_url}" -o concourse.tgz
 tar -xzf concourse.tgz
 
 tmp_daemon_config="/Users/administrator/worker.plist"
 daemon_config="/Library/LaunchDaemons/org.concourse-ci.worker.plist"
+
+if [ -f $daemon_config ]; then
+  sudo launchctl unload -w $daemon_config || true
+fi
+
+if pgrep concourse; then
+  sudo pkill concourse || true
+fi
 
 cat > $tmp_daemon_config <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -21,6 +48,15 @@ cat > $tmp_daemon_config <<EOF
     <string>org.concourse-ci.worker</string>
     <key>Program</key>
     <string>/Users/administrator/concourse.sh</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin></string>
+        <key>HOME</key>
+        <string>/Users/administrator></string>
+        <key>GOPATH</key>
+        <string>/Users/administrator/go</string>
+    </dict>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
@@ -38,12 +74,7 @@ cat > $tmp_daemon_config <<EOF
 </plist>
 EOF
 
-if [ -f $daemon_config ]; then
-  run_sudo launchctl stop -w $daemon_config || true
-  run_sudo launchctl unload -w $daemon_config || true
-fi
+sudo mv $tmp_daemon_config $daemon_config
+sudo chown root:wheel $daemon_config
 
-run_sudo mv $tmp_daemon_config $daemon_config
-run_sudo chown root:wheel $daemon_config
-
-run_sudo launchctl load -w $daemon_config
+sudo launchctl load -w $daemon_config
