@@ -11,6 +11,12 @@ target_branch=$(cat concourse-pr/.git/resource/base_name)
   exit 0
 }
 
+if grep skip-migrations-check concourse-pr/.git/resource/title; then
+  echo "skipping migration check at PR's request"
+  echo "pr title: $(cat resource-pr/.git/resource/title)"
+  exit 0
+fi
+
 migrations_on_master=$(mktemp)
 find $master_dir -name '[0-9]*' -exec basename {} \; |
   sort > "$migrations_on_master"
