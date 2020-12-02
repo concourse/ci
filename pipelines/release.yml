@@ -565,6 +565,14 @@ jobs:
         input_mapping: {concourse: built-concourse, resource-types: resource-types-alpine}
         output_mapping: {concourse-tarball: concourse-linux-alpine}
         params: {PLATFORM: linux}
+      - task: concourse-linux-alpine-arm64
+        file: ci/tasks/concourse-build-linux.yml
+        image: unit-image
+        input_mapping: {concourse: built-concourse, resource-types: resource-types-alpine}
+        output_mapping: {concourse-tarball: concourse-linux-alpine-arm64}
+        params:
+          - PLATFORM: linux
+          - GOARCH: arm64
       - task: concourse-linux-ubuntu
         image: unit-image
         file: ci/tasks/concourse-build-linux.yml
@@ -581,6 +589,9 @@ jobs:
     - put: linux-rc
       params: {file: concourse-linux-alpine/concourse-*.tgz}
       inputs: [concourse-linux-alpine]
+    - put: linux-rc-arm64
+      params: {file: concourse-linux-alpine-arm64/concourse-*arm64.tgz}
+      inputs: [concourse-linux-alpine-arm64]
     - put: linux-rc-ubuntu
       params: {file: concourse-linux-ubuntu/concourse-*.tgz}
       inputs: [concourse-linux-ubuntu]
@@ -931,6 +942,8 @@ jobs:
       - bosh-topgun
     - get: linux-rc
       passed: [build-rc]
+    - get: linux-rc-arm64
+      passed: [build-rc]
     - get: linux-rc-ubuntu
       passed: [build-rc, bosh-check-props]
     - get: windows-rc
@@ -989,6 +1002,8 @@ jobs:
       params: {bump: final}
       passed: [create-draft-release]
     - get: linux-rc
+      passed: [create-draft-release]
+    - get: linux-rc-arm64
       passed: [create-draft-release]
     - get: linux-rc-ubuntu
       passed: [create-draft-release]
@@ -1055,6 +1070,8 @@ jobs:
     - get: unit-image
       passed: [shipit]
     - get: linux-rc
+      passed: [shipit]
+    - get: linux-rc-arm64
       passed: [shipit]
     - get: windows-rc
       passed: [shipit]
@@ -1345,6 +1362,14 @@ resources:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
     regexp: rcs/concourse-(.*)-linux-amd64.tgz
+
+- name: linux-rc-arm64
+  type: gcs
+  icon: linux
+  source:
+    bucket: concourse-artifacts
+    json_key: ((concourse_artifacts_json_key))
+    regexp: rcs/concourse-(.*)-linux-arm64.tgz
 
 - name: linux-rc-ubuntu
   type: gcs

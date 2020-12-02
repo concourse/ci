@@ -26,6 +26,7 @@ outputs:
 
 params:
   PLATFORM: linux
+  GOARCH: amd64
 
 run:
   path: ci/tasks/scripts/concourse-build

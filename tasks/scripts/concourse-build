@@ -23,7 +23,7 @@ else
   version="${latest_version}+dev.${commits_since}.${current_ref}"
 fi
 
-archive=concourse-${version}.${PLATFORM}.amd64.tgz
+archive=concourse-${version}.${PLATFORM}.${GOARCH:-amd64}.tgz
 
 final_version=""
 ldflags=""
