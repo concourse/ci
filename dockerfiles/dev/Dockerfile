@@ -17,7 +17,7 @@ RUN apt-get update && apt-get -y install \
       tree \
       btrfs-tools
 
-COPY dumb-init/dumb-init_*_amd64 /usr/local/bin/dumb-init
+COPY dumb-init/dumb-init_*_x86_64 /usr/local/bin/dumb-init
 RUN chmod +x /usr/local/bin/dumb-init
 
 # Add container runtime dependencies
