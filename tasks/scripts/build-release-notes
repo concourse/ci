@@ -12,3 +12,5 @@ chmod +x release-me/releaseme
   --last-commit-SHA=$LAST_COMMIT_SHA \
   --release-version=$RELEASE_VERSION \
   > built-notes/notes.md
+
+cat resource-versions/versions >> built-notes/notes.md

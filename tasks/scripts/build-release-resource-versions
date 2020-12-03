@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -e
+
+echo "untar-ing rc"
+tar -zxf ./linux-rc/*.tgz concourse/resource-types --strip-components=1
+
+FILE=resource-versions/versions
+
+cat > $FILE <<EOF
+
+## 📦 Bundled resource types
+
+<details>
+
+EOF
+
+echo "parsing resource versions"
+for r in ./resource-types/*; do
+  name=$(basename $r)
+  version="v$(jq ".version" -r $r/resource_metadata.json)"
+  ghlink="https://github.com/concourse/$name-resource/releases/tag/$version"
+  echo "- $name: [$version]($ghlink)" >> $FILE
+done
+
+
+cat >> $FILE <<EOF
+
+</details>
+EOF
