@@ -78,6 +78,7 @@ groups:
   - shipit
   - publish-binaries
   - publish-image
+  - generate-dpkg-list
   - publish-bosh-release
   - bump-cbd-versions
   - patch
