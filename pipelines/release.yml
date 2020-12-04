@@ -1137,52 +1137,44 @@ jobs:
     - get: version
       passed: [shipit]
       trigger: true
-    - get: concourse
-      passed: [shipit]
     - get: concourse-rc-image
       passed: [shipit]
       params: {format: oci}
     - get: concourse-rc-image-ubuntu
       passed: [shipit]
       params: {format: oci}
-    - get: concourse-rc-image-ubuntu-rootfs
-      resource: concourse-rc-image-ubuntu
-      passed: [shipit]
-    - get: latest-version
-    - get: latest-of-same-major-version
-    - get: ci
+  - load_var: version
+    file: version/version
   - in_parallel:
-    - do:
-      - task: docker-semver-tags
-        file: ci/tasks/docker-semver-tags.yml
-        output_mapping: {tags: alpine-tags}
+    - put: concourse-image
+      inputs: [concourse-rc-image]
+      params:
+        image: concourse-rc-image/image.tar
+        version: ((.:version))
+        bump_aliases: true
+    - put: concourse-image-ubuntu
+      inputs: [concourse-rc-image-ubuntu]
+      params:
+        image: concourse-rc-image-ubuntu/image.tar
+        version: ((.:version))
+        bump_aliases: true
 
-      - put: concourse-image
-        inputs: [concourse-rc-image, alpine-tags]
-        params:
-          image: concourse-rc-image/image.tar
-          additional_tags: alpine-tags/tags
-
-    - do:
-      - task: docker-semver-tags
-        file: ci/tasks/docker-semver-tags.yml
-        output_mapping: {tags: ubuntu-tags}
-        params: {SUFFIX: ubuntu}
-
-      - task: generate-dpkg-list
-        file: ci/tasks/generate-dpkg-list.yml
-        image: concourse-rc-image-ubuntu-rootfs
-        params: {COMPONENT_NAME: "concourse"}
-
-      - put: concourse-image-dpkg-list
-        inputs: [dpkg-list]
-        params: {file: "dpkg-list/concourse-*.txt"}
-
-      - put: concourse-image-ubuntu
-        inputs: [concourse-rc-image-ubuntu, ubuntu-tags]
-        params:
-          image: concourse-rc-image-ubuntu/image.tar
-          additional_tags: ubuntu-tags/tags
+- name: generate-dpkg-list
+  plan:
+  - in_parallel:
+    - get: concourse-image-ubuntu
+      passed: [publish-image]
+      params: {format: rootfs}
+      trigger: true
+    - get: version
+      passed: [publish-image]
+      trigger: true
+  - task: generate-dpkg-list
+    file: ci/tasks/generate-dpkg-list.yml
+    image: concourse-rc-image-ubuntu
+    params: {COMPONENT_NAME: "concourse"}
+  - put: concourse-image-dpkg-list
+    params: {file: "dpkg-list/concourse-*.txt"}
 
 - name: patch
   public: true
@@ -1294,10 +1286,6 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-    # avoid tagging as 'latest' in case this is a patch release for an older
-    # version
-    tag: ((release_minor))
-
 - name: concourse-image-ubuntu
   type: registry-image
   icon: *image-icon
@@ -1305,10 +1293,7 @@ resources:
     repository: concourse/concourse
     username: ((docker.username))
     password: ((docker.password))
-
-    # avoid tagging as 'latest' in case this is a patch release for an older
-    # version
-    tag: ((release_minor))-ubuntu
+    variant: ubuntu
 
 - name: version
   type: semver
@@ -1320,23 +1305,6 @@ resources:
     bucket: concourse-artifacts
     key: version-((release_minor))
     initial_version: ((release_minor)).0-rc.0
-
-- name: latest-version
-  type: github-release
-  icon: &release-icon package-variant-closed
-  source:
-    owner: concourse
-    repository: concourse
-    access_token: ((concourse_github_release.access_token))
-
-- name: latest-of-same-major-version
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: concourse
-    repository: concourse
-    access_token: ((concourse_github_release.access_token))
-    tag_filter: '^v(((release_major))\.\d+\.\d+)$'
 
 - name: linux-rc
   type: gcs
