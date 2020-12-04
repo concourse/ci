@@ -1120,6 +1120,7 @@ resources:
   icon: &image-icon docker
   source:
     repository: concourse/dev
+    tag: latest
     username: ((docker.username))
     password: ((docker.password))
 
@@ -1137,6 +1138,7 @@ resources:
   icon: *image-icon
   source:
     repository: concourse/unit
+    tag: latest
     username: ((docker.username))
     password: ((docker.password))
 
@@ -1145,6 +1147,7 @@ resources:
   icon: *image-icon
   source:
     repository: concourse/golang-builder
+    tag: latest
     username: ((docker.username))
     password: ((docker.password))
 
@@ -1490,6 +1493,7 @@ resources:
   icon: &image-icon docker
   source:
     repository: concourse/resource-types
+    tag: latest
     username: ((docker.username))
     password: ((docker.password))
 
@@ -1507,6 +1511,7 @@ resources:
   icon: *image-icon
   source:
     repository: concourse/concourse-dev
+    tag: latest
     username: ((docker.username))
     password: ((docker.password))
 
