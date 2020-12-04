@@ -19,6 +19,12 @@
 #
 # everything else will be managed by the pipeline
 
+meta:
+  icons:
+  - &release-icon package-variant-closed
+  - &git-icon github
+  - &image-icon docker
+
 resource_types:
 - name: gcs
   type: registry-image
@@ -1193,7 +1199,7 @@ jobs:
 resources:
 - name: concourse
   type: git
-  icon: &git-icon github
+  icon: *git-icon
   source:
     uri: https://github.com/concourse/concourse.git
     branch: release/((release_minor)).x
@@ -1209,7 +1215,7 @@ resources:
 
 - name: concourse-docker
   type: git
-  icon: &git-icon github
+  icon: *git-icon
   source:
     uri: https://github.com/concourse/concourse-docker.git
     branch: master
@@ -1225,7 +1231,7 @@ resources:
 
 - name: resource-types-alpine-image
   type: registry-image
-  icon: &image-icon docker
+  icon: *image-icon
   source:
     repository: concourse/resource-types
     tag: release-((release_minor))
@@ -1235,7 +1241,7 @@ resources:
 
 - name: resource-types-ubuntu-image
   type: registry-image
-  icon: &image-icon docker
+  icon: *image-icon
   source:
     repository: concourse/resource-types
     tag: release-((release_minor))-ubuntu
