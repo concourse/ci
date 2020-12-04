@@ -309,21 +309,10 @@ resource_types:
   source:
     repository: jtarchie/pr
 
-- name: semver
-  type: registry-image
-  source:
-    repository: concourse/semver-resource
-
-- name: registry-image
-  type: registry-image
-  source:
-    repository: concourse/registry-image-resource
-
 - name: gcs
   type: registry-image
   source:
     repository: frodenas/gcs-resource
-
 
 resources:
 - name: alpine-edge
