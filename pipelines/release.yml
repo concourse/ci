@@ -1176,6 +1176,7 @@ jobs:
     - get: version
       passed: [publish-image]
       trigger: true
+    - get: ci
   - task: generate-dpkg-list
     file: ci/tasks/generate-dpkg-list.yml
     image: concourse-rc-image-ubuntu
