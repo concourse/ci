@@ -309,6 +309,8 @@ jobs:
 
 - name: reconfigure-monitoring-pipeline
   plan:
+  - get: pipelines-and-tasks
+    passed: [reconfigure-self]
   - get: oxygen-mask
     trigger: true
   - get: ruby-alpine-image
