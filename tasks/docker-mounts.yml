@@ -1,0 +1,17 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: concourse/unit}
+
+params:
+  KUBE_CONFIG:
+  RELEASE_NAME:
+
+inputs:
+- name: ci
+
+run:
+  path: ci/tasks/scripts/start-docker
+  args: [ci/tasks/scripts/docker-mounts]
