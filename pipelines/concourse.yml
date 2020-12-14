@@ -60,6 +60,10 @@ groups:
   - unit-image
   - build-golang-builder-image
 
+- name: all
+  jobs:
+  - "*"
+
 jobs:
 - name: unit-image
   public: true
