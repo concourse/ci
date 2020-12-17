@@ -66,6 +66,10 @@ resource "google_compute_instance" "windows_worker" {
   }
 
   allow_stopping_for_update = true
+
+  shielded_instance_config {
+    enable_integrity_monitoring = false
+  }
 }
 
 data "template_file" "startup_script" {
