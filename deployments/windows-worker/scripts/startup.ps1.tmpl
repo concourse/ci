@@ -5,10 +5,14 @@ $ProgressPreference="SilentlyContinue"
 
 cd C:\
 
+& {
 # install StackDriver monitoring agent so we can get memory and disk metrics in
 # the GCP console
 Invoke-WebRequest -Uri https://repo.stackdriver.com/windows/StackdriverMonitoring-GCM-46.exe -OutFile StackDriverMonitoring.exe
-Start-Process -FilePath ./StackDriverMonitoring.exe -ArgumentList "/S" -Wait -PassThru
+if (Test-Path .\MonitoringAgent\uninstall.exe) {
+   Start-Process -FilePath .\MonitoringAgent\uninstall.exe -ArgumentList "/S" -Wait -PassThru
+}
+Start-Process -FilePath ./StackDriverMonitoring.exe -ArgumentList "/S /D=C:\MonitoringAgent" -Wait -PassThru
 rm StackDriverMonitoring.exe
 
 # install Go
@@ -48,3 +52,4 @@ ${worker_key}
   /tsa-public-key .\tsa-host-public-key `
   /tsa-worker-private-key .\worker-key `
   /team main
+} *> C:/startup.log
