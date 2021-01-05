@@ -10,5 +10,5 @@ fi
 concourse_chart=$1
 
 grep -REhv '\s+#\s+' $concourse_chart/templates |
-  grep -Eoh 'name: (([A-Z_])+|http_proxy|https_proxy|no_proxy)' |
+  grep -Eoh 'name: (([A-Z0-9_])+|http_proxy|https_proxy|no_proxy)' |
   sed -e "s/^name: //"

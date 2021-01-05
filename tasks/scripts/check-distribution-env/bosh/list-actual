@@ -10,5 +10,5 @@ fi
 release=$1
 
 grep -REhv '\s+#\s+' $release/jobs |
-  grep -Eoh 'env(_file)?: (([A-Z_])+|http_proxy|https_proxy|no_proxy)' |
+  grep -Eoh 'env(_file)?: (([A-Z0-9_])+|http_proxy|https_proxy|no_proxy)' |
   sed -e "s/^env\(_file\)\?: //"
