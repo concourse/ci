@@ -11,6 +11,7 @@ inputs:
 - name: repo
 - name: version
 - name: resource-versions
+  optional: true
 
 outputs:
 - name: built-notes

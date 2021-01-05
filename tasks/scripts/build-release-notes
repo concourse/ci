@@ -13,4 +13,6 @@ chmod +x release-me/releaseme
   --release-version=$RELEASE_VERSION \
   > built-notes/notes.md
 
-cat resource-versions/versions >> built-notes/notes.md
+if [ -f resource-versions/versions ]; then
+	cat resource-versions/versions >> built-notes/notes.md
+fi
