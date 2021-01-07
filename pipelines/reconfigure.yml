@@ -35,6 +35,13 @@ resources:
   source:
     uri: https://github.com/pivotal/concourse-for-platform-automation.git
 
+- name: docs-ci
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/docs
+    paths: [ci]
+
 - name: flight-attendant-ci
   type: git
   icon: github
@@ -238,6 +245,8 @@ jobs:
     trigger: true
   - get: concourse-for-k8s
     trigger: true
+  - get: docs-ci
+    trigger: true
   - get: flight-attendant-ci
     trigger: true
   - get: ft-ci
@@ -269,6 +278,12 @@ jobs:
       concourse_image_tag: latest
   - set_pipeline: baggageclaim
     file: baggageclaim-ci/ci/pipeline.yml
+  - set_pipeline: baggageclaim-prs
+    team: contributor
+    file: baggageclaim-ci/ci/prs-pipeline.yml
+  - set_pipeline: docs-prs
+    team: contributor
+    file: docs-ci/ci/prs-pipeline.yml
   - set_pipeline: dutyfree
     team: dutyfree
     file: resource-types-website-ci/ci/pipeline.yml

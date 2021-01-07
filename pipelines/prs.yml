@@ -22,38 +22,12 @@ resources:
     repository: concourse/concourse
     access_token: ((pull_requests_access_token))
 
-- name: baggageclaim-master
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/baggageclaim
-
-- name: baggageclaim-pr
-  type: pull-request
-  icon: source-pull
-  source:
-    repository: concourse/baggageclaim
-    access_token: ((pull_requests_access_token))
-
-- name: docs-master
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/docs
-
 - name: validator
   type: github-release
   icon: github
   source:
     owner: clarafu
     repository: release-me
-
-- name: docs-pr
-  type: pull-request
-  icon: source-pull
-  source:
-    repository: concourse/docs
-    access_token: ((pull_requests_access_token))
 
 - name: ci
   type: git
@@ -79,11 +53,6 @@ resources:
   type: registry-image
   icon: docker
   source: {repository: concourse/unit}
-
-- name: baggageclaim-ci
-  type: registry-image
-  icon: docker
-  source: {repository: concourse/baggageclaim-ci}
 
 - name: postgres-image
   type: registry-image
@@ -425,37 +394,6 @@ jobs:
     params: {BUILD: true}
     input_mapping: {concourse: built-concourse}
     file: ci/tasks/downgrade-test.yml
-
-- name: baggageclaim
-  public: true
-  on_failure:
-    put: baggageclaim-pr
-    params: {path: baggageclaim-pr, status: failure, context: unit}
-    tags: [pr]
-  on_success:
-    put: baggageclaim-pr
-    params: {path: baggageclaim-pr, status: success, context: unit}
-    tags: [pr]
-  plan:
-  - in_parallel:
-    - get: baggageclaim-pr
-      trigger: true
-      version: every
-      tags: [pr]
-    - get: baggageclaim-master
-      tags: [pr]
-    - get: baggageclaim-ci
-    - get: ci
-  - put: baggageclaim-pr
-    params: {path: baggageclaim-pr, status: pending, context: unit}
-    tags: [pr]
-  - task: unit-linux
-    image: baggageclaim-ci
-    privileged: true
-    timeout: 1h
-    file: baggageclaim-master/ci/unit-linux.yml
-    input_mapping: {baggageclaim: baggageclaim-pr}
-    tags: [pr]
 
 - name: docs
   public: true
