@@ -5,10 +5,6 @@ image_resource:
   type: registry-image
   source: {repository: concourse/unit}
 
-params:
-  KUBE_CONFIG:
-  RELEASE_NAME:
-
 inputs:
 - name: ci
 
