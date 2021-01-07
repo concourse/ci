@@ -51,6 +51,7 @@ config:
   params:
     DOCKERFILE: #@ resource_name + "-resource/dockerfiles/" + distro + "/Dockerfile"
     ADDITIONAL_TARGETS: tests
+    DEBUG: 'true'
     _: #@ template.replace(build_params(resource_name))
     #! TODO: use pre-fetched base image once the build task supports it,
     #! i.e. load_base: #@ determine_base(distro)
