@@ -275,6 +275,20 @@ jobs:
     file: ci/tasks/containerd-integration.yml
   on_failure: *failed-concourse
 
+- name: check-docker-mounts
+  public: true
+  max_in_flight: 1
+  plan:
+    - get: concourse
+      passed: [unit, dev-image]
+      trigger: true
+    - get: unit-image
+    - get: ci
+    - task: docker-mounts
+      image: unit-image
+      privileged: true
+      file: ci/tasks/docker-mounts.yml
+
 - name: testflight
   public: true
   max_in_flight: 2

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e -u
+
+source ci/tasks/scripts/docker-helpers.sh
+
+start_docker
+trap stop_docker EXIT SIGTERM SIGINT
+
+"$@"
