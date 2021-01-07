@@ -95,7 +95,7 @@ jobs:
     file: ci-pipelines/pipelines/prs.yml
     team: contributor
     instance_vars:
-      pr_base_branch: release/((release_minor)).x
+      branch: release/((release_minor)).x
     vars:
       dev_image_tag: release-((release_minor))
       concourse_image_tag: ((release_minor))

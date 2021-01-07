@@ -263,7 +263,7 @@ jobs:
     team: contributor
     file: pipelines-and-tasks/pipelines/prs.yml
     instance_vars:
-      pr_base_branch: master
+      branch: master
     vars:
       dev_image_tag: latest
       concourse_image_tag: latest

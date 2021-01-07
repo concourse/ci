@@ -1,6 +1,6 @@
 # the following vars must be specified:
 #
-#   ((pr_base_branch))      only PRs against this branch will be run
+#   ((branch))              only PRs against this branch will be run
 #   ((dev_image_tag))       the tag to use for the dev image
 #   ((concourse_image_tag)) the tag to use for the concourse image for upgrade/downgrade
 
@@ -20,6 +20,7 @@ resources:
   icon: github
   source:
     uri: https://github.com/concourse/concourse
+    branch: ((branch))
 
 - name: concourse-pr
   type: pull-request
@@ -27,7 +28,7 @@ resources:
   source:
     repository: concourse/concourse
     access_token: ((pull_requests_access_token))
-    base_branch: ((pr_base_branch))
+    base_branch: ((branch))
 
 - name: validator
   type: github-release
