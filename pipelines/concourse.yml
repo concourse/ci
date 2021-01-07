@@ -39,20 +39,11 @@ groups:
 
 - name: k8s
   jobs:
-  - k8s-check-helm-params
-  - k8s-smoke
-  - k8s-topgun
+  - k8s-*
 
 - name: bosh
   jobs:
-  - bosh-bump
-  - bosh-smoke
-  - bosh-smoke-containerd
-  - bosh-topgun-core
-  - bosh-topgun-runtime
-  - bosh-topgun-both
-  - bosh-topgun-pcf
-  - bosh-check-props
+  - bosh-*
 
 - name: images
   jobs:
