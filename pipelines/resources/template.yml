@@ -50,6 +50,7 @@ config:
     path: image
   params:
     DOCKERFILE: #@ resource_name + "-resource/dockerfiles/" + distro + "/Dockerfile"
+    ADDITIONAL_TARGETS: tests
     _: #@ template.replace(build_params(resource_name))
     #! TODO: use pre-fetched base image once the build task supports it,
     #! i.e. load_base: #@ determine_base(distro)
@@ -433,6 +434,7 @@ resources:
   icon: docker
   source:
     repository: vito/oci-build-task
+    tag: master
 
 #@ if resource_name == "cf":
 - name: cf-cli
