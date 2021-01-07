@@ -1,15 +1,8 @@
 #!/bin/bash
 
 migrations_path=atc/db/migration/migrations/
-master_dir=concourse-master/$migrations_path
+base_dir=concourse-base/$migrations_path
 pr_dir=concourse-pr/$migrations_path
-
-target_branch=$(cat concourse-pr/.git/resource/base_name)
-[ $target_branch = 'master' ] || {
-  echo "skipping migration check because this PR does not target the 'master' branch"
-  echo "target branch: $target_branch"
-  exit 0
-}
 
 if grep skip-migrations-check concourse-pr/.git/resource/title >/dev/null; then
   echo "skipping migration check at PR's request"
@@ -17,26 +10,26 @@ if grep skip-migrations-check concourse-pr/.git/resource/title >/dev/null; then
   exit 0
 fi
 
-migrations_on_master=$(mktemp)
-find $master_dir -name '[0-9]*' -exec basename {} \; |
-  sort > "$migrations_on_master"
+migrations_on_base=$(mktemp)
+find $base_dir -name '[0-9]*' -exec basename {} \; |
+  sort > "$migrations_on_base"
 
 actual_pr_migrations=$(mktemp)
 find $pr_dir -name '[0-9]*' -exec basename {} \; |
   sort > "$actual_pr_migrations"
 
-unique_to_master=$(comm -23 "$migrations_on_master" "$actual_pr_migrations")
-[ -z "$unique_to_master" ] || {
+unique_to_base=$(comm -23 "$migrations_on_base" "$actual_pr_migrations")
+[ -z "$unique_to_base" ] || {
   echo "pr removed migrations:"
-  echo "$unique_to_master"
+  echo "$unique_to_base"
   echo "and prs cannot remove migrations."
   exit 1
 }
 
-new_on_pr=$(comm -13 "$migrations_on_master" "$actual_pr_migrations")
+new_on_pr=$(comm -13 "$migrations_on_base" "$actual_pr_migrations")
 
 expected_pr_migrations=$(mktemp)
-sort -n "$migrations_on_master" >> "$expected_pr_migrations"
+sort -n "$migrations_on_base" >> "$expected_pr_migrations"
 if [ -n "$new_on_pr" ]; then
   echo "$new_on_pr" >> "$expected_pr_migrations"
 fi
@@ -47,7 +40,7 @@ fi
 diff "$expected_pr_migrations" <(sort -n "$actual_pr_migrations") >/dev/null || {
   echo "pr added migrations:"
   echo "$new_on_pr"
-  echo "out of order with master."
-  echo "new migrations in a pr must be strictly newer than those on master."
+  echo "out of order with the base branch."
+  echo "new migrations in a pr must be strictly newer than those on the base branch."
   exit 1
 }

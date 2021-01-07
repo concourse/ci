@@ -262,6 +262,10 @@ jobs:
   - set_pipeline: prs
     team: contributor
     file: pipelines-and-tasks/pipelines/prs.yml
+    vars:
+      pr_base_branch: master
+      dev_image_tag: latest
+      concourse_image_tag: latest
   - set_pipeline: helm-prs
     file: pipelines-and-tasks/pipelines/helm-prs.yml
     vars:

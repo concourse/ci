@@ -1,3 +1,9 @@
+# the following vars must be specified:
+#
+#   ((pr_base_branch))      only PRs against this branch will be run
+#   ((dev_image_tag))       the tag to use for the dev image
+#   ((concourse_image_tag)) the tag to use for the concourse image for upgrade/downgrade
+
 ---
 resource_types:
 - name: bosh-deployment
@@ -9,7 +15,7 @@ resource_types:
   source: {repository: teliaoss/github-pr-resource}
 
 resources:
-- name: concourse-master
+- name: concourse-base
   type: git
   icon: github
   source:
@@ -21,6 +27,7 @@ resources:
   source:
     repository: concourse/concourse
     access_token: ((pull_requests_access_token))
+    base_branch: ((pr_base_branch))
 
 - name: validator
   type: github-release
@@ -40,14 +47,18 @@ resources:
   icon: docker
   source:
     repository: concourse/concourse
-    tag: latest
+    tag: ((concourse_image_tag))
     username: ((docker.username))
     password: ((docker.password))
 
 - name: dev-image
   type: registry-image
   icon: docker
-  source: {repository: concourse/dev}
+  source:
+    repository: concourse/dev
+    tag: ((dev_image_tag))
+    username: ((docker.username))
+    password: ((docker.password))
 
 - name: unit-image
   type: registry-image
@@ -81,7 +92,7 @@ jobs:
       trigger: true
       version: every
       tags: [pr]
-    - get: concourse-master
+    - get: concourse-base
       tags: [pr]
     - get: unit-image
       tags: [pr]
