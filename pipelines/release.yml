@@ -507,13 +507,13 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
-      passed: [testflight, watsjs, upgrade, downgrade]
+      passed: [dev-image, testflight, watsjs, upgrade, downgrade]
       trigger: true
     - get: dev-image
       trigger: true
-      passed: [testflight, watsjs, upgrade, downgrade]
+      passed: [dev-image]
     - get: unit-image
-      passed: [testflight, watsjs, upgrade, downgrade]
+      passed: [dev-image]
       trigger: true
   - put: version
     params: {pre: rc}

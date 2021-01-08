@@ -526,7 +526,7 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
-      passed: [testflight, watsjs, upgrade, downgrade]
+      passed: [dev-image, testflight, watsjs, upgrade, downgrade]
       trigger: true
     - get: unit-image
       passed: [dev-image]
