@@ -482,8 +482,10 @@ jobs:
       trigger: true
     - get: prometheus-chart
       tags: [k8s-topgun]
+      params: {untar: true}
     - get: postgresql-chart
       tags: [k8s-topgun]
+      params: {untar: true}
     - get: ci
       tags: [k8s-topgun]
   - task: k8s-topgun
