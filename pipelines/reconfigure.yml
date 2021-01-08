@@ -167,38 +167,55 @@ jobs:
         datadog-event
         mock
     input_mapping: {pipelines: pipelines-and-tasks}
-  - set_pipeline: git
-    file: rendered_pipelines/git.yml
-  - set_pipeline: time
-    file: rendered_pipelines/time.yml
-  - set_pipeline: docker-image
-    file: rendered_pipelines/docker-image.yml
-  - set_pipeline: registry-image
-    file: rendered_pipelines/registry-image.yml
-  - set_pipeline: cf
-    file: rendered_pipelines/cf.yml
-  - set_pipeline: bosh-io-release
-    file: rendered_pipelines/bosh-io-release.yml
-  - set_pipeline: bosh-io-stemcell
-    file: rendered_pipelines/bosh-io-stemcell.yml
-  - set_pipeline: tracker
-    file: rendered_pipelines/tracker.yml
-  - set_pipeline: hg
-    file: rendered_pipelines/hg.yml
-  - set_pipeline: github-release
-    file: rendered_pipelines/github-release.yml
-  - set_pipeline: semver
-    file: rendered_pipelines/semver.yml
-  - set_pipeline: s3
-    file: rendered_pipelines/s3.yml
-  - set_pipeline: concourse-pipeline
-    file: rendered_pipelines/concourse-pipeline.yml
-  - set_pipeline: pool
-    file: rendered_pipelines/pool.yml
-  - set_pipeline: datadog-event
-    file: rendered_pipelines/datadog-event.yml
-  - set_pipeline: mock
-    file: rendered_pipelines/mock.yml
+  - in_parallel:
+    - set_pipeline: resource
+      instance_vars: {type: git}
+      file: rendered_pipelines/git.yml
+    - set_pipeline: resource
+      instance_vars: {type: time}
+      file: rendered_pipelines/time.yml
+    - set_pipeline: resource
+      instance_vars: {type: docker-image}
+      file: rendered_pipelines/docker-image.yml
+    - set_pipeline: resource
+      instance_vars: {type: registry-image}
+      file: rendered_pipelines/registry-image.yml
+    - set_pipeline: resource
+      instance_vars: {type: cf}
+      file: rendered_pipelines/cf.yml
+    - set_pipeline: resource
+      instance_vars: {type: bosh-io-release}
+      file: rendered_pipelines/bosh-io-release.yml
+    - set_pipeline: resource
+      instance_vars: {type: bosh-io-stemcell}
+      file: rendered_pipelines/bosh-io-stemcell.yml
+    - set_pipeline: resource
+      instance_vars: {type: tracker}
+      file: rendered_pipelines/tracker.yml
+    - set_pipeline: resource
+      instance_vars: {type: hg}
+      file: rendered_pipelines/hg.yml
+    - set_pipeline: resource
+      instance_vars: {type: github-release}
+      file: rendered_pipelines/github-release.yml
+    - set_pipeline: resource
+      instance_vars: {type: semver}
+      file: rendered_pipelines/semver.yml
+    - set_pipeline: resource
+      instance_vars: {type: s3}
+      file: rendered_pipelines/s3.yml
+    - set_pipeline: resource
+      instance_vars: {type: concourse-pipeline}
+      file: rendered_pipelines/concourse-pipeline.yml
+    - set_pipeline: resource
+      instance_vars: {type: pool}
+      file: rendered_pipelines/pool.yml
+    - set_pipeline: resource
+      instance_vars: {type: datadog-event}
+      file: rendered_pipelines/datadog-event.yml
+    - set_pipeline: resource
+      instance_vars: {type: mock}
+      file: rendered_pipelines/mock.yml
 
 - name: reconfigure-platform-automation
   plan:
