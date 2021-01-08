@@ -10,7 +10,8 @@ inputs:
 - name: ci
 - name: concourse-rc-image
 - name: concourse-chart
-- name: helm-charts
+- name: prometheus-chart
+- name: postgresql-chart
 
 caches:
 - path: gopath

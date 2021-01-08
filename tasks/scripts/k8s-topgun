@@ -22,6 +22,10 @@ if [[ $HELM_VERSION == "2" ]]; then
 fi
 # END of tech-debt
 
+mkdir helm-charts
+cp prometheus-chart/prometheus helm-charts
+cp postgresql-chart/postgresql helm-charts
+
 export CONCOURSE_IMAGE_DIGEST="$(cat concourse-rc-image/digest)"
 export CONCOURSE_IMAGE_TAG="$(cat concourse-rc-image/tag)"
 export HELM_CHARTS_DIR="$(realpath ./helm-charts)"
