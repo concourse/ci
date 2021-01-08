@@ -73,12 +73,12 @@ plan:
 - #@ template.replace(extra_steps(distro))
 - put: #@ "resource-image-dev-" + distro
   params: {image: built-resource-image/image.tar}
-#@ end
 on_failure: &failed-ci
   put: notify
   params:
     mode: normal
     alert_type: failed
+#@ end
 
 #@ def extra_steps(distro):
   #@ if resource_name == "docker-image":
