@@ -45,6 +45,7 @@ resource_types:
 groups:
 - name: develop
   jobs:
+  - set-prs-pipeline
   - unit
   - resource-types-images
   - dev-image
@@ -61,16 +62,11 @@ groups:
 
 - name: k8s
   jobs:
-  - k8s-check-helm-params
-  - k8s-smoke
-  - k8s-topgun
+  - k8s-*
 
 - name: bosh
   jobs:
-  - bosh-bump
-  - bosh-smoke
-  - bosh-topgun
-  - bosh-check-props
+  - bosh-*
 
 - name: publish
   jobs:
@@ -89,6 +85,21 @@ groups:
   - "*"
 
 jobs:
+- name: set-prs-pipeline
+  public: true
+  serial: true
+  plan:
+  - get: ci-pipelines
+    trigger: true
+  - set_pipeline: prs
+    file: ci-pipelines/pipelines/prs.yml
+    team: contributor
+    instance_vars:
+      branch: release/((release_minor)).x
+    vars:
+      dev_image_tag: release-((release_minor))
+      concourse_image_tag: ((release_minor))
+
 - name: unit
   public: true
   serial: true
@@ -1218,6 +1229,14 @@ resources:
   source:
     uri: https://github.com/concourse/ci.git
     branch: master
+
+- name: ci-pipelines
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/ci
+    paths:
+    - pipelines
 
 - name: concourse-docker
   type: git
