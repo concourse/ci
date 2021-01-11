@@ -36,6 +36,7 @@ groups:
   - bin-smoke-lts
   - upgrade
   - downgrade
+  - check-docker-mounts
 
 - name: quickstart
   jobs:
