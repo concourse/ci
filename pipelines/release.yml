@@ -42,6 +42,10 @@ resource_types:
   type: registry-image
   source: {repository: mockersf/concourse-slack-notifier}
 
+- name: helm-chart
+  type: registry-image
+  source: {repository: concourse/helm-chart-resource}
+
 groups:
 - name: develop
   jobs:
@@ -492,8 +496,12 @@ jobs:
       tags: [k8s-topgun]
     - get: unit-image
       tags: [k8s-topgun]
-    - get: helm-charts
+    - get: prometheus-chart
       tags: [k8s-topgun]
+      params: {untar: true}
+    - get: postgresql-chart
+      tags: [k8s-topgun]
+      params: {untar: true}
     - get: concourse-chart
       trigger: true
       passed: [k8s-smoke]
@@ -1419,12 +1427,23 @@ resources:
     branch: release/((release_minor)).x
     private_key: ((concourse_chart_private_key))
 
-- name: helm-charts
-  type: git
-  icon: *git-icon
+- name: prometheus-chart
+  type: helm-chart
+  icon: &helm-icon ship-wheel
   source:
-    uri: https://github.com/helm/charts
-    branch: master
+    chart: prometheus-community/prometheus
+    repos:
+      - name: prometheus-community
+        url: https://prometheus-community.github.io/helm-charts
+
+- name: postgresql-chart
+  type: helm-chart
+  icon: *helm-icon
+  source:
+    chart: bitnami/postgresql
+    repos:
+      - name: bitnami
+        url: https://charts.bitnami.com/bitnami
 
 - name: concourse-draft-release
   type: github-release
