@@ -162,6 +162,7 @@ jobs:
       version: every
       tags: [pr]
     - get: oci-build-task
+      tags: [pr]
     - get: dev-image
       params: {format: oci}
       tags: [pr]
@@ -193,6 +194,7 @@ jobs:
       outputs: [{name: image}]
       caches: [{path: cache}]
       run: {path: build}
+    tags: [pr]
   - across:
     - var: runtime
       values:
