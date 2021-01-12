@@ -71,6 +71,11 @@ resources:
   icon: docker
   source: {repository: postgres}
 
+- name: oci-build-task
+  type: registry-image
+  icon: docker
+  source: {repository: vito/oci-build-task}
+
 jobs:
 - name: unit
   public: true
@@ -153,6 +158,7 @@ jobs:
       trigger: true
       version: every
       tags: [pr]
+    - get: oci-build-task
     - get: dev-image
       params: {format: oci}
       tags: [pr]
@@ -172,6 +178,18 @@ jobs:
     file: ci/tasks/yarn-build.yml
     input_mapping: {concourse: concourse-pr}
     tags: [pr]
+  - task: build
+    image: oci-build-task
+    privileged: true
+    config:
+      platform: linux
+      params:
+        CONTEXT: built-concourse/Dockerfile
+        IMAGE_ARG_base_image: dev-image/image.tar
+      inputs: [{name: built-concourse}, {name: dev-image}]
+      outputs: [{name: built-image}]
+      caches: [{path: cache}]
+      run: {path: build}
   - across:
     - var: runtime
       values:
@@ -182,9 +200,8 @@ jobs:
     timeout: 1h
     privileged: true
     file: ci/tasks/docker-compose-testflight.yml
-    input_mapping: {concourse: built-concourse}
+    input_mapping: {concourse: built-concourse, dev-image: built-image}
     params:
-      BUILD: true
       RUNTIME: ((.:runtime))
       DOWNLOAD_CLI: false
     tags: [pr]
