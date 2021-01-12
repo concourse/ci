@@ -368,6 +368,7 @@ resources:
 - name: resource-pr
   type: pull-request
   icon: source-pull
+  check_every: 2m
   source:
     access_token: ((pull_requests_access_token))
     base: master
