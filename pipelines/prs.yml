@@ -184,7 +184,7 @@ jobs:
     config:
       platform: linux
       params:
-        CONTEXT: built-concourse/Dockerfile
+        CONTEXT: built-concourse
         IMAGE_ARG_base_image: dev-image/image.tar
       inputs: [{name: built-concourse}, {name: dev-image}]
       outputs: [{name: built-image}]
