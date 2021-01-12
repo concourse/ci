@@ -25,6 +25,7 @@ resources:
 - name: concourse-pr
   type: pull-request
   icon: source-pull
+  check_every: 2m
   source:
     repository: concourse/concourse
     access_token: ((pull_requests_access_token))
