@@ -169,7 +169,6 @@ jobs:
         github-release
         semver
         s3
-        concourse-pipeline
         pool
         datadog-event
         mock
@@ -211,9 +210,6 @@ jobs:
     - set_pipeline: resource
       instance_vars: {type: s3}
       file: rendered_pipelines/s3.yml
-    - set_pipeline: resource
-      instance_vars: {type: concourse-pipeline}
-      file: rendered_pipelines/concourse-pipeline.yml
     - set_pipeline: resource
       instance_vars: {type: pool}
       file: rendered_pipelines/pool.yml

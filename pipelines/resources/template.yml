@@ -27,8 +27,6 @@ BUILD_ARG_S3_TESTING_BUCKET: ((s3_resource.bucket))
 BUILD_ARG_S3_VERSIONED_TESTING_BUCKET: ((s3_resource.versioned_bucket))
 BUILD_ARG_S3_TESTING_REGION: ((s3_resource.region))
 BUILD_ARG_S3_ENDPOINT: https://s3.amazonaws.com
-  #@ elif resource_name == "concourse-pipeline":
-CONTEXT: .
   #@ elif resource_name == "docker-image":
 CONTEXT: #@ resource_name + "-resource"
 UNPACK_ROOTFS: 'true'
@@ -154,9 +152,6 @@ plan:
 - get: cf-cli
   trigger: true
   params: {globs: ["cf-cli*linux*"]}
-  #@ elif resource_name == "concourse-pipeline":
-- get: fly
-  params: {globs: ["fly-*-linux-amd64.tgz"]}
   #@ else: return []
 #@ end
 
@@ -461,11 +456,4 @@ resources:
     bucket: cf-cli-releases
     regexp: "releases/v([\\d\\.]+)/cf-cli_.*_linux_x86-64.tgz"
     region_name: us-west-1
-#@ elif resource_name == "concourse-pipeline":
-- name: fly
-  type: github-release
-  source:
-    user: concourse
-    repository: concourse
-    access_token: ((concourse_github_dummy.access_token))
 #@ end
