@@ -311,8 +311,6 @@ jobs:
     file: resource-types-website-ci/ci/pipeline.yml
   - set_pipeline: bosh-cleanup
     file: pipelines-and-tasks/pipelines/bosh-cleanup.yml
-  - set_pipeline: wings
-    file: pipelines-and-tasks/pipelines/wings.yml
   - set_pipeline: norsk-mirror
     file: pipelines-and-tasks/pipelines/norsk-mirror.yml
   - set_pipeline: release-6.3.x
