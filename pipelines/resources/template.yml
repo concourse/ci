@@ -444,7 +444,6 @@ resources:
   icon: docker
   source:
     repository: vito/oci-build-task
-    tag: master
 
 - name: notify
   type: slack-notifier
