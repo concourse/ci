@@ -190,7 +190,7 @@ jobs:
         CONTEXT: built-concourse
         IMAGE_ARG_base_image: dev-image/image.tar
       inputs: [{name: built-concourse}, {name: dev-image}]
-      outputs: [{name: built-image}]
+      outputs: [{name: image}]
       caches: [{path: cache}]
       run: {path: build}
   - across:
@@ -203,7 +203,7 @@ jobs:
     timeout: 1h
     privileged: true
     file: ci/tasks/docker-compose-testflight.yml
-    input_mapping: {concourse: built-concourse, dev-image: built-image}
+    input_mapping: {concourse: built-concourse, dev-image: image}
     params:
       RUNTIME: ((.:runtime))
       DOWNLOAD_CLI: false
