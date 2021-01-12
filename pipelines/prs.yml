@@ -12,7 +12,9 @@ resource_types:
 
 - name: pull-request
   type: registry-image
-  source: {repository: teliaoss/github-pr-resource}
+  source:
+    repository: teliaoss/github-pr-resource
+    tag: v0.21.0
 
 resources:
 - name: concourse-base
