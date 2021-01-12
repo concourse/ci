@@ -1202,7 +1202,7 @@ jobs:
     - get: ci
   - task: generate-dpkg-list
     file: ci/tasks/generate-dpkg-list.yml
-    image: concourse-rc-image-ubuntu
+    image: concourse-image-ubuntu
     params: {COMPONENT_NAME: "concourse"}
   - put: concourse-image-dpkg-list
     params: {file: "dpkg-list/concourse-*.txt"}
