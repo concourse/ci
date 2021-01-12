@@ -14,7 +14,7 @@ start_docker
 [ -d concourse-image ] && docker load -i concourse-image/image.tar
 [ -d postgres-image ] && docker load -i postgres-image/image.tar
 
-[ -f dev-image/tag ] && export CONCOURSE_DEV_REF=":$(cat dev-image/tag)"
+[ -f dev-image/tag ] && export CONCOURSE_DEV_IMAGE="concourse/dev:$(cat dev-image/tag)"
 if [ -f concourse-image/tag ]; then
   export CONCOURSE_LATEST_TAG=$(cat concourse-image/tag)
 else

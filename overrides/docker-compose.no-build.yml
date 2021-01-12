@@ -2,7 +2,7 @@ version: '3'
 
 services:
   web:
-    image: concourse/dev${CONCOURSE_DEV_REF}
+    image: ${CONCOURSE_DEV_IMAGE}
     volumes: ["${CONCOURSE_KEYS}:/concourse-keys"]
     environment:
       CONCOURSE_SESSION_SIGNING_KEY: /concourse-keys/session_signing_key
@@ -10,7 +10,7 @@ services:
       CONCOURSE_TSA_HOST_KEY: /concourse-keys/tsa_host_key
 
   worker:
-    image: concourse/dev${CONCOURSE_DEV_REF}
+    image: ${CONCOURSE_DEV_IMAGE}
     volumes: ["${CONCOURSE_KEYS}:/concourse-keys"]
     environment:
       CONCOURSE_TSA_PUBLIC_KEY: /concourse-keys/tsa_host_key.pub
