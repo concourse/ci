@@ -9,7 +9,8 @@ start_docker
 [ -d dev-image ] && docker load -i dev-image/image.tar
 [ -d "$POSTGRES_IMAGE" ] && docker load -i "$POSTGRES_IMAGE/image.tar"
 
-export CONCOURSE_DEV_TAG=$(cat dev-image/tag)
+[-f dev-image/tag] && export CONCOURSE_DEV_REF=":$(cat dev-image/tag)"
+[-f dev-image/digest] && export CONCOURSE_DEV_REF="@$(cat dev-image/digest)"
 export POSTGRES_TAG=$(cat "$POSTGRES_IMAGE/tag")
 export CONCOURSE_KEYS=$PWD/keys
 

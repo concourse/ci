@@ -377,7 +377,7 @@ jobs:
   - task: upgrade-test
     timeout: 1h
     privileged: true
-    params: {BUILD: true, CONCOURSE_DEV_TAG: ((dev_image_tag))}
+    params: {BUILD: true, CONCOURSE_DEV_REF: ":((dev_image_tag))"}
     input_mapping: {concourse: built-concourse}
     file: ci/tasks/upgrade-test.yml
 
@@ -423,6 +423,6 @@ jobs:
   - task: downgrade-test
     timeout: 1h
     privileged: true
-    params: {BUILD: true, CONCOURSE_DEV_TAG: ((dev_image_tag))}
+    params: {BUILD: true, CONCOURSE_DEV_REF: ":((dev_image_tag))"}
     input_mapping: {concourse: built-concourse}
     file: ci/tasks/downgrade-test.yml
