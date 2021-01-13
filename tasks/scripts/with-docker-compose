@@ -9,8 +9,11 @@ start_docker
 [ -d dev-image ] && docker load -i dev-image/image.tar
 [ -d "$POSTGRES_IMAGE" ] && docker load -i "$POSTGRES_IMAGE/image.tar"
 
-[ -f dev-image/tag ] && export CONCOURSE_DEV_IMAGE="concourse/dev:$(cat dev-image/tag)"
+# note: tag must take precedence, since the digest returned by the
+# registry-image resource is not the same as the image id in the docker CLI.
+# the oci-build-task, however, gives a digest that can be used
 [ -f dev-image/digest ] && export CONCOURSE_DEV_IMAGE="$(cat dev-image/digest)"
+[ -f dev-image/tag ] && export CONCOURSE_DEV_IMAGE="concourse/dev:$(cat dev-image/tag)"
 export POSTGRES_TAG=$(cat "$POSTGRES_IMAGE/tag")
 export CONCOURSE_KEYS=$PWD/keys
 
