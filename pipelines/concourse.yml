@@ -106,7 +106,10 @@ jobs:
     privileged: true
     file: ci/tasks/build-golang-builder-image.yml
   - put: golang-builder-image
-    params: {image: image/image.tar}
+    params:
+      image: image/image.tar
+      version: golang-linux/version
+      bump_aliases: true
   on_failure: *failed-ci
 
 - name: unit
