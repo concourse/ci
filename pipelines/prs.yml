@@ -310,6 +310,8 @@ jobs:
       trigger: true
       version: every
       tags: [pr]
+    - get: oci-build-task
+      tags: [pr]
     - get: dev-image
       params: {format: oci}
       tags: [pr]
@@ -328,13 +330,25 @@ jobs:
     file: ci/tasks/yarn-build.yml
     input_mapping: {concourse: concourse-pr}
     tags: [pr]
+  - task: build
+    image: oci-build-task
+    privileged: true
+    config:
+      platform: linux
+      params:
+        CONTEXT: built-concourse
+        IMAGE_ARG_base_image: dev-image/image.tar
+      inputs: [{name: built-concourse}, {name: dev-image}]
+      outputs: [{name: image}]
+      caches: [{path: cache}]
+      run: {path: build}
+    tags: [pr]
   - task: watsjs
     attempts: 3
     timeout: 1h
     privileged: true
     file: ci/tasks/docker-compose-watsjs.yml
-    input_mapping: {concourse: built-concourse}
-    params: {BUILD: true}
+    input_mapping: {concourse: built-concourse, dev-image: image}
     tags: [pr]
 
 - name: upgrade
