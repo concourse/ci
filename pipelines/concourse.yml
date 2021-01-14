@@ -105,10 +105,12 @@ jobs:
     image: oci-build-task
     privileged: true
     file: ci/tasks/build-golang-builder-image.yml
+  - load_var: version
+    file: golang-linux/version
   - put: golang-builder-image
     params:
       image: image/image.tar
-      version: golang-linux/version
+      version: ((.:version))
       bump_aliases: true
   on_failure: *failed-ci
 
