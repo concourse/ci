@@ -44,6 +44,7 @@ config:
   inputs:
   - name: #@ resource_name + "-resource"
   - name: #@ determine_base(distro)
+  - name: golang-builder
   outputs:
   - name: built-resource-image
     path: image
@@ -51,6 +52,7 @@ config:
     DOCKERFILE: #@ resource_name + "-resource/dockerfiles/" + distro + "/Dockerfile"
     ADDITIONAL_TARGETS: tests
     IMAGE_ARG_base_image: #@ determine_base(distro) + "/image.tar"
+    IMAGE_ARG_builder_image: golang-builder/image.tar
     _: #@ template.replace(build_params(resource_name))
   run: {path: build}
 #@ end
@@ -71,6 +73,7 @@ plan:
     trigger: true
     params: {format: oci}
   - get: oci-build-task
+  - get: golang-builder
   - #@ template.replace(extra_get_steps(distro))
 - #@ build_task(resource_name, distro)
 - #@ template.replace(extra_steps(distro))
@@ -120,6 +123,7 @@ plan:
     trigger: true
     params: {format: oci}
   - get: oci-build-task
+  - get: golang-builder
   - #@ template.replace(extra_get_steps(distro))
 - put: #@ resource_name + "-resource"
   resource: resource-pr
@@ -333,6 +337,12 @@ resources:
   source:
     repository: ubuntu
     tag: bionic
+
+- name: golang-builder
+  type: registry-image
+  icon: docker
+  source:
+    repository: concourse/golang-builder
 
 - name: resource-repo
   type: git
