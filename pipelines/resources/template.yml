@@ -72,9 +72,10 @@ plan:
   - get: #@ determine_base(distro)
     trigger: true
     params: {format: oci}
-  - get: oci-build-task
   - get: golang-builder
+    trigger: true
     params: {format: oci}
+  - get: oci-build-task
   - #@ template.replace(extra_get_steps(distro))
 - #@ build_task(resource_name, distro)
 - #@ template.replace(extra_steps(distro))
