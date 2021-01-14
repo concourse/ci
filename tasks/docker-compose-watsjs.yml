@@ -9,7 +9,6 @@ inputs:
 - name: concourse
 - name: ci
 - name: dev-image
-  optional: true
 - name: postgres-image
   optional: true
 
@@ -18,7 +17,6 @@ caches:
 - path: concourse/web/wats/node_modules
 
 params:
-  BUILD:
   RUNTIME: guardian
   POSTGRES_IMAGE: postgres-image
 

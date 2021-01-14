@@ -9,7 +9,6 @@ inputs:
 - name: concourse
 - name: ci
 - name: dev-image
-  optional: true
 - name: postgres-image
 - name: postgres-image-legacy
   optional: true
@@ -18,7 +17,6 @@ caches:
 - path: gopath
 
 params:
-  BUILD:
   RUNTIME: guardian
   DOWNLOAD_CLI: true
   HAS_RUNTIME_FLAG: true
