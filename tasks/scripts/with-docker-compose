@@ -23,7 +23,7 @@ else
   DOCKER_COMPOSE_FLAGS="-f concourse/docker-compose.yml -f ci/overrides/docker-compose.ci-$RUNTIME.yml"
 fi
 
-  ci/tasks/scripts/generate-keys
+ci/tasks/scripts/generate-keys
 
 docker-compose \
   $DOCKER_COMPOSE_FLAGS \
@@ -36,5 +36,10 @@ function stop_docker_compose() {
   docker-compose -f concourse/docker-compose.yml down
   stop_docker
 }
+
+apt-get install net-tools curl
+cat /etc/os-release
+ps -wwef
+netstat -at
 
 "$@"
