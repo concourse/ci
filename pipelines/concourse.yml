@@ -70,17 +70,18 @@ jobs:
     - get: ci-unit-image #have this here for auto-triggering of this job
       trigger: true
     - get: oci-build-task
-    - get: golang-builder-trigger
+    - get: golang-builder-image
       trigger: true
-      params:
-        skip_download: true
+      params: {format: oci}
   - task: build
     image: oci-build-task
     privileged: true
     config:
       platform: linux
-      params: {CONTEXT: ci/dockerfiles/unit}
-      inputs: [{name: ci}]
+      params:
+        CONTEXT: ci/dockerfiles/unit
+        IMAGE_ARG_base_image: golang-builder-image/image.tar
+      inputs: [{name: ci}, {name: golang-builder-image}]
       outputs: [{name: image}]
       caches: [{path: cache}]
       run: {path: build}
@@ -214,10 +215,9 @@ jobs:
         trigger: true
       - get: unit-image
         trigger: true
-      - get: golang-builder-trigger
+      - get: golang-builder-image
         trigger: true
-        params:
-          skip_download: true
+        params: {format: oci}
       - get: gdn
         trigger: true
       - get: containerd
@@ -1167,15 +1167,6 @@ resources:
 
 - name: golang-builder-image
   type: registry-image
-  icon: *image-icon
-  source:
-    repository: concourse/golang-builder
-    tag: latest
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: golang-builder-trigger
-  type: docker-image
   icon: *image-icon
   source:
     repository: concourse/golang-builder

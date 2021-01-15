@@ -1,4 +1,5 @@
-FROM concourse/golang-builder
+ARG base_image=concourse/golang-builder
+FROM ${base_image}
 
 # basic setup for adding new apt sources and installing packages
 RUN apt-get update && apt-get -y install \

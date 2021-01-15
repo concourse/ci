@@ -8,12 +8,14 @@ image_resource:
 params:
   REPOSITORY: concourse/dev
   DOCKERFILE: ci/dockerfiles/dev/Dockerfile
+  IMAGE_ARG_base_image: golang-builder-image/image.tar
 
 inputs:
 - name: ci
 - name: dumb-init
 - name: concourse
 - name: gdn
+- name: golang-builder-image
 - name: containerd
   optional: true
 - name: runc

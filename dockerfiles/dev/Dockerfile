@@ -8,7 +8,8 @@
 # * warming the module cache
 # * warming the build cache
 
-FROM concourse/golang-builder
+ARG base_image=concourse/golang-builder
+FROM ${base_image}
 
 RUN apt-get update && apt-get -y install \
       iproute2 \
