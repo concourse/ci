@@ -104,7 +104,7 @@ plan:
 
 #@ def determine_base(distro):
 #@ if distro == "alpine":
-#@   return "alpine-edge"
+#@   return "alpine"
 #@ elif distro == "ubuntu":
 #@   return "ubuntu-bionic"
 #@ end
@@ -327,12 +327,12 @@ resource_types:
   source: {repository: mockersf/concourse-slack-notifier}
 
 resources:
-- name: alpine-edge
+- name: alpine
   type: registry-image
   icon: docker
   source:
     repository: alpine
-    tag: edge
+    tag: latest
 
 - name: ubuntu-bionic
   type: registry-image
