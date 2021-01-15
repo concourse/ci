@@ -37,7 +37,7 @@ function stop_docker_compose() {
   stop_docker
 }
 
-apt-get install net-tools curl
+apt-get install -y net-tools curl
 cat /etc/os-release
 ps -wwef
 netstat -at
