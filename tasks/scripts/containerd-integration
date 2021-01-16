@@ -17,7 +17,8 @@ run_test() {
 
   go mod download
 
-  go test -v -race ./worker/runtime/integration
+  # CGO is required for go test -race
+  CGO_ENABLED=1 go test -v -race ./worker/runtime/integration
 }
 
 main
