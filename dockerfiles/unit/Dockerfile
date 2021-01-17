@@ -1,6 +1,9 @@
 ARG base_image=concourse/golang-builder
 FROM ${base_image}
 
+# enable CGO so we can go test with -race
+ENV CGO_ENABLED=1
+
 # basic setup for adding new apt sources and installing packages
 RUN apt-get update && apt-get -y install \
       apt-transport-https \
