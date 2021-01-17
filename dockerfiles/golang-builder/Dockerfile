@@ -1,4 +1,4 @@
-FROM ubuntu:bionic
+FROM ubuntu:latest
 
 # gcc for cgo
 RUN apt-get update && apt-get install -y --no-install-recommends \
