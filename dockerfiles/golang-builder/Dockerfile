@@ -23,7 +23,9 @@ ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 ENV CGO_ENABLED=0
 
 # strip file system paths from built executables
-ENV GOFLAGS=-trimpath
+# TODO: once go 1.16 hits, uncomment this. currently, it's breaking packr
+# when running unit tests that run migrations
+# ENV GOFLAGS=-trimpath
 
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 WORKDIR $GOPATH
