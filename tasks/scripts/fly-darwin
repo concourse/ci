@@ -12,5 +12,4 @@ go mod download
 
 go install github.com/onsi/ginkgo/ginkgo
 
-# CGO is required for go test -race
-CGO_ENABLED=1 ginkgo -r -p -race "$@"
+ginkgo -r -p -race "$@"
