@@ -1,4 +1,8 @@
-FROM ubuntu:latest
+# TODO (vito): rolling forward to bionic or fossa breaks watsjs - pending
+# investigation
+#
+# concourse/concourse#6427
+FROM ubuntu:xenial
 
 # gcc for cgo
 RUN apt-get update && apt-get install -y --no-install-recommends \
