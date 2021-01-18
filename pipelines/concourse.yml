@@ -244,7 +244,6 @@ jobs:
           file: ci/tasks/yarn-build.yml
         - task: fly-linux
           file: ci/tasks/fly-build-linux.yml
-          image: golang-builder-image
         - task: fly-windows
           file: ci/tasks/fly-build-windows.yml
         - task: fly-darwin
