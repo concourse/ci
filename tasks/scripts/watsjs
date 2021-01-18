@@ -15,4 +15,8 @@ cd web/wats
 stty columns 80 # for better yarn output
 yarn install
 
-yarn test -v --color "$@"
+yarn test -v --color "$@" &
+PID=$!
+
+sleep 600
+kill -SIGINT $PID
