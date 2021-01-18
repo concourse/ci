@@ -537,6 +537,8 @@ jobs:
     - get: unit-image
       passed: [dev-image]
       trigger: true
+    - get: golang-builder-image
+      passed: [dev-image]
   - put: version
     params: {pre: rc}
 
@@ -553,6 +555,8 @@ jobs:
     - get: dev-image
       passed: [rc]
       trigger: true
+    - get: golang-builder-image
+      passed: [rc]
     - get: version
       passed: [rc]
       trigger: true
@@ -594,12 +598,12 @@ jobs:
       steps:
       - task: concourse-linux-alpine
         file: ci/tasks/concourse-build-linux.yml
-        image: unit-image
+        image: golang-builder-image
         input_mapping: {concourse: built-concourse, resource-types: resource-types-alpine}
         output_mapping: {concourse-tarball: concourse-linux-alpine}
         params: {PLATFORM: linux}
       - task: concourse-linux-ubuntu
-        image: unit-image
+        image: golang-builder-image
         file: ci/tasks/concourse-build-linux.yml
         input_mapping: {concourse: built-concourse, resource-types: resource-types-ubuntu}
         output_mapping: {concourse-tarball: concourse-linux-ubuntu}
