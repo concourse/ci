@@ -12,7 +12,6 @@ outputs:
 
 caches:
 - path: gopath
-- path: tmp
 
 run:
   path: powershell
