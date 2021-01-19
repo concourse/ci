@@ -247,7 +247,7 @@ jobs:
       - get: unit-image
         trigger: true
       - get: golang-builder-image
-        resource: golang-builder-xenial-image
+        resource: golang-builder-bionic-image
         trigger: true
         params: {format: oci}
       - get: gdn
