@@ -2,7 +2,8 @@
 # investigation
 #
 # concourse/concourse#6427
-FROM ubuntu:xenial
+ARG base_image
+FROM ${base_image}
 
 # gcc for cgo
 RUN apt-get update && apt-get install -y --no-install-recommends \
