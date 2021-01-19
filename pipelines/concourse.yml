@@ -105,6 +105,7 @@ jobs:
       trigger: true
     - get: ubuntu-xenial
       trigger: true
+      params: {format: oci}
   - task: build
     image: oci-build-task
     privileged: true
@@ -130,6 +131,7 @@ jobs:
       trigger: true
     - get: ubuntu-bionic
       trigger: true
+      params: {format: oci}
   - task: build
     image: oci-build-task
     privileged: true
