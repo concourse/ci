@@ -71,7 +71,7 @@ jobs:
       trigger: true
     - get: oci-build-task
     - get: golang-builder-image
-      resource: golang-builder-xenial-image
+      resource: golang-builder-bionic-image
       trigger: true
       params: {format: oci}
   - task: build
