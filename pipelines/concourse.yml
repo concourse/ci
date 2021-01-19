@@ -1591,3 +1591,21 @@ resources:
     tag: ubuntu
     username: ((docker.username))
     password: ((docker.password))
+
+- name: ubuntu-xenial
+  type: registry-image
+  icon: *image-icon
+  source:
+    repository: ubuntu
+    tag: xenial
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: ubuntu-bionic
+  type: registry-image
+  icon: *image-icon
+  source:
+    repository: ubuntu
+    tag: bionic
+    username: ((docker.username))
+    password: ((docker.password))
