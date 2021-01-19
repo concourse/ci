@@ -67,7 +67,7 @@ jobs:
   plan:
   - in_parallel:
     - get: ci
-    - get: ci-unit-image #have this here for auto-triggering of this job
+      resource: ci-unit-image
       trigger: true
     - get: oci-build-task
     - get: golang-builder-image
