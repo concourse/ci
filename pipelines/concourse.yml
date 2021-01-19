@@ -244,8 +244,6 @@ jobs:
       steps:
       - get: concourse
         trigger: true
-      - get: unit-image
-        trigger: true
       - get: golang-builder-image
         resource: golang-builder-bionic-image
         trigger: true
@@ -266,20 +264,21 @@ jobs:
       - get: resource-types-ubuntu-image
         passed: [resource-types-images]
         trigger: true
+      - get: unit-image
       - get: oci-build-task
       - get: ci
   - in_parallel:
       fail_fast: true
       steps:
-        - task: yarn-build
-          image: unit-image
-          file: ci/tasks/yarn-build.yml
-        - task: fly-linux
-          file: ci/tasks/fly-build-linux.yml
-        - task: fly-windows
-          file: ci/tasks/fly-build-windows.yml
-        - task: fly-darwin
-          file: ci/tasks/fly-build-darwin.yml
+      - task: yarn-build
+        image: unit-image
+        file: ci/tasks/yarn-build.yml
+      - task: fly-linux
+        file: ci/tasks/fly-build-linux.yml
+      - task: fly-windows
+        file: ci/tasks/fly-build-windows.yml
+      - task: fly-darwin
+        file: ci/tasks/fly-build-darwin.yml
   - task: build
     image: oci-build-task
     privileged: true
