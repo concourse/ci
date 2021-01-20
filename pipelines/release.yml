@@ -757,7 +757,6 @@ jobs:
       - guardian
       - containerd
       max_in_flight: 1
-    fail_fast: true
     do:
     - task: terraform-smoke
       image: unit-image
