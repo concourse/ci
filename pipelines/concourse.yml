@@ -54,7 +54,7 @@ groups:
   jobs:
   - resource-types-images
   - unit-image
-  - build-golang-builder-*-image
+  - build-golang-builder-image
 
 - name: all
   jobs:
@@ -71,7 +71,6 @@ jobs:
       trigger: true
     - get: oci-build-task
     - get: golang-builder-image
-      resource: golang-builder-bionic-image
       trigger: true
       params: {format: oci}
   - task: build
@@ -94,33 +93,7 @@ jobs:
       mode: normal
       alert_type: failed
 
-- name: build-golang-builder-xenial-image
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: ci
-    - get: oci-build-task
-    - get: golang-linux
-      trigger: true
-    - get: ubuntu-xenial
-      trigger: true
-      params: {format: oci}
-  - task: build
-    image: oci-build-task
-    privileged: true
-    file: ci/tasks/build-golang-builder-image.yml
-    input_mapping: {base-image: ubuntu-xenial}
-  - load_var: version
-    file: golang-linux/version
-  - put: golang-builder-xenial-image
-    params:
-      image: image/image.tar
-      version: ((.:version))
-      bump_aliases: true
-  on_failure: *failed-ci
-
-- name: build-golang-builder-bionic-image
+- name: build-golang-builder-image
   public: true
   serial: true
   plan:
@@ -139,7 +112,7 @@ jobs:
     input_mapping: {base-image: ubuntu-bionic}
   - load_var: version
     file: golang-linux/version
-  - put: golang-builder-bionic-image
+  - put: golang-builder-image
     params:
       image: image/image.tar
       version: ((.:version))
@@ -245,7 +218,6 @@ jobs:
       - get: concourse
         trigger: true
       - get: golang-builder-image
-        resource: golang-builder-bionic-image
         trigger: true
         params: {format: oci}
       - get: gdn
@@ -570,7 +542,6 @@ jobs:
       passed: [dev-image]
       trigger: true
     - get: golang-builder-image
-      resource: golang-builder-bionic-image
       passed: [dev-image]
     - get: ci
     - get: resource-types-alpine-image
@@ -1199,16 +1170,7 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: golang-builder-xenial-image
-  type: registry-image
-  icon: *image-icon
-  source:
-    repository: concourse/golang-builder
-    username: ((docker.username))
-    password: ((docker.password))
-    variant: xenial
-
-- name: golang-builder-bionic-image
+- name: golang-builder-image
   type: registry-image
   icon: *image-icon
   source:
