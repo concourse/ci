@@ -333,7 +333,7 @@ jobs:
   - set_pipeline: enterprise-helm-chart
     file: concourse-for-k8s/ci/pipeline.yml
     vars:
-      concourse_chart_branch: release/6.7.3
+      concourse_chart_branch: release/6.7.x
       concourse_minor: "6.7.3"
   - set_pipeline: datadog-dashboards
     file: pipelines-and-tasks/pipelines/datadog-dashboards.yml
