@@ -55,12 +55,9 @@ RUN curl -L "https://github.com/cloudfoundry/bosh-cli/releases/download/v6.3.0/b
       chmod +x /usr/local/bin/bosh
 
 # install kubectl for k8s-related jobs
-RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
-      touch /etc/apt/sources.list.d/kubernetes.list && \
-      echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list && \
-      apt-get update && \
-      apt-get install --no-install-recommends -y kubectl && \
-      rm -rf /var/lib/apt/lists/*
+RUN curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
+      -o /usr/local/bin/kubectl && \
+      chmod +x /usr/local/bin/kubectl
 
 # install helm for k8s-related jobs
 RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
