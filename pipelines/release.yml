@@ -93,10 +93,11 @@ jobs:
   public: true
   serial: true
   plan:
-  - get: ci-pipelines
+  - get: ci
+    resource: ci-prs-pipeline
     trigger: true
   - set_pipeline: prs
-    file: ci-pipelines/pipelines/prs.yml
+    file: ci/pipelines/prs.yml
     team: contributor
     instance_vars:
       branch: release/((release_minor)).x
@@ -1245,13 +1246,13 @@ resources:
     uri: https://github.com/concourse/ci.git
     branch: master
 
-- name: ci-pipelines
+- name: ci-prs-pipeline
   type: git
   icon: github
   source:
     uri: https://github.com/concourse/ci
     paths:
-    - pipelines
+    - pipelines/prs.yml
 
 - name: concourse-docker
   type: git
