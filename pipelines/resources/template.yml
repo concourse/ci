@@ -346,6 +346,7 @@ resources:
   icon: docker
   source:
     repository: concourse/golang-builder
+    variant: bionic
 
 - name: resource-repo
   type: git

@@ -1488,9 +1488,9 @@ resources:
   icon: *image-icon
   source:
     repository: concourse/golang-builder
+    variant: bionic
     username: ((docker.username))
     password: ((docker.password))
-
 
 - name: builder
   type: registry-image
