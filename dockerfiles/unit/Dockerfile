@@ -82,14 +82,17 @@ RUN curl -fsSL https://releases.hashicorp.com/terraform/0.12.6/terraform_0.12.6_
       unzip /tmp/terraform.zip -d /usr/local/bin && \
       rm /tmp/terraform.zip
 RUN apt-get update && apt-get -y install jq openssh-client libnss3-tools
-RUN curl -so /etc/ssl/certs/fake_root.pem \
-  https://letsencrypt.org/certs/fakelerootx1.pem && \
-  chmod 644 /etc/ssl/certs/fake_root.pem && \
-  mkdir -p /root/.pki/nssdb && \
+
+# install Let's Encrypt staging cert for 'curl'
+RUN curl https://letsencrypt.org/certs/fakelerootx1.pem -o /usr/local/share/ca-certificates/fakelerootx1.crt && \
+      update-ca-certificates
+
+# install Let's Encrypt staging cert to nssdb for Chrome
+RUN mkdir -p /root/.pki/nssdb && \
   chmod 700 /root/.pki/nssdb && \
   certutil -N -d sql:/root/.pki/nssdb --empty-password && \
   certutil -A \
     -n "LetsEncrypt Staging Fake Root" \
     -t "TCu,Cu,Tu" \
-    -i /etc/ssl/certs/fake_root.pem \
+    -i /usr/local/share/ca-certificates/fakelerootx1.crt \
     -d sql:/root/.pki/nssdb
