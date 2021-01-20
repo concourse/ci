@@ -310,8 +310,6 @@ jobs:
       trigger: true
       version: every
       tags: [pr]
-    - get: oci-build-task
-      tags: [pr]
     - get: dev-image
       params: {format: oci}
       tags: [pr]
@@ -319,6 +317,9 @@ jobs:
       params: {format: oci}
       tags: [pr]
     - get: ci
+      tags: [pr]
+    - get: oci-build-task
+      tags: [pr]
   - put: concourse-status-update
     resource: concourse-pr
     inputs: [concourse-pr]
@@ -375,10 +376,16 @@ jobs:
     - get: concourse-image
       params: {format: oci}
       tags: [pr]
+    - get: dev-image
+      params: {format: oci}
+      tags: [pr]
     - get: postgres-image
       params: {format: oci}
       tags: [pr]
     - get: ci
+      tags: [pr]
+    - get: oci-build-task
+      tags: [pr]
   - put: concourse-status-update
     resource: concourse-pr
     inputs: [concourse-pr]
@@ -390,11 +397,23 @@ jobs:
     file: ci/tasks/yarn-build.yml
     input_mapping: {concourse: concourse-pr}
     tags: [pr]
+  - task: build
+    image: oci-build-task
+    privileged: true
+    config:
+      platform: linux
+      params:
+        CONTEXT: built-concourse
+        IMAGE_ARG_base_image: dev-image/image.tar
+      inputs: [{name: built-concourse}, {name: dev-image}]
+      outputs: [{name: image}]
+      caches: [{path: cache}]
+      run: {path: build}
+    tags: [pr]
   - task: upgrade-test
     timeout: 1h
     privileged: true
-    params: {BUILD: true, CONCOURSE_DEV_IMAGE: "concourse/dev:((dev_image_tag))"}
-    input_mapping: {concourse: built-concourse}
+    input_mapping: {concourse: built-concourse, dev-image: image}
     file: ci/tasks/upgrade-test.yml
 
 - name: downgrade
@@ -421,10 +440,16 @@ jobs:
     - get: concourse-image
       params: {format: oci}
       tags: [pr]
+    - get: dev-image
+      params: {format: oci}
+      tags: [pr]
     - get: postgres-image
       params: {format: oci}
       tags: [pr]
     - get: ci
+      tags: [pr]
+    - get: oci-build-task
+      tags: [pr]
   - put: concourse-status-update
     resource: concourse-pr
     inputs: [concourse-pr]
@@ -436,9 +461,20 @@ jobs:
     file: ci/tasks/yarn-build.yml
     input_mapping: {concourse: concourse-pr}
     tags: [pr]
+  - task: build
+    image: oci-build-task
+    privileged: true
+    config:
+      platform: linux
+      params:
+        CONTEXT: built-concourse
+        IMAGE_ARG_base_image: dev-image/image.tar
+      inputs: [{name: built-concourse}, {name: dev-image}]
+      outputs: [{name: image}]
+      caches: [{path: cache}]
+      run: {path: build}
   - task: downgrade-test
     timeout: 1h
     privileged: true
-    params: {BUILD: true, CONCOURSE_DEV_IMAGE: "concourse/dev:((dev_image_tag))"}
-    input_mapping: {concourse: built-concourse}
+    input_mapping: {concourse: built-concourse, dev-image: image}
     file: ci/tasks/downgrade-test.yml

@@ -5,15 +5,10 @@ image_resource:
   type: registry-image
   source: {repository: concourse/unit}
 
-params:
-  BUILD:
-
 inputs:
 - name: concourse
 - name: ci
-  # Required if BUILD != true
 - name: dev-image
-  optional: true
 - name: concourse-image
   optional: true
 - name: postgres-image

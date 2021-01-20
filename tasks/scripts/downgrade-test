@@ -10,10 +10,14 @@ source ci/tasks/scripts/docker-helpers.sh
 
 start_docker
 
-[ -d dev-image ] && docker load -i dev-image/image.tar
+docker load -i dev-image/image.tar
 [ -d concourse-image ] && docker load -i concourse-image/image.tar
 [ -d postgres-image ] && docker load -i postgres-image/image.tar
 
+# note: tag must take precedence, since the digest returned by the
+# registry-image resource is not the same as the image id in the docker CLI.
+# the oci-build-task, however, gives a digest that can be used
+[ -f dev-image/digest ] && export CONCOURSE_DEV_IMAGE="$(cat dev-image/digest)"
 [ -f dev-image/tag ] && export CONCOURSE_DEV_IMAGE="concourse/dev:$(cat dev-image/tag)"
 if [ -f concourse-image/tag ]; then
   export CONCOURSE_LATEST_TAG=$(cat concourse-image/tag)
@@ -31,16 +35,10 @@ DOCKER_COMPOSE_FLAGS="-f docker-compose.yml -f $inputs/ci/overrides/docker-compo
 
 # start with rc and set up
 echo "Deploying Concourse RC"
-if [ "$BUILD" = "true" ]; then
-  docker-compose \
-    $DOCKER_COMPOSE_FLAGS \
-    up --build -d
-else
-  docker-compose \
-    $DOCKER_COMPOSE_FLAGS \
-    -f $inputs/ci/overrides/docker-compose.no-build.yml \
-    up --no-build -d
-fi
+docker-compose \
+  $DOCKER_COMPOSE_FLAGS \
+  -f $inputs/ci/overrides/docker-compose.no-build.yml \
+  up --no-build -d
 
 trap stop_docker_compose EXIT SIGTERM SIGINT
 function stop_docker_compose() {
@@ -80,16 +78,10 @@ $inputs/ci/tasks/scripts/verify-upgrade-downgraded-pipeline-temporary
 docker-compose stop worker
 
 # upgrade back and verify
-if [ "$BUILD" = "true" ]; then
-  docker-compose \
-    $DOCKER_COMPOSE_FLAGS \
-    up --no-build -d
-else
-  docker-compose \
-    $DOCKER_COMPOSE_FLAGS \
-    -f $inputs/ci/overrides/docker-compose.no-build.yml \
-    up --no-build -d
-fi
+docker-compose \
+  $DOCKER_COMPOSE_FLAGS \
+  -f $inputs/ci/overrides/docker-compose.no-build.yml \
+  up --no-build -d
 
 $inputs/ci/tasks/scripts/verify-upgrade-downgrade-pipeline
 
