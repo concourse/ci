@@ -2,11 +2,11 @@
 name: ((deployment_name))
 
 releases:
-- name: concourse
+- name: ((release_prefix))-concourse
   version: latest
-- name: postgres
+- name: ((release_prefix))-postgres
   version: latest
-- name: bpm
+- name: ((release_prefix))-bpm
   version: latest
 
 instance_groups:
@@ -18,10 +18,10 @@ instance_groups:
   vm_type: test
   stemcell: xenial
   jobs:
-  - release: bpm
+  - release: ((release_prefix))-bpm
     name: bpm
 
-  - release: concourse
+  - release: ((release_prefix))-concourse
     name: web
     properties:
       log_level: debug
@@ -47,13 +47,13 @@ instance_groups:
         host_key: ((tsa_host_key))
         authorized_keys: [((worker_key.public_key))]
 
-  - release: concourse
+  - release: ((release_prefix))-concourse
     name: worker
     properties:
       worker_gateway:
         worker_key: ((worker_key))
 
-  - release: postgres
+  - release: ((release_prefix))-postgres
     name: postgres
     properties:
       databases:

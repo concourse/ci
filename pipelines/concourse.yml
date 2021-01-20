@@ -847,6 +847,7 @@ jobs:
       - gcp-xenial-stemcell/*.tgz
       vars:
         deployment_name: concourse-smoke
+        release_prefix: bosh-smoke
   - task: discover-bosh-endpoint-info
     tags: [bosh]
     file: ci/tasks/discover-bosh-endpoint-info.yml
@@ -900,6 +901,7 @@ jobs:
       - gcp-xenial-stemcell/*.tgz
       vars:
         deployment_name: concourse-smoke-containerd
+        release_prefix: bosh-smoke-containerd
   - task: discover-bosh-endpoint-info
     tags: [bosh]
     file: ci/tasks/discover-bosh-endpoint-info.yml
