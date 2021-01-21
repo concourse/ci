@@ -1,0 +1,97 @@
+resource_types:
+- name: gcs
+  type: registry-image
+  source: {repository: frodenas/gcs-resource}
+
+- name: slack-notifier
+  type: registry-image
+  source: {repository: mockersf/concourse-slack-notifier}
+
+- name: kubectl-top
+  type: registry-image
+  source:
+    repository: aoldershaw/kubectl-top-resource
+
+jobs:
+- name: monitor-ci
+  plan:
+  - in_parallel:
+    - get: ci-memory-spike
+      version: every
+      trigger: true
+    - get: ci
+  - load_var: data
+    file: ci-memory-spike/data.json
+  - task: heap-dump
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source: {repository: bitnami/kubectl}
+      outputs:
+      - name: heap-dump
+      params:
+        CA_CERT: ((k8s.ca))
+        PASSWORD: ((k8s.password))
+      run:
+        user: root
+        path: bash
+        args:
+        - -c
+        - |
+          set -e -u
+          echo "$CA_CERT" > /tmp/ca
+          kubectl \
+              --username '((k8s.username))' \
+              --password "$PASSWORD" \
+              --server '((k8s.server))' \
+              --certificate-authority /tmp/ca \
+              --namespace '((.:data.namespace))' \
+            port-forward 'pod/((.:data.pod))' 8079:8079 >/dev/null &
+          timeout 30 bash -c 'until echo 2>>/dev/null >>/dev/tcp/127.0.0.1/8079; do sleep 1; done'
+          curl http://localhost:8079/debug/pprof/heap > heap-dump/((.:data.date)).mem.pprof
+  - put: heap-dump
+    params:
+      file: heap-dump/*.pprof
+  - put: notify
+    params:
+      message: "CI web pod ((.:data.pod)) has memory usage ((.:data.mem)) (limit: 1Gi)"
+
+resources:
+- name: ci
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/ci.git
+    branch: master
+
+- name: ci-memory-spike
+  type: kubectl-top
+  icon: memory
+  source:
+    username: ((k8s.username))
+    password: ((k8s.password))
+    server: ((k8s.server))
+    ca: ((k8s.ca))
+    namespace: ci
+    labels: app=ci-web
+    container_name: ci-web
+    mem_threshold_mb: 512
+
+- name: heap-dump
+  type: gcs
+  icon: dump-truck
+  check_every: never
+  source:
+    bucket: concourse-misc
+    json_key: ((concourse_misc_json_key))
+    regexp: ci_heap_dumps/(.*).pprof
+
+- name: notify
+  type: slack-notifier
+  icon: slack
+  source:
+    url: ((slack_hooks.concourse-private))
+    username: ((basic_auth.username))
+    password: ((basic_auth.password))
+    concourse_url: https://ci.concourse-ci.org
