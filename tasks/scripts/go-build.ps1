@@ -1,5 +1,3 @@
-Set-PSDebug -Trace 1
-
 $ErrorActionPreference = "Stop"
 trap { $host.SetShouldExit(1) }
 
