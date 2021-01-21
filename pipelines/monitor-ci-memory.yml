@@ -13,7 +13,7 @@ resource_types:
     repository: aoldershaw/kubectl-top-resource
 
 jobs:
-- name: monitor-ci
+- name: heap-dump
   plan:
   - in_parallel:
     - get: ci-memory-spike
