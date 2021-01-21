@@ -1,0 +1,21 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: concourse/unit}
+
+params:
+  BOSH_ENVIRONMENT:
+  BOSH_CA_CERT:
+  BOSH_CLIENT:
+  BOSH_CLIENT_SECRET:
+
+inputs:
+- name: concourse-release
+- name: postgres-release
+- name: bpm-release
+- name: ci
+
+run:
+  path: ci/tasks/scripts/upload-releases

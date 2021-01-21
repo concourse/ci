@@ -836,7 +836,7 @@ jobs:
   - put: concourse-release-repo
     params: {repository: bumped-concourse-release-repo}
 
-- name: bosh-smoke
+- name: bosh-upload-releases
   public: true
   serial: true
   plan:
@@ -857,6 +857,53 @@ jobs:
     - get: bpm-release
       trigger: true
     - get: gcp-xenial-stemcell
+      trigger: true
+    - get: bbr-sdk-release
+      trigger: true
+    - get: vault-release
+      trigger: true
+    - get: credhub-release
+      trigger: true
+    - get: uaa-release
+      trigger: true
+    - get: bbr
+      trigger: true
+    - get: ci
+  - task: upload-releases
+    tags: [bosh]
+    file: ci/tasks/upload-releases.yml
+    image: unit-image
+    params:
+      BOSH_ENVIRONMENT: https://10.0.0.6:25555
+      BOSH_CA_CERT: ((testing_bosh_ca_cert))
+      BOSH_CLIENT: ((testing_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
+
+- name: bosh-smoke
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    # these don't trigger, to ensure that the job gets triggered by
+    # concourse-release, which is unfortunately decoupled from the resource
+    # that we 'put' to.
+    - get: concourse
+      passed: [bosh-upload-releases]
+    - get: unit-image
+      passed: [bosh-upload-releases]
+    - get: version
+      passed: [bosh-upload-releases]
+    - get: concourse-release
+      passed: [bosh-upload-releases]
+      trigger: true
+    - get: postgres-release
+      passed: [bosh-upload-releases]
+      trigger: true
+    - get: bpm-release
+      passed: [bosh-upload-releases]
+      trigger: true
+    - get: gcp-xenial-stemcell
+      passed: [bosh-upload-releases]
       trigger: true
     - get: ci
   - put: smoke-deployment
@@ -900,28 +947,37 @@ jobs:
     # concourse-release, which is unfortunately decoupled from the resource
     # that we 'put' to.
     - get: concourse
-      passed: [bosh-bump]
+      passed: [bosh-upload-releases]
     - get: unit-image
-      passed: [bosh-bump]
+      passed: [bosh-upload-releases]
     - get: version
-      passed: [bosh-bump]
+      passed: [bosh-upload-releases]
     - get: concourse-release
+      passed: [bosh-upload-releases]
       trigger: true
     - get: postgres-release
+      passed: [bosh-upload-releases]
       trigger: true
     - get: bpm-release
+      passed: [bosh-upload-releases]
       trigger: true
     - get: bbr-sdk-release
+      passed: [bosh-upload-releases]
       trigger: true
     - get: gcp-xenial-stemcell
+      passed: [bosh-upload-releases]
       trigger: true
     - get: vault-release
+      passed: [bosh-upload-releases]
       trigger: true
     - get: credhub-release
+      passed: [bosh-upload-releases]
       trigger: true
     - get: uaa-release
+      passed: [bosh-upload-releases]
       trigger: true
     - get: bbr
+      passed: [bosh-upload-releases]
       trigger: true
     - get: ci
   - task: bosh-topgun
