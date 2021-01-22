@@ -66,6 +66,8 @@ on_failure: &failed-ci
     alert_type: failed
 plan:
 - in_parallel:
+  - get: periodic-check
+    trigger: true
   - get: #@ resource_name + "-resource"
     resource: resource-repo
     trigger: true
@@ -464,6 +466,11 @@ resources:
     username: ((basic_auth.username))
     password: ((basic_auth.password))
     concourse_url: https://ci.concourse-ci.org
+
+- name: periodic-check
+  type: time
+  source:
+    interval: 24h
 
 #@ if resource_name == "cf":
 - name: cf-cli
