@@ -1047,6 +1047,8 @@ jobs:
       passed: [bosh-topgun]
     - get: uaa-release
       passed: [bosh-topgun]
+  - task: build-resource-versions
+    file: ci/tasks/build-release-resource-versions.yml
   - in_parallel:
     - task: build-release-name
       file: ci/tasks/build-release-name.yml
