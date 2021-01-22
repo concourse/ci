@@ -343,8 +343,22 @@ jobs:
     file: ft-ci/ci/pipeline.yml
   - set_pipeline: boarding-pass
     file: boarding-pass-ci/ci/pipeline.yml
-  - set_pipeline: monitor-ci-memory
-    file: pipelines-and-tasks/pipelines/monitor-ci-memory.yml
+  - set_pipeline: monitor-resources
+    file: pipelines-and-tasks/pipelines/monitor-resources.yml
+    instance_vars:
+      namespace: ci
+    vars:
+      container_name: ci-web
+      mem_threshold_mb: 512
+      mem_limit: 1Gi
+  - set_pipeline: monitor-resources
+    file: pipelines-and-tasks/pipelines/monitor-resources.yml
+    instance_vars:
+      namespace: hush-house
+    vars:
+      container_name: hush-house-web
+      mem_threshold_mb: 1024
+      mem_limit: 2Gi
   on_failure: *notify
   on_error: *notify
 
