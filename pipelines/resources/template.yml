@@ -324,8 +324,8 @@ resource_types:
 
 - name: slack-notifier
   type: registry-image
-  ## Switch back to mockersf/concourse-slack-notifier once
-  ## https://github.com/mockersf/concourse-slack-notifier/pull/86 is merged
+  #! Switch back to mockersf/concourse-slack-notifier once
+  #! https://github.com/mockersf/concourse-slack-notifier/pull/86 is merged
   source: {repository: aoldershaw/concourse-slack-notifier}
 
 resources:
