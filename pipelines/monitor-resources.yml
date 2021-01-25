@@ -56,7 +56,7 @@ jobs:
           kubectl \
               --username "$K8S_USERNAME" \
               --password "$K8S_PASSWORD" \
-              --server "K8S_SERVER" \
+              --server "$K8S_SERVER" \
               --certificate-authority /tmp/ca \
               --namespace '((.:data.namespace))' \
             port-forward 'pod/((.:data.pod))' 8079:8079 >/dev/null &
