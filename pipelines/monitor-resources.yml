@@ -88,6 +88,7 @@ resources:
     namespace: ((namespace))
     container_name: ((container_name))
     mem_threshold_mb: ((mem_threshold_mb))
+    time_between_s: 600 # Only emit versions every 10 minutes so as not to spam slack
 
 - name: heap-dump
   type: gcs
