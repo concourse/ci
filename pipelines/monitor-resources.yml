@@ -42,7 +42,7 @@ jobs:
       - name: heap-dump
       params:
         K8S_CA_CERT: ((k8s.ca))
-        K8S_USERNAME: ((k8s,username))
+        K8S_USERNAME: ((k8s.username))
         K8S_PASSWORD: ((k8s.password))
         K8S_SERVER: ((k8s.server))
       run:
