@@ -41,8 +41,10 @@ jobs:
       outputs:
       - name: heap-dump
       params:
-        CA_CERT: ((k8s.ca))
-        PASSWORD: ((k8s.password))
+        K8S_CA_CERT: ((k8s.ca))
+        K8S_USERNAME: ((k8s,username))
+        K8S_PASSWORD: ((k8s.password))
+        K8S_SERVER: ((k8s.server))
       run:
         user: root
         path: bash
@@ -50,11 +52,11 @@ jobs:
         - -c
         - |
           set -e -u
-          echo "$CA_CERT" > /tmp/ca
+          echo "$K8S_CA_CERT" > /tmp/ca
           kubectl \
-              --username '((k8s.username))' \
-              --password "$PASSWORD" \
-              --server '((k8s.server))' \
+              --username "$K8S_USERNAME" \
+              --password "$K8S_PASSWORD" \
+              --server "K8S_SERVER" \
               --certificate-authority /tmp/ca \
               --namespace '((.:data.namespace))' \
             port-forward 'pod/((.:data.pod))' 8079:8079 >/dev/null &
