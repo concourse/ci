@@ -721,6 +721,8 @@ jobs:
       - ubuntu-1604-lts
       - ubuntu-1804-lts
       - ubuntu-2004-lts
+      - debian-9-stretch
+      - debian-10-buster
       max_in_flight: 1
     - var: runtime
       values:
