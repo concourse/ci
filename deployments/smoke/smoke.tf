@@ -52,6 +52,10 @@ resource "google_compute_firewall" "bosh-director" {
   target_tags = ["smoke"]
 }
 
+locals {
+  user = var.GCP_IMAGE == "debian-9-stretch-v20210122" ? "admin" : "root"
+}
+
 resource "google_compute_instance" "smoke" {
   name         = "smoke-${random_pet.smoke.id}"
   machine_type = "custom-8-8192"
@@ -63,10 +67,6 @@ resource "google_compute_instance" "smoke" {
       image = var.GCP_IMAGE
       size  = "30"
     }
-  }
-
-  locals {
-    user = var.GCP_IMAGE == "debian-9-stretch-v20210122" ? "admin" : "root"
   }
 
   network_interface {
