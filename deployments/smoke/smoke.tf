@@ -52,10 +52,6 @@ resource "google_compute_firewall" "smoke" {
   target_tags = ["smoke"]
 }
 
-locals {
-  user = var.GCP_IMAGE == "debian-9-stretch-v20210122" ? "admin" : "root"
-}
-
 resource "google_compute_instance" "smoke" {
   name         = "smoke-${random_pet.smoke.id}"
   machine_type = "custom-8-8192"
@@ -78,13 +74,13 @@ resource "google_compute_instance" "smoke" {
   }
 
   metadata = {
-    sshKeys = "${local.user}:${file("keys/id_rsa.pub")}"
+    sshKeys = "root:${file("keys/id_rsa.pub")}"
   }
 
   connection {
     type        = "ssh"
     host        = google_compute_address.smoke.address
-    user        = local.user
+    user        = "root"
     private_key = file("keys/id_rsa")
   }
 
@@ -92,13 +88,13 @@ resource "google_compute_instance" "smoke" {
     inline = [
       "set -e -x",
       "[ -e /var/lib/cloud ] && until [ -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done",
-      "sudo apt-get update",
-      "sudo apt-get -y install postgresql",
+      "apt-get update",
+      "apt-get -y install postgresql",
       "sudo -i -u postgres createuser concourse",
       "sudo -i -u postgres createdb --owner=concourse concourse",
-      "sudo adduser --system --group concourse",
-      "sudo mkdir -p /etc/concourse",
-      "sudo chgrp concourse /etc/concourse",
+      "adduser --system --group concourse",
+      "mkdir -p /etc/concourse",
+      "chgrp concourse /etc/concourse",
     ]
   }
 }
@@ -150,7 +146,7 @@ resource "null_resource" "rerun" {
   connection {
     type        = "ssh"
     host        = google_compute_address.smoke.address
-    user        = local.user
+    user        = "root"
     private_key = file("keys/id_rsa")
   }
 
