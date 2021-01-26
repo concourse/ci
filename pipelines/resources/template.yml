@@ -3,6 +3,12 @@
 #@ load("@ytt:assert", "assert")
 
 #@ resource_name = data.values.resource_name or assert.fail("resource name must be specified")
+#@ def github_owner():
+#@   if resource_name == "cf":
+#@     return "cloudfoundry-community"
+#@   end
+#@  return "concourse"
+#@ end
 
 #@ def build_params(resource_name):
   #@ if resource_name == "registry-image":
@@ -236,7 +242,7 @@ plan:
 - task: build-release-notes
   file: ci/tasks/build-release-notes.yml
   params:
-    GITHUB_OWNER: concourse
+    GITHUB_OWNER: #@ github_owner()
     GITHUB_REPO: #@ resource_name + "-resource"
     GITHUB_TOKEN: ((concourse_github_dummy.access_token))
     GITHUB_BRANCH: master
@@ -365,7 +371,7 @@ resources:
   icon: package-variant-closed
   source:
     access_token: ((concourse_bot_access_token))
-    owner: concourse
+    owner: #@ github_owner()
     repository: #@ resource_name + "-resource"
 
 - name: version
@@ -376,7 +382,7 @@ resources:
     driver: git
     file: version
     private_key: ((concourse_bot_private_key))
-    uri: #@ "git@github.com:concourse/" + resource_name + "-resource"
+    uri: #@ "git@github.com:" + github_owner() + "/" + resource_name + "-resource"
 
 - name: resource-pr
   type: pull-request
@@ -385,13 +391,13 @@ resources:
   source:
     access_token: ((pull_requests_access_token))
     base: master
-    repo: #@ "concourse/" + resource_name + "-resource"
+    repo: #@ github_owner() + "/" + resource_name + "-resource"
 
 - name: resource-image
   type: registry-image
   icon: docker
   source:
-    repository: #@ "concourse/" + resource_name + "-resource"
+    repository: #@ github_owner() + "/" + resource_name + "-resource"
     username: ((docker.username))
     password: ((docker.password))
 
@@ -399,7 +405,7 @@ resources:
   type: registry-image
   icon: docker
   source:
-    repository: #@ "concourse/" + resource_name + "-resource"
+    repository: #@ github_owner() + "/" + resource_name + "-resource"
     variant: alpine
     username: ((docker.username))
     password: ((docker.password))
@@ -408,7 +414,7 @@ resources:
   type: registry-image
   icon: docker
   source:
-    repository: #@ "concourse/" + resource_name + "-resource"
+    repository: #@ github_owner() + "/" + resource_name + "-resource"
     variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
@@ -417,7 +423,7 @@ resources:
   type: registry-image
   icon: docker
   source:
-    repository: #@ "concourse/" + resource_name + "-resource"
+    repository: #@ github_owner() + "/" + resource_name + "-resource"
     tag: dev
     password: ((docker.password))
     username: ((docker.username))
@@ -427,7 +433,7 @@ resources:
   icon: docker
   source:
     password: ((docker.password))
-    repository: #@ "concourse/" + resource_name + "-resource"
+    repository: #@ github_owner() + "/" + resource_name + "-resource"
     tag: dev-ubuntu
     username: ((docker.username))
 
