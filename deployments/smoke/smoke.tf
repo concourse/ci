@@ -40,7 +40,7 @@ resource "google_compute_address" "smoke" {
   name = "smoke-${random_pet.smoke.id}-ip"
 }
 
-resource "google_compute_firewall" "bosh-director" {
+resource "google_compute_firewall" "smoke" {
   name    = "smoke-${random_pet.smoke.id}-allow-http"
   network = "default"
 
