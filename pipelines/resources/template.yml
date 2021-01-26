@@ -397,7 +397,7 @@ resources:
   type: registry-image
   icon: docker
   source:
-    repository: #@ github_owner() + "/" + resource_name + "-resource"
+    repository: #@ "concourse/" + resource_name + "-resource"
     username: ((docker.username))
     password: ((docker.password))
 
@@ -405,7 +405,7 @@ resources:
   type: registry-image
   icon: docker
   source:
-    repository: #@ github_owner() + "/" + resource_name + "-resource"
+    repository: #@ "concourse/" + resource_name + "-resource"
     variant: alpine
     username: ((docker.username))
     password: ((docker.password))
@@ -414,7 +414,7 @@ resources:
   type: registry-image
   icon: docker
   source:
-    repository: #@ github_owner() + "/" + resource_name + "-resource"
+    repository: #@ "concourse/" + resource_name + "-resource"
     variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
@@ -423,7 +423,7 @@ resources:
   type: registry-image
   icon: docker
   source:
-    repository: #@ github_owner() + "/" + resource_name + "-resource"
+    repository: #@ "concourse/" + resource_name + "-resource"
     tag: dev
     password: ((docker.password))
     username: ((docker.username))
@@ -433,7 +433,7 @@ resources:
   icon: docker
   source:
     password: ((docker.password))
-    repository: #@ github_owner() + "/" + resource_name + "-resource"
+    repository: #@ "concourse/" + resource_name + "-resource"
     tag: dev-ubuntu
     username: ((docker.username))
 
