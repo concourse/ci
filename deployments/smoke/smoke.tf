@@ -150,7 +150,7 @@ resource "null_resource" "rerun" {
   connection {
     type        = "ssh"
     host        = google_compute_address.smoke.address
-    user        = "root"
+    user        = local.user
     private_key = file("keys/id_rsa")
   }
 
