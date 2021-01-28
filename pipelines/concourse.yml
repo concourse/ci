@@ -27,6 +27,7 @@ groups:
   jobs:
   - unit
   - dev-image
+  - integration
   - testflight
   - containerd-integration
   - watsjs
@@ -34,8 +35,6 @@ groups:
   - build-image
   - bin-smoke
   - bin-smoke-lts
-  - upgrade
-  - downgrade
   - check-docker-mounts
 
 - name: quickstart
@@ -360,7 +359,7 @@ jobs:
     file: ci/tasks/docker-compose-watsjs.yml
   on_failure: *failed-concourse
 
-- name: upgrade
+- name: integration
   public: true
   serial: true
   plan:
@@ -377,35 +376,13 @@ jobs:
       params: {format: oci}
     - get: postgres-image
       params: {format: oci}
-    - get: ci
-  - task: upgrade-test
-    privileged: true
-    image: unit-image
-    file: ci/tasks/upgrade-test.yml
-  on_failure: *failed-concourse
-
-- name: downgrade
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed: [unit, dev-image]
-      trigger: true
-    - get: dev-image
-      passed: [dev-image]
-      params: {format: oci}
-      trigger: true
-    - get: unit-image
-    - get: concourse-image
-      params: {format: oci}
-    - get: postgres-image
+    - get: vault-image
       params: {format: oci}
     - get: ci
-  - task: downgrade-test
+  - task: integration
     privileged: true
     image: unit-image
-    file: ci/tasks/downgrade-test.yml
+    file: ci/tasks/integration.yml
   on_failure: *failed-concourse
 
 - name: k8s-smoke
@@ -539,7 +516,7 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
-      passed: [dev-image, testflight, watsjs, upgrade, downgrade]
+      passed: [dev-image, testflight, watsjs, integration]
       trigger: true
     - get: unit-image
       passed: [dev-image]
@@ -1282,6 +1259,11 @@ resources:
   type: registry-image
   icon: *image-icon
   source: {repository: postgres, tag: 9.5}
+
+- name: vault-image
+  type: registry-image
+  icon: *image-icon
+  source: {repository: vault}
 
 - name: dumb-init
   type: github-release
