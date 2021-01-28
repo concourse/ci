@@ -1,0 +1,36 @@
+#!/bin/bash
+# vim: set ft=sh
+
+set -e -u
+
+export GOPATH=$PWD/gopath
+export PATH=$GOPATH/bin:$PATH
+
+source ci/tasks/scripts/docker-helpers.sh
+
+start_docker
+
+docker load -i dev-image/image.tar
+
+export TEST_CONCOURSE_DEV_IMAGE="concourse/dev:$(cat dev-image/tag)"
+
+if [ -d concourse-image ]; then
+  docker load -i concourse-image/image.tar
+  export TEST_CONCOURSE_LATEST_IMAGE="concourse/concourse:$(cat concourse-image/tag)"
+fi
+
+if [ -d vault-image ]; then
+  docker load -i postgres-image/image.tar
+  export TEST_POSTGRES_IMAGE="postgres:$(cat postgres-image/tag)"
+fi
+
+if [ -d vault-image ]; then
+  docker load -i vault-image/image.tar
+  export TEST_VAULT_IMAGE="vault:$(cat vault-image/tag)"
+fi
+
+cd concourse
+
+go mod download
+
+go test ./integration/... "$@"
