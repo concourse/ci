@@ -18,8 +18,8 @@ RUN apt-get update && apt-get -y install \
 ENV DEBIAN_FRONTEND noninteractive
 RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN add-apt-repository "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main"
-RUN apt-get update && apt-get -y install postgresql-11
-ENV PATH $PATH:/usr/lib/postgresql/11/bin
+RUN apt-get update && apt-get -y install postgresql-13
+ENV PATH $PATH:/usr/lib/postgresql/13/bin
 
 # install Node 12.x
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
