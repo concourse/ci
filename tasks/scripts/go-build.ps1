@@ -7,3 +7,7 @@ $env:TMP = "$pwd\tmp"
 
 $env:GOPATH = "$pwd\gopath"
 $env:Path += ";$pwd\gopath\bin"
+
+# disable cgo - this makes the Windows build consistent with Linux by not
+# building code with the 'cgo' buildflag (e.g. sqlite3 in dex).
+$env:CGO_ENABLED = "0"
