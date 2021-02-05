@@ -35,7 +35,7 @@ choco install --no-progress -r -y git mingw
 refreshenv
 
 # install Concourse
-Invoke-WebRequest -Uri https://storage.googleapis.com/concourse-artifacts/dev/concourse-6.7.0+dev.409.cc6d4a1a0.windows.amd64.zip -OutFile concourse.zip
+Invoke-WebRequest -Uri https://storage.googleapis.com/concourse-artifacts/dev/concourse-6.7.2+dev.773.368451a95.windows.amd64.zip -OutFile concourse.zip
 Expand-Archive -LiteralPath concourse.zip -DestinationPath . -Force
 
 @'
