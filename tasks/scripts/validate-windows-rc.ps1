@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 trap { $host.SetShouldExit(1) }
 
 Expand-Archive `
-    -Path .\concourse-windows\concourse-*.tgz `
+    -Path .\concourse-windows\concourse-*.zip `
     -DestinationPath .\concourse
 cd .\concourse
 
