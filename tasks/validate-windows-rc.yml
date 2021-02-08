@@ -1,0 +1,9 @@
+---
+platform: windows
+
+inputs:
+- name: ci
+- name: concourse-windows
+
+run:
+  path: ci/tasks/scripts/validate-windows-rc.ps1

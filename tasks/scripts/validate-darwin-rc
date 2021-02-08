@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+tar -xzf concourse-tarball/concourse-*.tgz
+cd concourse
+
+./bin/concourse --version
+
+tar -xzf fly-assets/fly-darwin-amd64.tgz
+./fly --version

@@ -597,6 +597,18 @@ jobs:
         file: ci/tasks/concourse-build-darwin.yml
         output_mapping: {concourse-tarball: concourse-darwin}
   - in_parallel:
+    - task: validate-linux-rc
+      file: ci/tasks/validate-linux-rc.yml
+      input_mapping: {concourse-tarball: concourse-linux-alpine}
+    - task: validate-linux-rc-ubuntu
+      file: ci/tasks/validate-linux-rc.yml
+      input_mapping: {concourse-tarball: concourse-linux-ubuntu}
+    - task: validate-windows-rc
+      file: ci/tasks/validate-windows-rc.yml
+    - task: validate-darwin-rc
+      file: ci/tasks/validate-darwin-rc.yml
+      input_mapping: {concourse-tarball: concourse-darwin}
+  - in_parallel:
     - put: linux-rc
       params: {file: concourse-linux-alpine/concourse-*.tgz}
       inputs: [concourse-linux-alpine]

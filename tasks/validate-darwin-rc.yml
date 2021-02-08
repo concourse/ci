@@ -1,0 +1,9 @@
+---
+platform: darwin
+
+inputs:
+- name: ci
+- name: concourse-tarball
+
+run:
+  path: ci/tasks/scripts/validate-darwin-rc

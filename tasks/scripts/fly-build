@@ -23,11 +23,6 @@ pushd concourse
   fi
 
   go build -a -ldflags "$ldflags" -o $output/fly ./fly
-
-  if [[ "$platform" == "linux" ]] && which ldd && ldd $output/fly; then
-    echo "binary is not static; aborting"
-    exit 1
-  fi
 popd
 
 pushd $output
