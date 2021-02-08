@@ -1,0 +1,10 @@
+---
+roles:
+- name: owner
+  local:
+    users:
+    - admin
+  github:
+    teams:
+    - concourse:pivotal
+

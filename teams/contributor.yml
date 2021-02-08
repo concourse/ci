@@ -1,0 +1,11 @@
+---
+roles:
+- name: owner
+  github:
+    teams:
+    - concourse:pivotal
+- name: pipeline-operator
+  github:
+    teams:
+    - concourse:contributors
+
