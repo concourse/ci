@@ -1,3 +1,6 @@
+$ErrorActionPreference = "Stop"
+trap { $host.SetShouldExit(1) }
+
 Expand-Archive `
     -Path .\concourse-windows\concourse-*.tgz `
     -DestinationPath .\concourse
