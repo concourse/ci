@@ -6,4 +6,5 @@ inputs:
 - name: concourse-windows
 
 run:
-  path: ci/tasks/scripts/validate-windows-rc.ps1
+  path: powershell
+  args: [ci/tasks/scripts/validate-windows-rc.ps1]
