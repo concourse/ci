@@ -119,7 +119,7 @@ jobs:
   - get: pipelines-and-tasks
     trigger: true
   - set_pipeline: self
-    file: ci/pipelines/reconfigure.yml
+    file: pipelines-and-tasks/pipelines/reconfigure.yml
 
 - name: reconfigure-teams
   plan:
@@ -128,7 +128,7 @@ jobs:
   - get: teams
     trigger: true
   - task: reconfigure
-    file: ci/tasks/reconfigure-teams.yml
+    file: teams/tasks/reconfigure-teams.yml
     params:
       ADMIN_USERNAME: ((concourse_admin_user))
       ADMIN_PASSWORD: ((concourse_admin_pass))
