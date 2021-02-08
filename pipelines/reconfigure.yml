@@ -111,7 +111,7 @@ jobs:
   plan:
   - get: ci
     trigger: true
-  - set_pipeline: reconfigure-pipelines
+  - set_pipeline: self
     file: ci/pipelines/reconfigure.yml
 
 - name: reconfigure-teams
