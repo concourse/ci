@@ -3,7 +3,7 @@ trap { $host.SetShouldExit(1) }
 
 Expand-Archive `
     -Path .\concourse-windows\concourse-*.zip `
-    -DestinationPath .\concourse
+    -DestinationPath .
 cd .\concourse
 
 .\bin\concourse.exe --version
