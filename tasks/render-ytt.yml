@@ -7,11 +7,11 @@ image_resource:
     tag: kbld-rand-1592942790507001000-1148625018150
 inputs:
 - name: pipelines
-- name: pipelines-and-tasks
+- name: ci
 outputs:
 - name: rendered_pipelines
 params:
   PIPELINES:
 run:
-  path: pipelines-and-tasks/tasks/scripts/render-ytt-templates
+  path: ci/tasks/scripts/render-ytt-templates
   user: root
