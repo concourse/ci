@@ -11,8 +11,9 @@ params:
   CONCOURSE_URL:
 
 inputs:
-- name: ci
+- name: pipelines-and-tasks
+- name: teams
 
 run:
-  path: ci/tasks/scripts/reconfigure-teams
+  path: pipelines-and-tasks/tasks/scripts/reconfigure-teams
 

@@ -128,7 +128,7 @@ jobs:
   - get: teams
     trigger: true
   - task: reconfigure
-    file: teams/tasks/reconfigure-teams.yml
+    file: pipelines-and-tasks/tasks/reconfigure-teams.yml
     params:
       ADMIN_USERNAME: ((concourse_admin_user))
       ADMIN_PASSWORD: ((concourse_admin_pass))

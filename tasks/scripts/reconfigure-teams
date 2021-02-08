@@ -11,7 +11,7 @@ set +x
 
 set -x
 
-cd ci/teams
+cd teams/teams
 
 for team in *.yml; do
   /fly -t ci set-team --team-name "${team%.yml}" -c "$team" --non-interactive
