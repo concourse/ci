@@ -323,7 +323,7 @@ resource_types:
 - name: pull-request
   type: registry-image
   source:
-    repository: jtarchie/pr
+    repository: teliaoss/github-pr-resource
 
 - name: gcs
   type: registry-image
@@ -390,8 +390,8 @@ resources:
   check_every: 2m
   source:
     access_token: ((pull_requests_access_token))
-    base: master
-    repo: #@ github_owner() + "/" + resource_name + "-resource"
+    base_branch: master
+    repository: #@ github_owner() + "/" + resource_name + "-resource"
 
 - name: resource-image
   type: registry-image
