@@ -130,9 +130,9 @@ jobs:
   - task: reconfigure
     file: pipelines-and-tasks/tasks/reconfigure-teams.yml
     params:
-      ADMIN_USERNAME: ((concourse_admin_user))
-      ADMIN_PASSWORD: ((concourse_admin_pass))
-      CONCOURSE_URL: https://ci.concourse-ci.org
+      ADMIN_USERNAME: ((concourse.username))
+      ADMIN_PASSWORD: ((concourse.password))
+      CONCOURSE_URL: ((concourse.url))
 
 - name: reconfigure-promote
   plan:
