@@ -142,8 +142,6 @@ plan:
     context: #@ "status-" + distro
     path: resource-pr
     status: pending
-  get_params:
-    fetch_merge: true
 - do:
   - #@ build_task(resource_name, distro)
   - #@ template.replace(extra_steps(distro))
