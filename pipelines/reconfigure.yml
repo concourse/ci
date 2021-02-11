@@ -421,13 +421,10 @@ jobs:
     file: oxygen-mask/gen-monitor.yml
     vars:
       atc_url: https://hush-house.pivotal.io
+      metrics_store: wavefront
       interval: 30s
-      username: ((basic_auth.username))
-      password: ((basic_auth.password))
       team_name: main
       pipeline_name: monitoring
-      datadog_api_key: ((datadog_api_key))
-      github_access_token: ((concourse_github_dummy.access_token))
 
 - name: reconfigure-example-pipelines
   plan:
