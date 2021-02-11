@@ -416,7 +416,7 @@ jobs:
         args:
         - -c
         - |
-          erb metrics_store=wavefront monitor.yml > gen-monitor.yml
+          erb metrics_store=datadog monitor.yml > gen-monitor.yml
   - set_pipeline: monitoring-stats
     file: oxygen-mask/gen-monitor.yml
     vars:
