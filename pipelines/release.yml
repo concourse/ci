@@ -1231,20 +1231,20 @@ jobs:
     - get: concourse-rc-image-ubuntu
       passed: [shipit]
       params: {format: oci}
-  - load_var: version
+  - load_var: image_version
     file: version/version
   - in_parallel:
     - put: concourse-image
       inputs: [concourse-rc-image]
       params:
         image: concourse-rc-image/image.tar
-        version: ((.:version))
+        version: ((.:image_version))
         bump_aliases: true
     - put: concourse-image-ubuntu
       inputs: [concourse-rc-image-ubuntu]
       params:
         image: concourse-rc-image-ubuntu/image.tar
-        version: ((.:version))
+        version: ((.:image_version))
         bump_aliases: true
 
 - name: generate-dpkg-list
