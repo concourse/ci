@@ -1,8 +1,6 @@
 #!/bin/bash
 
-GO111MODULE=auto
-
-go get github.com/onsi/ginkgo/ginkgo
-go get github.com/onsi/gomega
-go get -d -v ./...
-ginkgo -flakeAttempts=3 -r ci/tasks/scripts
+# go get github.com/onsi/ginkgo/ginkgo
+# go get github.com/onsi/gomega
+# go get -d -v ./...
+# ginkgo -flakeAttempts=3 -r ci/tasks/scripts
