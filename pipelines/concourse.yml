@@ -111,11 +111,19 @@ jobs:
     input_mapping: {base-image: ubuntu-bionic}
   - load_var: version
     file: golang-linux/version
-  - put: golang-builder-image
-    params:
-      image: image/image.tar
-      version: ((.:version))
-      bump_aliases: true
+  - in_parallel:
+    - put: golang-builder-image
+      params:
+        image: image/image.tar
+        version: ((.:version))
+        bump_aliases: true
+
+    # push to latest (+ bare semver tags) to make local dev a bit easier
+    - put: golang-builder-image-latest
+      params:
+        image: image/image.tar
+        version: ((.:version))
+        bump_aliases: true
   on_failure: *failed-ci
 
 - name: unit
@@ -1249,6 +1257,14 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
     variant: bionic
+
+- name: golang-builder-image-latest
+  type: registry-image
+  icon: *image-icon
+  source:
+    repository: concourse/golang-builder
+    username: ((docker.username))
+    password: ((docker.password))
 
 - name: postgres-image
   type: registry-image
