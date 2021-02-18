@@ -9,6 +9,11 @@ jobs:
     params:
       repository: concourse
       merge: true
+  on_failure: &notify
+    put: notify
+    params:
+      mode: normal
+      alert_type: failed
 
 - name: promote-cbd
   serial: true
@@ -19,6 +24,7 @@ jobs:
     params:
       repository: cbd
       merge: true
+  on_failure: *notify
 
 - name: publish-docs
   public: true
@@ -35,7 +41,13 @@ jobs:
       GITHUB_TOKEN: ((concourse_github_dummy.access_token))
   - put: docs-gh-pages
     params: {repository: built-docs}
+  on_failure: *notify
 
+
+resource_types:
+- name: slack-notifier
+  type: registry-image
+  source: {repository: mockersf/concourse-slack-notifier}
 
 resources:
 - name: cbd
@@ -82,3 +94,9 @@ resources:
     uri: git@github.com:concourse/docs
     branch: gh-pages
     private_key: ((docs_deploy_key))
+
+- name: notify
+  type: slack-notifier
+  icon: slack
+  source:
+    url: ((slack_hooks.concourse-private))
