@@ -301,25 +301,26 @@ jobs:
 
 - name: reconfigure-pipelines
   plan:
-  - get: pipelines-and-tasks
-    trigger: true
-    passed: [unit]
-  - get: baggageclaim-ci
-    trigger: true
-  - get: booklit-ci
-    trigger: true
-  - get: concourse-for-k8s
-    trigger: true
-  - get: dex-ci
-    trigger: true
-  - get: docs-ci
-    trigger: true
-  - get: flight-attendant-ci
-    trigger: true
-  - get: ft-ci
-    trigger: true
-  - get: resource-types-website-ci
-    trigger: true
+  - in_parallel:
+    - get: pipelines-and-tasks
+      trigger: true
+      passed: [unit]
+    - get: baggageclaim-ci
+      trigger: true
+    - get: booklit-ci
+      trigger: true
+    - get: concourse-for-k8s
+      trigger: true
+    - get: dex-ci
+      trigger: true
+    - get: docs-ci
+      trigger: true
+    - get: flight-attendant-ci
+      trigger: true
+    - get: ft-ci
+      trigger: true
+    - get: resource-types-website-ci
+      trigger: true
   - set_pipeline: concourse
     file: pipelines-and-tasks/pipelines/concourse.yml
   - set_pipeline: helm-chart
