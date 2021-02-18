@@ -119,7 +119,7 @@ resources:
   type: slack-notifier
   icon: slack
   source:
-    url: ((slack_hook))
+    url: ((slack_hooks.concourse-private))
 
 - name: latest-concourse
   type: github-release
