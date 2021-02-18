@@ -85,7 +85,7 @@ resources:
   type: git
   icon: github
   source:
-    uri: https://github.com/concourse/greenpeace
+    uri: git@github.com:concourse/greenpeace.git
     paths: [pipelines, tasks]
     private_key: ((greenpeace_private_key))
 
