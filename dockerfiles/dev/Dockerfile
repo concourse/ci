@@ -58,8 +58,7 @@ COPY ./resource-types-image/rootfs/usr/local/concourse/resource-types/ /usr/loca
 COPY concourse /src
 
 # build the init executable for containerd
-RUN  set -x && \
-	gcc -O2 -static -o /usr/local/concourse/bin/init /src/cmd/init/init.c
+RUN gcc -O2 -static -o /usr/local/concourse/bin/init /src/cmd/init/init.c
 
 RUN cd /src && \
       go mod download && \
