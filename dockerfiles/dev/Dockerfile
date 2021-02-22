@@ -63,8 +63,7 @@ RUN  set -x && \
 
 RUN cd /src && \
       go mod download && \
-      go install github.com/gobuffalo/packr/packr && \
-      packr build -gcflags=all="-N -l" -o /usr/local/concourse/bin/concourse \
+      go build -gcflags=all="-N -l" -o /usr/local/concourse/bin/concourse \
         ./cmd/concourse && \
       rm -rf /src
 

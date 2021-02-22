@@ -33,8 +33,7 @@ if [ -e final-version/version ]; then
 fi
 
 pushd concourse
-  go install github.com/gobuffalo/packr/packr
-  packr build -o concourse -ldflags "$ldflags" ./cmd/concourse
+  go build -o concourse -ldflags "$ldflags" ./cmd/concourse
 
   if [ -n "$final_version" ]; then
     test "$(./concourse --version)" = "$final_version"
