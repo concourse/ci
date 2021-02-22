@@ -12,13 +12,19 @@ variable "macstadium_password" {
 
 variable "concourse_bundle_url" {
   type    = string
-  default = "https://storage.googleapis.com/concourse-artifacts/dev/concourse-6.7.0+dev.461.5e9e2ec33.darwin.amd64.tgz"
+  default = "https://github.com/concourse/concourse/releases/download/v7.0.0/concourse-7.0.0-darwin-amd64.tgz"
+}
+
+variable "go_version" {
+  type    = string
+  default = "1.16"
 }
 
 resource "null_resource" "instance" {
   triggers = {
-    ip  = var.macstadium_ip
-    url = var.concourse_bundle_url
+    ip         = var.macstadium_ip
+    url        = var.concourse_bundle_url
+    go_version = var.go_version
   }
 
   connection {
@@ -43,6 +49,7 @@ resource "null_resource" "instance" {
       templatefile("${path.module}/scripts/startup.sh.tmpl", {
         password             = var.macstadium_password,
         concourse_bundle_url = var.concourse_bundle_url,
+        go_version           = var.go_version,
       })
     ]
   }

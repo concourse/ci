@@ -21,8 +21,17 @@ CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/insta
 export PATH="/usr/local/bin:$PATH"
 
 # Install dependencies
-brew install git
-brew install go
+function install_or_upgrade {
+    if brew ls --versions "$1" >/dev/null; then
+        HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade "$1"
+    else
+        HOMEBREW_NO_AUTO_UPDATE=1 brew install "$1"
+    fi
+}
+install_or_upgrade git
+
+curl -L "https://golang.org/dl/go${go_version}.darwin-amd64.pkg" -o go.pkg
+sudo installer -pkg go.pkg -target /
 
 # Download concourse
 curl -L "${concourse_bundle_url}" -o concourse.tgz
@@ -51,9 +60,11 @@ cat > $tmp_daemon_config <<EOF
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
-        <string>/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin></string>
+        <string>/Users/administrator/go/bin:/usr/local/go/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin></string>
         <key>HOME</key>
         <string>/Users/administrator></string>
+        <key>GOROOT</key>
+        <string>/usr/local/go</string>
         <key>GOPATH</key>
         <string>/Users/administrator/go</string>
     </dict>
