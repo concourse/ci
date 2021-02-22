@@ -16,7 +16,7 @@ Start-Process -FilePath ./StackDriverMonitoring.exe -ArgumentList "/S /D=C:\Moni
 rm StackDriverMonitoring.exe
 
 # install Go
-Invoke-WebRequest -Uri https://golang.org/dl/go1.15.5.windows-amd64.msi -OutFile go.msi
+Invoke-WebRequest -Uri https://golang.org/dl/go1.16.windows-amd64.msi -OutFile go.msi
 Start-Process -FilePath ./go.msi -ArgumentList "/passive /norestart" -Wait -PassThru
 rm go.msi
 
@@ -35,7 +35,7 @@ choco install --no-progress -r -y git mingw
 refreshenv
 
 # install Concourse
-Invoke-WebRequest -Uri https://storage.googleapis.com/concourse-artifacts/dev/concourse-6.7.2+dev.773.368451a95.windows.amd64.zip -OutFile concourse.zip
+Invoke-WebRequest -Uri https://github.com/concourse/concourse/releases/download/v7.0.0/concourse-7.0.0-windows-amd64.zip -OutFile concourse.zip
 Expand-Archive -LiteralPath concourse.zip -DestinationPath . -Force
 
 @'
