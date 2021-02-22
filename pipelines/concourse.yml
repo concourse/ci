@@ -20,7 +20,7 @@ resource_types:
 
 - name: helm-chart
   type: registry-image
-  source: {repository: concourse/helm-chart-resource}
+  source: {repository: linkyard/helm-chart-resource, tag: 2.17.0}
 
 groups:
 - name: develop
