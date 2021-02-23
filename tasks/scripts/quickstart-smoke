@@ -6,12 +6,10 @@ source ci/tasks/scripts/docker-helpers.sh
 
 start_docker
 
+# load in concourse/concourse-dev:latest
 [ -d concourse-rc-image ] && docker load -i concourse-rc-image/image.tar
-# concourse/concourse-rc:latest
 
-pushd docs
-  docker-compose -f docker-compose.yml -f latest-rc.override.yml up -d
-popd
+docker-compose -f docs/docker-compose.yml -f ci/overrides/docker-compose.latest-rc.yml up -d
 
 # now run the watjs/smoke tests
 mkdir -p endpoint-info

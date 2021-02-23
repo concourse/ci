@@ -1,0 +1,3 @@
+services:
+  concourse:
+    image: concourse/concourse-dev:latest
