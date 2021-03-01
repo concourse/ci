@@ -363,13 +363,13 @@ jobs:
   on_failure:
     put: concourse-pr
     inputs: [concourse-pr]
-    params: {path: concourse-pr, status: failure, context: upgrade}
+    params: {path: concourse-pr, status: failure, context: integration}
     tags: [pr]
     get_params: {skip_download: true}
   on_success:
     put: concourse-pr
     inputs: [concourse-pr]
-    params: {path: concourse-pr, status: success, context: upgrade}
+    params: {path: concourse-pr, status: success, context: integration}
     tags: [pr]
     get_params: {skip_download: true}
   plan:
@@ -397,7 +397,7 @@ jobs:
   - put: concourse-status-update
     resource: concourse-pr
     inputs: [concourse-pr]
-    params: {path: concourse-pr, status: pending, context: upgrade}
+    params: {path: concourse-pr, status: pending, context: integration}
     tags: [pr]
     get_params: {list_changed_files: true, skip_download: true}
   - task: yarn-build
