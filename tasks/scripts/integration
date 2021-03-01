@@ -10,23 +10,36 @@ source ci/tasks/scripts/docker-helpers.sh
 
 start_docker
 
-docker load -i dev-image/image.tar
+image_ref () {
+  dir=$1
+  repo=$2
 
-export TEST_CONCOURSE_DEV_IMAGE="concourse/dev:$(cat dev-image/tag)"
+  # note: tag must take precedence, since the digest returned by the
+  # registry-image resource is not the same as the image id in the docker CLI.
+  # the oci-build-task, however, gives a digest that can be used
+  if [ -f "${dir}/tag" ]; then
+    echo "${repo}:$(cat ${dir}/tag)"
+  else
+    echo "${repo}@$(cat ${dir}/digest)"
+  fi
+}
+
+docker load -i dev-image/image.tar
+export TEST_CONCOURSE_DEV_IMAGE="$(image_ref dev-image concourse/dev)"
 
 if [ -d concourse-image ]; then
   docker load -i concourse-image/image.tar
-  export TEST_CONCOURSE_LATEST_IMAGE="concourse/concourse:$(cat concourse-image/tag)"
+  export TEST_CONCOURSE_LATEST_IMAGE="$(image_ref concourse-image concourse/concourse)"
 fi
 
-if [ -d vault-image ]; then
+if [ -d postgres-image ]; then
   docker load -i postgres-image/image.tar
-  export TEST_POSTGRES_IMAGE="postgres:$(cat postgres-image/tag)"
+  export TEST_POSTGRES_IMAGE="$(image_ref postgres-image postgres)"
 fi
 
 if [ -d vault-image ]; then
   docker load -i vault-image/image.tar
-  export TEST_VAULT_IMAGE="vault:$(cat vault-image/tag)"
+  export TEST_VAULT_IMAGE="$(image_ref vault-image vault)"
 fi
 
 cd concourse
