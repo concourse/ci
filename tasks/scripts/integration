@@ -20,7 +20,7 @@ image_ref () {
   if [ -f "${dir}/tag" ]; then
     echo "${repo}:$(cat ${dir}/tag)"
   else
-    echo "${repo}@$(cat ${dir}/digest)"
+    cat ${dir}/digest
   fi
 }
 
