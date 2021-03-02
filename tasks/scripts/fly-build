@@ -17,12 +17,17 @@ if [ -e final-version/version ]; then
   ldflags="-X github.com/concourse/concourse.Version=${final_version}"
 fi
 
+tags=""
+
 pushd concourse
-  if [[ "$platform" == "linux" ]]; then
-    ldflags+=' -extldflags "-static"'
+  ldflags+=' -extldflags "-static"'
+
+  if [[ "$platform" == "darwin" ]]; then
+    export CGO_ENABLED=1
+    tags+=' osusergo'
   fi
 
-  go build -a -ldflags "$ldflags" -o $output/fly ./fly
+  go build -a -tags "$tags" -ldflags "$ldflags" -o $output/fly ./fly
 popd
 
 pushd $output

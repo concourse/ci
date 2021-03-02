@@ -9,3 +9,6 @@ cd concourse
 
 tar -xzf fly-assets/fly-darwin-amd64.tgz
 ./fly --version
+
+GODEBUG="netdns=1" ./fly -t dummy login -c http://example.com 2> fly_error || true
+grep "using cgo DNS resolver" fly_error
