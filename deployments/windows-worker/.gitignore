@@ -1,6 +1,0 @@
-keys/id_rsa*
-keys/worker_key
-keys/tsa_host_key.pub
-keys/gcp.json
-.terraform/
-concourse.tgz
