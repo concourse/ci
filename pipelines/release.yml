@@ -1510,7 +1510,7 @@ resources:
     drafts: true
     owner: concourse
     repository: concourse
-    access_token: ((concourse_github_release.access_token))
+    access_token: ((concourse_bot_access_token))
 
 - name: concourse-github-release
   type: github-release
@@ -1518,7 +1518,7 @@ resources:
   source:
     owner: concourse
     repository: concourse
-    access_token: ((concourse_github_release.access_token))
+    access_token: ((concourse_bot_access_token))
 
 - name: concourse-boshio
   type: bosh-io-release

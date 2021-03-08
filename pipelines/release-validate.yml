@@ -5,7 +5,7 @@ resources:
   source:
     owner: concourse
     repository: concourse
-    access_token: ((concourse_github_release.access_token))
+    access_token: ((concourse_github_dummy.access_token))
 
 - name: concourse-boshio
   type: bosh-io-release
@@ -34,7 +34,7 @@ resources:
   source:
     owner: concourse
     repository: concourse
-    access_token: ((concourse_github_release.access_token))
+    access_token: ((concourse_github_dummy.access_token))
 
 - name: ci
   type: git
