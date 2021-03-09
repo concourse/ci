@@ -28,6 +28,14 @@ resources:
     uri: https://github.com/concourse/baggageclaim
     paths: [ci]
 
+- name: boarding-pass-ci
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:concourse/boarding-pass.git
+    paths: [ci]
+    private_key: ((concourse_bot_private_key))
+
 - name: booklit-ci
   type: git
   icon: github
@@ -307,6 +315,8 @@ jobs:
       passed: [unit]
     - get: baggageclaim-ci
       trigger: true
+    - get: boarding-pass-ci
+      trigger: true
     - get: booklit-ci
       trigger: true
     - get: concourse-for-k8s
@@ -358,6 +368,8 @@ jobs:
   - set_pipeline: dutyfree
     team: dutyfree
     file: resource-types-website-ci/ci/pipeline.yml
+  - set_pipeline: boarding-pass
+    file: boarding-pass-ci/ci/pipeline.yml
   - set_pipeline: booklit
     file: booklit-ci/ci/pipeline.yml
   - set_pipeline: update-dex
