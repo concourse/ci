@@ -406,6 +406,18 @@ jobs:
       has_runtime_flag: "true"
       helm_version: "3"
       slack_hook: ((slack_hooks.concourse-interrupt))
+  - set_pipeline: release-7.1.x
+    file: pipelines-and-tasks/pipelines/release.yml
+    instance_vars:
+      version: 7.1.x
+    vars:
+      release_major: "7"
+      release_minor: "7.1"
+      latest_release: "7.0"
+      concourse_smoke_deployment_name: "concourse-smoke-7-1"
+      has_runtime_flag: "true"
+      helm_version: "3"
+      slack_hook: ((slack_hooks.concourse-interrupt))
   - set_pipeline: enterprise-helm-chart
     file: concourse-for-k8s/ci/pipeline.yml
     vars:
