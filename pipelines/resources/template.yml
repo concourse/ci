@@ -320,6 +320,7 @@ jobs:
 resource_types:
 - name: pull-request
   type: registry-image
+  check_every: 2m
   source:
     repository: teliaoss/github-pr-resource
 
