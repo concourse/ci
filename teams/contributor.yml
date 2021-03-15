@@ -3,9 +3,8 @@ roles:
 - name: owner
   github:
     teams:
-    - concourse:pivotal
+    - concourse:maintainers
 - name: pipeline-operator
   github:
-    teams:
-    - concourse:contributors
-
+    orgs:
+    - concourse
