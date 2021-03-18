@@ -87,7 +87,7 @@ resources:
 jobs:
 - name: unit
   public: true
-  max_in_flight: 3
+  max_in_flight: 6
   on_failure:
     put: concourse-pr
     inputs: [concourse-pr]
@@ -147,7 +147,7 @@ jobs:
 
 - name: testflight
   public: true
-  max_in_flight: 3
+  max_in_flight: 6
   on_failure:
     put: concourse-pr
     inputs: [concourse-pr]
@@ -218,7 +218,7 @@ jobs:
 
 - name: validate-labels
   public: true
-  max_in_flight: 3
+  max_in_flight: 6
   on_failure:
     put: concourse-pr
     inputs: [concourse-pr]
@@ -256,7 +256,7 @@ jobs:
 
 - name: containerd-integration
   public: true
-  max_in_flight: 3
+  max_in_flight: 6
   on_failure:
     put: concourse-pr
     inputs: [concourse-pr]
@@ -296,7 +296,7 @@ jobs:
 
 - name: watsjs
   public: true
-  max_in_flight: 3
+  max_in_flight: 6
   on_failure:
     put: concourse-pr
     inputs: [concourse-pr]
@@ -359,7 +359,7 @@ jobs:
 
 - name: integration
   public: true
-  max_in_flight: 3
+  max_in_flight: 6
   on_failure:
     put: concourse-pr
     inputs: [concourse-pr]
