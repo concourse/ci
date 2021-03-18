@@ -345,15 +345,17 @@ jobs:
       concourse_image_tag: latest
   - set_pipeline: helm-prs
     file: pipelines-and-tasks/pipelines/helm-prs.yml
+    instance_vars:
+      branch: master
     vars:
-      pr_base_branch: master
       concourse_base_branch: master
       concourse_image_name: concourse/concourse
       concourse_image_tag: latest
-  - set_pipeline: helm-prs-dev
+  - set_pipeline: helm-prs
     file: pipelines-and-tasks/pipelines/helm-prs.yml
+    instance_vars:
+      branch: dev
     vars:
-      pr_base_branch: dev
       concourse_base_branch: master
       concourse_image_name: concourse/concourse-rc
       concourse_image_tag: latest

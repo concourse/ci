@@ -10,7 +10,7 @@ resources:
   icon: source-pull
   source:
     repository: concourse/concourse-chart
-    base_branch: ((pr_base_branch))
+    base_branch: ((branch))
     access_token: ((pr_access_token))
 
 - name: helm-charts
