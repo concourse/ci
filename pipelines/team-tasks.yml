@@ -1,3 +1,27 @@
+members: &members
+# Aidan
+- "<@W013S2H8ABU>"
+# Scott
+- "<@W013B9SAXJT>"
+# Daniel
+- "<@W013QLP3YJZ>"
+# Esteban
+- "<@U01LJULP0LS>"
+# Alex
+- "<@W013S7H1JCT>"
+# Rui
+- "<@W012PK4PCR1>"
+# Taylor
+- "<@W011PN57Q8Y>"
+# Muntasir
+- "<@W011EC91F5L>"
+# Navdeep
+- "<@W013K986P7G>"
+# Matthew
+- "<@W013BA1CNMD>"
+# Clara
+- "<@W013B99CVU7>"
+
 resource_types:
 - name: slack-notification
   type: registry-image
@@ -39,57 +63,13 @@ resources:
   type: static-list-resource
   source:
     unique: lunch
-    list:
-      # Aidan
-      - "<@W013S2H8ABU>"
-      # Scott
-      - "<@W013B9SAXJT>"
-      # Daniel
-      - "<@W013QLP3YJZ>"
-      # Esteban
-      - "<@U01LJULP0LS>"
-      # Alex
-      - "<@W013S7H1JCT>"
-      # Rui
-      - "<@W012PK4PCR1>"
-      # Taylor
-      - "<@W011PN57Q8Y>"
-      # Muntasir
-      - "<@W011EC91F5L>"
-      # Navdeep
-      - "<@W013K986P7G>"
-      # Matthew
-      - "<@W013BA1CNMD>"
-      # Clara
-      - "<@W013B99CVU7>"
+    list: *members
 
 - name: standup
   type: static-list-resource
   source:
     unique: standup
-    list:
-      # Aidan
-      - "<@W013S2H8ABU>"
-      # Scott
-      - "<@W013B9SAXJT>"
-      # Daniel
-      - "<@W013QLP3YJZ>"
-      # Esteban
-      - "<@U01LJULP0LS>"
-      # Alex
-      - "<@W013S7H1JCT>"
-      # Rui
-      - "<@W012PK4PCR1>"
-      # Taylor
-      - "<@W011PN57Q8Y>"
-      # Muntasir
-      - "<@W011EC91F5L>"
-      # Navdeep
-      - "<@W013K986P7G>"
-      # Matthew
-      - "<@W013BA1CNMD>"
-      # Clara
-      - "<@W013B99CVU7>"
+    list: *members
 
 jobs:
 - name: monthly-team-lunch
