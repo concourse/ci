@@ -1,0 +1,74 @@
+resource_types:
+- name: slack-notification
+  type: registry-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+
+- name: static-list-resource
+  type: registry-image
+  source:
+    repository: taylorsilva/static-list-resource
+
+- name: cron-resource
+  type: docker-image
+  source:
+    repository: cftoolsmiths/cron-resource
+
+resources:
+- name: slack-message
+  type: slack-notification
+  source:
+    url: ((slack_hook))
+
+- name: first-day-of-month
+  type: cron-resource
+  source:
+    expression: "0 0 1 * *"
+    location: "America/New_York"
+    fire_immediately: true
+
+- name: members
+  type: static-list-resource
+  check_every: never
+  source:
+    list:
+      # Aidan
+      - "<@W013S2H8ABU>"
+      # Scott
+      - "<@W013B9SAXJT>"
+      # Daniel
+      - "<@W013QLP3YJZ>"
+      # Esteban
+      - "<@U01LJULP0LS>"
+      # Alex
+      - "<@W013S7H1JCT>"
+      # Rui
+      - "<@W012PK4PCR1>"
+      # Taylor
+      - "<@W011PN57Q8Y>"
+      # Muntasir
+      - "<@W011EC91F5L>"
+      # Navdeep
+      - "<@W013K986P7G>"
+      # Matthew
+      - "<@W013BA1CNMD>"
+      # Clara
+      - "<@W013B99CVU7>"
+
+
+jobs:
+- name: monthly-team-lunch
+  plan:
+  - get: first-day-of-month
+    trigger: true
+  - get: members
+  - put: slack-message
+    params:
+      text_file: members/item
+      text: |
+        $TEXT_FILE_CONTENT will organize this month's team lunch!
+        1. Set a date/time and create a calendar event
+        2. Think of something the team can do/watch (e.g. codenames)
+  - put: members
+    params:
+      previous: members/item

@@ -445,6 +445,8 @@ jobs:
       container_name: hush-house-web
       mem_threshold_mb: 1024
       mem_limit: 2Gi
+  - set_pipeline: team-tasks
+    file: pipelines-and-tasks/pipelines/team-tasks.yml
   on_failure: *notify
   on_error: *notify
 
