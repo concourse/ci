@@ -24,13 +24,21 @@ resources:
   type: cron-resource
   source:
     expression: "0 0 1 * *"
-    location: "America/New_York"
+    location: "America/Toronto"
     fire_immediately: true
 
-- name: members
-  type: static-list-resource
-  check_every: never
+- name: good-morning
+  type: time
   source:
+    start: 8:00 AM
+    stop: 9:00 AM
+    location: "America/Toronto"
+    days: [Monday, Tuesday, Wednesday, Thursday, Friday]
+
+- name: lunch
+  type: static-list-resource
+  source:
+    unique: lunch
     list:
       # Aidan
       - "<@W013S2H8ABU>"
@@ -55,20 +63,66 @@ resources:
       # Clara
       - "<@W013B99CVU7>"
 
+- name: standup
+  type: static-list-resource
+  source:
+    unique: standup
+    list:
+      # Aidan
+      - "<@W013S2H8ABU>"
+      # Scott
+      - "<@W013B9SAXJT>"
+      # Daniel
+      - "<@W013QLP3YJZ>"
+      # Esteban
+      - "<@U01LJULP0LS>"
+      # Alex
+      - "<@W013S7H1JCT>"
+      # Rui
+      - "<@W012PK4PCR1>"
+      # Taylor
+      - "<@W011PN57Q8Y>"
+      # Muntasir
+      - "<@W011EC91F5L>"
+      # Navdeep
+      - "<@W013K986P7G>"
+      # Matthew
+      - "<@W013BA1CNMD>"
+      # Clara
+      - "<@W013B99CVU7>"
 
 jobs:
 - name: monthly-team-lunch
   plan:
   - get: first-day-of-month
     trigger: true
-  - get: members
+  - get: lunch
   - put: slack-message
     params:
-      text_file: members/item
+      text_file: lunch/item
       text: |
         $TEXT_FILE_CONTENT will organize this month's team lunch!
         1. Set a date/time and create a calendar event
         2. Think of something the team can do/watch (e.g. codenames)
-  - put: members
+  - put: lunch
     params:
-      previous: members/item
+      previous: lunch/item
+
+- name: standup-rotation
+  plan:
+  - get: good-morning
+    trigger: true
+  - get: standup
+  - put: slack-message
+    params:
+      text_file: standup/item
+      text: |
+        $TEXT_FILE_CONTENT is running standup today! If they can't do it today someone else should volunteer.
+        1. Join the zoom room <http://hangar.concourse-ci.org/> to start standup.
+        2. <https://project.concourse-ci.org/pull-requests|Open the PR's tab in cadet> and start screen sharing. Open all unassigned PR's. For each PR ask who wants to review it and assign them.
+        3. <https://project.concourse-ci.org/pairs|Go to the pairs tab>. Ask if anyone is sticking or soloing. Then hit "shuffle" and "apply".
+        4. Stop screensharing. Give your daily update and pass it on to someone else.
+        5. Last person does the countdown clap!
+  - put: standup
+    params:
+      previous: standup/item
