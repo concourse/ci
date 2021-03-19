@@ -10,7 +10,7 @@ resource_types:
     repository: taylorsilva/static-list-resource
 
 - name: cron-resource
-  type: docker-image
+  type: registry-image
   source:
     repository: cftoolsmiths/cron-resource
 
