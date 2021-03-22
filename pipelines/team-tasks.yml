@@ -98,11 +98,10 @@ jobs:
       text_file: standup/item
       text: |
         $TEXT_FILE_CONTENT is running standup today! If they can't do it today someone else should volunteer.
-        1. Join the zoom room <http://hangar.concourse-ci.org/> to start standup.
-        2. <https://project.concourse-ci.org/pull-requests|Open the PR's tab in cadet> and start screen sharing. Open all unassigned PR's. For each PR ask who wants to review it and assign them.
-        3. <https://project.concourse-ci.org/pairs|Go to the pairs tab>. Ask if anyone is sticking or soloing. Then hit "shuffle" and "apply".
-        4. Stop screensharing. Give your daily update and pass it on to someone else.
-        5. Last person does the countdown clap!
+        1. <https://project.concourse-ci.org/pull-requests|Open the PR's tab in cadet> and start screen sharing. Open all unassigned PR's. For each PR ask who wants to review it and assign them.
+        2. <https://project.concourse-ci.org/pairs|Go to the pairs tab>. Ask if anyone is sticking or soloing. Then hit "shuffle" and "apply".
+        3. Stop screensharing. Give your daily update and pass it on to someone else.
+        4. Last person does the countdown clap!
   - put: standup
     params:
       previous: standup/item
