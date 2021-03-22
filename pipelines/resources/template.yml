@@ -22,7 +22,7 @@ BUILD_ARG_DOCKER_PUSH_REPO: ((registry_image_resource_docker.push_repo))
 BUILD_ARG_DOCKER_PUSH_USERNAME: ((registry_image_resource_docker.username))
 
 BUILD_ARG_GCR_PUSH_PASSWORD: ((registry_image_resource_gcr.password))
-BUILD_ARG_GCR_PUSH_REPO: ((registry_image_resource_gcr.push_repo))
+BUILD_ARG_GCR_PUSH_REPO: ((registry_image_resource_gcr.repo))
   #@ elif resource_name == "semver":
 CONTEXT: #@ resource_name + "-resource"
 BUILD_ARG_SEMVER_TESTING_ACCESS_KEY_ID: ((semver_resource_bucket.access_key))
