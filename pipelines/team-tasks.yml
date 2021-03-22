@@ -84,7 +84,8 @@ jobs:
         $TEXT_FILE_CONTENT will organize this month's team lunch!
         1. Set a date/time and create a calendar event
         2. Think of something the team can do/watch (e.g. codenames)
-  - put: lunch
+  - put: next-months-organizer
+    resourc: lunch
     params:
       previous: lunch/item
 
@@ -102,6 +103,7 @@ jobs:
         2. <https://project.concourse-ci.org/pairs|Go to the pairs tab>. Ask if anyone is sticking or soloing. Then hit "shuffle" and "apply".
         3. Stop screensharing. Give your daily update and pass it on to someone else.
         4. Last person does the countdown clap!
-  - put: standup
+  - put: tomorrows-standup-host
+    resource: standup
     params:
       previous: standup/item
