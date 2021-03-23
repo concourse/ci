@@ -59,6 +59,14 @@ resources:
     location: "America/Toronto"
     days: [Monday, Tuesday, Wednesday, Thursday, Friday]
 
+- name: friday-morning
+  type: time
+  source:
+    start: 11:00 AM
+    stop: 11:30 AM
+    location: "America/Toronto"
+    days: [Friday]
+
 - name: lunch
   type: static-list-resource
   source:
@@ -69,6 +77,12 @@ resources:
   type: static-list-resource
   source:
     unique: standup
+    list: *members
+
+- name: retro
+  type: static-list-resource
+  source:
+    unique: retro
     list: *members
 
 jobs:
@@ -107,3 +121,23 @@ jobs:
     resource: standup
     params:
       previous: standup/item
+
+- name: retro-rotation
+  plan:
+  - get: friday-morning
+    trigger: true
+  - get: retro
+  - put: slack-message
+    params:
+      text_file: retro/item
+      text: |
+        $TEXT_FILE_CONTENT is running retro today! If they can't do it today someone else should volunteer.
+        1. <https://postfacto.vmware.com/retros/concourse|Everyone should open the retro board>. No need to screenshare, everyone sees the same thing.
+        2. Allow everyone 5-10mins to add items to the board.
+        2. Go through all action items and check off any completed items.
+        3. Start going through the items on the board. If you don't want to think about which item to pick you can press the right arrow on your keyboard to auto-select an item (goes through all greens, then yellows, then reds, saving the green with the most hearts for last). Add action items as you go.
+        4. Once the board is cleared and all action items recorded you may archive the retro board (Menu > Archive Retro)
+  - put: next-weeks-host
+    resource: retro
+    params:
+      previous: retro/item
