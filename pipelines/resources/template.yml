@@ -339,6 +339,11 @@ resource_types:
   #! https://github.com/mockersf/concourse-slack-notifier/pull/86 is merged
   source: {repository: aoldershaw/concourse-slack-notifier}
 
+- name: registry-image-2
+  type: registry-image
+  source:
+    repository: aoldershaw/registry-image-resource
+
 resources:
 - name: alpine
   type: registry-image
@@ -397,7 +402,7 @@ resources:
     repository: #@ github_owner() + "/" + resource_name + "-resource"
 
 - name: resource-image
-  type: registry-image
+  type: registry-image-2
   icon: docker
   source:
     repository: #@ "concourse/" + resource_name + "-resource"
@@ -405,7 +410,7 @@ resources:
     password: ((docker.password))
 
 - name: resource-image-alpine
-  type: registry-image
+  type: registry-image-2
   icon: docker
   source:
     repository: #@ "concourse/" + resource_name + "-resource"
@@ -414,7 +419,7 @@ resources:
     password: ((docker.password))
 
 - name: resource-image-ubuntu
-  type: registry-image
+  type: registry-image-2
   icon: docker
   source:
     repository: #@ "concourse/" + resource_name + "-resource"
