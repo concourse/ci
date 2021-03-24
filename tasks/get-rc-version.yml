@@ -1,0 +1,18 @@
+platform: linux
+
+inputs:
+- name: concourse
+- name: version
+
+outputs:
+- name: version
+
+run:
+  path: sh
+  args:
+  - -c
+  - |
+    set -e -x
+
+    current_ref="$(git -C concourse rev-parse --short HEAD)"
+    printf "+${current_ref}" >> version/version

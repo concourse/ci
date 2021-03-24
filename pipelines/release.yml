@@ -575,6 +575,9 @@ jobs:
         - task: yarn-build
           file: ci/tasks/yarn-build.yml
           image: unit-image
+  - task: get-rc-version
+    file: ci/tasks/get-rc-version.yml
+    image: golang-builder-image
   - in_parallel:
       fail_fast: true
       steps:

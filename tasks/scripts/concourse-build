@@ -11,9 +11,7 @@ if [ -z "${PLATFORM}" ]; then
   exit 1
 fi
 
-current_ref="$(git -C concourse rev-parse --short HEAD)"
-
-version="$(cat version/version)+${current_ref}"
+version="$(cat version/version)"
 
 archive=concourse-${version}.${PLATFORM}.amd64.tgz
 

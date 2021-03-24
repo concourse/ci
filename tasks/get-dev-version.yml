@@ -13,8 +13,10 @@ run:
   - |
     set -e -x
 
+    current_ref="$(git -C concourse rev-parse --short HEAD)"
+
     latest_tag="$(git -C concourse describe --tags --abbrev=0 HEAD)"
     timestamp="$(date +%s)"
     latest_version=$(echo $latest_tag | sed s/v//)
 
-    echo "${latest_version}+dev.${timestamp}" > version/version
+    echo "${latest_version}+dev.${timestamp}.${current_ref}" > version/version

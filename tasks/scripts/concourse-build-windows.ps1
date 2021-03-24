@@ -1,8 +1,6 @@
 . .\ci\tasks\scripts\go-build.ps1
 
-$currentRef = & git -C concourse rev-parse --short HEAD
-
-$version = "$(Get-Content "version\version")+$currentRef"
+$version = "$(Get-Content "version\version")"
 
 $archive = "concourse-${version}.windows.amd64.zip"
 
