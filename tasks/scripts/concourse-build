@@ -13,15 +13,7 @@ fi
 
 current_ref="$(git -C concourse rev-parse --short HEAD)"
 
-version=""
-if [ -e version/version ]; then
-  version="$(cat version/version)+${current_ref}"
-else
-  latest_tag="$(git -C concourse describe --tags --abbrev=0 HEAD)"
-  commits_since="$(git -C concourse rev-list ${latest_tag}..HEAD --count)"
-  latest_version=$(echo $latest_tag | sed s/v//)
-  version="${latest_version}+dev.${commits_since}.${current_ref}"
-fi
+version="$(cat version/version)+${current_ref}"
 
 archive=concourse-${version}.${PLATFORM}.amd64.tgz
 

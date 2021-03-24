@@ -2,14 +2,7 @@
 
 $currentRef = & git -C concourse rev-parse --short HEAD
 
-if (Test-Path "version\version") {
-  $version = "$(Get-Content "version\version")+$currentRef"
-} else {
-  $latestTag = & git -C concourse describe --tags --abbrev=0 HEAD
-  $commitsSince = & git -C concourse rev-list "$latestTag..HEAD" --count
-  $latestVersion = $latestTag -replace "v", ""
-  $version = "$latestVersion+dev.$commitsSince.$currentRef"
-}
+$version = "$(Get-Content "version\version")+$currentRef"
 
 $archive = "concourse-${version}.windows.amd64.zip"
 
