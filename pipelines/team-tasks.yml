@@ -40,18 +40,20 @@ resource_types:
 
 resources:
 - name: slack-message
+  icon: slack
   type: slack-notification
   source:
     url: ((slack_hooks.concourse-private))
 
 - name: first-day-of-month
+  icon: calendar
   type: cron-resource
   source:
     expression: "0 0 1 * *"
     location: "America/Toronto"
-    fire_immediately: true
 
 - name: good-morning
+  icon: calendar
   type: time
   source:
     start: 8:00 AM
@@ -60,6 +62,7 @@ resources:
     days: [Monday, Tuesday, Wednesday, Thursday, Friday]
 
 - name: friday-morning
+  icon: calendar
   type: time
   source:
     start: 11:00 AM
@@ -68,18 +71,21 @@ resources:
     days: [Friday]
 
 - name: lunch
+  icon: format-list-bulleted-square
   type: static-list-resource
   source:
     unique: lunch
     list: *members
 
 - name: standup
+  icon: format-list-bulleted-square
   type: static-list-resource
   source:
     unique: standup
     list: *members
 
 - name: retro
+  icon: format-list-bulleted-square
   type: static-list-resource
   source:
     unique: retro
@@ -99,7 +105,7 @@ jobs:
         1. Set a date/time and create a calendar event
         2. Think of something the team can do/watch (e.g. codenames)
   - put: next-months-organizer
-    resourc: lunch
+    resource: lunch
     params:
       previous: lunch/item
 
