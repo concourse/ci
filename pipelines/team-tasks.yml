@@ -1,0 +1,150 @@
+# This is a list of everyones slack id
+members: &members
+# Aidan
+- "<@W013S2H8ABU>"
+# Scott
+- "<@W013B9SAXJT>"
+# Daniel
+- "<@W013QLP3YJZ>"
+# Esteban
+- "<@U01LJULP0LS>"
+# Alex
+- "<@W013S7H1JCT>"
+# Rui
+- "<@W012PK4PCR1>"
+# Taylor
+- "<@W011PN57Q8Y>"
+# Muntasir
+- "<@W011EC91F5L>"
+# Navdeep
+- "<@W013K986P7G>"
+# Matthew
+- "<@W013BA1CNMD>"
+# Clara
+- "<@W013B99CVU7>"
+
+resource_types:
+- name: slack-notification
+  type: registry-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+
+- name: static-list-resource
+  type: registry-image
+  source:
+    repository: taylorsilva/static-list-resource
+
+- name: cron-resource
+  type: registry-image
+  source:
+    repository: cftoolsmiths/cron-resource
+
+resources:
+- name: slack-message
+  icon: slack
+  type: slack-notification
+  source:
+    url: ((slack_hooks.concourse-private))
+
+- name: first-day-of-month
+  icon: calendar
+  type: cron-resource
+  source:
+    expression: "0 0 1 * *"
+    location: "America/Toronto"
+
+- name: good-morning
+  icon: calendar
+  type: time
+  source:
+    start: 8:00 AM
+    stop: 9:00 AM
+    location: "America/Toronto"
+    days: [Monday, Tuesday, Wednesday, Thursday, Friday]
+
+- name: friday-morning
+  icon: calendar
+  type: time
+  source:
+    start: 11:00 AM
+    stop: 11:30 AM
+    location: "America/Toronto"
+    days: [Friday]
+
+- name: lunch
+  icon: format-list-bulleted-square
+  type: static-list-resource
+  source:
+    unique: lunch
+    list: *members
+
+- name: standup
+  icon: format-list-bulleted-square
+  type: static-list-resource
+  source:
+    unique: standup
+    list: *members
+
+- name: retro
+  icon: format-list-bulleted-square
+  type: static-list-resource
+  source:
+    unique: retro
+    list: *members
+
+jobs:
+- name: monthly-team-lunch
+  plan:
+  - get: first-day-of-month
+    trigger: true
+  - get: lunch
+  - put: slack-message
+    params:
+      text_file: lunch/item
+      text: |
+        $TEXT_FILE_CONTENT will organize this month's team lunch!
+        1. Set a date/time and create a calendar event
+        2. Think of something the team can do/watch (e.g. codenames)
+  - put: next-months-organizer
+    resource: lunch
+    params:
+      previous: lunch/item
+
+- name: standup-rotation
+  plan:
+  - get: good-morning
+    trigger: true
+  - get: standup
+  - put: slack-message
+    params:
+      text_file: standup/item
+      text: |
+        $TEXT_FILE_CONTENT is running standup today! If they can't do it today someone else should volunteer.
+        1. <https://project.concourse-ci.org/pull-requests|Open the PR's tab in cadet> and start screen sharing. Open all unassigned PR's. For each PR ask who wants to review it and assign them.
+        2. <https://project.concourse-ci.org/pairs|Go to the pairs tab>. Ask if anyone is sticking or soloing. Then hit "shuffle" and "apply".
+        3. Stop screensharing. Give your daily update and pass it on to someone else.
+        4. Last person does the countdown clap!
+  - put: tomorrows-standup-host
+    resource: standup
+    params:
+      previous: standup/item
+
+- name: retro-rotation
+  plan:
+  - get: friday-morning
+    trigger: true
+  - get: retro
+  - put: slack-message
+    params:
+      text_file: retro/item
+      text: |
+        $TEXT_FILE_CONTENT is running retro today! If they can't do it today someone else should volunteer.
+        1. <https://postfacto.vmware.com/retros/concourse|Everyone should open the retro board>. No need to screenshare, everyone sees the same thing.
+        2. Allow everyone 5-10mins to add items to the board.
+        2. Go through all action items and check off any completed items.
+        3. Start going through the items on the board. If you don't want to think about which item to pick you can press the right arrow on your keyboard to auto-select an item (goes through all greens, then yellows, then reds, saving the green with the most hearts for last). Add action items as you go.
+        4. Once the board is cleared and all action items recorded you may archive the retro board (Menu > Archive Retro)
+  - put: next-weeks-host
+    resource: retro
+    params:
+      previous: retro/item
