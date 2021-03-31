@@ -1332,6 +1332,51 @@ jobs:
     params:
       file: version/version
 
+- name: update-images
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: periodic-check
+      trigger: true
+    - get: version
+      passed: [shipit]
+    - get: linux-rc
+      passed: [shipit]
+    - get: concourse-docker
+      trigger: true
+    - get: builder
+    - get: ci
+  - in_parallel:
+    - task: build-alpine
+      file: concourse-docker/ci/build-image.yml
+      image: builder
+      output_mapping: {image: image-alpine}
+      privileged: true
+    - task: build-ubuntu
+      file: concourse-docker/ci/build-image.yml
+      image: builder
+      input_mapping: {linux-rc: linux-rc-ubuntu}
+      output_mapping: {image: image-ubuntu}
+      privileged: true
+  - load_var: image_version
+    file: version/version
+  - in_parallel:
+    - put: concourse-image
+      inputs: [image-alpine]
+      params:
+        image: image-alpine/image.tar
+        version: ((.:image_version))
+        bump_aliases: true
+    - put: concourse-image-ubuntu
+      inputs: [image-ubuntu]
+      params:
+        image: image-ubuntu/image.tar
+        version: ((.:image_version))
+        bump_aliases: true
+  on_failure: *failed-concourse
+  on_error: *failed-concourse
+
 resources:
 - name: concourse
   type: git
@@ -1840,6 +1885,7 @@ resources:
     regexp: "helm-version-(.*).txt"
 
 - name: periodic-check
+  icon: clock
   type: time
   source:
     interval: 24h
