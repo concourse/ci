@@ -85,6 +85,7 @@ groups:
   - bump-cbd-versions
   - patch
   - discover-component-version
+  - update-images
 
 - name: all
   jobs:
@@ -1342,6 +1343,8 @@ jobs:
     - get: version
       passed: [shipit]
     - get: linux-rc
+      passed: [shipit]
+    - get: linux-rc-ubuntu
       passed: [shipit]
     - get: concourse-docker
       trigger: true
