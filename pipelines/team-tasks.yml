@@ -1,16 +1,37 @@
-# This is a list of everyones slack id
 members: &members
-- "Scott <@W013B9SAXJT>"
-- "Daniel <@W013QLP3YJZ>"
-- "Esteban <@U01LJULP0LS>"
-- "Alex <@W013S7H1JCT>"
-- "Rui <@W012PK4PCR1>"
-- "Taylor <@W011PN57Q8Y>"
-- "Muntasir <@W011EC91F5L>"
-- "Navdeep <@W013K986P7G>"
-- "Matthew <@W013BA1CNMD>"
-- "Clara <@W013B99CVU7>"
-- "Aidan <@W013S2H8ABU>"
+- |
+  name: Rui
+  slack_id: <@W012PK4PCR1>
+- |
+  name: Alex
+  slack_id: <@W013S7H1JCT>
+- |
+  name: Taylor
+  slack_id: <@W011PN57Q8Y>
+- |
+  name: Muntasir
+  slack_id: <@W011EC91F5L>
+- |
+  name: Esteban
+  slack_id: <@U01LJULP0LS>
+- |
+  name: Navdeep
+  slack_id: <@W013K986P7G>
+- |
+  name: Matthew
+  slack_id: <@W013BA1CNMD>
+- |
+  name: Clara
+  slack_id: <@W013B99CVU7>
+- |
+  name: Aidan
+  slack_id: <@W013S2H8ABU>
+- |
+  name: Scott
+  slack_id: <@W013B9SAXJT>
+- |
+  name: Daniel
+  slack_id: <@W013QLP3YJZ>
 
 resource_types:
 - name: slack-notification
@@ -84,14 +105,17 @@ resources:
 jobs:
 - name: monthly-team-lunch
   plan:
-  - get: first-day-of-month
-    trigger: true
-  - get: lunch
+  - in_parallel:
+    - get: first-day-of-month
+      trigger: true
+    - get: lunch
+  - load_var: member
+    file: lunch/item
+    format: yml
   - put: slack-message
     params:
-      text_file: lunch/item
       text: |
-        $TEXT_FILE_CONTENT will organize this month's team lunch!
+        ((.:member.slack_id)) will organize this month's team lunch!
         1. Set a date/time and create a calendar event
         2. Think of something the team can do/watch (e.g. codenames)
   - put: next-months-organizer
@@ -101,14 +125,18 @@ jobs:
 
 - name: standup-rotation
   plan:
-  - get: good-morning
-    trigger: true
-  - get: standup
+  - in_parallel:
+    - get: good-morning
+      trigger: true
+    - get: standup
+  - load_var: member
+    file: standup/item
+    format: yml
   - put: slack-message
     params:
       text_file: standup/item
       text: |
-        $TEXT_FILE_CONTENT is running standup today! If they can't do it today someone else should volunteer.
+        ((.:member.slack_id)) is running standup today! If they can't do it today someone else should volunteer.
         1. <https://project.concourse-ci.org/pull-requests|Open the PR's tab in cadet> and start screen sharing. Open all unassigned PR's. For each PR ask who wants to review it and assign them.
         2. <https://project.concourse-ci.org/pairs|Go to the pairs tab>. Ask if anyone is sticking or soloing. Then hit "shuffle" and "apply".
         3. Stop screensharing. Give your daily update and pass it on to someone else.
@@ -120,14 +148,18 @@ jobs:
 
 - name: retro-rotation
   plan:
-  - get: friday-morning
-    trigger: true
-  - get: retro
+  - in_parallel:
+    - get: friday-morning
+      trigger: true
+    - get: retro
+  - load_var: member
+    file: retro/item
+    format: yml
   - put: slack-message
     params:
       text_file: retro/item
       text: |
-        $TEXT_FILE_CONTENT is running retro today! If they can't do it today someone else should volunteer.
+        ((.:member.slack_id)) is running retro today! If they can't do it today someone else should volunteer.
         1. <https://postfacto.vmware.com/retros/concourse|Everyone should open the retro board>. No need to screenshare, everyone sees the same thing.
         2. Allow everyone 5-10mins to add items to the board.
         2. Go through all action items and check off any completed items.
@@ -137,3 +169,27 @@ jobs:
     resource: retro
     params:
       previous: retro/item
+
+- name: manual-skip-lunch
+  plan:
+  - get: lunch
+  - put: next-person
+    resource: lunch
+    params:
+      previous: lunch/item
+
+- name: manual-skip-retro
+  plan:
+  - get: retro
+  - put: next-person
+    resource: retro
+    params:
+      previous: retro/item
+
+- name: manual-skip-standup
+  plan:
+  - get: standup
+  - put: next-person
+    resource: standup
+    params:
+      previous: standup/item
