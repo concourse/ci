@@ -103,7 +103,7 @@ resources:
     list: *members
 
 jobs:
-- name: monthly-team-lunch
+- name: rotation-lunch
   plan:
   - in_parallel:
     - get: first-day-of-month
@@ -123,7 +123,7 @@ jobs:
     params:
       previous: lunch/item
 
-- name: standup-rotation
+- name: rotation-standup
   plan:
   - in_parallel:
     - get: good-morning
@@ -146,7 +146,7 @@ jobs:
     params:
       previous: standup/item
 
-- name: retro-rotation
+- name: rotation-retro
   plan:
   - in_parallel:
     - get: friday-morning
