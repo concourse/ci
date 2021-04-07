@@ -43,6 +43,25 @@ jobs:
     params: {repository: built-docs}
   on_failure: *notify
 
+- name: refresh-rfc-table
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse
+      passed: [publish-docs]
+    - get: docs
+      passed: [publish-docs]
+    - get: daily
+      trigger: true
+  - task: build-docs
+    file: docs/ci/build.yml
+    params:
+      ANALYTICS_ID: ((analytics_id))
+      GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+  - put: docs-gh-pages
+    params: {repository: built-docs}
+  on_failure: *notify
 
 resource_types:
 - name: slack-notifier
@@ -100,3 +119,8 @@ resources:
   icon: slack
   source:
     url: ((slack_hooks.concourse-private))
+
+- name: daily
+  type: time
+  icon: clock
+  source: {} # daily is the effective default
