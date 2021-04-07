@@ -331,124 +331,125 @@ jobs:
       trigger: true
     - get: resource-types-website-ci
       trigger: true
-  - set_pipeline: concourse
-    file: pipelines-and-tasks/pipelines/concourse.yml
-  - set_pipeline: helm-chart
-    file: pipelines-and-tasks/pipelines/helm-chart.yml
-  - set_pipeline: prs
-    team: contributor
-    file: pipelines-and-tasks/pipelines/prs.yml
-    instance_vars:
-      branch: master
-    vars:
-      dev_image_tag: latest
-      concourse_image_tag: latest
-  - set_pipeline: helm-prs
-    file: pipelines-and-tasks/pipelines/helm-prs.yml
-    instance_vars:
-      branch: master
-    vars:
-      concourse_base_branch: master
-      concourse_image_name: concourse/concourse
-      concourse_image_tag: latest
-  - set_pipeline: helm-prs
-    file: pipelines-and-tasks/pipelines/helm-prs.yml
-    instance_vars:
-      branch: dev
-    vars:
-      concourse_base_branch: master
-      concourse_image_name: concourse/concourse-rc
-      concourse_image_tag: latest
-  - set_pipeline: baggageclaim
-    file: baggageclaim-ci/ci/pipeline.yml
-  - set_pipeline: baggageclaim-prs
-    team: contributor
-    file: baggageclaim-ci/ci/prs-pipeline.yml
-  - set_pipeline: docs-prs
-    team: contributor
-    file: docs-ci/ci/prs-pipeline.yml
-  - set_pipeline: dutyfree
-    team: dutyfree
-    file: resource-types-website-ci/ci/pipeline.yml
-  - set_pipeline: boarding-pass
-    file: boarding-pass-ci/ci/pipeline.yml
-  - set_pipeline: booklit
-    file: booklit-ci/ci/pipeline.yml
-  - set_pipeline: update-dex
-    file: dex-ci/ci/pipeline.yml
-  - set_pipeline: release-6.3.x
-    file: pipelines-and-tasks/pipelines/release.yml
-    vars:
-      release_major: "6"
-      release_minor: "6.3"
-      latest_release: "6.2"
-      concourse_smoke_deployment_name: "concourse-smoke-6-3"
-      has_runtime_flag: "false"
-      helm_version: "2" # tech-debt for this pipeline only
-      slack_hook: ((slack_hooks.concourse-private))
-  - set_pipeline: release-6.7.x
-    file: pipelines-and-tasks/pipelines/release.yml
-    vars:
-      release_major: "6"
-      release_minor: "6.7"
-      latest_release: "6.6"
-      concourse_smoke_deployment_name: "concourse-smoke-6-7"
-      has_runtime_flag: "true"
-      helm_version: "3"
-      slack_hook: ((slack_hooks.concourse-private))
-  - set_pipeline: release
-    file: pipelines-and-tasks/pipelines/release.yml
-    instance_vars:
-      version: 7.0.x
-    vars:
-      release_major: "7"
-      release_minor: "7.0"
-      latest_release: "6.7"
-      concourse_smoke_deployment_name: "concourse-smoke-7-0"
-      has_runtime_flag: "true"
-      helm_version: "3"
-      slack_hook: ((slack_hooks.concourse-interrupt))
-  - set_pipeline: release
-    file: pipelines-and-tasks/pipelines/release.yml
-    instance_vars:
-      version: 7.1.x
-    vars:
-      release_major: "7"
-      release_minor: "7.1"
-      latest_release: "7.0"
-      concourse_smoke_deployment_name: "concourse-smoke-7-1"
-      has_runtime_flag: "true"
-      helm_version: "3"
-      slack_hook: ((slack_hooks.concourse-interrupt))
-  - set_pipeline: enterprise-helm-chart
-    file: concourse-for-k8s/ci/pipeline.yml
-    vars:
-      concourse_chart_branch: release/6.7.x
-      concourse_minor: "6.7.3"
-  - set_pipeline: flight-attendant
-    file: flight-attendant-ci/ci/pipeline.yml
-  - set_pipeline: ft
-    file: ft-ci/ci/pipeline.yml
-  - set_pipeline: monitor-resources
-    file: pipelines-and-tasks/pipelines/monitor-resources.yml
-    instance_vars:
-      namespace: ci
-    vars:
-      container_name: ci-web
-      mem_threshold_mb: 512
-      mem_limit: 1Gi
-  - set_pipeline: monitor-resources
-    file: pipelines-and-tasks/pipelines/monitor-resources.yml
-    instance_vars:
-      namespace: hush-house
-    vars:
-      container_name: hush-house-web
-      mem_threshold_mb: 1024
-      mem_limit: 2Gi
-  - set_pipeline: team-tasks
-    file: pipelines-and-tasks/pipelines/team-tasks.yml
-  on_failure: *notify
-  on_error: *notify
+  - in_parallel:
+    - set_pipeline: concourse
+      file: pipelines-and-tasks/pipelines/concourse.yml
+    - set_pipeline: helm-chart
+      file: pipelines-and-tasks/pipelines/helm-chart.yml
+    - set_pipeline: prs
+      team: contributor
+      file: pipelines-and-tasks/pipelines/prs.yml
+      instance_vars:
+        branch: master
+      vars:
+        dev_image_tag: latest
+        concourse_image_tag: latest
+    - set_pipeline: helm-prs
+      file: pipelines-and-tasks/pipelines/helm-prs.yml
+      instance_vars:
+        branch: master
+      vars:
+        concourse_base_branch: master
+        concourse_image_name: concourse/concourse
+        concourse_image_tag: latest
+    - set_pipeline: helm-prs
+      file: pipelines-and-tasks/pipelines/helm-prs.yml
+      instance_vars:
+        branch: dev
+      vars:
+        concourse_base_branch: master
+        concourse_image_name: concourse/concourse-rc
+        concourse_image_tag: latest
+    - set_pipeline: baggageclaim
+      file: baggageclaim-ci/ci/pipeline.yml
+    - set_pipeline: baggageclaim-prs
+      team: contributor
+      file: baggageclaim-ci/ci/prs-pipeline.yml
+    - set_pipeline: docs-prs
+      team: contributor
+      file: docs-ci/ci/prs-pipeline.yml
+    - set_pipeline: dutyfree
+      team: dutyfree
+      file: resource-types-website-ci/ci/pipeline.yml
+    - set_pipeline: boarding-pass
+      file: boarding-pass-ci/ci/pipeline.yml
+    - set_pipeline: booklit
+      file: booklit-ci/ci/pipeline.yml
+    - set_pipeline: update-dex
+      file: dex-ci/ci/pipeline.yml
+    - set_pipeline: release-6.3.x
+      file: pipelines-and-tasks/pipelines/release.yml
+      vars:
+        release_major: "6"
+        release_minor: "6.3"
+        latest_release: "6.2"
+        concourse_smoke_deployment_name: "concourse-smoke-6-3"
+        has_runtime_flag: "false"
+        helm_version: "2" # tech-debt for this pipeline only
+        slack_hook: ((slack_hooks.concourse-private))
+    - set_pipeline: release-6.7.x
+      file: pipelines-and-tasks/pipelines/release.yml
+      vars:
+        release_major: "6"
+        release_minor: "6.7"
+        latest_release: "6.6"
+        concourse_smoke_deployment_name: "concourse-smoke-6-7"
+        has_runtime_flag: "true"
+        helm_version: "3"
+        slack_hook: ((slack_hooks.concourse-private))
+    - set_pipeline: release
+      file: pipelines-and-tasks/pipelines/release.yml
+      instance_vars:
+        version: 7.0.x
+      vars:
+        release_major: "7"
+        release_minor: "7.0"
+        latest_release: "6.7"
+        concourse_smoke_deployment_name: "concourse-smoke-7-0"
+        has_runtime_flag: "true"
+        helm_version: "3"
+        slack_hook: ((slack_hooks.concourse-interrupt))
+    - set_pipeline: release
+      file: pipelines-and-tasks/pipelines/release.yml
+      instance_vars:
+        version: 7.1.x
+      vars:
+        release_major: "7"
+        release_minor: "7.1"
+        latest_release: "7.0"
+        concourse_smoke_deployment_name: "concourse-smoke-7-1"
+        has_runtime_flag: "true"
+        helm_version: "3"
+        slack_hook: ((slack_hooks.concourse-interrupt))
+    - set_pipeline: enterprise-helm-chart
+      file: concourse-for-k8s/ci/pipeline.yml
+      vars:
+        concourse_chart_branch: release/6.7.x
+        concourse_minor: "6.7.3"
+    - set_pipeline: flight-attendant
+      file: flight-attendant-ci/ci/pipeline.yml
+    - set_pipeline: ft
+      file: ft-ci/ci/pipeline.yml
+    - set_pipeline: monitor-resources
+      file: pipelines-and-tasks/pipelines/monitor-resources.yml
+      instance_vars:
+        namespace: ci
+      vars:
+        container_name: ci-web
+        mem_threshold_mb: 512
+        mem_limit: 1Gi
+    - set_pipeline: monitor-resources
+      file: pipelines-and-tasks/pipelines/monitor-resources.yml
+      instance_vars:
+        namespace: hush-house
+      vars:
+        container_name: hush-house-web
+        mem_threshold_mb: 1024
+        mem_limit: 2Gi
+    - set_pipeline: team-tasks
+      file: pipelines-and-tasks/pipelines/team-tasks.yml
+    on_failure: *notify
+    on_error: *notify
 
 - name: reconfigure-monitoring-pipeline
   plan:
