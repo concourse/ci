@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+trivy image \
+  --severity "HIGH,CRITICAL" \
+  --ignore-unfixed \
+  --exit-code 1 \
+  --input image/image.tar

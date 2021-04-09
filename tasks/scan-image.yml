@@ -1,0 +1,13 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: aquasec/trivy}
+
+inputs:
+- name: ci
+- name: image
+
+run:
+  path: ci/tasks/scripts/scan-image
