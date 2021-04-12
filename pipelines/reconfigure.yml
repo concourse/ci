@@ -73,22 +73,6 @@ resources:
     uri: https://github.com/concourse/docs
     paths: [ci]
 
-- name: flight-attendant-ci
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/flight-attendant
-    paths:
-    - ci
-
-- name: ft-ci
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/ft
-    paths:
-    - ci
-
 - name: greenpeace
   type: git
   icon: github
@@ -325,10 +309,6 @@ jobs:
       trigger: true
     - get: docs-ci
       trigger: true
-    - get: flight-attendant-ci
-      trigger: true
-    - get: ft-ci
-      trigger: true
     - get: resource-types-website-ci
       trigger: true
   - in_parallel:
@@ -438,10 +418,6 @@ jobs:
       vars:
         concourse_chart_branch: release/6.7.x
         concourse_minor: "6.7.3"
-    - set_pipeline: flight-attendant
-      file: flight-attendant-ci/ci/pipeline.yml
-    - set_pipeline: ft
-      file: ft-ci/ci/pipeline.yml
     - set_pipeline: monitor-resources
       file: pipelines-and-tasks/pipelines/monitor-resources.yml
       instance_vars:
