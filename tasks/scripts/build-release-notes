@@ -11,6 +11,7 @@ chmod +x release-me/releaseme
   --github-branch=$GITHUB_BRANCH \
   --last-commit-SHA=$LAST_COMMIT_SHA \
   --release-version=$RELEASE_VERSION \
+  --ignore-authors=dependabot \
   > built-notes/notes.md
 
 if [ -f resource-versions/versions ]; then
