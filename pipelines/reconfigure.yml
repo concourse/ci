@@ -28,14 +28,6 @@ resources:
     uri: https://github.com/concourse/baggageclaim
     paths: [ci]
 
-- name: boarding-pass-ci
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:concourse/boarding-pass.git
-    paths: [ci]
-    private_key: ((concourse_bot_private_key))
-
 - name: booklit-ci
   type: git
   icon: github
@@ -51,12 +43,6 @@ resources:
     private_key: ((concourse_for_k8s_token))
     paths:
     - ci
-
-- name: concourse-for-platform-automation
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/pivotal/concourse-for-platform-automation.git
 
 - name: dex-ci
   type: git
@@ -262,21 +248,6 @@ jobs:
       instance_vars: {type: mock}
       file: rendered_pipelines/mock.yml
 
-- name: reconfigure-platform-automation
-  plan:
-  - get: pipelines-and-tasks
-    passed: [reconfigure-self]
-    trigger: true
-  - get: concourse-for-platform-automation
-    trigger: true
-  - task: render-platform-automation
-    params:
-      PIPELINES: pipeline.yml
-    input_mapping: {pipelines: concourse-for-platform-automation}
-    file: pipelines-and-tasks/tasks/render-ytt.yml
-  - set_pipeline: enterprise-platform-automation
-    file: rendered_pipelines/pipeline.yml
-
 - name: unit
   plan:
   - get: pipelines-and-tasks
@@ -298,8 +269,6 @@ jobs:
       trigger: true
       passed: [unit]
     - get: baggageclaim-ci
-      trigger: true
-    - get: boarding-pass-ci
       trigger: true
     - get: booklit-ci
       trigger: true
@@ -351,8 +320,6 @@ jobs:
     - set_pipeline: dutyfree
       team: dutyfree
       file: resource-types-website-ci/ci/pipeline.yml
-    - set_pipeline: boarding-pass
-      file: boarding-pass-ci/ci/pipeline.yml
     - set_pipeline: booklit
       file: booklit-ci/ci/pipeline.yml
     - set_pipeline: update-dex
