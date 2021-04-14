@@ -1528,7 +1528,7 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/concourse-bosh-release
-    regexp: ((release_minor)).*
+    regexp: ^((release_minor)).*
 
 - name: unit-image
   type: registry-image
