@@ -384,7 +384,6 @@ jobs:
       file: concourse-for-k8s/ci/pipeline.yml
       vars:
         concourse_chart_branch: release/6.7.x
-        concourse_minor: "6.7.3"
     - set_pipeline: monitor-resources
       file: pipelines-and-tasks/pipelines/monitor-resources.yml
       instance_vars:
