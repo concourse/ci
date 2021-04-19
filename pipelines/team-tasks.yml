@@ -63,14 +63,14 @@ resources:
     expression: "0 0 1 * *"
     location: "America/Toronto"
 
-- name: good-morning
+- name: end-of-day
   icon: calendar
   type: time
   source:
-    start: 8:00 AM
-    stop: 9:00 AM
+    start: 4:00 PM
+    stop: 5:00 PM
     location: "America/Toronto"
-    days: [Monday, Tuesday, Wednesday, Thursday, Friday]
+    days: [Monday, Tuesday, Wednesday, Thursday, Sunday]
 
 - name: friday-morning
   icon: calendar
@@ -126,7 +126,7 @@ jobs:
 - name: rotation-standup
   plan:
   - in_parallel:
-    - get: good-morning
+    - get: end-of-day
       trigger: true
     - get: standup
   - load_var: member
@@ -136,7 +136,7 @@ jobs:
     params:
       text_file: standup/item
       text: |
-        ((.:member.slack_id)) is running standup today! If they can't do it today someone else should volunteer.
+        ((.:member.slack_id)) is running standup tomorrow morning! If they can't do it tomorrow someone else should volunteer.
         1. <https://project.concourse-ci.org/pull-requests|Open the PR's tab in cadet> and start screen sharing. Open all unassigned PR's. For each PR ask who wants to review it and assign them.
         2. <https://project.concourse-ci.org/pairs|Go to the pairs tab>. Ask if anyone is sticking or soloing. Then hit "shuffle" and "apply".
         3. Stop screensharing. Give your daily update and pass it on to someone else.
