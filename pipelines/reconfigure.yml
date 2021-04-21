@@ -386,6 +386,12 @@ jobs:
         concourse_chart_branch: release/6.7.x
     - set_pipeline: team-tasks
       file: pipelines-and-tasks/pipelines/team-tasks.yml
+    - set_pipeline: branch
+      file: pipelines-and-tasks/pipelines/branch.yml
+      instance_vars:
+        branch: rewrite-atc-worker
+      vars:
+        branch_slug: rewrite-atc-worker
     on_failure: *notify
     on_error: *notify
 
