@@ -2,7 +2,16 @@
 
 set -e
 
-trivy image \
+echo "unpacking vulnerability db"
+cache_dir=`pwd`
+mkdir -p "${cache_dir}/db"
+tar -xzf trivy-db/trivy-offline.db.tgz -C "${cache_dir}/db"
+
+echo "scanning base os"
+trivy \
+  --cache-dir "${cache_dir}" \
+  --quiet \
+  image \
   --severity "HIGH,CRITICAL" \
   --ignore-unfixed \
   --exit-code 1 \

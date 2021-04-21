@@ -11,4 +11,5 @@ inputs:
 - name: trivy-db
 
 run:
-  path: ci/tasks/scripts/scan-image
+  path: ci/tasks/scripts/scan-resource-types
+
