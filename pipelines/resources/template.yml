@@ -95,6 +95,57 @@ plan:
   params: {image: built-resource-image/image.tar}
 #@ end
 
+#@ def scan_task(distro):
+task: #@ "scan-" + distro
+image: trivy
+config:
+  platform: linux
+  inputs:
+  - name: #@ "resource-image-dev-" + distro
+    path: image
+  - name: trivy-db
+  run:
+    path: sh
+    args:
+    - -c
+    - |
+      mkdir db
+      tar -xzf trivy-db/trivy-offline.db.tgz -C ./db
+
+      trivy \
+        --cache-dir $(pwd) \
+        image \
+        --severity "HIGH,CRITICAL" \
+        --ignore-unfixed \
+        --exit-code 1 \
+        --input image/image.tar
+#@ end
+
+#@ def scan_image():
+name: scan-image
+on_failure: &failed-ci
+  put: notify
+  params:
+    mode: normal
+    alert_type: failed
+plan:
+- in_parallel:
+  - get: resource-repo
+  - get: resource-image-dev-alpine
+    passed: [build-alpine]
+    params: {format: oci}
+  - get: resource-image-dev-ubuntu
+    passed: [build-ubuntu]
+    params: {format: oci}
+  - get: trivy
+    trigger: true
+  - get: trivy-db
+    trigger: true
+    params: {globs: [trivy-offline.db.tgz]}
+- #@ scan_task("alpine")
+- #@ scan_task("ubuntu")
+#@ end
+
 #@ def extra_steps(distro):
   #@ if resource_name == "docker-image":
 - task: smoke-test
@@ -177,24 +228,22 @@ name: #@ "publish-" + bump
 plan:
 - in_parallel:
   - get: resource-repo
-    passed:
-    - build-alpine
-    - build-ubuntu
+    passed: [scan-image]
   - get: ci
   - get: release-me
   - get: resource-image-dev-alpine
-    passed: [build-alpine]
+    passed: [scan-image]
     params: {format: oci}
   - get: resource-image-dev-alpine-rootfs
     resource: resource-image-dev-alpine
-    passed: [build-alpine]
+    passed: [scan-image]
     params: {format: rootfs}
   - get: resource-image-dev-ubuntu
-    passed: [build-ubuntu]
+    passed: [scan-image]
     params: {format: oci}
   - get: resource-image-dev-ubuntu-rootfs
     resource: resource-image-dev-ubuntu
-    passed: [build-ubuntu]
+    passed: [scan-image]
     params: {format: rootfs}
   - get: version
     params:
@@ -315,6 +364,7 @@ plan:
 jobs:
 - #@ build_image("alpine")
 - #@ build_image("ubuntu")
+- #@ scan_image()
 - #@ validate_pr("alpine")
 - #@ validate_pr("ubuntu")
 - #@ publish_job("major")
@@ -360,6 +410,19 @@ resources:
   source:
     repository: concourse/golang-builder
     variant: bionic
+
+- name: trivy
+  type: registry-image
+  icon: docker
+  source:
+    repository: aquasec/trivy
+
+- name: trivy-db
+  type: github-release
+  icon: database
+  source:
+    owner: aquasecurity
+    repository: trivy-db
 
 - name: resource-repo
   type: git
