@@ -384,22 +384,6 @@ jobs:
       file: concourse-for-k8s/ci/pipeline.yml
       vars:
         concourse_chart_branch: release/6.7.x
-    - set_pipeline: monitor-resources
-      file: pipelines-and-tasks/pipelines/monitor-resources.yml
-      instance_vars:
-        namespace: ci
-      vars:
-        container_name: ci-web
-        mem_threshold_mb: 512
-        mem_limit: 1Gi
-    - set_pipeline: monitor-resources
-      file: pipelines-and-tasks/pipelines/monitor-resources.yml
-      instance_vars:
-        namespace: hush-house
-      vars:
-        container_name: hush-house-web
-        mem_threshold_mb: 1024
-        mem_limit: 2Gi
     - set_pipeline: team-tasks
       file: pipelines-and-tasks/pipelines/team-tasks.yml
     on_failure: *notify
