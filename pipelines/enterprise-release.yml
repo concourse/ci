@@ -1,0 +1,84 @@
+jobs:
+  - name: bosh
+    plan:
+      - in_parallel:
+        - get: concourse-bosh-release
+        - get: stemcell-version
+        - get: postgres-version
+      - task: create-pivnet-metadata
+        config:
+          platform: linux
+          inputs:
+            - name: concourse-bosh-release
+          outputs:
+            - name: product
+          image_resource:
+            type: registry-image
+            source: { repository: ubuntu }
+          run:
+            path: /bin/bash
+            args:
+              - -cex
+              - |
+                version=$(cat concourse-bosh-release/VERSION)
+                echo "release:
+                  version: $version Bosh Release
+                  release_type: Developer Release
+                  eula_slug: vmware_eula
+                  description: |
+                    "Concourse for VMware Tanzu v${version} is a stable and VMware supported version of Concourse. Please refer to Release Notes for breaking changes, features and fixes in this release."
+                    "Concourse for VMware Tanzu v${version} was tested on Stemcell 621.97 (Xenial) upon release and supports the 621.* Stemcell family."
+                    "Concourse for VMware Tanzu v${version} requires PostgreSQL 9.6+"
+                  availability: Admins Only
+                  release_date: $(date '+%Y-%m-%d')
+                  end_of_support_date: $(date -d "+9 months" '+%Y-%m-%d')
+                  release_notes_url: https://docs.pivotal.io/p-concourse/v6/rn
+                  license_exception: "ENC Unrestricted"
+                  eccn: "5D002"
+                product_files:
+                - file: concourse-bosh-release/release.tgz
+                  upload_as: Concourse Bosh v${version}
+                  file_type: "Software"
+                - file: OSL
+                  upload_as: Concourse Bosh OSL v${version}
+                  file_type: "Open Source License"
+                - file: ODP
+                  upload_as: Concourse Bosh ODP v${version}
+                  file_type: "Open Source License"
+                upgrade_path_specifiers:
+                - specifier: ~>6.3.1
+                " > product/metadata.yaml
+      - in_parallel:
+        - put: pivnet-helm-release
+          inputs:
+            - final
+            - product
+          params:
+            metadata_file: product/metadata.yaml
+            file_glob: final/concourse-*.tgz
+
+resources:
+  - name: concourse-bosh-release
+    type: bosh-io-release
+    source:
+      repository: concourse/concourse-bosh-release
+
+  - name: pivnet-bosh-release
+    type: pivnet
+    icon: chart-timeline-variant
+    source:
+      api_token: ((pivnet-token))
+      product_slug: p-concourse
+      copy_metadata: true
+      endpoint: https://network.pivotal.io
+
+resource_types:
+  - name: gcs
+    type: registry-image
+    source: {repository: frodenas/gcs-resource}
+
+  - name: pivnet
+    type: registry-image
+    source:
+      repository: pivotalcf/pivnet-resource
+      tag: latest-final
