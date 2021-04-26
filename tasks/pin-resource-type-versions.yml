@@ -1,0 +1,26 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: python, tag: alpine}
+
+inputs:
+- name: ci
+- name: resource-type-versions
+
+outputs:
+- name: ci
+
+params:
+  FILE: ci/pipelines/reconfigure.yml
+  RELEASE_MINOR:
+
+run:
+  path: sh
+  args:
+  - -c
+  - |
+    set -e
+    pip install oyaml
+    python ci/tasks/scripts/pin-resource-type-versions.py
