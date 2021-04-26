@@ -1,4 +1,5 @@
 import os
+import sys
 # ordered yaml so as not to change the order of keys
 import oyaml as yaml
 
@@ -44,7 +45,7 @@ if __name__ == '__main__':
         new_lines = yaml.dump([step], default_flow_style=False).split('\n')
         new_lines = [" " * leading + line + '\n' for line in new_lines if line]
 
-        new_content = ''.join(lines[:i] + new_lines + lines[j+1:])
+        new_content = ''.join(lines[:i] + new_lines + lines[j:])
         with open(os.environ['FILE'], 'w') as file:
             file.write(new_content)
         sys.exit(0)

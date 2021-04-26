@@ -87,6 +87,7 @@ groups:
   - patch
   - discover-component-version
   - rebuild-images
+  - pin-resource-type-versions
 
 - name: all
   jobs:
@@ -1295,6 +1296,24 @@ jobs:
       repository: bumped-repo
       merge: true
 
+- name: pin-resource-type-versions
+  serial: true
+  plan:
+  - in_parallel:
+    - get: linux-rc
+      passed: [shipit]
+      trigger: true
+    - get: ci
+  - task: extract-resource-type-versions
+    file: ci/tasks/extract-resource-type-versions.yml
+  - task: pin-resource-type-versions
+    file: ci/tasks/pin-resource-type-versions.yml
+    params:
+      RELEASE_MINOR: ((release_minor))
+    output_mapping: {ci: bumped-ci}
+  - put: ci
+    params: {repository: bumped-ci}
+
 - name: publish-image
   serial: true
   plan:
@@ -1476,6 +1495,7 @@ resources:
   source:
     uri: https://github.com/concourse/ci.git
     branch: master
+    private_key: ((concourse_bot_private_key))
 
 - name: ci-prs-pipeline
   type: git

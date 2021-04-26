@@ -22,5 +22,14 @@ run:
   - -c
   - |
     set -e
+
     pip install oyaml
     python ci/tasks/scripts/pin-resource-type-versions.py
+
+    cd git
+    git config --global user.email "ci@localhost"
+    git config --global user.name "CI Bot"
+
+    apk add git
+    git add -A
+    git commit -m "pin resource type versions for release $RELEASE_MINOR"
