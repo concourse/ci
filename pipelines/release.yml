@@ -9,6 +9,7 @@
 #   ((has_runtime_flag))                whether the CONCOURSE_RUNTIME flag is supported by this version (determines how to deploy containerd-backed workers)
 #   ((slack_hook))                      the slack hook to use for sending the notification (one slack hook per channel)
 #                                       concourse-private hook for LTS versions, and concourse-interrupt hook for OSS-only ones
+#   ((resource_type_versions))          a YAML object containing the semver constraints for each of the base resource types. should default to "" for each type for a new release (i.e. no constraint).
 #
 # the following git branches need to be created:
 #
@@ -1838,6 +1839,7 @@ resources:
     owner: concourse
     repository: mock-resource
     access_token: ((concourse_github_dummy.access_token))
+    semver_constraint: ((resource_type_versions.mock))
 
 - name: bosh-io-release-resource
   type: github-release
@@ -1846,6 +1848,7 @@ resources:
     owner: concourse
     repository: bosh-io-release-resource
     access_token: ((concourse_github_dummy.access_token))
+    semver_constraint: ((resource_type_versions.bosh-io-release))
 
 - name: bosh-io-stemcell-resource
   type: github-release
@@ -1854,6 +1857,7 @@ resources:
     owner: concourse
     repository: bosh-io-stemcell-resource
     access_token: ((concourse_github_dummy.access_token))
+    semver_constraint: ((resource_type_versions.bosh-io-stemcell))
 
 - name: cf-resource
   type: github-release
@@ -1862,6 +1866,7 @@ resources:
     owner: cloudfoundry-community
     repository: cf-resource
     access_token: ((concourse_github_dummy.access_token))
+    semver_constraint: ((resource_type_versions.cf))
 
 - name: docker-image-resource
   type: github-release
@@ -1870,6 +1875,7 @@ resources:
     owner: concourse
     repository: docker-image-resource
     access_token: ((concourse_github_dummy.access_token))
+    semver_constraint: ((resource_type_versions.docker-image))
 
 - name: git-resource
   type: github-release
@@ -1878,6 +1884,7 @@ resources:
     owner: concourse
     repository: git-resource
     access_token: ((concourse_github_dummy.access_token))
+    semver_constraint: ((resource_type_versions.git))
 
 - name: github-release-resource
   type: github-release
@@ -1886,6 +1893,7 @@ resources:
     owner: concourse
     repository: github-release-resource
     access_token: ((concourse_github_dummy.access_token))
+    semver_constraint: ((resource_type_versions.github-release))
 
 - name: hg-resource
   type: github-release
@@ -1894,6 +1902,7 @@ resources:
     owner: concourse
     repository: hg-resource
     access_token: ((concourse_github_dummy.access_token))
+    semver_constraint: ((resource_type_versions.hg))
 
 - name: pool-resource
   type: github-release
@@ -1902,6 +1911,7 @@ resources:
     owner: concourse
     repository: pool-resource
     access_token: ((concourse_github_dummy.access_token))
+    semver_constraint: ((resource_type_versions.pool))
 
 - name: registry-image-resource
   type: github-release
@@ -1910,6 +1920,7 @@ resources:
     owner: concourse
     repository: registry-image-resource
     access_token: ((concourse_github_dummy.access_token))
+    semver_constraint: ((resource_type_versions.registry-image))
 
 - name: s3-resource
   type: github-release
@@ -1918,6 +1929,7 @@ resources:
     owner: concourse
     repository: s3-resource
     access_token: ((concourse_github_dummy.access_token))
+    semver_constraint: ((resource_type_versions.s3))
 
 - name: semver-resource
   type: github-release
@@ -1926,6 +1938,7 @@ resources:
     owner: concourse
     repository: semver-resource
     access_token: ((concourse_github_dummy.access_token))
+    semver_constraint: ((resource_type_versions.semver))
 
 - name: time-resource
   type: github-release
@@ -1934,6 +1947,7 @@ resources:
     owner: concourse
     repository: time-resource
     access_token: ((concourse_github_dummy.access_token))
+    semver_constraint: ((resource_type_versions.time))
 
 - name: tracker-resource
   type: github-release
@@ -1942,6 +1956,7 @@ resources:
     owner: concourse
     repository: tracker-resource
     access_token: ((concourse_github_dummy.access_token))
+    semver_constraint: ((resource_type_versions.tracker))
 
 - name: concourse-image-dpkg-list
   type: gcs
