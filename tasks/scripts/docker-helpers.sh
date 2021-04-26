@@ -35,6 +35,9 @@ function stop_docker() {
     return 0
   fi
 
-  kill -TERM $pid
-  wait $pid
+  # if the process has already exited, kill will error, in which case we
+  # shouldn't try to wait for it
+  if kill -TERM $pid; then
+    wait $pid
+  fi
 }
