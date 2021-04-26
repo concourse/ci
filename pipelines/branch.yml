@@ -444,7 +444,7 @@ jobs:
         GCP_PROJECT: cf-concourse-production
         GCP_KEY: ((concourse_smoke_gcp_key))
         SSH_KEY: ((concourse_smoke_ssh_key))
-        WORKSPACE: branch-((.:branch_slug))-bin-smoke-((.:runtime))
+        WORKSPACE: branch-((branch_slug))-bin-smoke-((.:runtime))
         TF_VAR_RUNTIME: ((.:runtime))
     - task: smoke
       image: unit-image
@@ -488,7 +488,7 @@ jobs:
         GCP_PROJECT: cf-concourse-production
         GCP_KEY: ((concourse_smoke_gcp_key))
         SSH_KEY: ((concourse_smoke_ssh_key))
-        WORKSPACE: branch-((.:branch_slug))-bin-smoke-lts-((.:runtime))
+        WORKSPACE: branch-((branch_slug))-bin-smoke-lts-((.:runtime))
         TF_VAR_GCP_IMAGE: ((.:gcp-image))
         TF_VAR_RUNTIME: ((.:runtime))
     - task: smoke
