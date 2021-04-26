@@ -14,14 +14,6 @@ if [ ! -f ~/.kube/config ]; then
   echo "$KUBE_CONFIG" > ~/.kube/config
 fi
 
-# TODO: tech-debt for maintaining 6.3.x version of the chart which uses Helm v2
-# Remove when 6.3.x no longer needs to be supported
-if [[ $HELM_VERSION == "2" ]]; then
-  rm -f /usr/local/bin/helm
-  mv /usr/local/bin/helm2 /usr/local/bin/helm
-fi
-# END of tech-debt
-
 mkdir -p helm-charts/stable
 cp -r prometheus-chart/prometheus helm-charts/stable
 cp -r postgresql-chart/postgresql helm-charts/stable

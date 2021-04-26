@@ -20,7 +20,6 @@ params:
   CONCOURSE_CHART_DIR:
   CONCOURSE_IMAGE_NAME:
   KUBE_CONFIG:
-  HELM_VERSION: 3
 
 run:
   path: ci/tasks/scripts/k8s-topgun

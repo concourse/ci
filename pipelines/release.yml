@@ -501,7 +501,6 @@ jobs:
       IN_CLUSTER: "true"
       KUBE_CONFIG: ((kube_config))
       CONCOURSE_IMAGE_NAME: concourse/concourse-rc
-      HELM_VERSION: ((helm_version))
   on_failure: *failed-concourse
   on_error: *failed-concourse
 

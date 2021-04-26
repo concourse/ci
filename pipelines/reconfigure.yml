@@ -324,16 +324,6 @@ jobs:
       file: booklit-ci/ci/pipeline.yml
     - set_pipeline: update-dex
       file: dex-ci/ci/pipeline.yml
-    - set_pipeline: release-6.3.x
-      file: pipelines-and-tasks/pipelines/release.yml
-      vars:
-        release_major: "6"
-        release_minor: "6.3"
-        latest_release: "6.2"
-        concourse_smoke_deployment_name: "concourse-smoke-6-3"
-        has_runtime_flag: "false"
-        helm_version: "2" # tech-debt for this pipeline only
-        slack_hook: ((slack_hooks.concourse-private))
     - set_pipeline: release-6.7.x
       file: pipelines-and-tasks/pipelines/release.yml
       vars:
@@ -342,31 +332,6 @@ jobs:
         latest_release: "6.6"
         concourse_smoke_deployment_name: "concourse-smoke-6-7"
         has_runtime_flag: "true"
-        helm_version: "3"
-        slack_hook: ((slack_hooks.concourse-private))
-    - set_pipeline: release
-      file: pipelines-and-tasks/pipelines/release.yml
-      instance_vars:
-        version: 7.0.x
-      vars:
-        release_major: "7"
-        release_minor: "7.0"
-        latest_release: "6.7"
-        concourse_smoke_deployment_name: "concourse-smoke-7-0"
-        has_runtime_flag: "true"
-        helm_version: "3"
-        slack_hook: ((slack_hooks.concourse-private))
-    - set_pipeline: release
-      file: pipelines-and-tasks/pipelines/release.yml
-      instance_vars:
-        version: 7.1.x
-      vars:
-        release_major: "7"
-        release_minor: "7.1"
-        latest_release: "7.0"
-        concourse_smoke_deployment_name: "concourse-smoke-7-1"
-        has_runtime_flag: "true"
-        helm_version: "3"
         slack_hook: ((slack_hooks.concourse-private))
     - set_pipeline: release
       file: pipelines-and-tasks/pipelines/release.yml
@@ -378,7 +343,6 @@ jobs:
         latest_release: "7.1"
         concourse_smoke_deployment_name: "concourse-smoke-7-2"
         has_runtime_flag: "true"
-        helm_version: "3"
         slack_hook: ((slack_hooks.concourse-interrupt))
     - set_pipeline: enterprise-helm-chart
       file: concourse-for-k8s/ci/pipeline.yml
