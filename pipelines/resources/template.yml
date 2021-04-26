@@ -134,9 +134,11 @@ plan:
   - get: resource-image-dev-alpine
     passed: [build-alpine]
     params: {format: oci}
+    trigger: true
   - get: resource-image-dev-ubuntu
     passed: [build-ubuntu]
     params: {format: oci}
+    trigger: true
   - get: trivy
     trigger: true
   - get: trivy-db
