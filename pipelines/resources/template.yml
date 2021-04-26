@@ -131,6 +131,9 @@ on_failure: &failed-ci
 plan:
 - in_parallel:
   - get: resource-repo
+    passed:
+    - build-alpine
+    - build-ubuntu
   - get: resource-image-dev-alpine
     passed: [build-alpine]
     params: {format: oci}
