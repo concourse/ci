@@ -1092,8 +1092,8 @@ jobs:
       passed: [bosh-topgun]
     - get: uaa-release
       passed: [bosh-topgun]
-  - task: build-resource-versions
-    file: ci/tasks/build-release-resource-versions.yml
+  - task: extract-resource-type-versions
+    file: ci/tasks/extract-resource-type-versions.yml
   - in_parallel:
     - task: build-release-name
       file: ci/tasks/build-release-name.yml
@@ -1116,7 +1116,6 @@ jobs:
       tag_prefix: v
       name: release-name/release-name
       body: built-notes/notes.md
-
 
 - name: shipit
   public: true

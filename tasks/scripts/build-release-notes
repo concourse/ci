@@ -3,6 +3,8 @@
 LAST_COMMIT_SHA=$(cat repo/.git/ref)
 RELEASE_VERSION=$(cat version/version)
 
+FILE=built-notes/notes.md
+
 chmod +x release-me/releaseme
 ./release-me/releaseme generate \
   --github-token=$GITHUB_TOKEN \
@@ -12,8 +14,20 @@ chmod +x release-me/releaseme
   --last-commit-SHA=$LAST_COMMIT_SHA \
   --release-version=$RELEASE_VERSION \
   --ignore-authors=dependabot \
-  > built-notes/notes.md
+  > $FILE
 
-if [ -f resource-versions/versions ]; then
-	cat resource-versions/versions >> built-notes/notes.md
+if [ -f resource-type-versions/versions.yml ]; then
+  cat >> $FILE <<EOF
+
+## 📦 Bundled resource types
+
+<details>
+
+EOF
+  cat resource-type-versions/versions.yml | while read line; do
+    name=$(printf $line | cut -d':' -f1 | xargs)
+    version=$(printf $line | cut -d':' -f2 | xargs)
+    ghlink="https://github.com/concourse/$name-resource/releases/tag/$version"
+    echo "- $name: [$version]($ghlink)" >> $FILE
+  done
 fi
