@@ -1,0 +1,41 @@
+#!/bin/sh
+
+set -e
+
+echo "unpacking vulnerability db"
+cache_dir=`pwd`
+mkdir -p "${cache_dir}/db"
+tar -xzf trivy-db/trivy-offline.db.tgz -C "${cache_dir}/db"
+
+failed=""
+cd image/rootfs/usr/local/concourse/resource-types
+
+set +e
+
+for resource in *; do
+  echo -e "\nscanning ${resource}-resource:"
+
+  cd $resource
+  tar -xzf rootfs.tgz
+
+  trivy \
+    --cache-dir "$cache_dir" \
+    --quiet \
+    filesystem \
+    --severity "HIGH,CRITICAL" \
+    --ignore-unfixed \
+    --exit-code 1 \
+    --input .
+
+  if [ $? -ne 0 ]; then
+    failed="${failed}\n- ${resource}"
+  fi
+
+  cd ..
+done
+
+if [ $failed != "" ]; then
+  echo -e "the following resource-types failed the scan:$failed"
+  exit 1
+fi
+

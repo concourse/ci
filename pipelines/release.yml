@@ -62,6 +62,7 @@ groups:
   - rc
   - build-rc
   - build-rc-image
+  - scan-rc-image
   - bin-smoke
   - bin-smoke-lts
 
@@ -408,11 +409,11 @@ jobs:
       passed: [build-rc-image]
       trigger: true
     - get: concourse-rc-image
-      passed: [build-rc-image]
+      passed: [scan-rc-image]
       params: {format: oci}
       trigger: true
     - get: concourse-rc-image-ubuntu
-      passed: [build-rc-image]
+      passed: [scan-rc-image]
       params: {format: oci}
       trigger: true
     - get: version
@@ -649,6 +650,7 @@ jobs:
       trigger: true
     - get: builder
     - get: ci
+    - get: trivy
   - in_parallel:
       fail_fast: true
       steps:
@@ -678,6 +680,54 @@ jobs:
             additional_tags: version/version
   on_failure: *failed-concourse
   on_error: *failed-concourse
+
+- name: scan-rc-image
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse-rc-image
+      passed: [build-rc-image]
+      params: {format: oci}
+      trigger: true
+    - get: concourse-rc-image-rootfs
+      resource: concourse-rc-image
+      passed: [build-rc-image]
+      params: {format: rootfs}
+      trigger: true
+    - get: concourse-rc-image-ubuntu
+      passed: [build-rc-image]
+      params: {format: oci}
+      trigger: true
+    - get: concourse-rc-image-ubuntu-rootfs
+      resource: concourse-rc-image-ubuntu
+      passed: [build-rc-image]
+      params: {format: rootfs}
+      trigger: true
+    - get: ci
+    - get: trivy
+      trigger: true
+    - get: trivy-db
+      trigger: true
+      params: {globs: [trivy-offline.db.tgz]}
+  - in_parallel:
+      steps:
+        - task: scan-alpine
+          file: ci/tasks/scan-image.yml
+          image: trivy
+          input_mapping: {image: concourse-rc-image}
+        - task: scan-ubuntu
+          file: ci/tasks/scan-image.yml
+          image: trivy
+          input_mapping: {image: concourse-rc-image-ubuntu}
+        - task: scan-resource-types-alpine
+          file: ci/tasks/scan-resource-types.yml
+          image: trivy
+          input_mapping: {image: concourse-rc-image-rootfs}
+        - task: scan-resource-types-ubuntu
+          file: ci/tasks/scan-resource-types.yml
+          image: trivy
+          input_mapping: {image: concourse-rc-image-ubuntu-rootfs}
 
 - name: bin-smoke
   public: true
@@ -1799,3 +1849,15 @@ resources:
   source:
     owner: clarafu
     repository: release-me
+
+- name: trivy
+  type: registry-image
+  source:
+    repository: aquasec/trivy
+
+- name: trivy-db
+  type: github-release
+  icon: database
+  source:
+    owner: aquasecurity
+    repository: trivy-db
