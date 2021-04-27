@@ -1340,6 +1340,9 @@ jobs:
   - in_parallel:
     - get: periodic-check
       trigger: true
+    - get: unit-image
+    - get: concourse
+      passed: [shipit]
     - get: version
       passed: [shipit]
     - get: linux-rc
@@ -1347,7 +1350,6 @@ jobs:
     - get: linux-rc-ubuntu
       passed: [shipit]
     - get: concourse-docker
-      trigger: true
     - get: builder
     - get: ci
   - in_parallel:
@@ -1362,6 +1364,19 @@ jobs:
       input_mapping: {linux-rc: linux-rc-ubuntu}
       output_mapping: {image: image-ubuntu}
       privileged: true
+  - in_parallel:
+    - task: watsjs-ubuntu
+      image: unit-image
+      privileged: true
+      timeout: 1h
+      file: ci/tasks/docker-compose-watsjs.yml
+      input_mapping: {dev-image: image-ubuntu}
+    - task: watsjs-alpine
+      image: unit-image
+      privileged: true
+      timeout: 1h
+      file: ci/tasks/docker-compose-watsjs.yml
+      input_mapping: {dev-image: image-alpine}
   - load_var: image_version
     file: version/version
   - in_parallel:
