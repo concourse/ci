@@ -409,11 +409,11 @@ jobs:
       passed: [build-rc-image]
       trigger: true
     - get: concourse-rc-image
-      passed: [scan-rc-image]
+      passed: [build-rc-image]
       params: {format: oci}
       trigger: true
     - get: concourse-rc-image-ubuntu
-      passed: [scan-rc-image]
+      passed: [build-rc-image]
       params: {format: oci}
       trigger: true
     - get: version
@@ -1076,8 +1076,9 @@ jobs:
     - get: darwin-rc
       passed: [build-rc]
     - get: concourse-rc-image
-      passed: [k8s-smoke]
+      passed: [k8s-topgun, scan-rc-image]
     - get: concourse-rc-image-ubuntu
+      passed: [k8s-topgun, scan-rc-image]
     - get: concourse-release
       passed: [bosh-smoke, bosh-topgun]
       params: {tarball: false}
