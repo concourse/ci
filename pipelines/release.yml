@@ -1365,17 +1365,17 @@ jobs:
       output_mapping: {image: image-ubuntu}
       privileged: true
   - in_parallel:
-    - task: watsjs-ubuntu
+    - task: watsjs-smoke-ubuntu
       image: unit-image
       privileged: true
       timeout: 1h
-      file: ci/tasks/docker-compose-watsjs.yml
+      file: ci/tasks/docker-compose-watsjs-smoke.yml
       input_mapping: {dev-image: image-ubuntu}
-    - task: watsjs-alpine
+    - task: watsjs-smoke-alpine
       image: unit-image
       privileged: true
       timeout: 1h
-      file: ci/tasks/docker-compose-watsjs.yml
+      file: ci/tasks/docker-compose-watsjs-smoke.yml
       input_mapping: {dev-image: image-alpine}
   - load_var: image_version
     file: version/version
