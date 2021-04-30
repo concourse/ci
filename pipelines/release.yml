@@ -1152,6 +1152,8 @@ jobs:
       passed: [create-draft-release]
     - get: uaa-release
       passed: [create-draft-release]
+    - get: gcp-xenial-stemcell
+      passed: [bosh-smoke, bosh-topgun]
   - put: version
     params: {file: final-version/version}
 
@@ -1169,20 +1171,41 @@ jobs:
         trigger: true
       - get: version
         passed: [shipit]
-    - task: discover-postgresql-version
-      file: ci/tasks/discover-component-version.yml
-      output_mapping: {component-version: postgresql-version}
-      params: {COMPONENT_NAME: "postgresql"}
-    - task: discover-helm-version
-      file: ci/tasks/discover-component-version.yml
-      output_mapping: {component-version: helm-version}
-      params: {COMPONENT_NAME: "helm"}
-    - put: resource-postgresql-version
-      inputs: [postgresql-version]
-      params: {file: "postgresql-version/postgresql-version-*.txt"}
-    - put: resource-helm-version
-      inputs: [helm-version]
-      params: {file: "helm-version/helm-version-*.txt"}
+      - get: gcp-xenial-stemcell
+        passed: [shipit]
+    - in_parallel:
+      - load_var: concourse-version
+        file: version/version
+      - load_var: stemcell-version
+        file: gcp-xenial-stemcell/version
+    - in_parallel:
+      - task: discover-postgresql-version
+        file: ci/tasks/discover-component-version.yml
+        output_mapping: {component-version: postgresql-version}
+        params:
+          COMPONENT_NAME: "postgresql"
+          CONCOURSE_VERSION: ((.:concourse-version))
+      - task: discover-helm-version
+        file: ci/tasks/discover-component-version.yml
+        output_mapping: {component-version: helm-version}
+        params:
+          COMPONENT_NAME: "helm"
+          CONCOURSE_VERSION: ((.:concourse-version))
+      - task: discover-stemcell-version
+        file: ci/tasks/discover-stemcell-version.yml
+        params:
+          CONCOURSE_VERSION: ((.:concourse-version))
+          STEMCELL_VERSION: ((.:stemcell-version))
+    - in_parallel:
+      - put: resource-postgresql-version
+        inputs: [postgresql-version]
+        params: {file: "postgresql-version/postgresql-version-*.txt"}
+      - put: resource-helm-version
+        inputs: [helm-version]
+        params: {file: "helm-version/helm-version-*.txt"}
+      - put: gcp-stemcell-version
+        inputs: [stemcell-version]
+        params: {file: "stemcell-version/stemcell-version-*.txt"}
 
 - name: publish-binaries
   serial: true
@@ -1838,6 +1861,14 @@ resources:
     bucket: concourse-components-version
     json_key: ((concourse_components_json_key))
     regexp: "helm-version-(.*).txt"
+
+- name: gcp-stemcell-version
+  type: gcs
+  icon: format-list-bulleted
+  source:
+    bucket: concourse-components-version
+    json_key: ((concourse_components_json_key))
+    regexp: "stemcell-version-(.*).txt"
 
 - name: periodic-check
   type: time

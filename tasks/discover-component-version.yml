@@ -5,24 +5,20 @@ image_resource:
   source: {repository: concourse/unit}
 
 inputs:
-  - name: version
+- name: version
 
 outputs:
-  - name: component-version
+- name: component-version
 
 params:
   COMPONENT_NAME: ~
+  CONCOURSE_VERSION:
 
 run:
   path: /bin/bash
   args:
     - -cex
     - |
-
-      if [[ -d ./version ]]; then
-        CONCOURSE_VERSION=$(cat ./version/version)
-      fi
-
       if [ $COMPONENT_NAME == "helm" ]; then
         helm version --template "{{.Version}}" > ./component-version/helm-version-${CONCOURSE_VERSION}.txt
       else
