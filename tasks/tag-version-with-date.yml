@@ -1,0 +1,19 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: concourse/unit}
+
+outputs:
+- name: date-tag
+
+params:
+  VERSION: ~
+
+run:
+  path: bash
+  args:
+    - -ce
+    - |
+      echo ${VERSION}-$(date +"%Y%m%d") > date-tag/tag
