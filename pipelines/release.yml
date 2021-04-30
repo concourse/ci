@@ -1333,7 +1333,7 @@ jobs:
     params:
       file: version/version
 
-- name: update-images
+- name: rebuild-images
   public: true
   serial: true
   plan:
