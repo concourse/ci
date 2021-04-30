@@ -1352,6 +1352,8 @@ jobs:
     - get: concourse-docker
     - get: builder
     - get: ci
+  - load_var: image_version
+    file: version/version
   - in_parallel:
     - task: build-alpine
       file: concourse-docker/ci/build-image.yml
@@ -1365,6 +1367,17 @@ jobs:
       output_mapping: {image: image-ubuntu}
       privileged: true
   - in_parallel:
+    - task: validate-binary-version-alpine
+      image: image-alpine
+      file: ci/tasks/validate-binary-version.yml
+      params:
+        VERSION: ((.:image_version))
+    - task: validate-binary-version-ubuntu
+      image: image-ubuntu
+      file: ci/tasks/validate-binary-version.yml
+      params:
+        VERSION: ((.:image_version))
+  - in_parallel:
     - task: watsjs-smoke-ubuntu
       image: unit-image
       privileged: true
@@ -1377,8 +1390,6 @@ jobs:
       timeout: 1h
       file: ci/tasks/docker-compose-watsjs-smoke.yml
       input_mapping: {dev-image: image-alpine}
-  - load_var: image_version
-    file: version/version
   - in_parallel:
     - task: alpine-date-tag
       image: unit-image
