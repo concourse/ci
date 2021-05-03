@@ -1377,6 +1377,8 @@ jobs:
     - get: ci
     - get: trivy
     - get: trivy-db
+    - get: postgres-image
+      params: {format: oci}
   - load_var: image_version
     file: version/version
   - in_parallel:
