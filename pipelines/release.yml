@@ -1352,6 +1352,8 @@ jobs:
     - get: concourse-docker
     - get: builder
     - get: ci
+    - get: trivy
+    - get: trivy-db
   - load_var: image_version
     file: version/version
   - in_parallel:
@@ -1366,17 +1368,25 @@ jobs:
       input_mapping: {linux-rc: linux-rc-ubuntu}
       output_mapping: {image: image-ubuntu}
       privileged: true
-  - in_parallel:
+  - in_parallel: # sanity checks
     - task: validate-binary-version-alpine
       image: image-alpine
       file: ci/tasks/validate-binary-version.yml
       params:
-        VERSION: ((.:image_version))
+        EXPECTED_VERSION: ((.:image_version))
     - task: validate-binary-version-ubuntu
       image: image-ubuntu
       file: ci/tasks/validate-binary-version.yml
       params:
-        VERSION: ((.:image_version))
+        EXPECTED_VERSION: ((.:image_version))
+    - task: scan-image-alpine
+      file: ci/tasks/scan-image.yml
+      image: trivy
+      input_mapping: {image: image-alpine}
+    - task: scan-image-ubuntu
+      file: ci/tasks/scan-image.yml
+      image: trivy
+      input_mapping: {image: image-ubuntu}
   - in_parallel:
     - task: watsjs-smoke-ubuntu
       image: unit-image
