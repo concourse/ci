@@ -85,7 +85,7 @@ groups:
   - bump-cbd-versions
   - patch
   - discover-component-version
-  - update-images
+  - rebuild-images
 
 - name: all
   jobs:
