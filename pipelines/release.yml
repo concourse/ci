@@ -85,6 +85,7 @@ groups:
   - bump-cbd-versions
   - patch
   - discover-component-version
+  - rebuild-images
 
 - name: all
   jobs:
@@ -1355,6 +1356,104 @@ jobs:
     params:
       file: version/version
 
+- name: rebuild-images
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: periodic-check
+      trigger: true
+    - get: unit-image
+    - get: concourse
+      passed: [shipit]
+    - get: version
+      passed: [shipit]
+    - get: linux-rc
+      passed: [shipit]
+    - get: linux-rc-ubuntu
+      passed: [shipit]
+    - get: concourse-docker
+    - get: builder
+    - get: ci
+    - get: trivy
+    - get: trivy-db
+  - load_var: image_version
+    file: version/version
+  - in_parallel:
+    - task: build-alpine
+      file: concourse-docker/ci/build-image.yml
+      image: builder
+      output_mapping: {image: image-alpine}
+      privileged: true
+    - task: build-ubuntu
+      file: concourse-docker/ci/build-image.yml
+      image: builder
+      input_mapping: {linux-rc: linux-rc-ubuntu}
+      output_mapping: {image: image-ubuntu}
+      privileged: true
+  - in_parallel: # sanity checks
+    - task: validate-binary-version-alpine
+      image: image-alpine
+      file: ci/tasks/validate-binary-version.yml
+      params:
+        EXPECTED_VERSION: ((.:image_version))
+    - task: validate-binary-version-ubuntu
+      image: image-ubuntu
+      file: ci/tasks/validate-binary-version.yml
+      params:
+        EXPECTED_VERSION: ((.:image_version))
+    - task: scan-image-alpine
+      file: ci/tasks/scan-image.yml
+      image: trivy
+      input_mapping: {image: image-alpine}
+    - task: scan-image-ubuntu
+      file: ci/tasks/scan-image.yml
+      image: trivy
+      input_mapping: {image: image-ubuntu}
+  - in_parallel:
+    - task: watsjs-smoke-ubuntu
+      image: unit-image
+      privileged: true
+      timeout: 1h
+      file: ci/tasks/docker-compose-watsjs-smoke.yml
+      input_mapping: {dev-image: image-ubuntu}
+    - task: watsjs-smoke-alpine
+      image: unit-image
+      privileged: true
+      timeout: 1h
+      file: ci/tasks/docker-compose-watsjs-smoke.yml
+      input_mapping: {dev-image: image-alpine}
+  - in_parallel:
+    - task: alpine-date-tag
+      image: unit-image
+      file: ci/tasks/tag-version-with-date.yml
+      output_mapping: {date-tag: alpine-date-tag}
+      params:
+        VERSION: ((.:image_version))-alpine
+    - task: ubuntu-date-tag
+      image: unit-image
+      file: ci/tasks/tag-version-with-date.yml
+      output_mapping: {date-tag: ubuntu-date-tag}
+      params:
+        VERSION: ((.:image_version))-ubuntu
+  - in_parallel:
+    - put: concourse-image
+      inputs: detect
+      params:
+        image: image-alpine/image.tar
+        version: ((.:image_version))
+        bump_aliases: true
+        additional_tags: alpine-date-tag/tag
+    - put: concourse-image-ubuntu
+      inputs: detect
+      params:
+        image: image-ubuntu/image.tar
+        version: ((.:image_version))
+        bump_aliases: true
+        additional_tags: ubuntu-date-tag/tag
+  on_failure: *failed-concourse
+  on_error: *failed-concourse
+
 resources:
 - name: concourse
   type: git
@@ -1871,6 +1970,7 @@ resources:
     regexp: "stemcell-version-(.*).txt"
 
 - name: periodic-check
+  icon: clock
   type: time
   source:
     interval: 24h

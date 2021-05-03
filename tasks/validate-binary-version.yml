@@ -1,0 +1,16 @@
+---
+platform: linux
+
+params:
+  EXPECTED_VERSION: ~
+
+run:
+  path: bash
+  args:
+    - -cex
+    - |
+      BINARY_VERSION=$(/usr/local/concourse/bin/concourse --version)
+
+      if [[ "$BINARY_VERSION" != "${EXPECTED_VERSION}" ]]; then
+        exit 1
+      fi
