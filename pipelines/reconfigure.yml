@@ -348,8 +348,6 @@ jobs:
       file: concourse-for-k8s/ci/pipeline.yml
       vars:
         concourse_chart_branch: release/6.7.x
-    - set_pipeline: team-tasks
-      file: pipelines-and-tasks/pipelines/team-tasks.yml
     - set_pipeline: branch
       file: pipelines-and-tasks/pipelines/branch.yml
       instance_vars:
