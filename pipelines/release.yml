@@ -1385,12 +1385,16 @@ jobs:
       image: builder
       output_mapping: {image: image-alpine}
       privileged: true
+      params:
+        UNPACK_ROOTFS: true
     - task: build-ubuntu
       file: concourse-docker/ci/build-image.yml
       image: builder
       input_mapping: {linux-rc: linux-rc-ubuntu}
       output_mapping: {image: image-ubuntu}
       privileged: true
+      params:
+        UNPACK_ROOTFS: true
   - in_parallel: # sanity checks
     - task: validate-binary-version-alpine
       image: image-alpine
