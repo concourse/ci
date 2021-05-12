@@ -22,12 +22,11 @@ if [ -f resource-type-versions/versions.yml ]; then
 ## 📦 Bundled resource types
 
 <details>
-
+$(
+  awk 'BEGIN {FS = ": "}; {
+    url = sprintf("https://github.com/concourse/%s/releases/tag/%s", $1, $2);
+    printf "- %s: [%s](%s)\n", $1, $2, url
+  }' resource-type-versions/versions.yml
+)
+</details>
 EOF
-  cat resource-type-versions/versions.yml | while read line; do
-    name=$(printf $line | cut -d':' -f1 | xargs)
-    version=$(printf $line | cut -d':' -f2 | xargs)
-    ghlink="https://github.com/concourse/$name-resource/releases/tag/$version"
-    echo "- $name: [$version]($ghlink)" >> $FILE
-  done
-fi
