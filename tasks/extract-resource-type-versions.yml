@@ -10,8 +10,7 @@ inputs:
 - name: linux-rc
 
 outputs:
-- name: resource-versions
+- name: resource-type-versions
 
 run:
-  path: ci/tasks/scripts/build-release-resource-versions
-
+  path: ci/tasks/scripts/extract-resource-type-versions

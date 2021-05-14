@@ -10,7 +10,7 @@ inputs:
 - name: ci
 - name: repo
 - name: version
-- name: resource-versions
+- name: resource-type-versions
   optional: true
 
 outputs:
