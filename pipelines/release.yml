@@ -1493,7 +1493,7 @@ resources:
   type: git
   icon: *git-icon
   source:
-    uri: https://github.com/concourse/ci.git
+    uri: git@github.com:concourse/ci.git
     branch: master
     private_key: ((concourse_bot_private_key))
 
