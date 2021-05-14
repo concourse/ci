@@ -20,6 +20,11 @@ def find_next_set_pipeline(lines, from_line):
     step_yaml = ''.join([l[leading+2:] for l in lines[i:j]])
     return yaml.safe_load(step_yaml), leading, i, j
 
+def remove_prefix(s, prefix):
+    if s.startswith(prefix):
+        return s[len(prefix):]
+    return s
+
 if __name__ == '__main__':
     release_minor = os.environ['RELEASE_MINOR']
 
@@ -30,7 +35,7 @@ if __name__ == '__main__':
         versions = yaml.safe_load(file)
 
     # ~x.y.z is a semver constraint meaning "any patch versions in the x.y series >= z"
-    versions = {resource_type: "~" + version for resource_type, version in versions.items()}
+    versions = {resource_type: "~" + remove_prefix(version, 'v') for resource_type, version in versions.items()}
 
     i = 0
     while True:
