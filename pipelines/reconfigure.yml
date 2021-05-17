@@ -353,11 +353,11 @@ jobs:
       instance_vars:
         version: 7.2.x
       vars:
-        release_major: "7"
-        release_minor: "7.2"
-        latest_release: "7.1"
-        concourse_smoke_deployment_name: "concourse-smoke-7-2"
-        has_runtime_flag: "true"
+        release_major: '7'
+        release_minor: '7.2'
+        latest_release: '7.1'
+        concourse_smoke_deployment_name: concourse-smoke-7-2
+        has_runtime_flag: 'true'
         slack_hook: ((slack_hooks.concourse-interrupt))
         resource_type_versions:
           bosh-io-release: ~1.0.4
