@@ -327,11 +327,11 @@ jobs:
     - set_pipeline: release-6.7.x
       file: pipelines-and-tasks/pipelines/release.yml
       vars:
-        release_major: "6"
-        release_minor: "6.7"
-        latest_release: "6.6"
-        concourse_smoke_deployment_name: "concourse-smoke-6-7"
-        has_runtime_flag: "true"
+        release_major: '6'
+        release_minor: '6.7'
+        latest_release: '6.6'
+        concourse_smoke_deployment_name: concourse-smoke-6-7
+        has_runtime_flag: 'true'
         slack_hook: ((slack_hooks.concourse-private))
         resource_type_versions:
           bosh-io-release: ~1.0.3
@@ -344,7 +344,7 @@ jobs:
           mock: ~0.11.0
           pool: ~1.1.4
           registry-image: ~0.14.0
-          s3: ~1.1.1
+          s3: ~1.1.0
           semver: ~1.2.1
           time: ~1.4.0
           tracker: ~1.0.3
