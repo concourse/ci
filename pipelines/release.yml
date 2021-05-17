@@ -1495,7 +1495,7 @@ resources:
   source:
     uri: git@github.com:concourse/ci.git
     branch: master
-    private_key: ((concourse_bot_private_key))
+    private_key: ((deploy_keys.ci-repo-push))
 
 - name: ci-prs-pipeline
   type: git
