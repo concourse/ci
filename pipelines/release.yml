@@ -1428,17 +1428,15 @@ jobs:
       params:
         EXPECTED_VERSION: ((.:image_version))
     - try:
-        task: scan-image-alpine
-        file: ci/tasks/scan-image.yml
-        image: trivy
-        input_mapping: {image: image-alpine}
-        on_failure: *failed-concourse
-        on_error: *failed-concourse
-    - try:
-        task: scan-image-ubuntu
-        file: ci/tasks/scan-image.yml
-        image: trivy
-        input_mapping: {image: image-ubuntu}
+        in_parallel:
+        - task: scan-image-alpine
+          file: ci/tasks/scan-image.yml
+          image: trivy
+          input_mapping: {image: image-alpine}
+        - task: scan-image-ubuntu
+          file: ci/tasks/scan-image.yml
+          image: trivy
+          input_mapping: {image: image-ubuntu}
         on_failure: *failed-concourse
         on_error: *failed-concourse
   - in_parallel:
