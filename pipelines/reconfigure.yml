@@ -403,7 +403,10 @@ jobs:
     # TEMPLATE FOR NEXT RELEASE
     # to create a new release pipeline, copy (but don't delete!) this template,
     # replacing MAJOR, MINOR, PREV_MAJOR, PREV_MINOR, and SLACK_CHANNEL
-    # accordingly
+    # accordingly.
+    #
+    # Note: you can leave the resource_type_versions as "" - these values will
+    # be updated appropriately when the release is shipped
     #
     # - set_pipeline: release
     #   file: pipelines-and-tasks/pipelines/release.yml
@@ -417,6 +420,7 @@ jobs:
     #     has_runtime_flag: "true"
     #     slack_hook: ((slack_hooks.SLACK_CHANNEL))
     #     resource_type_versions:
+    #       # These should be left blank, as they will be updated after the release has shipped!
     #       bosh-io-release: ""
     #       bosh-io-stemcell: ""
     #       cf: ""
