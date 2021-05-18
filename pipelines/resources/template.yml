@@ -148,11 +148,11 @@ plan:
     trigger: true
     params: {globs: [trivy-offline.db.tgz]}
 - try:
-  in_parallel:
-    - #@ scan_task("alpine")
-    - #@ scan_task("ubuntu")
-  on_failure: *failed-ci
-  on_error: *failed-ci
+    in_parallel:
+      - #@ scan_task("alpine")
+      - #@ scan_task("ubuntu")
+    on_failure: *failed-ci
+    on_error: *failed-ci
 #@ end
 
 #@ def extra_steps(distro):
