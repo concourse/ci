@@ -901,7 +901,7 @@ jobs:
       trigger: true
     - get: bpm-release
       trigger: true
-    - get: gcp-xenial-stemcell
+    - get: gcp-bionic-stemcell
       trigger: true
     - get: bbr-sdk-release
       trigger: true
@@ -947,7 +947,7 @@ jobs:
     - get: bpm-release
       passed: [bosh-upload-releases]
       trigger: true
-    - get: gcp-xenial-stemcell
+    - get: gcp-bionic-stemcell
       passed: [bosh-upload-releases]
       trigger: true
     - get: ci
@@ -960,7 +960,7 @@ jobs:
       - postgres-release/*.tgz
       - bpm-release/*.tgz
       stemcells:
-      - gcp-xenial-stemcell/*.tgz
+      - gcp-bionic-stemcell/*.tgz
       vars:
         deployment_name: ((concourse_smoke_deployment_name))
   - task: discover-bosh-endpoint-info
@@ -1009,7 +1009,7 @@ jobs:
     - get: bbr-sdk-release
       passed: [bosh-upload-releases]
       trigger: true
-    - get: gcp-xenial-stemcell
+    - get: gcp-bionic-stemcell
       passed: [bosh-upload-releases]
       trigger: true
     - get: vault-release
@@ -1030,7 +1030,7 @@ jobs:
     file: ci/tasks/topgun.yml
     image: unit-image
     input_mapping:
-      stemcell: gcp-xenial-stemcell
+      stemcell: gcp-bionic-stemcell
     params:
       DEPLOYMENT_NAME_PREFIX: concourse-topgun-((release_minor))
       BOSH_ENVIRONMENT: https://10.0.0.6:25555
@@ -1154,7 +1154,7 @@ jobs:
       passed: [create-draft-release]
     - get: uaa-release
       passed: [create-draft-release]
-    - get: gcp-xenial-stemcell
+    - get: gcp-bionic-stemcell
       passed: [bosh-smoke, bosh-topgun]
   - put: version
     params: {file: final-version/version}
@@ -1173,13 +1173,13 @@ jobs:
         trigger: true
       - get: version
         passed: [shipit]
-      - get: gcp-xenial-stemcell
+      - get: gcp-bionic-stemcell
         passed: [shipit]
     - in_parallel:
       - load_var: concourse-version
         file: version/version
       - load_var: stemcell-version
-        file: gcp-xenial-stemcell/version
+        file: gcp-bionic-stemcell/version
     - in_parallel:
       - task: discover-postgresql-version
         file: ci/tasks/discover-component-version.yml
@@ -1751,10 +1751,10 @@ resources:
   icon: *image-icon
   source: {repository: vito/oci-build-task}
 
-- name: gcp-xenial-stemcell
+- name: gcp-bionic-stemcell
   type: bosh-io-stemcell
   icon: *release-icon
-  source: {name: bosh-google-kvm-ubuntu-xenial-go_agent}
+  source: {name: bosh-google-kvm-ubuntu-bionic-go_agent}
 
 - name: cbd
   type: git
