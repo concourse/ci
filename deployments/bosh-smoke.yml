@@ -16,7 +16,7 @@ instance_groups:
   networks: [{name: test}]
   persistent_disk: 10240
   vm_type: test
-  stemcell: xenial
+  stemcell: bionic
   jobs:
   - release: bpm
     name: bpm
@@ -75,8 +75,8 @@ variables:
   type: ssh
 
 stemcells:
-- alias: xenial
-  os: ubuntu-xenial
+- alias: bionic
+  os: ubuntu-bionic
   version: latest
 
 update:

@@ -823,7 +823,7 @@ jobs:
       trigger: true
     - get: bpm-release
       trigger: true
-    - get: gcp-xenial-stemcell
+    - get: gcp-bionic-stemcell
       trigger: true
     - get: bbr-sdk-release
       trigger: true
@@ -867,7 +867,7 @@ jobs:
     - get: bpm-release
       passed: [bosh-upload-releases]
       trigger: true
-    - get: gcp-xenial-stemcell
+    - get: gcp-bionic-stemcell
       passed: [bosh-upload-releases]
       trigger: true
     - get: ci
@@ -881,7 +881,7 @@ jobs:
       - postgres-release/*.tgz
       - bpm-release/*.tgz
       stemcells:
-      - gcp-xenial-stemcell/*.tgz
+      - gcp-bionic-stemcell/*.tgz
       vars:
         deployment_name: concourse-smoke
   - task: discover-bosh-endpoint-info
@@ -923,7 +923,7 @@ jobs:
     - get: bpm-release
       passed: [bosh-upload-releases]
       trigger: true
-    - get: gcp-xenial-stemcell
+    - get: gcp-bionic-stemcell
       passed: [bosh-upload-releases]
       trigger: true
     - get: ci
@@ -939,7 +939,7 @@ jobs:
       - postgres-release/*.tgz
       - bpm-release/*.tgz
       stemcells:
-      - gcp-xenial-stemcell/*.tgz
+      - gcp-bionic-stemcell/*.tgz
       vars:
         deployment_name: concourse-smoke-containerd
   - task: discover-bosh-endpoint-info
@@ -985,7 +985,7 @@ jobs:
     - get: bbr-sdk-release
       passed: [bosh-upload-releases]
       trigger: true
-    - get: gcp-xenial-stemcell
+    - get: gcp-bionic-stemcell
       passed: [bosh-upload-releases]
       trigger: true
     - get: vault-release
@@ -1006,7 +1006,7 @@ jobs:
     file: ci/tasks/topgun.yml
     image: unit-image
     input_mapping:
-      stemcell: gcp-xenial-stemcell
+      stemcell: gcp-bionic-stemcell
     params:
       BOSH_ENVIRONMENT: https://10.0.0.6:25555
       BOSH_CA_CERT: ((testing_bosh_ca_cert))
@@ -1043,7 +1043,7 @@ jobs:
     - get: bbr-sdk-release
       passed: [bosh-upload-releases]
       trigger: true
-    - get: gcp-xenial-stemcell
+    - get: gcp-bionic-stemcell
       passed: [bosh-upload-releases]
       trigger: true
     - get: vault-release
@@ -1064,7 +1064,7 @@ jobs:
     file: ci/tasks/topgun.yml
     image: unit-image
     input_mapping:
-      stemcell: gcp-xenial-stemcell
+      stemcell: gcp-bionic-stemcell
     params:
       BOSH_ENVIRONMENT: https://10.0.0.6:25555
       BOSH_CA_CERT: ((testing_bosh_ca_cert))
@@ -1101,7 +1101,7 @@ jobs:
     - get: bbr-sdk-release
       passed: [bosh-upload-releases]
       trigger: true
-    - get: gcp-xenial-stemcell
+    - get: gcp-bionic-stemcell
       passed: [bosh-upload-releases]
       trigger: true
     - get: vault-release
@@ -1122,7 +1122,7 @@ jobs:
     file: ci/tasks/topgun.yml
     image: unit-image
     input_mapping:
-      stemcell: gcp-xenial-stemcell
+      stemcell: gcp-bionic-stemcell
     params:
       BOSH_ENVIRONMENT: https://10.0.0.6:25555
       BOSH_CA_CERT: ((testing_bosh_ca_cert))
@@ -1159,7 +1159,7 @@ jobs:
     - get: bbr-sdk-release
       passed: [bosh-upload-releases]
       trigger: true
-    - get: gcp-xenial-stemcell
+    - get: gcp-bionic-stemcell
       passed: [bosh-upload-releases]
       trigger: true
     - get: vault-release
@@ -1180,7 +1180,7 @@ jobs:
     file: ci/tasks/topgun.yml
     image: unit-image
     input_mapping:
-      stemcell: gcp-xenial-stemcell
+      stemcell: gcp-bionic-stemcell
     params:
       BOSH_ENVIRONMENT: https://10.0.0.6:25555
       BOSH_CA_CERT: ((testing_bosh_ca_cert))
@@ -1568,11 +1568,11 @@ resources:
     ca_cert: ((testing_bosh_ca_cert))
     deployment: concourse-smoke-containerd
 
-- name: gcp-xenial-stemcell
+- name: gcp-bionic-stemcell
   type: bosh-io-stemcell
   icon: *release-icon
   source:
-    name: bosh-google-kvm-ubuntu-xenial-go_agent
+    name: bosh-google-kvm-ubuntu-bionic-go_agent
 
 - name: concourse-docker
   type: git
