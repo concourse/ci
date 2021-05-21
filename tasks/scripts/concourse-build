@@ -13,7 +13,7 @@ fi
 
 version="$(cat version/version)"
 
-archive=concourse-${version}.${PLATFORM}.amd64.tgz
+archive=concourse-${version}.${PLATFORM}.${GOARCH:-amd64}.tgz
 
 final_version=""
 ldflags=""
