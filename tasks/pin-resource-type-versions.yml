@@ -33,4 +33,4 @@ run:
     git config --global user.name "CI Bot"
 
     git add -A
-    git commit -m "pin resource type versions for release $RELEASE_MINOR"
+    git commit --allow-empty -m "pin resource type versions for release $RELEASE_MINOR"
