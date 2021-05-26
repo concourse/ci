@@ -195,6 +195,7 @@ jobs:
       params:
         CONTEXT: built-concourse
         IMAGE_ARG_base_image: dev-image/image.tar
+        TARGET: with-fly
       inputs: [{name: built-concourse}, {name: dev-image}]
       outputs: [{name: image}]
       caches: [{path: cache}]
@@ -344,6 +345,7 @@ jobs:
       params:
         CONTEXT: built-concourse
         IMAGE_ARG_base_image: dev-image/image.tar
+        TARGET: with-fly
       inputs: [{name: built-concourse}, {name: dev-image}]
       outputs: [{name: image}]
       caches: [{path: cache}]
@@ -413,6 +415,7 @@ jobs:
       params:
         CONTEXT: built-concourse
         IMAGE_ARG_base_image: dev-image/image.tar
+        TARGET: with-fly
       inputs: [{name: built-concourse}, {name: dev-image}]
       outputs: [{name: image}]
       caches: [{path: cache}]
