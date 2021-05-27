@@ -1071,17 +1071,17 @@ jobs:
       - bosh-smoke
       - bosh-topgun
     - get: linux-rc
-      passed: [build-rc]
+      passed: [build-rc, build-rc-image]
     - get: linux-rc-ubuntu
-      passed: [build-rc, bosh-check-props]
+      passed: [build-rc, build-rc-image, bosh-check-props]
     - get: windows-rc
       passed: [build-rc]
     - get: darwin-rc
       passed: [build-rc]
     - get: concourse-rc-image
-      passed: [k8s-topgun]
+      passed: [k8s-topgun, build-rc-image]
     - get: concourse-rc-image-ubuntu
-      passed: [k8s-topgun]
+      passed: [k8s-topgun, build-rc-image]
     - get: concourse-release
       passed: [bosh-smoke, bosh-topgun]
       params: {tarball: false}
