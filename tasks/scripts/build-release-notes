@@ -22,6 +22,7 @@ if [ -f resource-type-versions/versions.yml ]; then
 ## 📦 Bundled resource types
 
 <details>
+
 $(
   awk 'BEGIN {FS = ": "}; {
     url = sprintf("https://github.com/concourse/%s/releases/tag/%s", $1, $2);
