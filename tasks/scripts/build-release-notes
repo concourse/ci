@@ -25,7 +25,7 @@ if [ -f resource-type-versions/versions.yml ]; then
 
 $(
   awk 'BEGIN {FS = ": "}; {
-    url = sprintf("https://github.com/concourse/%s/releases/tag/%s", $1, $2);
+    url = sprintf("https://github.com/concourse/%s-resource/releases/tag/%s", $1, $2);
     printf "- %s: [%s](%s)\n", $1, $2, url
   }' resource-type-versions/versions.yml
 )
