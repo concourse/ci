@@ -45,64 +45,6 @@ jobs:
       mode: normal
       alert_type: failed
 
-- name: resource-types-images
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: bosh-io-release-resource
-      trigger: true
-    - get: bosh-io-stemcell-resource
-      trigger: true
-    - get: cf-resource
-      trigger: true
-    - get: docker-image-resource
-      trigger: true
-    - get: git-resource
-      trigger: true
-    - get: github-release-resource
-      trigger: true
-    - get: hg-resource
-      trigger: true
-    - get: pool-resource
-      trigger: true
-    - get: registry-image-resource
-      trigger: true
-    - get: s3-resource
-      trigger: true
-    - get: semver-resource
-      trigger: true
-    - get: time-resource
-      trigger: true
-    - get: tracker-resource
-      trigger: true
-    - get: mock-resource
-      trigger: true
-    - get: oci-build-task
-      trigger: true
-    - get: ci
-  - in_parallel:
-    - task: build-alpine
-      image: oci-build-task
-      privileged: true
-      params:
-        BUILD_ARG_distro: alpine
-      file: ci/tasks/build-resource-types-image.yml
-    - task: build-ubuntu
-      output_mapping: {image: image_ubuntu}
-      image: oci-build-task
-      privileged: true
-      params:
-        BUILD_ARG_distro: ubuntu
-      file: ci/tasks/build-resource-types-image.yml
-  - in_parallel:
-    - put: resource-types-alpine-image
-      params: {image: image/image.tar}
-      get_params: {format: oci}
-    - put: resource-types-ubuntu-image
-      params: {image: image_ubuntu/image.tar}
-      get_params: {format: oci}
-
 - name: dev-image
   public: true
   serial: true
@@ -130,10 +72,6 @@ jobs:
       - get: dumb-init
         trigger: true
       - get: resource-types-alpine-image
-        passed: [resource-types-images]
-        trigger: true
-      - get: resource-types-ubuntu-image
-        passed: [resource-types-images]
         trigger: true
       - get: unit-image
       - get: oci-build-task
@@ -299,8 +237,6 @@ jobs:
     - get: ci
     - get: resource-types-alpine-image
       passed: [dev-image]
-    - get: resource-types-ubuntu-image
-      passed: [dev-image]
   - in_parallel:
     - task: fly-linux
       file: ci/tasks/fly-build-linux.yml
@@ -319,10 +255,6 @@ jobs:
           file: ci/tasks/hoist-linux-resource-types.yml
           image: resource-types-alpine-image
           output_mapping: {resource-types: resource-types-alpine}
-        - task: hoist-resource-types-ubuntu
-          file: ci/tasks/hoist-linux-resource-types.yml
-          image: resource-types-ubuntu-image
-          output_mapping: {resource-types: resource-types-ubuntu}
         - task: yarn-build
           file: ci/tasks/yarn-build.yml
           image: unit-image
@@ -339,13 +271,6 @@ jobs:
           PLATFORM: linux
         input_mapping: {concourse: built-concourse, resource-types: resource-types-alpine}
         output_mapping: {concourse-tarball: concourse-linux-alpine}
-      - task: concourse-linux-ubuntu
-        image: golang-builder-image
-        params:
-          PLATFORM: linux-ubuntu
-        file: ci/tasks/concourse-build-linux.yml
-        input_mapping: {concourse: built-concourse, resource-types: resource-types-ubuntu}
-        output_mapping: {concourse-tarball: concourse-linux-ubuntu}
       - task: concourse-windows
         file: ci/tasks/concourse-build-windows.yml
         input_mapping: {concourse: built-concourse}
@@ -357,9 +282,6 @@ jobs:
     - put: linux-dev-alpine
       params: {file: concourse-linux-alpine/concourse-*.tgz}
       inputs: [concourse-linux-alpine]
-    - put: linux-dev-ubuntu
-      params: {file: concourse-linux-ubuntu/concourse-*.tgz}
-      inputs: [concourse-linux-ubuntu]
     - put: windows-dev
       params: {file: concourse-windows/concourse-*.zip}
       inputs: [concourse-windows]
@@ -381,39 +303,20 @@ jobs:
     - get: linux-dev-alpine
       trigger: true
       passed: [build-concourse]
-    - get: linux-dev-ubuntu
-      trigger: true
-      passed: [build-concourse]
     - get: concourse-docker
       trigger: true
     - get: oci-build-task
     - get: ci
-  - in_parallel:
-      fail_fast: true
-      steps:
-        - task: build-alpine
-          file: concourse-docker/ci/build-image.yml
-          image: oci-build-task
-          input_mapping: {linux-rc: linux-dev-alpine}
-          output_mapping: {image: image-alpine}
-          privileged: true
-        - task: build-ubuntu
-          file: concourse-docker/ci/build-image.yml
-          image: oci-build-task
-          input_mapping: {linux-rc: linux-dev-ubuntu}
-          output_mapping: {image: image-ubuntu}
-          privileged: true
-  - in_parallel:
-      fail_fast: true
-      steps:
-        - put: concourse-dev-alpine-image
-          inputs: [image-alpine]
-          params:
-            image: image-alpine/image.tar
-        - put: concourse-dev-ubuntu-image
-          inputs: [image-ubuntu]
-          params:
-            image: image-ubuntu/image.tar
+  - task: build-alpine
+    file: concourse-docker/ci/build-image.yml
+    image: oci-build-task
+    input_mapping: {linux-rc: linux-dev-alpine}
+    output_mapping: {image: image-alpine}
+    privileged: true
+  - put: concourse-dev-alpine-image
+    inputs: [image-alpine]
+    params:
+      image: image-alpine/image.tar
   on_failure: *failed-concourse
 
 - name: bin-smoke
@@ -424,7 +327,7 @@ jobs:
     - get: concourse
       passed: [build-concourse]
       trigger: true
-    - get: linux-dev-ubuntu
+    - get: linux-dev-alpine
       passed: [build-concourse]
       trigger: true
     - get: unit-image
@@ -439,7 +342,7 @@ jobs:
     - task: terraform-smoke
       image: unit-image
       file: ci/tasks/terraform-smoke.yml
-      input_mapping: {linux-rc: linux-dev-ubuntu}
+      input_mapping: {linux-rc: linux-dev-alpine}
       params:
         GCP_PROJECT: cf-concourse-production
         GCP_KEY: ((concourse_smoke_gcp_key))
@@ -461,7 +364,7 @@ jobs:
     - get: concourse
       passed: [build-concourse]
       trigger: true
-    - get: linux-dev-ubuntu
+    - get: linux-dev-alpine
       passed: [build-concourse]
       trigger: true
     - get: unit-image
@@ -483,7 +386,7 @@ jobs:
     - task: terraform-smoke
       image: unit-image
       file: ci/tasks/terraform-smoke.yml
-      input_mapping: {linux-rc: linux-dev-ubuntu}
+      input_mapping: {linux-rc: linux-dev-alpine}
       params:
         GCP_PROJECT: cf-concourse-production
         GCP_KEY: ((concourse_smoke_gcp_key))
@@ -686,118 +589,6 @@ resources:
     repository: plugins
     access_token: ((concourse_github_dummy.access_token))
 
-- name: mock-resource
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: concourse
-    repository: mock-resource
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: bosh-io-release-resource
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: concourse
-    repository: bosh-io-release-resource
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: bosh-io-stemcell-resource
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: concourse
-    repository: bosh-io-stemcell-resource
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: cf-resource
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: cloudfoundry-community
-    repository: cf-resource
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: docker-image-resource
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: concourse
-    repository: docker-image-resource
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: git-resource
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: concourse
-    repository: git-resource
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: github-release-resource
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: concourse
-    repository: github-release-resource
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: hg-resource
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: concourse
-    repository: hg-resource
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: pool-resource
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: concourse
-    repository: pool-resource
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: registry-image-resource
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: concourse
-    repository: registry-image-resource
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: s3-resource
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: concourse
-    repository: s3-resource
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: semver-resource
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: concourse
-    repository: semver-resource
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: time-resource
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: concourse
-    repository: time-resource
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: tracker-resource
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: concourse
-    repository: tracker-resource
-    access_token: ((concourse_github_dummy.access_token))
-
 - name: oci-build-task
   type: registry-image
   icon: *image-icon
@@ -810,14 +601,6 @@ resources:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
     regexp: branch/((branch_slug))/concourse-(.*)\.linux-alpine\.amd64\.tgz
-
-- name: linux-dev-ubuntu
-  type: gcs
-  icon: linux
-  source:
-    bucket: concourse-artifacts
-    json_key: ((concourse_artifacts_json_key))
-    regexp: branch/((branch_slug))/concourse-(.*)\.linux-ubuntu\.amd64\.tgz
 
 - name: windows-dev
   type: gcs
@@ -850,29 +633,11 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: resource-types-ubuntu-image
-  type: registry-image
-  icon: &image-icon docker
-  source:
-    repository: concourse/resource-types
-    tag: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
 - name: concourse-dev-alpine-image
   type: registry-image
   icon: *image-icon
   source:
     repository: concourse/concourse-dev
-    tag: latest
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: concourse-dev-ubuntu-image
-  type: registry-image
-  icon: *image-icon
-  source:
-    repository: concourse/concourse-dev
-    tag: ubuntu
+    tag: branch-((branch_slug))
     username: ((docker.username))
     password: ((docker.password))
