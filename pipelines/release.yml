@@ -2024,6 +2024,7 @@ resources:
   source:
     owner: clarafu
     repository: release-me
+    access_token: ((concourse_github_dummy.access_token))
 
 - name: trivy
   type: registry-image
@@ -2036,3 +2037,4 @@ resources:
   source:
     owner: aquasecurity
     repository: trivy-db
+    access_token: ((concourse_github_dummy.access_token))
