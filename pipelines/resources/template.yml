@@ -374,7 +374,6 @@ plan:
     params: {format: oci}
   - get: golang-builder
     params: {format: oci}
-  - get: concourse-unit
   - get: oci-build-task
   - get: version
   - get: ci
@@ -384,7 +383,7 @@ plan:
 - #@ build_task(resource_name, distro)
 - #@ template.replace(extra_steps(distro))
 - task: #@ distro + "-date-tag"
-  image: concourse-unit
+  image: oci-build-task
   file: ci/tasks/tag-version-with-date.yml
   params:
     VERSION: #@ "((.:version))-" + distro
@@ -398,7 +397,7 @@ plan:
   #@ if distro == "alpine":
   - put: resource-image
     params:
-      image: resource-image-dev-alpine/image.tar
+      image: built-resource-image/image.tar
       version: ((.:version))
       bump_aliases: true
   #@ end
@@ -479,14 +478,6 @@ resources:
   source:
     repository: concourse/golang-builder
     variant: bionic
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: concourse-unit
-  type: registry-image
-  icon: docker
-  source:
-    repository: concourse/unit
     username: ((docker.username))
     password: ((docker.password))
 

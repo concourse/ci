@@ -3,7 +3,7 @@ platform: linux
 
 image_resource:
   type: registry-image
-  source: {repository: concourse/unit}
+  source: {repository: busybox}
 
 outputs:
 - name: date-tag
@@ -12,7 +12,7 @@ params:
   VERSION: ~
 
 run:
-  path: bash
+  path: sh
   args:
     - -ce
     - |
