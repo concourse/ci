@@ -361,6 +361,49 @@ plan:
     file: version/version
 #@ end
 
+#@ def rebuild_images(distro):
+name: #@ "republish-images-" + distro
+plan:
+- in_parallel:
+  - get: daily-trigger
+    trigger: true
+  - get: #@ resource_name + "-resource"
+    resource: resource-repo-tags
+  - get: #@ determine_base(distro)
+    trigger: true
+    params: {format: oci}
+  - get: golang-builder
+    trigger: true
+    params: {format: oci}
+  - get: oci-build-task
+  - get: version
+  - get: ci
+  - #@ template.replace(extra_get_steps(distro))
+- load_var: version
+  file: version/version
+- #@ build_task(resource_name, distro)
+- #@ template.replace(extra_steps(distro))
+- task: #@ distro + "-date-tag"
+  image: golang-builder
+  file: ci/tasks/tag-version-with-date.yml
+  params:
+    VERSION: #@ "((.:version))-" + distro
+- in_parallel:
+  - put: #@ "resource-image-" + distro
+    params:
+      image: built-resource-image/image.tar
+      version: ((.:version))
+      bump_aliases: true
+      additional_tags: date-tag/tag
+  #@ if distro == "alpine":
+  - put: resource-image
+    params:
+      image: resource-image-dev-alpine/image.tar
+      version: ((.:version))
+      bump_aliases: true
+  #@ end
+#@ end
+
 #@ def unique_version_history():
 #@ return resource_name == "time"
 #@ end
@@ -370,6 +413,17 @@ plan:
 #@ end
 
 ---
+groups:
+- name: main
+  jobs:
+  - prs-*
+  - build-*
+  - scan-*
+  - publish-*
+- name: republish
+  jobs:
+  - republish-*
+
 jobs:
 - #@ build_image("alpine")
 - #@ build_image("ubuntu")
@@ -379,6 +433,8 @@ jobs:
 - #@ publish_job("major")
 - #@ publish_job("minor")
 - #@ publish_job("patch")
+- #@ rebuild_images("alpine")
+- #@ rebuild_images("ubuntu")
 
 resource_types:
 - name: pull-request
@@ -440,6 +496,15 @@ resources:
     branch: master
     private_key: ((concourse_bot_private_key))
     uri: #@ "git@github.com:concourse/" + resource_name + "-resource"
+
+- name: resource-repo-tags
+  type: git
+  icon: github
+  source:
+    branch: master
+    private_key: ((concourse_bot_private_key))
+    uri: #@ "git@github.com:concourse/" + resource_name + "-resource"
+    tag_filter: "v*"
 
 - name: resource-repo-release
   type: github-release
