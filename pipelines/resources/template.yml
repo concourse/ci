@@ -373,8 +373,8 @@ plan:
     trigger: true
     params: {format: oci}
   - get: golang-builder
-    trigger: true
     params: {format: oci}
+  - get: concourse-unit
   - get: oci-build-task
   - get: version
   - get: ci
@@ -384,7 +384,7 @@ plan:
 - #@ build_task(resource_name, distro)
 - #@ template.replace(extra_steps(distro))
 - task: #@ distro + "-date-tag"
-  image: golang-builder
+  image: concourse-unit
   file: ci/tasks/tag-version-with-date.yml
   params:
     VERSION: #@ "((.:version))-" + distro
@@ -461,6 +461,8 @@ resources:
   source:
     repository: alpine
     tag: latest
+    username: ((docker.username))
+    password: ((docker.password))
 
 - name: ubuntu-bionic
   type: registry-image
@@ -468,6 +470,8 @@ resources:
   source:
     repository: ubuntu
     tag: bionic
+    username: ((docker.username))
+    password: ((docker.password))
 
 - name: golang-builder
   type: registry-image
@@ -475,12 +479,24 @@ resources:
   source:
     repository: concourse/golang-builder
     variant: bionic
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: concourse-unit
+  type: registry-image
+  icon: docker
+  source:
+    repository: concourse/unit
+    username: ((docker.username))
+    password: ((docker.password))
 
 - name: trivy
   type: registry-image
   icon: docker
   source:
     repository: aquasec/trivy
+    username: ((docker.username))
+    password: ((docker.password))
 
 - name: trivy-db
   type: github-release
