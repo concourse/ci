@@ -791,16 +791,17 @@ jobs:
   - load_var: concourse_version
     file: version/version
   - across:
-    - var: gcp-image
-      values:
-      - ubuntu-1604-lts
-      - ubuntu-1804-lts
-      - ubuntu-2004-lts
-      max_in_flight: 1
     - var: runtime
       values:
       - guardian
       - containerd
+      max_in_flight: all
+    - var: gcp-image
+      values:
+      - debian-10-buster-v20210122
+      - ubuntu-1604-lts
+      - ubuntu-1804-lts
+      - ubuntu-2004-lts
       max_in_flight: 1
     do:
     - task: terraform-smoke
@@ -811,7 +812,7 @@ jobs:
         GCP_PROJECT: cf-concourse-production
         GCP_KEY: ((concourse_smoke_gcp_key))
         SSH_KEY: ((concourse_smoke_ssh_key))
-        WORKSPACE: release-((release_minor))-lts
+        WORKSPACE: release-((release_minor))-((.:runtime))-lts
         CONCOURSE_VERSION: ((.:concourse_version))
         TF_VAR_GCP_IMAGE: ((.:gcp-image))
         TF_VAR_RUNTIME: ((.:runtime))
