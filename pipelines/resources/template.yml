@@ -364,6 +364,11 @@ plan:
 #@ def rebuild_images(distro):
 name: #@ "republish-images-" + distro
 plan:
+on_failure: &failed-ci
+  put: notify
+  params:
+    mode: normal
+    alert_type: failed
 - in_parallel:
   - get: daily-trigger
     trigger: true
