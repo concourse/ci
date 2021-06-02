@@ -13,15 +13,11 @@ variable "region" {
 }
 
 variable "GCP_IMAGE" {
-  type    = string
+  type = string
 }
 
 variable "RUNTIME" {
-  type    = string
-}
-
-variable "HAS_RUNTIME_FLAG" {
-  type    = bool
+  type = string
 }
 
 provider "google" {
@@ -131,8 +127,7 @@ data "template_file" "worker_conf" {
   template = file("systemd/smoke-worker.conf.tpl")
 
   vars = {
-    runtime          = var.RUNTIME
-    has_runtime_flag = var.HAS_RUNTIME_FLAG
+    runtime = var.RUNTIME
   }
 }
 

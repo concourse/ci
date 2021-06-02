@@ -19,7 +19,6 @@ caches:
 params:
   RUNTIME: guardian
   DOWNLOAD_CLI: true
-  HAS_RUNTIME_FLAG: true
   POSTGRES_IMAGE: postgres-image
 
 run:

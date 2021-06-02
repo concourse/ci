@@ -6,7 +6,6 @@
 #   ((concourse_smoke_deployment_name)) a unique name for the smoke bosh deployment
 #   ((latest_release))                  the latest concourse/concourse tag for upgrade testing.
 #                                       e.g. 6.6.x -> 6.5, 7.0.x -> 6.7
-#   ((has_runtime_flag))                whether the CONCOURSE_RUNTIME flag is supported by this version (determines how to deploy containerd-backed workers)
 #   ((slack_hook))                      the slack hook to use for sending the notification (one slack hook per channel)
 #                                       concourse-private hook for LTS versions, and concourse-interrupt hook for OSS-only ones
 #   ((resource_type_versions))          a YAML object containing the semver constraints for each of the base resource types. should default to "" for each type for a new release (i.e. no constraint).
@@ -312,7 +311,6 @@ jobs:
     timeout: 1h
     params:
       RUNTIME: ((.:runtime))
-      HAS_RUNTIME_FLAG: ((has_runtime_flag))
     file: ci/tasks/docker-compose-testflight.yml
   on_failure: *failed-concourse
   on_error: *failed-concourse
@@ -767,7 +765,6 @@ jobs:
           WORKSPACE: release-((release_minor))
           CONCOURSE_VERSION: ((.:concourse_version))
           TF_VAR_RUNTIME: ((.:runtime))
-          TF_VAR_HAS_RUNTIME_FLAG: ((has_runtime_flag))
       - task: smoke
         image: unit-image
         file: ci/tasks/smoke.yml
@@ -818,7 +815,6 @@ jobs:
         CONCOURSE_VERSION: ((.:concourse_version))
         TF_VAR_GCP_IMAGE: ((.:gcp-image))
         TF_VAR_RUNTIME: ((.:runtime))
-        TF_VAR_HAS_RUNTIME_FLAG: ((has_runtime_flag))
     - task: smoke
       image: unit-image
       file: ci/tasks/smoke.yml

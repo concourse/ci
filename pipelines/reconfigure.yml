@@ -331,7 +331,6 @@ jobs:
         release_minor: '6.7'
         latest_release: '6.6'
         concourse_smoke_deployment_name: concourse-smoke-6-7
-        has_runtime_flag: 'true'
         slack_hook: ((slack_hooks.concourse-private))
         resource_type_versions:
           bosh-io-release: ~1.0.3
@@ -357,7 +356,6 @@ jobs:
         release_minor: '7.2'
         latest_release: '7.1'
         concourse_smoke_deployment_name: concourse-smoke-7-2
-        has_runtime_flag: 'true'
         slack_hook: ((slack_hooks.concourse-interrupt))
         resource_type_versions:
           bosh-io-release: ~1.0.4
@@ -383,7 +381,6 @@ jobs:
         release_minor: '7.3'
         latest_release: '7.2'
         concourse_smoke_deployment_name: concourse-smoke-7-3
-        has_runtime_flag: 'true'
         slack_hook: ((slack_hooks.concourse-interrupt))
         resource_type_versions:
           bosh-io-release: ~1.1.0
@@ -417,7 +414,6 @@ jobs:
     #     release_minor: "MAJOR.MINOR"
     #     latest_release: "PREV_MAJOR.PREV_MINOR"
     #     concourse_smoke_deployment_name: "concourse-smoke-MAJOR-MINOR"
-    #     has_runtime_flag: "true"
     #     slack_hook: ((slack_hooks.SLACK_CHANNEL))
     #     resource_type_versions:
     #       # These should be left blank, as they will be updated after the release has shipped!

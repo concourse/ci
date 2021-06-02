@@ -17,11 +17,7 @@ docker load -i "$POSTGRES_IMAGE/image.tar"
 export POSTGRES_TAG=$(cat "$POSTGRES_IMAGE/tag")
 export CONCOURSE_KEYS=$PWD/keys
 
-if [[ "$RUNTIME" = "containerd" && "$HAS_RUNTIME_FLAG" = "false" ]]; then
-  DOCKER_COMPOSE_FLAGS="-f concourse/docker-compose.yml -f ci/overrides/docker-compose.ci-containerd-legacy.yml"
-else
-  DOCKER_COMPOSE_FLAGS="-f concourse/docker-compose.yml -f ci/overrides/docker-compose.ci-$RUNTIME.yml"
-fi
+DOCKER_COMPOSE_FLAGS="-f concourse/docker-compose.yml -f ci/overrides/docker-compose.ci-$RUNTIME.yml"
 
 ci/tasks/scripts/generate-keys
 
