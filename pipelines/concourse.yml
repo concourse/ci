@@ -902,7 +902,7 @@ jobs:
     timeout: 1h
   on_failure: *failed-concourse
 
-- name: bosh-smoke-containerd
+- name: bosh-smoke-guardian
   public: true
   serial: true
   plan:
@@ -927,13 +927,13 @@ jobs:
       passed: [bosh-upload-releases]
       trigger: true
     - get: ci
-  - put: smoke-deployment-containerd
+  - put: smoke-deployment-guardian
     tags: [bosh]
     params:
       recreate: true
       manifest: ci/deployments/bosh-smoke.yml
       ops_files:
-      - ci/deployments/bosh-operations/runtime-containerd.yml
+      - ci/deployments/bosh-operations/runtime-guardian.yml
       releases:
       - concourse-release/*.tgz
       - postgres-release/*.tgz
@@ -941,7 +941,7 @@ jobs:
       stemcells:
       - gcp-bionic-stemcell/*.tgz
       vars:
-        deployment_name: concourse-smoke-containerd
+        deployment_name: concourse-smoke-guardian
   - task: discover-bosh-endpoint-info
     tags: [bosh]
     file: ci/tasks/discover-bosh-endpoint-info.yml
@@ -951,7 +951,7 @@ jobs:
       BOSH_CA_CERT: ((testing_bosh_ca_cert))
       BOSH_CLIENT: ((testing_bosh_client.id))
       BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
-      BOSH_DEPLOYMENT: concourse-smoke-containerd
+      BOSH_DEPLOYMENT: concourse-smoke-guardian
       BOSH_INSTANCE_GROUP: concourse
   - task: smoke
     tags: [bosh]
