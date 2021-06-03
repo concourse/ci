@@ -1557,7 +1557,7 @@ resources:
     ca_cert: ((testing_bosh_ca_cert))
     deployment: concourse-smoke
 
-- name: smoke-deployment-containerd
+- name: smoke-deployment-guardian
   tags: [bosh]
   type: bosh-deployment
   icon: fire
@@ -1566,7 +1566,7 @@ resources:
     client: ((testing_bosh_client.id))
     client_secret: ((testing_bosh_client.secret))
     ca_cert: ((testing_bosh_ca_cert))
-    deployment: concourse-smoke-containerd
+    deployment: concourse-smoke-guardian
 
 - name: gcp-bionic-stemcell
   type: bosh-io-stemcell
