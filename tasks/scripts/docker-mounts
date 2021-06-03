@@ -70,6 +70,11 @@ docker pull busybox
 docker run -it busybox mount | tail -n +2 > docker-mounts
 docker run -it --privileged busybox mount  | tail -n +2 > privileged-docker-mounts
 
+# normalize the /dev/sd* mounts to /dev/sdb, since we don't care what hard disk
+# the mounts originated from (sda -> 1st mounted disk, sdb -> 2nd, sdc -> 3rd)
+sed -i 's|/dev/sd.|/dev/sdb|g' docker-mounts
+sed -i 's|/dev/sd.|/dev/sdb|g' privileged-docker-mounts
+
 # Instructions in case of job failure
 cat <<EOF
  This job checks whether the mount configuration in a regular and privileged Docker container have changed.
