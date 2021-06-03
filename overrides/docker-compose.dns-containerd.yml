@@ -1,7 +1,0 @@
-version: '3'
-
-services:
-  concourse:
-    environment:
-      CONCOURSE_CONTAINERD_DNS_SERVER: '8.8.8.8,4.4.4.4'
-
