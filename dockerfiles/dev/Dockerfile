@@ -14,6 +14,7 @@ FROM ${base_image}
 RUN apt-get update && apt-get -y install \
       iproute2 \
       ca-certificates \
+      curl \
       file \
       tree \
       btrfs-tools
