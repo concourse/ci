@@ -628,7 +628,8 @@ resources:
 - name: daily-trigger
   type: time
   source:
-    interval: 24h
+    start: 1AM
+    stop: 2AM
 
 #@ if resource_name == "cf":
 - name: cf-cli
