@@ -23,20 +23,6 @@ BUILD_ARG_DOCKER_PUSH_USERNAME: ((registry_image_resource_docker.username))
 
 BUILD_ARG_GCR_PUSH_SERVICE_ACCOUNT_KEY: ((registry_image_resource_gcr.service_account_key))
 BUILD_ARG_GCR_PUSH_REPO: ((registry_image_resource_gcr.repo))
-  #@ elif resource_name == "semver":
-CONTEXT: #@ resource_name + "-resource"
-BUILD_ARG_SEMVER_TESTING_ACCESS_KEY_ID: ((semver_resource_bucket.access_key))
-BUILD_ARG_SEMVER_TESTING_BUCKET: ((semver_resource.bucket))
-BUILD_ARG_SEMVER_TESTING_REGION: ((semver_resource.region))
-BUILD_ARG_SEMVER_TESTING_SECRET_ACCESS_KEY: ((semver_resource_bucket.secret_key))
-  #@ elif resource_name == "s3":
-CONTEXT: #@ resource_name + "-resource"
-BUILD_ARG_S3_TESTING_ACCESS_KEY_ID: ((s3_resource_bucket.access_key))
-BUILD_ARG_S3_TESTING_SECRET_ACCESS_KEY: ((s3_resource_bucket.secret_key))
-BUILD_ARG_S3_TESTING_BUCKET: ((s3_resource.bucket))
-BUILD_ARG_S3_VERSIONED_TESTING_BUCKET: ((s3_resource.versioned_bucket))
-BUILD_ARG_S3_TESTING_REGION: ((s3_resource.region))
-BUILD_ARG_S3_ENDPOINT: https://s3.amazonaws.com
   #@ elif resource_name == "docker-image":
 CONTEXT: #@ resource_name + "-resource"
 UNPACK_ROOTFS: 'true'
