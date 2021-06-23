@@ -7,6 +7,7 @@ image_resource:
 
 params:
   KUBE_CONFIG:
+  SERVICE_ACCOUNT_KEY:
   RELEASE_NAME:
   MAX_TICKS: 180
 

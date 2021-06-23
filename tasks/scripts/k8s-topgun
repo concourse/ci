@@ -4,15 +4,14 @@
 set -e -u
 
 readonly SKIP="${SKIP:-}"
+readonly DIR=$(cd $(dirname $0) && pwd)
+
+source "$DIR/k8s-helpers.sh"
 
 export GOPATH=$PWD/gopath
 export PATH=$GOPATH/bin:$PATH
 
-mkdir -p ~/.kube
-
-if [ ! -f ~/.kube/config ]; then
-  echo "$KUBE_CONFIG" > ~/.kube/config
-fi
+ensure_kube_config
 
 mkdir -p helm-charts/stable
 cp -r prometheus-chart/prometheus helm-charts/stable

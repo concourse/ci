@@ -20,6 +20,7 @@ params:
   CONCOURSE_CHART_DIR:
   CONCOURSE_IMAGE_NAME:
   KUBE_CONFIG:
+  SERVICE_ACCOUNT_KEY:
 
 run:
   path: ci/tasks/scripts/k8s-topgun

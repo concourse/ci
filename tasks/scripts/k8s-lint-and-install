@@ -2,6 +2,10 @@
 
 set -e -u
 
+readonly DIR=$(cd $(dirname $0) && pwd)
+
+source "$DIR/k8s-helpers.sh"
+
 releasename="pr-$(cat concourse/.git/resource/pr)-$(head -c 6 concourse/.git/resource/base_sha)"
 
 function cleanup {
@@ -11,11 +15,7 @@ function cleanup {
 }
 trap cleanup EXIT
 
-mkdir -p ~/.kube
-
-if [ ! -f ~/.kube/config ]; then
-  echo "$KUBE_CONFIG" > ~/.kube/config
-fi
+ensure_kube_config
 
 helm lint concourse
 helm dependency update ./concourse

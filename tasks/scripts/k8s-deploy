@@ -15,25 +15,13 @@ set -o pipefail
 readonly RELEASE_NAME="${RELEASE_NAME:-concourse-smoke}"
 readonly CONCOURSE_IMAGE="${CONCOURSE_IMAGE:-concourse/dev}"
 readonly CONCOURSE_DIGEST="${CONCOURSE_DIGEST:-$(cat ./image-info/digest)}"
+readonly DIR=$(cd $(dirname $0) && pwd)
+
+source "$DIR/k8s-helpers.sh"
 
 main() {
-  eventually_populate_kube_config
+  ensure_kube_config
   run_helm_deploy
-}
-
-eventually_populate_kube_config() {
-  mkdir -p ~/.kube
-
-  if [[ -f ~/.kube/config ]]; then
-    return 0
-  fi
-
-  if [[ -z $KUBE_CONFIG ]]; then
-    echo "Error: KUBE_CONFIG must be specified when ~/.kube/config doesnt exist"
-    exit 1
-  fi
-
-  echo "$KUBE_CONFIG" >~/.kube/config
 }
 
 run_helm_deploy() {

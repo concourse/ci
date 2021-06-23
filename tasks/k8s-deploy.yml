@@ -8,6 +8,7 @@ image_resource:
 params:
   CONCOURSE_IMAGE:
   KUBE_CONFIG:
+  SERVICE_ACCOUNT_KEY:
   RELEASE_NAME:
 
 inputs:

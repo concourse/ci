@@ -429,7 +429,8 @@ jobs:
       image: unit-image
       file: ci/tasks/k8s-delete.yml
       params:
-        KUBE_CONFIG: ((kube_config))
+        KUBE_CONFIG: ((k8s_topgun.kube_config))
+        SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
         RELEASE_NAME: ((concourse_smoke_deployment_name))
         CONCOURSE_IMAGE: concourse/concourse-rc
   - task: deploy
@@ -437,21 +438,24 @@ jobs:
     input_mapping: {image-info: concourse-rc-image}
     file: ci/tasks/k8s-deploy.yml
     params:
-      KUBE_CONFIG: ((kube_config))
+      KUBE_CONFIG: ((k8s_topgun.kube_config))
+      SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
       RELEASE_NAME: ((concourse_smoke_deployment_name))
       CONCOURSE_IMAGE: concourse/concourse-rc
   - task: k8s-smoke
     image: unit-image
     file: ci/tasks/k8s-smoke.yml
     params:
-      KUBE_CONFIG: ((kube_config))
+      KUBE_CONFIG: ((k8s_topgun.kube_config))
+      SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
       RELEASE_NAME: ((concourse_smoke_deployment_name))
       MAX_TICKS: 180
   - task: delete
     image: unit-image
     file: ci/tasks/k8s-delete.yml
     params:
-      KUBE_CONFIG: ((kube_config))
+      KUBE_CONFIG: ((k8s_topgun.kube_config))
+      SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
       RELEASE_NAME: ((concourse_smoke_deployment_name))
       CONCOURSE_IMAGE: concourse/concourse-rc
   on_failure: *failed-concourse
@@ -500,7 +504,8 @@ jobs:
     tags: [k8s-topgun]
     params:
       IN_CLUSTER: "true"
-      KUBE_CONFIG: ((kube_config))
+      KUBE_CONFIG: ((k8s_topgun.kube_config))
+      SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
       CONCOURSE_IMAGE_NAME: concourse/concourse-rc
   on_failure: *failed-concourse
   on_error: *failed-concourse
