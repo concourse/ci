@@ -39,6 +39,7 @@ resources:
   source:
     owner: clarafu
     repository: release-me
+    access_token: ((pull_requests_access_token))
 
 - name: ci
   type: git
