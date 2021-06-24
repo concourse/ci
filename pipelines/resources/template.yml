@@ -596,6 +596,7 @@ resources:
   source:
     owner: clarafu
     repository: release-me
+    access_token: ((concourse_github_dummy.access_token))
 
 - name: oci-build-task
   type: registry-image
