@@ -486,6 +486,7 @@ resources:
   source:
     owner: aquasecurity
     repository: trivy-db
+    access_token: ((concourse_github_dummy.access_token))
 
 - name: resource-repo
   type: git
