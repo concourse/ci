@@ -57,7 +57,7 @@ groups:
   - resource-types-images
   - dev-image
   - testflight
-  - containerd-integration
+  - worker-runtime
   - watsjs
   - rc
   - build-rc
@@ -263,7 +263,7 @@ jobs:
   on_failure: *failed-concourse
   on_error: *failed-concourse
 
-- name: containerd-integration
+- name: worker-runtime
   public: true
   max_in_flight: 1
   plan:
@@ -516,7 +516,7 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
-      passed: [dev-image, testflight, watsjs, integration]
+      passed: [dev-image, testflight, watsjs, integration, worker-runtime]
       trigger: true
     - get: dev-image
       trigger: true

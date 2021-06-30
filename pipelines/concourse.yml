@@ -29,7 +29,7 @@ groups:
   - dev-image
   - integration
   - testflight
-  - containerd-integration
+  - worker-runtime
   - watsjs
   - build-concourse
   - build-image
@@ -273,7 +273,7 @@ jobs:
     get_params: {format: oci}
   on_failure: *failed-concourse
 
-- name: containerd-integration
+- name: worker-runtime
   public: true
   max_in_flight: 1
   plan:
@@ -530,7 +530,7 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
-      passed: [dev-image, testflight, watsjs, integration]
+      passed: [dev-image, testflight, watsjs, integration, worker-runtime]
       trigger: true
     - get: unit-image
       passed: [dev-image]
@@ -852,7 +852,7 @@ jobs:
       BOSH_CLIENT: ((testing_bosh_client.id))
       BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
 
-- name: bosh-smoke
+- name: bosh-smoke-containerd
   public: true
   serial: true
   plan:
@@ -882,6 +882,8 @@ jobs:
     params:
       recreate: true
       manifest: ci/deployments/bosh-smoke.yml
+      ops_files:
+      - ci/deployments/bosh-operations/runtime-containerd.yml
       releases:
       - concourse-release/*.tgz
       - postgres-release/*.tgz
