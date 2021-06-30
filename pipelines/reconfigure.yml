@@ -422,12 +422,6 @@ jobs:
         branch: rewrite-atc-worker
       vars:
         branch_slug: rewrite-atc-worker
-    - set_pipeline: branch
-      file: pipelines-and-tasks/pipelines/branch.yml
-      instance_vars:
-        branch: "revert-7114-issue/7106"
-      vars:
-        branch_slug: "revert-7114-issue"
     on_failure: *notify
     on_error: *notify
 
