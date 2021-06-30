@@ -36,6 +36,7 @@ groups:
   - bin-smoke
   - bin-smoke-lts
   - check-docker-mounts
+  - bump-prod
 
 - name: quickstart
   jobs:
@@ -659,6 +660,57 @@ jobs:
             image: image-ubuntu/image.tar
   on_failure: *failed-concourse
 
+- name: bump-prod
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: infrastructure
+    - get: concourse-image
+      resource: concourse-dev-alpine-image
+      passed: [build-image]
+      params: {skip_download: true}
+    - get: windows-dev
+      passed: [build-concourse]
+      params: {skip_download: "true"}
+    - get: darwin-dev
+      passed: [build-concourse]
+      params: {skip_download: "true"}
+  - load_var: concourse_image_repo
+    file: concourse-image/repository
+  - load_var: concourse_image_digest
+    file: concourse-image/digest
+  - task: convert-windows-url
+    file: infrastructure/tasks/convert-gs-url.yml
+    input_mapping: {input: windows-dev}
+    output_mapping: {output: windows}
+  - task: convert-darwin-url
+    file: infrastructure/tasks/convert-gs-url.yml
+    input_mapping: {input: darwin-dev}
+    output_mapping: {output: darwin}
+  - load_var: concourse_windows_bundle_url
+    file: windows/url
+  - load_var: concourse_darwin_bundle_url
+    file: darwin/url
+  - task: bump-versions
+    file: infrastructure/tasks/replace-file.yml
+    input_mapping: {repo: infrastructure}
+    output_mapping: {repo-bumped: infrastructure-bumped}
+    params:
+      FILE: terraform/environments/production/variables.yml
+      CONTENT: |
+        concourse_image_repo: ((.:concourse_image_repo))
+        concourse_image_digest: ((.:concourse_image_digest))
+        concourse_windows_bundle_url: ((.:concourse_windows_bundle_url))
+        concourse_darwin_bundle_url: ((.:concourse_darwin_bundle_url))
+      COMMIT: bump production to concourse dev
+  - put: infrastructure-bump
+    inputs: [infrastructure-bumped]
+    params:
+      repository: infrastructure-bumped
+      branch: master
+  on_failure: *failed-concourse
+
 - name: bin-smoke
   public: true
   serial: true
@@ -1223,6 +1275,21 @@ resources:
     branch: master
     paths:
     - dockerfiles/unit
+
+- name: infrastructure
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:concourse/infrastructure.git
+    private_key: ((greenpeace_private_key))
+
+- name: infrastructure-bump
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:concourse/infrastructure.git
+    branch: master
+    private_key: ((greenpeace_private_key))
 
 - name: notify
   type: slack-notifier
