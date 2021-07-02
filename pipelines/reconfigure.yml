@@ -413,12 +413,6 @@ jobs:
     - set_pipeline: branch
       file: pipelines-and-tasks/pipelines/branch.yml
       instance_vars:
-        branch: resource-causality
-      vars:
-        branch_slug: resource-causality
-    - set_pipeline: branch
-      file: pipelines-and-tasks/pipelines/branch.yml
-      instance_vars:
         branch: rewrite-atc-worker
       vars:
         branch_slug: rewrite-atc-worker
