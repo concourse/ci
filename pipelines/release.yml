@@ -65,6 +65,7 @@ groups:
   - scan-rc-image
   - bin-smoke
   - bin-smoke-lts
+  - bump-prod-to-rc
 
 - name: k8s
   jobs:
@@ -685,6 +686,57 @@ jobs:
             additional_tags: version/version
   on_failure: *failed-concourse
   on_error: *failed-concourse
+
+- name: bump-prod-to-rc
+  plan:
+  - in_parallel:
+    - get: infrastructure
+    - get: concourse-image
+      resource: concourse-rc-image
+      passed: [build-rc-image]
+      params: {skip_download: true}
+    - get: concourse-windows
+      resource: windows-rc
+      passed: [build-rc]
+      params: {skip_download: "true"}
+    - get: concourse-darwin
+      resource: darwin-rc
+      passed: [build-rc]
+      params: {skip_download: "true"}
+  - load_var: concourse_image_repo
+    file: concourse-image/repository
+  - load_var: concourse_image_digest
+    file: concourse-image/digest
+  - task: convert-windows-url
+    file: infrastructure/tasks/convert-gs-url.yml
+    input_mapping: {input: concourse-windows}
+    output_mapping: {output: windows}
+  - task: convert-darwin-url
+    file: infrastructure/tasks/convert-gs-url.yml
+    input_mapping: {input: concourse-darwin}
+    output_mapping: {output: darwin}
+  - load_var: concourse_windows_bundle_url
+    file: windows/url
+  - load_var: concourse_darwin_bundle_url
+    file: darwin/url
+  - task: bump-versions
+    file: infrastructure/tasks/replace-file.yml
+    input_mapping: {repo: infrastructure}
+    output_mapping: {repo-bumped: infrastructure-bumped}
+    params:
+      FILE: terraform/environments/production/variables.yml
+      CONTENT: |
+        concourse_image_repo: ((.:concourse_image_repo))
+        concourse_image_digest: ((.:concourse_image_digest))
+        concourse_windows_bundle_url: ((.:concourse_windows_bundle_url))
+        concourse_darwin_bundle_url: ((.:concourse_darwin_bundle_url))
+      COMMIT: bump production to ((release_minor)) rc
+  - put: infrastructure-bump
+    inputs: [infrastructure-bumped]
+    params:
+      repository: infrastructure-bumped
+      branch: master
+
 
 - name: scan-rc-image
   public: true
@@ -1510,6 +1562,21 @@ resources:
     uri: https://github.com/concourse/ci
     paths:
     - pipelines/prs.yml
+
+- name: infrastructure
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:concourse/infrastructure.git
+    private_key: ((greenpeace_private_key))
+
+- name: infrastructure-bump
+  type: git
+  icon: github
+  source:
+    uri: git@github.com:concourse/infrastructure.git
+    branch: master
+    private_key: ((greenpeace_private_key))
 
 - name: concourse-docker
   type: git
