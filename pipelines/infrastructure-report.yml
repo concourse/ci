@@ -89,7 +89,7 @@ jobs:
   - in_parallel:
     - get: ci
     - get: image
-  - task:
+  - task: report
     image: image
     file: ci/tasks/infrastructure-report.yml
     params:
