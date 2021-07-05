@@ -416,6 +416,8 @@ jobs:
         branch: rewrite-atc-worker
       vars:
         branch_slug: rewrite-atc-worker
+    - set_pipeline: infrastructure-report
+      file: pipelines-and-tasks/pipelines/infrastructure-report.yml
     on_failure: *notify
     on_error: *notify
 

@@ -1,0 +1,102 @@
+resources:
+- name: every-week
+  type: time
+  source:
+    interval: 24h
+    days: [Monday]
+
+- name: dockerfile
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/ci.git
+    branch: master
+    path: dockerfiles/infrastructure-report
+
+- name: ci
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/ci.git
+    branch: master
+
+- name: image
+  type: registry-image
+  icon: docker
+  source:
+    repository: gcr.io/cf-concourse-production/infrastructure-report
+    tag: latest
+    username: _json_key
+    password: ((gcr_gcp_key_json))
+
+- name: oci-build-task
+  type: registry-image
+  icon: docker
+  source:
+    repository: vito/oci-build-task
+
+- name: ubuntu-bionic
+  type: registry-image
+  icon: docker
+  source:
+    repository: ubuntu
+    tag: bionic
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: notify
+  type: slack-notifier
+  icon: slack
+  source:
+    url: ((slack_hooks.concourse-private))
+    username: ((basic_auth.username))
+    password: ((basic_auth.password))
+    concourse_url: https://ci.concourse-ci.org
+
+jobs:
+- name: build-image
+  plan:
+  - get: ci
+    resource: dockerfile
+    trigger: true
+  - in_parallel:
+    - get: oci-build-task
+    - get: ubuntu-bionic
+      params: {format: oci}
+  - task: build
+    image: oci-build-task
+    privileged: true
+    config:
+      platform: linux
+      params:
+        CONTEXT: ci/dockerfiles/infrastructure-report
+        IMAGE_ARG_base_image: ubuntu-bionic/image.tar
+      inputs:
+        - name: ci
+        - name: ubuntu-bionic
+      outputs:
+        - name: image
+      caches:
+        - path: cache
+      run: {path: build}
+  - put: image
+    params: {image: image/image.tar}
+
+- name: generate-report
+  plan:
+  - get: every-week
+    trigger: true
+  - in_parallel:
+    - get: ci
+    - get: image
+  - task:
+    image: image
+    file: ci/tasks/infrastructure-report.yml
+    params:
+      GCP_JSON_KEY: ((gcp_json_key))
+  on_success:
+    put: notify
+    params:
+      mode: concise
+      message: Infrastructure report generated
+      alert_type: success

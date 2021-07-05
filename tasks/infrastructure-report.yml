@@ -1,0 +1,12 @@
+---
+platform: linux
+
+inputs:
+- name: ci
+
+params:
+  GCP_JSON_KEY:
+
+run:
+  path: ci/tasks/scripts/infrastructure-report.sh
+
