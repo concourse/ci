@@ -93,7 +93,7 @@ jobs:
     image: image
     file: ci/tasks/infrastructure-report.yml
     params:
-      GCP_JSON_KEY: ((gcp_json_key))
+      GCP_JSON_KEY: ((gcp_json_key))
   on_success:
     put: notify
     params:
