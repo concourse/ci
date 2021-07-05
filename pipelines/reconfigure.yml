@@ -333,20 +333,20 @@ jobs:
         concourse_smoke_deployment_name: concourse-smoke-6-7
         slack_hook: ((slack_hooks.concourse-private))
         resource_type_versions:
-          bosh-io-release: ~1.0.3
-          bosh-io-stemcell: ~1.0.3
-          cf: ~1.1.0
-          docker-image: ~1.5.1
-          git: ~1.12.1
-          github-release: ~1.5.1
-          hg: ~1.2.0
-          mock: ~0.11.0
-          pool: ~1.1.4
-          registry-image: ~0.14.0
-          s3: ~1.1.0
-          semver: ~1.2.1
-          time: ~1.4.0
-          tracker: ~1.0.3
+          bosh-io-release: ~1.0
+          bosh-io-stemcell: ~1.0
+          cf: ~1.1
+          docker-image: ~1.5
+          git: ~1.12
+          github-release: ~1.5
+          hg: ~1.2
+          mock: ~0.11
+          pool: ~1.1
+          registry-image: ~0.14
+          s3: ~1.1
+          semver: ~1.2
+          time: ~1.4
+          tracker: ~1.0
     - set_pipeline: release
       file: pipelines-and-tasks/pipelines/release.yml
       instance_vars:
