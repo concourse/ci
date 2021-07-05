@@ -10,9 +10,10 @@ EOF
 
 gcloud init > /dev/null 2>&1
 
-FILE=report.txt
+# FILE=report.txt
 log () {
-  echo "$@" > $FILE
+  # echo "$@" > $FILE
+  echo "$@"
 }
 
 report_vms () {
