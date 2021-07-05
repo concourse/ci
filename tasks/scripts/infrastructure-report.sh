@@ -8,7 +8,7 @@ cat > $GOOGLE_APPLICATION_CREDENTIALS <<EOF
 $GCP_JSON_KEY
 EOF
 
-gcloud init > /dev/null 2>&1
+gcloud auth activate-service-account infrastructure-report@cf-concourse-production.iam.gserviceaccount.com --key-file=$GOOGLE_APPLICATION_CREDENTIALS --project=cf-concourse-production
 
 # FILE=report.txt
 log () {
@@ -43,6 +43,10 @@ report_vms () {
   gce_smoke=$(echo $gce | jq ' [ .[] | select( .name | contains("smoke-") ) ]')
   log "$(echo $gce_smoke | jq 'length') of which follow the Terraform smoke naming scheme \"smoke-\" (each workspace should correspond to 1 VM)"
   pushd ci/deployments/smoke > /dev/null
+    cat > keys/gcp.json <<EOF
+$GCP_JSON_KEY
+EOF
+
     terraform init > /dev/null
     workspaces=($(terraform workspace list | sed s/\*//g))
     log "  There are ${#workspaces[@]} terraform workspaces. They will need to be deleted manually if they're no longer being used"
