@@ -11,7 +11,7 @@ resources:
   source:
     uri: https://github.com/concourse/ci.git
     branch: master
-    path: dockerfiles/infrastructure-report
+    paths: dockerfiles/infrastructure-report
 
 - name: ci
   type: git
