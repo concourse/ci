@@ -8,7 +8,9 @@ cat > $GOOGLE_APPLICATION_CREDENTIALS <<EOF
 $GCP_JSON_KEY
 EOF
 
-gcloud auth activate-service-account infrastructure-report@cf-concourse-production.iam.gserviceaccount.com --key-file=$GOOGLE_APPLICATION_CREDENTIALS --project=cf-concourse-production
+account=$(echo $GCP_JSON_KEY | jq '.client_email')
+project=$(echo $GCP_JSON_KEY | jq '.project')
+gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS --project $project $account
 
 # FILE=report.txt
 log () {
@@ -97,11 +99,12 @@ report_disks () {
   log "$(echo $unused_disks | jq 'length') of which follow the GKE node naming scheme \"gke-\" (number reported by GCE and GKE should be the same)"
   gke=$(gcloud container clusters list --format=json)
 
-  for cluster in $(echo $gke | jq -r '.[] | { name:.name, count:.currentNodeCount } | @json')
+  for cluster in $(echo $gke | jq -r '.[] | { name:.name, count:.currentNodeCount, zone: .zone } | @json')
   do
     name=$(echo $cluster | jq -r '.name')
     nodes=$(echo $cluster | jq -r '.count')
-    gcloud container clusters get-credentials $name > /dev/null 2>&1
+    zone=$(echo $cluster | jq -r '.zone')
+    gcloud container clusters get-credentials --zone $zone $name> /dev/null 2>&1
 
     gce_count=$(echo $gce_disks | jq -r --arg cluster $name '[ .[] | select( .name | contains("gke-"+$cluster))] | length')
     pvcs=$(kubectl get pvc --all-namespaces --output=json | jq '.items | length')
