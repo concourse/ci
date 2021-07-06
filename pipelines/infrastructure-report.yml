@@ -1,3 +1,8 @@
+resource_types:
+- name: slack-notifier
+  type: registry-image
+  source: {repository: mockersf/concourse-slack-notifier}
+
 resources:
 - name: every-week
   type: time
@@ -11,7 +16,8 @@ resources:
   source:
     uri: https://github.com/concourse/ci.git
     branch: master
-    paths: dockerfiles/infrastructure-report
+    paths:
+      - dockerfiles/infrastructure-report
 
 - name: ci
   type: git
