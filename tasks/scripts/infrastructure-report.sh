@@ -9,7 +9,7 @@ $GCP_JSON_KEY
 EOF
 
 # for terraform smoke
-cat > keys/gcp.json <<EOF
+cat > ci/deployments/smoke/keys/gcp.json <<EOF
 $GCP_JSON_KEY
 EOF
 
