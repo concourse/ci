@@ -54,7 +54,7 @@ report_vm_gke () {
 # go through all the ci/deployments/smoke workspaces and make sure there's one vm per known workspace
 report_vm_tf () {
   gce_smoke=$(gcloud compute instances list --filter=name~smoke- --format=json)
-  info "$(echo $gce_smoke | jq 'length') of which follow the Terraform smoke naming scheme \"smoke-\" (each workspace should correspond to 1 VM)"
+  info "$(echo $gce_smoke | jq 'length') of which follow the Terraform smoke naming scheme \"smoke-\", each workspace should correspond to 1 VM"
   pushd ci/deployments/smoke > /dev/null
     terraform init > /dev/null
 
@@ -62,7 +62,7 @@ report_vm_tf () {
     unused_vms=$(echo $gce_smoke | jq '[ .[].name ]')
 
     workspaces=($(terraform workspace list | sed s/\*//g))
-    info "  There are ${#workspaces[@]} terraform workspaces. They will need to be deleted manually if they're no longer being used"
+    info "  There are ${#workspaces[@]} terraform workspaces (Make sure these workspaces are all valid, they will need to be destroyed manually if they're no longer in use)"
     for w in ${workspaces[@]}
     do
       terraform workspace select $w > /dev/null
@@ -72,7 +72,7 @@ report_vm_tf () {
       then
         instance_id=$(echo $tf_state | jq -r '.values.root_module.resources[] | select(.address == "google_compute_instance.smoke") | .values.name')
         unused_vms=$(echo $unused_vms | jq --arg instance "${instance_id}" '[ .[] | select( . == $instance | not ) ]')
-        info "  - $w (VM: \"${instance_id}\")"
+        info "  - $w [VM: \"${instance_id}\"]"
       else
         info "  - $w (no VM)"
       fi
@@ -82,7 +82,7 @@ report_vm_tf () {
     if [[ $(echo $unused_vms | jq -r 'length') != "0" ]]
     then
       info ""
-      warn "  There are some VMs that fit the Terraform smoke naming scheme but are not associated to a workspace:"
+      warn "  There are some VMs that fit the Terraform smoke naming scheme but are not associated to a workspace (These VMs probably shouldn't exist and needs to be deleted manually)"
       info $unused_vms | jq -r '.[] | "    - " + .'
     fi
   popd > /dev/null
@@ -111,8 +111,8 @@ report_vm_bosh () {
 
   # BOSH director and jumpbox vms
   toplevel_vms=$(echo $unknown_vms | jq '[ .[] | select( .labels.director == "bosh-init" ) ]')
-  info "  There are $(echo $toplevel_vms | jq 'length') top level VMs (i.e. BOSH directors and jumpboxes)"
-  info $toplevel_vms | jq -r '.[] | "  - " + .name + " (type: " + .labels.name + ", tags: " + ( .tags.items | join(",") ) + ")"'
+  info "  There are $(echo $toplevel_vms | jq 'length') top level VMs, i.e. BOSH directors and jumpboxes (There should only really be one environment, \"$topgun_director\" which is used for Topgun. Any others should be investigated)"
+  info $toplevel_vms | jq -r '.[] | "  - " + .name + " [type: " + .labels.name + ", tags: " + ( .tags.items | join(",") ) + "]"'
   info ""
   unknown_vms=$(echo $unknown_vms | jq --argjson used "$toplevel_vms" '. - $used')
 
@@ -121,8 +121,8 @@ report_vm_bosh () {
   vms_with_unknown_directors_count=$(echo $vms_with_unknown_directors | jq 'length')
   if [ $vms_with_unknown_directors_count -ne 0 ]
   then
-    warn "  There are ${vms_with_unknown_directors_count} VMs managed by other BOSH directors"
-    info $vms_with_unknown_directors | jq -r '.[] | "  - " + .name + " (director: " + .labels.director + ")"'
+    warn "  There are ${vms_with_unknown_directors_count} VMs managed by other BOSH directors (Any non-Topgun environment needs to be investigated to see why they exist. Note: Topgun VMs might show up here if they're deleted recently, you can ignore any that has $topgun_director as the director)"
+    info $vms_with_unknown_directors | jq -r '.[] | "  - " + .name + " [director: " + .labels.director + "]"'
     info ""
     unknown_vms=$(echo $unknown_vms | jq --argjson used "$vms_with_unknown_directors" '. - $used')
   fi
@@ -131,7 +131,7 @@ report_vm_bosh () {
   unknown_vms_count=$(echo $unknown_vms | jq 'length')
   if [ $unknown_vms_count -ne 0 ]
   then
-    warn "  There are $(echo $unknown_vms | jq 'length') VMs that follow the BOSH naming scheme but does not fit into any of the previous groups"
+    warn "  There are $(echo $unknown_vms | jq 'length') VMs that follow the BOSH naming scheme but does not fit into any of the previous groups. (These can almost always be safely deleted)"
     info $unknown_vms | jq -r '.[] | "  - " + .name'
     info ""
   fi
@@ -150,8 +150,11 @@ report_vms () {
   unknowns_count=$(echo $unknowns | jq 'length')
   if [ $unknowns_count -ne 0 ]
   then
-    warn "$(echo $unknowns | jq 'length') of which do not match any naming schemes"
+    warn "$(echo $unknowns | jq 'length') of which do not match any naming schemes (Investigate and figure out if they have a legitimate use case and update this script it does)"
     info $unknowns | jq -r '.[] | "  - " + .name'
+    info "  VMs with legitimate use:"
+    info "  - nat: used by BOSH VMs to access the external internet. Otherwise each BOSH VM will require an external IP"
+    info "  - windows-worker-ci: Windows worker for ci.concourse-ci.org"
   fi
 }
 
@@ -177,12 +180,11 @@ report_disks_gke () {
     pvcs=$(kubectl get pvc --all-namespaces --output=json | jq '.items | length')
     gke_count=$(($nodes + $pvcs))
 
-    info -n "  - GKE ${name} cluster has ${nodes} nodes ${pvcs} pvcs for a total of ${gke_count} disks, and GCE reported ${gce_count} persistant disks"
     if [ $gke_count -ne $gce_count ]
     then
-      warn "  - GKE ${name} cluster has ${nodes} nodes ${pvcs} pvcs for a total of ${gke_count} disks, and GCE reported ${gce_count} persistant disks"
+      warn "  - GKE ${name} cluster has ${nodes} nodes + ${pvcs} PVCs = ${gke_count} disks, but GCE reported ${gce_count} persistant disks (This will require some manual investigation)"
     else
-      info "  - GKE ${name} cluster has ${nodes} nodes ${pvcs} pvcs for a total of ${gke_count} disks, and GCE reported ${gce_count} persistant disks"
+      info "  - GKE ${name} cluster has ${nodes} nodes + ${pvcs} PVCs = ${gke_count} disks, and GCE reported ${gce_count} persistant disks"
     fi
   done
   info ""
@@ -190,7 +192,7 @@ report_disks_gke () {
   unused_disk_count=$(echo $unused_disks | jq 'length')
   if [ unused_disk_count -ne 0 ]
   then
-    warn "  There are $(echo $unused_disks | jq 'length') disks were used by clusters that no longer exist:"
+    warn "  There are $(echo $unused_disks | jq 'length') disks were used by clusters that no longer exist. (These can almost always be safely deleted if the cluster is truly gone)"
     info $unused_disks | jq -r '.[] | "  - " + .name'
   fi
   info ""
@@ -247,7 +249,7 @@ report_disks () {
   unknowns_count=$(echo $unknowns | jq 'length')
   if [ $unknowns_count -ne 0 ]
   then
-    warn "$(echo $unknowns | jq 'length') of which do not match any naming schemes"
+    warn "$(echo $unknowns | jq 'length') of which do not match any naming schemes (These should correspond to unknown VMs in the previous section, otherwise investigation will be needed)"
     info $unknowns | jq -r '.[] | "  - " + .name'
   fi
 }
