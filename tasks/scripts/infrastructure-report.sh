@@ -26,20 +26,20 @@ info () {
 
 # usage: warn "msg"
 warn () {
-  info -n $@
+  info -n "$@"
   info -e " \033[0;31m!!WARNING!!\033[0m"
 }
 
 # poke gke and figure out if the number of nodes they're reporting matches the number of vm instances using the `gke-$cluster_name-` pattern
 report_vm_gke () {
-  gce_smoke=$(gcloud compute instances list --filter=name~gke- --format=json)
+  gce_gke=$(gcloud compute instances list --filter=name~gke- --format=json)
   info "$(echo $gce_gke | jq 'length') of which follow the GKE node naming scheme \"gke-\" (number reported by GCE and GKE should be the same)"
   gke=$(gcloud container clusters list --format=json)
   for cluster in $(echo $gke | jq -r '.[] | { name:.name, count:.currentNodeCount } | @json')
   do
     name=$(echo $cluster | jq -r '.name')
     gke_count=$(echo $cluster | jq '.count')
-    gce_count=$(echo $gce | jq --arg name "${name}" '[ .[] | select(.name | contains("gke-"+$name) )] | length')
+    gce_count=$(echo $gce_gke | jq --arg name "${name}" '[ .[] | select(.name | contains("gke-"+$name) )] | length')
 
     if [ $gke_count -ne $gce_count ]
     then
@@ -170,21 +170,34 @@ report_disks_gke () {
   do
     name=$(echo $cluster | jq -r '.name')
     zone=$(echo $cluster | jq -r '.zone')
-    gce_count=$(echo $gce | jq -r --arg cluster $name '[ .[] | select( .name | contains("gke-"+$cluster))] | length')
+    gce_disks=$(echo $gce | jq -r --arg cluster $name '[ .[] | select( .name | contains("gke-"+$cluster))]')
+    gce_count=$(echo $gce_disks | jq 'length')
 
     # var to keep track of disks that doesn't belong to any active cluster
     unused_disks=$(echo $unused_disks | jq --arg cluster $name '[ .[] | select(.name | contains("gke-"+$cluster) | not) ]')
 
     gcloud container clusters get-credentials --zone $zone $name> /dev/null 2>&1
-    nodes=$(echo $cluster | jq -r '.count')
-    pvcs=$(kubectl get pvc --all-namespaces --output=json | jq '.items | length')
-    gke_count=$(($nodes + $pvcs))
+    pvs=$(kubectl get pv --all-namespaces --output=json | jq '.items')
+
+    nodes_count=$(echo $cluster | jq -r '.count')
+    pv_count=$(echo $pvs | jq 'length')
+    gke_count=$(($nodes_count + $pv_count))
 
     if [ $gke_count -ne $gce_count ]
     then
-      warn "  - GKE ${name} cluster has ${nodes} nodes + ${pvcs} PVCs = ${gke_count} disks, but GCE reported ${gce_count} persistant disks (This will require some manual investigation)"
+      warn "  - GKE ${name} cluster has ${nodes_count} nodes + ${pv_count} PVs = ${gke_count} disks, but GCE reported ${gce_count} persistant disks (This will require some manual investigation)"
+
+      # XXX: we're making a somewhat ballsy assumption that the diff will be in the persistent volume count
+      # it kinda makes logical sense the number of nodes should equal number of node disks (since it's created/destroyed by google), but this can come back to bite us
+      # it also assumes the real count will always be higher than the expected count (since it's gke that creates these, it should never fail to create disks)
+      info "    Assuming the difference is in the PV count, these disks are found in GCE but not in the GKE PVs list:"
+      pv_disks=$(echo $pvs | jq '[ .[].spec.gcePersistentDisk.pdName ]')
+      unused_pvs=$gce_disks
+      unused_pvs=$(echo $unused_pvs | jq '[ .[] | select(.labels."goog-gke-node" == null ) ]') # filter out node disks
+      unused_pvs=$(echo $unused_pvs | jq --argjson used "$pv_disks" '[ .[] | select( [.name] | inside($used) | not) ]') # filter out pv disks
+      info $unused_pvs | jq -r '.[] | "    * " + .name'
     else
-      info "  - GKE ${name} cluster has ${nodes} nodes + ${pvcs} PVCs = ${gke_count} disks, and GCE reported ${gce_count} persistant disks"
+      info "  - GKE ${name} cluster has ${nodes_count} nodes + ${pv_count} PVs = ${gke_count} disks, and GCE reported ${gce_count} persistant disks"
     fi
   done
   info ""
