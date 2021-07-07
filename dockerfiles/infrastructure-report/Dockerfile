@@ -21,3 +21,11 @@ RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyri
   echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
   apt-get update && apt-get install -y google-cloud-sdk
 
+
+# bosh cli
+RUN curl -Lo ./bosh https://github.com/cloudfoundry/bosh-cli/releases/download/v6.4.4/bosh-cli-6.4.4-linux-amd64 && \
+  install bosh /usr/local/bin
+
+# bbl
+RUN curl -Lo ./bbl https://github.com/cloudfoundry/bosh-bootloader/releases/download/v8.4.41/bbl-v8.4.41_linux_x86-64 && \
+  install bbl /usr/local/bin
