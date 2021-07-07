@@ -104,5 +104,5 @@ jobs:
     put: notify
     params:
       mode: concise
-      message: Infrastructure report generated
+      message: Infrastructure report generated, open build logs to view
       alert_type: success
