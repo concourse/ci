@@ -17,19 +17,23 @@ project=$(echo $GCP_JSON_KEY | jq -r '.project_id')
 gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS --project $project
 
 # FILE=report.txt
-log () {
+
+# usage: info "msg"
+info () {
   # echo "$@" > $FILE
   echo "$@"
 }
 
-report_vms () {
-  gce=$(gcloud compute instances list --format=json)
-  log "Total of $(echo $gce | jq 'length') VM instances"
+# usage: warn "msg"
+warn () {
+  info -n $@
+  info -e " \033[0;31m!!WARNING!!\033[0m"
+}
 
-
-  # poke gke and figure out if the number of nodes they're reporting matches the number of vm instances using the `gke-$cluster_name-` pattern
-  gce_gke=$(echo $gce | jq -r ' [ .[] | select( .name | contains("gke-") )]')
-  log "$(echo $gce_gke | jq 'length') of which follow the GKE node naming scheme \"gke-\" (number reported by GCE and GKE should be the same)"
+# poke gke and figure out if the number of nodes they're reporting matches the number of vm instances using the `gke-$cluster_name-` pattern
+report_vm_gke () {
+  gce_smoke=$(gcloud compute instances list --filter=name~gke- --format=json)
+  info "$(echo $gce_gke | jq 'length') of which follow the GKE node naming scheme \"gke-\" (number reported by GCE and GKE should be the same)"
   gke=$(gcloud container clusters list --format=json)
   for cluster in $(echo $gke | jq -r '.[] | { name:.name, count:.currentNodeCount } | @json')
   do
@@ -37,20 +41,20 @@ report_vms () {
     gke_count=$(echo $cluster | jq '.count')
     gce_count=$(echo $gce | jq --arg name "${name}" '[ .[] | select(.name | contains("gke-"+$name) )] | length')
 
-    log -n "  - GKE cluster \"${name}\" reports ${gke_count} nodes and GCE reports ${gce_count} VM instances"
     if [ $gke_count -ne $gce_count ]
     then
-      log " WARNING"
+      warn "  - GKE cluster \"${name}\" reports ${gke_count} nodes and GCE reports ${gce_count} VM instances"
     else
-      log ""
+      info "  - GKE cluster \"${name}\" reports ${gke_count} nodes and GCE reports ${gce_count} VM instances"
     fi
   done
-  log ""
+  info ""
+}
 
-
-  # go through all the ci/deployments/smoke workspaces and make sure there's one vm per known workspace
-  gce_smoke=$(echo $gce | jq ' [ .[] | select( .name | contains("smoke-") ) ]')
-  log "$(echo $gce_smoke | jq 'length') of which follow the Terraform smoke naming scheme \"smoke-\" (each workspace should correspond to 1 VM)"
+# go through all the ci/deployments/smoke workspaces and make sure there's one vm per known workspace
+report_vm_tf () {
+  gce_smoke=$(gcloud compute instances list --filter=name~smoke- --format=json)
+  info "$(echo $gce_smoke | jq 'length') of which follow the Terraform smoke naming scheme \"smoke-\" (each workspace should correspond to 1 VM)"
   pushd ci/deployments/smoke > /dev/null
     terraform init > /dev/null
 
@@ -58,7 +62,7 @@ report_vms () {
     unused_vms=$(echo $gce_smoke | jq '[ .[].name ]')
 
     workspaces=($(terraform workspace list | sed s/\*//g))
-    log "  There are ${#workspaces[@]} terraform workspaces. They will need to be deleted manually if they're no longer being used"
+    info "  There are ${#workspaces[@]} terraform workspaces. They will need to be deleted manually if they're no longer being used"
     for w in ${workspaces[@]}
     do
       terraform workspace select $w > /dev/null
@@ -68,54 +72,102 @@ report_vms () {
       then
         instance_id=$(echo $tf_state | jq -r '.values.root_module.resources[] | select(.address == "google_compute_instance.smoke") | .values.name')
         unused_vms=$(echo $unused_vms | jq --arg instance "${instance_id}" '[ .[] | select( . == $instance | not ) ]')
-        log "  - $w (VM: \"${instance_id}\")"
+        info "  - $w (VM: \"${instance_id}\")"
       else
-        log "  - $w (no VM)"
+        info "  - $w (no VM)"
       fi
     done
 
     # unaccounted for vms
     if [[ $(echo $unused_vms | jq -r 'length') != "0" ]]
     then
-      log ""
-      log "  There are some VMs that fit the Terraform smoke naming scheme but are not associated to a workspace:"
-      log $unused_vms | jq -r '.[] | "    - " + .'
+      info ""
+      warn "  There are some VMs that fit the Terraform smoke naming scheme but are not associated to a workspace:"
+      info $unused_vms | jq -r '.[] | "    - " + .'
     fi
   popd > /dev/null
-  log ""
+  info ""
+}
 
+report_vm_bosh () {
+  gce_bosh=$(gcloud compute instances list --filter=name~vm- --format=json)
+  info "$(echo $gce_bosh | jq 'length') of which follow the BOSH naming scheme \"vm-\""
 
-  # we should only have one bosh environment: bosh-topgun
-  log "$(echo $gce | jq ' [ .[] | select( .name | contains("vm-") )] | length') of which follow the BOSH naming scheme \"vm-\""
-  # pushd prod/bosh-topgun-bbl-state > /dev/null
-  #   eval "$(bbl print-env)"
+  # Topgun BOSH environment
+  topgun_director="bosh-bbl-env-manitoba-2020-10-01t19-18z" # hard coded for now
+  gce_topgun_bosh=$(echo $gce_bosh | jq --arg director $topgun_director '[ .[] | select (.labels.director ==  $director) ]')
 
-  # popd > /dev/null
-  log ""
+  # unknown_vms=$(echo $gce_bosh | jq '[ .[].name ]')
+  unknown_vms=$gce_bosh
 
+  gsutil -m cp -r gs://bosh-topgun-bbl-state/ . > /dev/null 2>&1
+  pushd bosh-topgun-bbl-state > /dev/null
+    eval "$(bbl print-env)"
+    topgun_vms=$(bosh vms --json | jq '[ .Tables[].Rows[].vm_cid ]')
+    info "  There are $(echo $topgun_vms | jq 'length') VMs managed by the Topgun BOSH director ($topgun_director) and GCE reports $(echo $gce_topgun_bosh | jq 'length') VM instances"
+    info ""
+    unknown_vms=$(echo $unknown_vms | jq --argjson used "$topgun_vms" '[ .[] | select( [.name] | inside($used) | not) ]')
+  popd > /dev/null
 
-  # unknown vms, some of this, like `nats` has legit use cases
+  # BOSH director and jumpbox vms
+  toplevel_vms=$(echo $unknown_vms | jq '[ .[] | select( .labels.director == "bosh-init" ) ]')
+  info "  There are $(echo $toplevel_vms | jq 'length') top level VMs (i.e. BOSH directors and jumpboxes)"
+  info $toplevel_vms | jq -r '.[] | "  - " + .name + " (type: " + .labels.name + ", tags: " + ( .tags.items | join(",") ) + ")"'
+  info ""
+  unknown_vms=$(echo $unknown_vms | jq --argjson used "$toplevel_vms" '. - $used')
+
+  # unknown BOSH directors
+  vms_with_unknown_directors=$(echo $unknown_vms | jq '[ .[] | select( .labels.director != null ) ]')
+  vms_with_unknown_directors_count=$(echo $vms_with_unknown_directors | jq 'length')
+  if [ $vms_with_unknown_directors_count -ne 0 ]
+  then
+    warn "  There are ${vms_with_unknown_directors_count} VMs managed by other BOSH directors"
+    info $vms_with_unknown_directors | jq -r '.[] | "  - " + .name + " (director: " + .labels.director + ")"'
+    info ""
+    unknown_vms=$(echo $unknown_vms | jq --argjson used "$vms_with_unknown_directors" '. - $used')
+  fi
+
+  # unknown BOSH vms
+  unknown_vms_count=$(echo $unknown_vms | jq 'length')
+  if [ $unknown_vms_count -ne 0 ]
+  then
+    warn "  There are $(echo $unknown_vms | jq 'length') VMs that follow the BOSH naming scheme but does not fit into any of the previous groups"
+    info $unknown_vms | jq -r '.[] | "  - " + .name'
+    info ""
+  fi
+}
+
+report_vms () {
+  gce=$(gcloud compute instances list --format=json)
+  info "Total of $(echo $gce | jq 'length') VM instances"
+
+  report_vm_gke
+  report_vm_tf
+  report_vm_bosh
+
+  # unknown vms, some of this, like `nats` and `ci-windows-worker` has legit use cases
   unknowns=$(echo $gce | jq -r ' [ .[] | select( ((.name|contains("gke-")) or (.name|contains("smoke")) or (.name|contains("vm-"))) | not ) ]')
-  log "$(echo $unknowns | jq 'length') of which do not match any naming schemes"
-  log $unknowns | jq -r '.[] | "  - " + .name'
+  unknowns_count=$(echo $unknowns | jq 'length')
+  if [ $unknowns_count -ne 0 ]
+  then
+    warn "$(echo $unknowns | jq 'length') of which do not match any naming schemes"
+    info $unknowns | jq -r '.[] | "  - " + .name'
+  fi
 }
 
 
-report_disks () {
-  gce_disks=$(gcloud compute disks list --format=json)
-  log "Total of $(echo $gce_disks | jq 'length') disks"
-
-
-  # gke disks is the sum of number of nodes (each nodes gets a disk) and the number of pvcs in that cluster
-  unused_disks=$(echo $gce_disks | jq -r ' [ .[] | select( .name | contains("gke-") )]')
-  log "$(echo $unused_disks | jq 'length') of which follow the GKE node naming scheme \"gke-\" (number reported by GCE and GKE should be the same)"
+# gke disks is the sum of number of nodes (each nodes gets a disk) and the number of pvcs in that cluster
+report_disks_gke () {
+  gce=$1
+  unused_disks=$(echo $gce | jq -r ' [ .[] | select( .name | contains("gke-") )]')
+  info "$(echo $unused_disks | jq 'length') of which follow the GKE node naming scheme \"gke-\" (number reported by GCE and GKE should be the same)"
 
   gke=$(gcloud container clusters list --format=json)
   for cluster in $(echo $gke | jq -r '.[] | { name:.name, count:.currentNodeCount, zone: .zone } | @json')
   do
     name=$(echo $cluster | jq -r '.name')
     zone=$(echo $cluster | jq -r '.zone')
-    gce_count=$(echo $gce_disks | jq -r --arg cluster $name '[ .[] | select( .name | contains("gke-"+$cluster))] | length')
+    gce_count=$(echo $gce | jq -r --arg cluster $name '[ .[] | select( .name | contains("gke-"+$cluster))] | length')
 
     # var to keep track of disks that doesn't belong to any active cluster
     unused_disks=$(echo $unused_disks | jq --arg cluster $name '[ .[] | select(.name | contains("gke-"+$cluster) | not) ]')
@@ -125,26 +177,82 @@ report_disks () {
     pvcs=$(kubectl get pvc --all-namespaces --output=json | jq '.items | length')
     gke_count=$(($nodes + $pvcs))
 
-    log -n "  - GKE ${name} cluster has ${nodes} nodes ${pvcs} pvcs for a total of ${gke_count} disks, and GCE reported ${gce_count} persistant disks"
+    info -n "  - GKE ${name} cluster has ${nodes} nodes ${pvcs} pvcs for a total of ${gke_count} disks, and GCE reported ${gce_count} persistant disks"
     if [ $gke_count -ne $gce_count ]
     then
-      log " !!WARNING!!"
+      warn "  - GKE ${name} cluster has ${nodes} nodes ${pvcs} pvcs for a total of ${gke_count} disks, and GCE reported ${gce_count} persistant disks"
     else
-      log ""
+      info "  - GKE ${name} cluster has ${nodes} nodes ${pvcs} pvcs for a total of ${gke_count} disks, and GCE reported ${gce_count} persistant disks"
     fi
   done
-  log ""
-  log "  There are $(echo $unused_disks | jq 'length') disks were used by clusters that no longer exist:"
-  log $unused_disks | jq -r '.[] | "  - " + .name'
-  log ""
+  info ""
 
+  unused_disk_count=$(echo $unused_disks | jq 'length')
+  if [ unused_disk_count -ne 0 ]
+  then
+    warn "  There are $(echo $unused_disks | jq 'length') disks were used by clusters that no longer exist:"
+    info $unused_disks | jq -r '.[] | "  - " + .name'
+  fi
+  info ""
+}
 
-  # terraform smoke should create a disk for every vm
+# terraform smoke should create a disk for every vm
+report_disks_tf () {
+  gce=$1
   gce_smoke=$(echo $gce | jq ' [ .[] | select( .name | contains("smoke-") ) ]')
-  log "$(echo $gce_smoke | jq 'length') of which follow the Terraform smoke naming scheme \"smoke-\" (please see the Terraform VM section as each VM equates to 1 disk)"
+  info "$(echo $gce_smoke | jq 'length') of which follow the Terraform smoke naming scheme \"smoke-\" (please see the Terraform VM section as each VM equates to 1 disk)"
+
+  unused_disks=$(echo $gce_smoke | jq '[ .[] | select( (.users | length) == 0 ) ]')
+  unused_disk_count=$(echo $unused_disks | jq 'length')
+  if [ $unused_disk_count -eq 0 ]
+  then
+    info "  All disks are accounted for (they're in use by a VM)"
+  else
+    warn "  Some disks are not in use by a VM (usually means they're safe to delete)"
+    info $unused_disks | jq -r '.[] | "  - " + .name'
+  fi
+  info ""
+
+}
+
+# can't really do much with BOSH disks since the CLI doesn't expose much info
+# best we can do is to make sure every disk is in use
+report_disks_bosh () {
+  gce=$1
+  gce_bosh=$(echo $gce | jq ' [ .[] | select( (.name | contains("vm-")) or (.name | contains("disk-")) ) ]')
+  info "$(echo $gce_bosh | jq 'length') of which follow the BOSH naming scheme \"disk-\" or \"vm-\""
+
+  unused_disks=$(echo $gce_bosh | jq '[ .[] | select( (.users | length) == 0 ) ]')
+  unused_disk_count=$(echo $unused_disks | jq 'length')
+  if [ $unused_disk_count -eq 0 ]
+  then
+    info "  All disks are accounted for (they're in use by a VM)"
+  else
+    warn "  Some disks are not in use by a VM (usually means they're safe to delete)"
+    info $unused_disks | jq -r '.[] | "  - " + .name'
+  fi
+  info ""
+}
+
+report_disks () {
+  gce=$(gcloud compute disks list --format=json)
+  info "Total of $(echo $gce | jq 'length') disks"
+
+  report_disks_gke "$gce"
+  report_disks_tf "$gce"
+  report_disks_bosh "$gce"
+
+  # unknown disks
+  unknowns=$(echo $gce | jq -r ' [ .[] | select( ((.name|contains("gke-")) or (.name|contains("smoke")) or (.name|contains("vm-")) or (.name|contains("disk-")) ) | not ) ]')
+  unknowns_count=$(echo $unknowns | jq 'length')
+  if [ $unknowns_count -ne 0 ]
+  then
+    warn "$(echo $unknowns | jq 'length') of which do not match any naming schemes"
+    info $unknowns | jq -r '.[] | "  - " + .name'
+  fi
 }
 
 report_vms
-log ""
-log ""
+info ""
+info ""
 report_disks
