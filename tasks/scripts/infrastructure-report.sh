@@ -190,7 +190,7 @@ report_disks_gke () {
   info ""
 
   unused_disk_count=$(echo $unused_disks | jq 'length')
-  if [ unused_disk_count -ne 0 ]
+  if [ $unused_disk_count -ne 0 ]
   then
     warn "  There are $(echo $unused_disks | jq 'length') disks were used by clusters that no longer exist. (These can almost always be safely deleted if the cluster is truly gone)"
     info $unused_disks | jq -r '.[] | "  - " + .name'
