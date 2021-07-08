@@ -77,6 +77,7 @@ plan:
     resource: #@ lts_string("resource-repo", lts)
     trigger: true
   - get: #@ determine_base(distro)
+    resource: #@ lts_string(determine_base(distro), lts)
     trigger: true
     params: {format: oci}
   - get: golang-builder
@@ -487,7 +488,25 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
+- name: alpine-lts
+  type: registry-image
+  icon: docker
+  source:
+    repository: alpine
+    tag: 3.14
+    username: ((docker.username))
+    password: ((docker.password))
+
 - name: ubuntu-bionic
+  type: registry-image
+  icon: docker
+  source:
+    repository: ubuntu
+    tag: bionic
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: ubuntu-bionic-lts
   type: registry-image
   icon: docker
   source:
