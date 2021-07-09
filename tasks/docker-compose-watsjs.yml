@@ -18,7 +18,6 @@ caches:
 
 params:
   RUNTIME: guardian
-  POSTGRES_IMAGE: postgres-image
 
 run:
   path: ci/tasks/scripts/with-docker-compose

@@ -9,7 +9,6 @@ inputs:
 - name: ci
 - name: dev-image
 - name: postgres-image
-  optional: true
 
 caches:
 - path: gopath
@@ -17,7 +16,6 @@ caches:
 
 params:
   RUNTIME: guardian
-  POSTGRES_IMAGE: postgres-image
 
 run:
   path: ci/tasks/scripts/with-docker-compose

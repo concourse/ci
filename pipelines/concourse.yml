@@ -347,8 +347,8 @@ jobs:
     timeout: 1h
     params:
       RUNTIME: ((.:runtime))
-      POSTGRES_IMAGE: ((.:postgres-image))
     file: ci/tasks/docker-compose-testflight.yml
+    input_mapping: {postgres-image: ((.:postgres-image))}
   on_failure: *failed-concourse
 
 - name: watsjs
