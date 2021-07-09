@@ -2,7 +2,9 @@
 
 set -e -u
 
-for resource in $RESOURCES; do
+apt-get update && apt-get install -y jq
+
+echo "$RESOURCES" | jq -r '.[]' | while read resource; do
   echo "rendering '$resource' pipeline config..."
   ytt --data-value resource_name=$resource -f pipelines/pipelines/resources/ \
     > rendered_pipelines/$resource.yml

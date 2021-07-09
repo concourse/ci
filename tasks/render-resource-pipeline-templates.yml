@@ -3,8 +3,6 @@ image_resource:
   type: registry-image
   source:
     repository: k14s/image
-    # does not publish a 'latest' tag currently
-    tag: kbld-rand-1592942790507001000-1148625018150
 inputs:
 - name: pipelines
 outputs:

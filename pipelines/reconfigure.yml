@@ -184,69 +184,30 @@ jobs:
   - task: render-resource-templates
     file: pipelines-and-tasks/tasks/render-resource-pipeline-templates.yml
     params:
-      RESOURCES: |
-        git
-        time
-        docker-image
-        registry-image
-        cf
-        bosh-io-release
-        bosh-io-stemcell
-        tracker
-        hg
-        github-release
-        semver
-        s3
-        pool
-        datadog-event
-        mock
+      RESOURCES: &resources
+      - git
+      - time
+      - docker-image
+      - registry-image
+      - cf
+      - bosh-io-release
+      - bosh-io-stemcell
+      - tracker
+      - hg
+      - github-release
+      - semver
+      - s3
+      - pool
+      - datadog-event
+      - mock
     input_mapping: {pipelines: pipelines-and-tasks}
-  - in_parallel:
-    - set_pipeline: resource
-      instance_vars: {type: git}
-      file: rendered_pipelines/git.yml
-    - set_pipeline: resource
-      instance_vars: {type: time}
-      file: rendered_pipelines/time.yml
-    - set_pipeline: resource
-      instance_vars: {type: docker-image}
-      file: rendered_pipelines/docker-image.yml
-    - set_pipeline: resource
-      instance_vars: {type: registry-image}
-      file: rendered_pipelines/registry-image.yml
-    - set_pipeline: resource
-      instance_vars: {type: cf}
-      file: rendered_pipelines/cf.yml
-    - set_pipeline: resource
-      instance_vars: {type: bosh-io-release}
-      file: rendered_pipelines/bosh-io-release.yml
-    - set_pipeline: resource
-      instance_vars: {type: bosh-io-stemcell}
-      file: rendered_pipelines/bosh-io-stemcell.yml
-    - set_pipeline: resource
-      instance_vars: {type: tracker}
-      file: rendered_pipelines/tracker.yml
-    - set_pipeline: resource
-      instance_vars: {type: hg}
-      file: rendered_pipelines/hg.yml
-    - set_pipeline: resource
-      instance_vars: {type: github-release}
-      file: rendered_pipelines/github-release.yml
-    - set_pipeline: resource
-      instance_vars: {type: semver}
-      file: rendered_pipelines/semver.yml
-    - set_pipeline: resource
-      instance_vars: {type: s3}
-      file: rendered_pipelines/s3.yml
-    - set_pipeline: resource
-      instance_vars: {type: pool}
-      file: rendered_pipelines/pool.yml
-    - set_pipeline: resource
-      instance_vars: {type: datadog-event}
-      file: rendered_pipelines/datadog-event.yml
-    - set_pipeline: resource
-      instance_vars: {type: mock}
-      file: rendered_pipelines/mock.yml
+  - across:
+    - var: type
+      values: *resources
+      max_in_flight: all
+    set_pipeline: resource
+    instance_vars: {type: ((.:type))}
+    file: rendered_pipelines/((.:type)).yml
 
 - name: unit
   plan:
