@@ -191,7 +191,7 @@ plan:
 
 #@ def determine_channel(distro):
 #@ if resource_name == "git" and distro == "alpine":
-#@  return "concourse-interrupt"
+#@  return "#concourse-interrupt"
 #@ else: return ""
 #@ end
 
