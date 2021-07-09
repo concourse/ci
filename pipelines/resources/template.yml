@@ -116,15 +116,22 @@ config:
         --ignore-unfixed \
         --exit-code 1 \
         --input image/image.tar
+on_failure:
+  put: notify
+  params:
+    mode: normal
+    channel: #@ determine_channel(distro)
+    alert_type: failed
+on_error:
+  put: notify
+  params:
+    mode: normal
+    channel: #@ determine_channel(distro)
+    alert_type: failed
 #@ end
 
 #@ def scan_image(lts):
 name: #@ lts_string("scan-image", lts)
-on_failure: &failed-ci
-  put: notify
-  params:
-    mode: normal
-    alert_type: failed
 plan:
 - in_parallel:
   - get: resource-repo
@@ -153,8 +160,6 @@ plan:
     in_parallel:
       - #@ scan_task("alpine")
       - #@ scan_task("ubuntu")
-    on_failure: *failed-ci
-    on_error: *failed-ci
 #@ end
 
 #@ def extra_steps(distro):
@@ -182,6 +187,12 @@ plan:
 #@ elif distro == "ubuntu":
 #@   return "ubuntu-bionic"
 #@ end
+#@ end
+
+#@ def determine_channel(distro):
+#@ if resource_name == "git" and distro == "alpine":
+#@  return "concourse-interrupt"
+#@ else: return ""
 #@ end
 
 #@ def validate_pr(distro):
