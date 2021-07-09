@@ -116,18 +116,8 @@ config:
         --ignore-unfixed \
         --exit-code 1 \
         --input image/image.tar
-on_failure:
-  put: notify
-  params:
-    mode: normal
-    channel: #@ determine_channel(distro)
-    alert_type: failed
-on_error:
-  put: notify
-  params:
-    mode: normal
-    channel: #@ determine_channel(distro)
-    alert_type: failed
+on_failure: #@ determine_channel(distro)
+on_error: #@ determine_channel(distro)
 #@ end
 
 #@ def scan_image(lts):
@@ -190,9 +180,17 @@ plan:
 #@ end
 
 #@ def determine_channel(distro):
-#@ if resource_name == "git" and distro == "alpine":
-#@  return "#concourse-interrupt"
-#@ else: return ""
+  #@ if resource_name == "git" and distro == "alpine":
+  put: notify-interrupt
+  params:
+    mode: normal
+    alert_type: failed
+  #@ else:
+  put: notify
+  params:
+    mode: normal
+    alert_type: failed
+  #@ end
 #@ end
 
 #@ def validate_pr(distro):
@@ -708,7 +706,16 @@ resources:
   type: slack-notifier
   icon: slack
   source:
-    url: ((slack_hook))
+    url: ((slack_hooks.concourse-private))
+    username: ((basic_auth.username))
+    password: ((basic_auth.password))
+    concourse_url: https://ci.concourse-ci.org
+
+- name: notify-interrupt
+  type: slack-notifier
+  icon: slack
+  source:
+    url: ((slack_hooks.concourse-interrupt))
     username: ((basic_auth.username))
     password: ((basic_auth.password))
     concourse_url: https://ci.concourse-ci.org
