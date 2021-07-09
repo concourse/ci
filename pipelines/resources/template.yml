@@ -711,6 +711,7 @@ resources:
     password: ((basic_auth.password))
     concourse_url: https://ci.concourse-ci.org
 
+#@ if resource_name == "git":
 - name: notify-interrupt
   type: slack-notifier
   icon: slack
@@ -719,6 +720,7 @@ resources:
     username: ((basic_auth.username))
     password: ((basic_auth.password))
     concourse_url: https://ci.concourse-ci.org
+#@ end
 
 - name: daily-trigger
   type: time
