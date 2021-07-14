@@ -778,18 +778,26 @@ jobs:
           file: ci/tasks/scan-image.yml
           image: trivy
           input_mapping: {image: concourse-rc-image}
+          params:
+            IGNORE_POLICY_FILE: ci/trivy-ignore/((release_minor))-image.rego
         - task: scan-ubuntu
           file: ci/tasks/scan-image.yml
           image: trivy
           input_mapping: {image: concourse-rc-image-ubuntu}
+          params:
+            IGNORE_POLICY_FILE: ci/trivy-ignore/((release_minor))-image.rego
         - task: scan-resource-types-alpine
           file: ci/tasks/scan-resource-types.yml
           image: trivy
           input_mapping: {image: concourse-rc-image-rootfs}
+          params:
+            IGNORE_POLICY_FILE: ci/trivy-ignore/((release_minor))-resource-types.rego
         - task: scan-resource-types-ubuntu
           file: ci/tasks/scan-resource-types.yml
           image: trivy
           input_mapping: {image: concourse-rc-image-ubuntu-rootfs}
+          params:
+            IGNORE_POLICY_FILE: ci/trivy-ignore/((release_minor))-resource-types.rego
 
 - name: bin-smoke
   public: true

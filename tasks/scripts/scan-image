@@ -7,6 +7,12 @@ cache_dir=`pwd`
 mkdir -p "${cache_dir}/db"
 tar -xzf trivy-db/trivy-offline.db.tgz -C "${cache_dir}/db"
 
+ignore_policy=""
+if [ ! -z $IGNORE_POLICY_FILE ]
+then
+  ignore_policy="--ignore-policy $IGNORE_POLICY_FILE"
+fi
+
 echo "scanning base os"
 trivy \
   --cache-dir "${cache_dir}" \
@@ -15,4 +21,5 @@ trivy \
   --severity "HIGH,CRITICAL" \
   --ignore-unfixed \
   --exit-code 1 \
-  --input image/image.tar
+  --input image/image.tar \
+  $ignore_policy

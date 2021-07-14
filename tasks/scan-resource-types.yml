@@ -10,6 +10,9 @@ inputs:
 - name: image
 - name: trivy-db
 
+params:
+  IGNORE_POLICY_FILE:
+
 run:
   path: ci/tasks/scripts/scan-resource-types
 

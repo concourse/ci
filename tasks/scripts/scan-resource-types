@@ -12,6 +12,12 @@ cd image/rootfs/usr/local/concourse/resource-types
 
 set +e
 
+ignore_policy=""
+if [ ! -z $IGNORE_POLICY_FILE ]
+then
+  ignore_policy="--ignore-policy $IGNORE_POLICY_FILE"
+fi
+
 for resource in *; do
   echo -e "\nscanning ${resource}-resource:"
 
@@ -25,7 +31,8 @@ for resource in *; do
     --severity "HIGH,CRITICAL" \
     --ignore-unfixed \
     --exit-code 1 \
-    --input .
+    --input . \
+    $ignore_policy
 
   if [ $? -ne 0 ]; then
     failed="${failed}\n-${resource}"
