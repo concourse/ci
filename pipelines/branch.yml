@@ -13,6 +13,11 @@ resource_types:
   # https://github.com/mockersf/concourse-slack-notifier/pull/86 is merged
   source: {repository: aoldershaw/concourse-slack-notifier}
 
+# TODO: get rid of this when https://github.com/concourse/concourse/issues/7284 is fixed
+- name: github-release
+  type: registry-image
+  source: {repository: aoldershaw/github-release-resource}
+
 jobs:
 - name: unit
   public: true
