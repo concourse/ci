@@ -119,7 +119,7 @@ resources:
     access_token: ((concourse_github_dummy.access_token))
 
 - name: concourse-prs
-  type: pull-requests
+  type: pull-request
   check_every: 2m
   source:
     repository: concourse/concourse
