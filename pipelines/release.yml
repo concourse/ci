@@ -118,6 +118,7 @@ jobs:
   - across:
     - var: pr_number
       values: ((.:concourse_prs))
+      max_in_flight: all
     set_pipeline: pr
     team: contributor
     file: ci/pipelines/pr.yml
