@@ -154,6 +154,7 @@ jobs:
   - put: pr-image
     params: {image: image/image.tar}
     get_params: {skip_download: true}
+    tags: [pr]
 
 - name: unit
   public: true
