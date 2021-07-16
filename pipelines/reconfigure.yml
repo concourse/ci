@@ -3,6 +3,10 @@ resource_types:
   type: registry-image
   source: {repository: mockersf/concourse-slack-notifier}
 
+- name: pull-request
+  type: registry-image
+  source: {repository: aoldershaw/github-pr-resource}
+
 resources:
 - name: pipelines-and-tasks
   type: git
@@ -12,6 +16,14 @@ resources:
     paths:
     - pipelines
     - tasks
+
+- name: pr-pipeline
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/ci
+    paths:
+    - pipelines/pr.yml
 
 - name: teams
   type: git
@@ -105,6 +117,14 @@ resources:
     owner: concourse
     repository: concourse
     access_token: ((concourse_github_dummy.access_token))
+
+- name: concourse-prs
+  type: pull-requests
+  check_every: 2m
+  source:
+    repository: concourse/concourse
+    access_token: ((pull_requests_access_token))
+    base_branch: master
 
 jobs:
 - name: reconfigure-self
@@ -246,14 +266,6 @@ jobs:
       file: pipelines-and-tasks/pipelines/concourse.yml
     - set_pipeline: helm-chart
       file: pipelines-and-tasks/pipelines/helm-chart.yml
-    - set_pipeline: prs
-      team: contributor
-      file: pipelines-and-tasks/pipelines/prs.yml
-      instance_vars:
-        branch: master
-      vars:
-        dev_image_tag: latest
-        concourse_image_tag: latest
     - set_pipeline: helm-prs
       file: pipelines-and-tasks/pipelines/helm-prs.yml
       instance_vars:
@@ -421,3 +433,28 @@ jobs:
   - set_pipeline: set-pipelines
     team: examples
     file: examples/pipelines/set-pipelines.yml
+
+- name: reconfigure-prs
+  plan:
+  - in_parallel:
+    - get: ignored
+      resource: pipelines-and-tasks
+      passed: [reconfigure-self]
+    - get: pr-pipeline
+      trigger: true
+    - get: concourse-prs
+      trigger: true
+  - load_var: concourse_prs
+    file: concourse-prs/prs.json
+  - across:
+    - var: pr_number
+      values: ((.:concourse_prs))
+    set_pipeline: pr
+    team: contributor
+    file: pr-pipeline/pipelines/pr.yml
+    instance_vars:
+      number: ((.:pr_number))
+    vars:
+      branch: master
+      dev_image_tag: latest
+      concourse_image_tag: latest

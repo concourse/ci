@@ -53,10 +53,14 @@ resource_types:
   type: registry-image
   source: {repository: aoldershaw/github-release-resource}
 
+- name: pull-request
+  type: registry-image
+  source: {repository: aoldershaw/github-pr-resource}
+
 groups:
 - name: develop
   jobs:
-  - set-prs-pipeline
+  - reconfigure-prs
   - unit
   - integration
   - resource-types-images
@@ -99,19 +103,28 @@ groups:
   - "*"
 
 jobs:
-- name: set-prs-pipeline
+- name: reconfigure-prs
   public: true
   serial: true
   plan:
-  - get: ci
-    resource: ci-prs-pipeline
-    trigger: true
-  - set_pipeline: prs
-    file: ci/pipelines/prs.yml
+  - in_parallel:
+    - get: ci
+      resource: ci-pr-pipeline
+      trigger: true
+    - get: concourse-prs
+      trigger: true
+  - load_var: concourse_prs
+    file: concourse-prs/prs.json
+  - across:
+    - var: pr_number
+      values: ((.:concourse_prs))
+    set_pipeline: pr
     team: contributor
+    file: ci/pipelines/pr.yml
     instance_vars:
-      branch: release/((release_minor)).x
+      number: ((.:pr_number))
     vars:
+      branch: release/((release_minor)).x
       dev_image_tag: release-((release_minor))
       concourse_image_tag: ((release_minor))
 
@@ -1568,13 +1581,13 @@ resources:
     branch: master
     private_key: ((deploy_keys.ci-repo-push))
 
-- name: ci-prs-pipeline
+- name: ci-pr-pipeline
   type: git
   icon: github
   source:
     uri: https://github.com/concourse/ci
     paths:
-    - pipelines/prs.yml
+    - pipelines/pr.yml
 
 - name: infrastructure
   type: git
@@ -2119,3 +2132,11 @@ resources:
     owner: aquasecurity
     repository: trivy-db
     access_token: ((concourse_github_dummy.access_token))
+
+- name: concourse-prs
+  type: pull-request
+  check_every: 2m
+  source:
+    repository: concourse/concourse
+    access_token: ((pull_requests_access_token))
+    base_branch: release/((release_minor)).x

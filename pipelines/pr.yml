@@ -1,0 +1,343 @@
+# the following vars must be specified:
+#
+#   ((number))              the PR number
+#   ((branch))              only PRs against this branch will be run
+#   ((dev_image_tag))       the tag to use for the dev image
+#   ((concourse_image_tag)) the tag to use for the concourse image for upgrade/downgrade test in integration
+
+---
+
+pending_status_notification: &pending_status_notification
+  put: concourse-status-update
+  resource: concourse-pr
+  inputs: [concourse-pr]
+  params: {path: concourse-pr, status: pending, context: $BUILD_JOB_NAME}
+  get_params: {skip_download: true}
+  tags: [pr]
+
+status_notifications: &status_notifications
+  on_success:
+    put: concourse-pr
+    inputs: [concourse-pr]
+    params: {path: concourse-pr, status: success, context: $BUILD_JOB_NAME}
+    get_params: {skip_download: true}
+    tags: [pr]
+  on_failure:
+    put: concourse-pr
+    inputs: [concourse-pr]
+    params: {path: concourse-pr, status: failure, context: $BUILD_JOB_NAME}
+    get_params: {skip_download: true}
+    tags: [pr]
+
+resource_types:
+- name: bosh-deployment
+  type: registry-image
+  source: {repository: cloudfoundry/bosh-deployment-resource}
+
+- name: pull-request
+  type: registry-image
+  source:
+    repository: aoldershaw/github-pr-resource
+
+resources:
+- name: concourse-base
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/concourse.git
+    branch: ((branch))
+
+- name: concourse-pr
+  type: pull-request
+  icon: source-pull
+  source:
+    repository: concourse/concourse
+    access_token: ((pull_requests_access_token))
+    number: ((number))
+
+- name: validator
+  type: github-release
+  icon: github
+  source:
+    owner: clarafu
+    repository: release-me
+    access_token: ((pull_requests_access_token))
+
+- name: ci
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/ci
+
+- name: concourse-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: concourse/concourse
+    tag: ((concourse_image_tag))
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: dev-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: concourse/dev
+    tag: ((dev_image_tag))
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: pr-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: concourse/dev
+    tag: pr-((number))
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: unit-image
+  type: registry-image
+  icon: docker
+  source: {repository: concourse/unit}
+
+- name: postgres-image
+  type: registry-image
+  icon: docker
+  source: {repository: postgres}
+
+- name: vault-image
+  type: registry-image
+  icon: docker
+  source: {repository: vault}
+
+- name: oci-build-task
+  type: registry-image
+  icon: docker
+  source: {repository: vito/oci-build-task}
+
+jobs:
+- name: pr-image
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse-pr
+      trigger: true
+      tags: [pr]
+    - get: oci-build-task
+      tags: [pr]
+    - get: dev-image
+      params: {format: oci}
+      tags: [pr]
+    - get: ci
+      tags: [pr]
+  - task: yarn-build
+    attempts: 3
+    file: ci/tasks/yarn-build.yml
+    input_mapping: {concourse: concourse-pr}
+    tags: [pr]
+  - task: build
+    image: oci-build-task
+    privileged: true
+    config:
+      platform: linux
+      params:
+        CONTEXT: built-concourse
+        IMAGE_ARG_base_image: dev-image/image.tar
+        TARGET: with-fly
+      inputs: [{name: built-concourse}, {name: dev-image}]
+      outputs: [{name: image}]
+      caches: [{path: cache}]
+      run: {path: build}
+    tags: [pr]
+  - put: pr-image
+    params: {image: image/image.tar}
+    get_params: {skip_download: true}
+
+- name: unit
+  public: true
+  serial: true
+  <<: *status_notifications
+  plan:
+  - in_parallel:
+    - get: concourse-pr
+      trigger: true
+      tags: [pr]
+    - get: concourse-base
+      tags: [pr]
+    - get: unit-image
+      tags: [pr]
+    - get: ci
+      tags: [pr]
+  - *pending_status_notification
+  - task: check-migration-order
+    timeout: 5m
+    file: ci/tasks/check-migration-order.yml
+    tags: [pr]
+  - task: yarn-analyse
+    attempts: 3
+    file: ci/tasks/yarn-analyse.yml
+    input_mapping: {concourse: concourse-pr}
+    tags: [pr]
+  - task: yarn-test
+    attempts: 3
+    file: ci/tasks/yarn-test.yml
+    input_mapping: {concourse: concourse-pr}
+    tags: [pr]
+  - task: yarn-benchmark
+    attempts: 3
+    file: ci/tasks/yarn-benchmark.yml
+    input_mapping: {concourse: concourse-pr}
+    tags: [pr]
+  - task: unit
+    image: unit-image
+    attempts: 3
+    timeout: 1h
+    file: ci/tasks/unit.yml
+    input_mapping: {concourse: built-concourse}
+    tags: [pr]
+
+- name: validate-labels
+  public: true
+  serial: true
+  <<: *status_notifications
+  plan:
+  - in_parallel:
+    - get: concourse-pr
+      trigger: true
+      tags: [pr]
+    - get: ci
+      tags: [pr]
+    - get: validator
+      tags: [pr]
+  - *pending_status_notification
+  - task: validate-pr
+    timeout: 5m
+    file: ci/tasks/validate-pr.yml
+    tags: [pr]
+    params:
+      GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+
+- name: containerd-integration
+  public: true
+  serial: true
+  <<: *status_notifications
+  plan:
+  - in_parallel:
+    - get: concourse-pr
+      trigger: true
+      tags: [pr]
+    - get: dev-image
+      tags: [pr]
+    - get: ci
+      tags: [pr]
+  - *pending_status_notification
+  - task: integration
+    image: dev-image
+    privileged: true
+    timeout: 1h
+    file: ci/tasks/containerd-integration.yml
+    input_mapping: {concourse: concourse-pr}
+    tags: [pr]
+
+- name: testflight
+  public: true
+  serial: true
+  <<: *status_notifications
+  plan:
+  - in_parallel:
+    - get: concourse-pr
+      passed: [pr-image]
+      trigger: true
+      tags: [pr]
+    - get: pr-image
+      passed: [pr-image]
+      params: {format: oci}
+      tags: [pr]
+    - get: postgres-image
+      params: {format: oci}
+      tags: [pr]
+    - get: ci
+      tags: [pr]
+  - *pending_status_notification
+  - across:
+    - var: runtime
+      values:
+      - guardian
+      - containerd
+      max_in_flight: all
+    task: testflight
+    timeout: 1h
+    privileged: true
+    file: ci/tasks/docker-compose-testflight.yml
+    input_mapping: {concourse: concourse-pr, dev-image: pr-image}
+    params:
+      RUNTIME: ((.:runtime))
+      DOWNLOAD_CLI: false
+    tags: [pr]
+
+- name: watsjs
+  public: true
+  serial: true
+  <<: *status_notifications
+  plan:
+  - in_parallel:
+    - get: concourse-pr
+      passed: [pr-image]
+      trigger: true
+      tags: [pr]
+    - get: pr-image
+      passed: [pr-image]
+      params: {format: oci}
+      tags: [pr]
+    - get: postgres-image
+      params: {format: oci}
+      tags: [pr]
+    - get: ci
+      tags: [pr]
+  - *pending_status_notification
+  - task: yarn-build
+    attempts: 3
+    file: ci/tasks/yarn-build.yml
+    input_mapping: {concourse: concourse-pr}
+    tags: [pr]
+  - task: watsjs
+    attempts: 3
+    timeout: 1h
+    privileged: true
+    file: ci/tasks/docker-compose-watsjs.yml
+    input_mapping: {concourse: built-concourse, dev-image: pr-image}
+    tags: [pr]
+
+- name: integration
+  public: true
+  serial: true
+  <<: *status_notifications
+  plan:
+  - in_parallel:
+    - get: concourse-pr
+      passed: [pr-image]
+      trigger: true
+      tags: [pr]
+    - get: concourse-image
+      params: {format: oci}
+      tags: [pr]
+    - get: pr-image
+      passed: [pr-image]
+      params: {format: oci}
+      tags: [pr]
+    - get: postgres-image
+      params: {format: oci}
+      tags: [pr]
+    - get: vault-image
+      params: {format: oci}
+      tags: [pr]
+    - get: ci
+      tags: [pr]
+  - *pending_status_notification
+  - task: integration
+    timeout: 1h
+    privileged: true
+    input_mapping: {concourse: concourse-pr, dev-image: pr-image}
+    file: ci/tasks/integration.yml
