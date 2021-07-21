@@ -1610,7 +1610,7 @@ resources:
   icon: *git-icon
   source:
     uri: https://github.com/concourse/concourse-docker.git
-    branch: master
+    branch: release/((release_minor)).x
 
 - name: notify
   type: slack-notifier
