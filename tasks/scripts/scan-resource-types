@@ -13,7 +13,7 @@ cd image/rootfs/usr/local/concourse/resource-types
 set +e
 
 ignore_policy=""
-if [ ! -z $IGNORE_POLICY_FILE ]
+if [ ! -f $IGNORE_POLICY_FILE ]
 then
   ignore_policy="--ignore-policy $IGNORE_POLICY_FILE"
 fi
