@@ -77,7 +77,6 @@ jobs:
       - get: dumb-init
         trigger: true
       - get: resource-types-alpine-image
-        trigger: true
       - get: unit-image
       - get: oci-build-task
       - get: ci
