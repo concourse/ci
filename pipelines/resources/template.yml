@@ -44,6 +44,7 @@ CONTEXT: #@ resource_name + "-resource"
 task: build
 privileged: true
 image: oci-build-task
+attempts: 2
 config:
   platform: linux
   inputs:
