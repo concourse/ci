@@ -41,7 +41,7 @@ groups:
   - bin-smoke
   - bin-smoke-lts
   - check-docker-mounts
-  - bump-prod
+  - bump-prod-*
 
 - name: quickstart
   jobs:
@@ -665,7 +665,38 @@ jobs:
             image: image-ubuntu/image.tar
   on_failure: *failed-concourse
 
-- name: bump-prod
+- name: bump-prod-web
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: infrastructure
+    - get: concourse-image
+      resource: concourse-dev-alpine-image
+      passed: [build-image]
+      params: {skip_download: true}
+  - load_var: concourse_image_repo
+    file: concourse-image/repository
+  - load_var: concourse_image_digest
+    file: concourse-image/digest
+  - task: bump-versions
+    file: infrastructure/tasks/patch-yaml.yml
+    input_mapping: {repo: infrastructure}
+    output_mapping: {repo-bumped: infrastructure-bumped}
+    params:
+      FILE: terraform/environments/production/variables.yml
+      PATCH:
+        concourse_web_image_repo: ((.:concourse_image_repo))
+        concourse_web_image_digest: ((.:concourse_image_digest))
+      COMMIT: bump production web to concourse dev
+  - put: infrastructure-bump
+    inputs: [infrastructure-bumped]
+    params:
+      repository: infrastructure-bumped
+      branch: master
+  on_failure: *failed-concourse
+
+- name: bump-prod-workers
   public: true
   serial: true
   plan:
@@ -698,17 +729,17 @@ jobs:
   - load_var: concourse_darwin_bundle_url
     file: darwin/url
   - task: bump-versions
-    file: infrastructure/tasks/replace-file.yml
+    file: infrastructure/tasks/patch-yaml.yml
     input_mapping: {repo: infrastructure}
     output_mapping: {repo-bumped: infrastructure-bumped}
     params:
       FILE: terraform/environments/production/variables.yml
-      CONTENT: |
-        concourse_image_repo: ((.:concourse_image_repo))
-        concourse_image_digest: ((.:concourse_image_digest))
+      PATCH:
+        concourse_worker_image_repo: ((.:concourse_image_repo))
+        concourse_worker_image_digest: ((.:concourse_image_digest))
         concourse_windows_bundle_url: ((.:concourse_windows_bundle_url))
         concourse_darwin_bundle_url: ((.:concourse_darwin_bundle_url))
-      COMMIT: bump production to concourse dev
+      COMMIT: bump production workers to concourse dev
   - put: infrastructure-bump
     inputs: [infrastructure-bumped]
     params:

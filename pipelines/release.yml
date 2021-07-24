@@ -745,8 +745,10 @@ jobs:
     params:
       FILE: terraform/environments/production/variables.yml
       CONTENT: |
-        concourse_image_repo: ((.:concourse_image_repo))
-        concourse_image_digest: ((.:concourse_image_digest))
+        concourse_web_image_repo: ((.:concourse_image_repo))
+        concourse_web_image_digest: ((.:concourse_image_digest))
+        concourse_worker_image_repo: ((.:concourse_image_repo))
+        concourse_worker_image_digest: ((.:concourse_image_digest))
         concourse_windows_bundle_url: ((.:concourse_windows_bundle_url))
         concourse_darwin_bundle_url: ((.:concourse_darwin_bundle_url))
       COMMIT: bump production to ((release_minor)) rc
