@@ -116,14 +116,14 @@ jobs:
   - load_var: concourse_prs
     file: concourse-prs/prs.json
   - across:
-    - var: pr_number
+    - var: pr
       values: ((.:concourse_prs))
       max_in_flight: all
     set_pipeline: pr
     team: contributor
     file: ci/pipelines/pr.yml
     instance_vars:
-      number: ((.:pr_number))
+      number: ((.:pr.number))
     vars:
       branch: release/((release_minor)).x
       dev_image_tag: release-((release_minor))

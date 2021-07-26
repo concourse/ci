@@ -453,14 +453,14 @@ jobs:
   - load_var: concourse_prs
     file: concourse-prs/prs.json
   - across:
-    - var: pr_number
+    - var: pr
       values: ((.:concourse_prs))
       max_in_flight: all
     set_pipeline: pr
     team: contributor
     file: pr-pipeline/pipelines/pr.yml
     instance_vars:
-      number: ((.:pr_number))
+      number: ((.:pr.number))
     vars:
       branch: master
       dev_image_tag: latest
