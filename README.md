@@ -21,11 +21,13 @@ Pipeline definitions live here. Some highlights:
 #### `concourse.yml`
 The crown jewel of this entire repo, [it's how concourse is built, tested, and shipped.](https://ci.concourse-ci.org/teams/main/pipelines/concourse)
 
-#### `prs.yml`
-This [pipeline](https://ci.concourse-ci.org/teams/contributor/pipelines/prs) will automatically test any opened pull requests, and then update the pull request with the results of the tests.
+#### `pr.yml`
+This [instance group](https://ci.concourse-ci.org/?search=team%3A%22contributor%22%20group%3A%22pr%22) contains one instanced pipeline for each open pull request. `pr.yml` specifies the tests to run for each pull request, and will update the pull request with the results of the tests.
 
 #### `reconfigure.yml`
 Whenever any of these pipeline definitions get changed, the [reconfigure pipeline](https://ci.concourse-ci.org/teams/main/pipelines/reconfigure-pipelines) will run to reconfigure the affected pipelines.
+
+This pipeline also tracks the list of pull requests and sets an instanced pipeline for each one.
 
 #### `resources/template.jsonnet`
 This is the template that gets used for all of the base resource types that are supported by the Concourse team. Each of those repos follows a similar enough structure that the same template can be used to do the basic PR-testing and shipping tasks for all of them.
