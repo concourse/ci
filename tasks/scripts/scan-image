@@ -8,7 +8,7 @@ mkdir -p "${cache_dir}/db"
 tar -xzf trivy-db/trivy-offline.db.tgz -C "${cache_dir}/db"
 
 ignore_policy=""
-if [ -f $IGNORE_POLICY_FILE ]; then
+if [ -f "$IGNORE_POLICY_FILE" ]; then
   ignore_policy="--ignore-policy $IGNORE_POLICY_FILE"
 fi
 
