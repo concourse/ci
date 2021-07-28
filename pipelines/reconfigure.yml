@@ -34,13 +34,6 @@ resources:
     paths:
     - teams
 
-- name: baggageclaim-ci
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/baggageclaim
-    paths: [ci]
-
 - name: booklit-ci
   type: git
   icon: github
@@ -259,8 +252,6 @@ jobs:
     - get: pipelines-and-tasks
       trigger: true
       passed: [unit]
-    - get: baggageclaim-ci
-      trigger: true
     - get: booklit-ci
       trigger: true
     - get: concourse-for-k8s
@@ -292,11 +283,6 @@ jobs:
         concourse_base_branch: master
         concourse_image_name: concourse/concourse-rc
         concourse_image_tag: latest
-    - set_pipeline: baggageclaim
-      file: baggageclaim-ci/ci/pipeline.yml
-    - set_pipeline: baggageclaim-prs
-      team: contributor
-      file: baggageclaim-ci/ci/prs-pipeline.yml
     - set_pipeline: docs-prs
       team: contributor
       file: docs-ci/ci/prs-pipeline.yml

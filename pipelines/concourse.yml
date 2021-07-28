@@ -145,18 +145,27 @@ jobs:
   - task: yarn-test
     image: unit-image
     file: ci/tasks/yarn-test.yml
-  - in_parallel:
+  - timeout: 1h
+    in_parallel:
     - task: unit
       image: unit-image
       file: ci/tasks/unit.yml
       input_mapping: {concourse: built-concourse}
-      timeout: 1h
     - task: fly-darwin
       file: ci/tasks/fly-darwin.yml
-      timeout: 1h
     - task: fly-windows
       file: ci/tasks/fly-windows.yml
-      timeout: 1h
+    - task: unit-baggageclaim
+      image: unit-image
+      file: ci/tasks/unit-baggageclaim.yml
+      privileged: true
+      input_mapping: {concourse: built-concourse}
+    - task: unit-baggageclaim-darwin
+      file: ci/tasks/unit-baggageclaim-darwin.yml
+      input_mapping: {concourse: built-concourse}
+    - task: unit-baggageclaim-windows
+      file: ci/tasks/unit-baggageclaim-windows.yml
+      input_mapping: {concourse: built-concourse}
   on_failure: &failed-concourse
     put: notify
     params:

@@ -1,0 +1,12 @@
+---
+platform: darwin
+
+inputs:
+- name: ci
+- name: concourse
+
+caches:
+- path: gopath/
+
+run:
+  path: ci/tasks/scripts/unit-baggageclaim-darwin

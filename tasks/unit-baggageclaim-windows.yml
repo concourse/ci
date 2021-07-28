@@ -1,0 +1,13 @@
+---
+platform: windows
+
+inputs:
+- name: ci
+- name: concourse
+
+caches:
+- path: gopath/
+
+run:
+  path: ci/tasks/scripts/unit-baggageclaim-windows.bat
+
