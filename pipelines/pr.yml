@@ -342,3 +342,4 @@ jobs:
     privileged: true
     input_mapping: {concourse: concourse-pr, dev-image: pr-image}
     file: ci/tasks/integration.yml
+    tags: [pr]
