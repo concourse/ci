@@ -1,7 +1,44 @@
 # the following vars must be specified:
 #
-#   ((branch))       the name of the branch to test/build
-#   ((branch_slug))  a friendly form of the branch to use for artifacts. may be the same as branch
+#   ((number))              the PR number
+#   ((branch))              only PRs against this branch will be run
+#   ((dev_image_tag))       the tag to use for the dev image
+#   ((concourse_image_tag)) the tag to use for the concourse image for upgrade/downgrade test in integration
+
+---
+
+icons:
+  git: &git-icon git
+  docker: &image-icon docker
+
+pending_status_notification: &pending_status_notification
+  put: concourse-status-update
+  resource: concourse-pr
+  inputs: [concourse-pr]
+  params: {path: concourse-pr, status: pending, context: $BUILD_JOB_NAME}
+  get_params: {skip_download: true}
+
+
+on_failure_slack: &on_failure_slack
+  put: notify
+  params:
+    mode: normal
+    alert_type: failed
+
+status_notifications: &status_notifications
+  on_success:
+    put: concourse-pr
+    inputs: [concourse-pr]
+    params: {path: concourse-pr, status: success, context: $BUILD_JOB_NAME}
+    get_params: {skip_download: true}
+  on_failure:
+    in_parallel:
+    - put: concourse-pr
+      inputs: [concourse-pr]
+      params: {path: concourse-pr, status: failure, context: $BUILD_JOB_NAME}
+      get_params: {skip_download: true}
+    - *on_failure_slack
+
 resource_types:
 - name: gcs
   type: registry-image
@@ -13,30 +50,43 @@ resource_types:
   # https://github.com/mockersf/concourse-slack-notifier/pull/86 is merged
   source: {repository: aoldershaw/concourse-slack-notifier}
 
-# TODO: get rid of this when https://github.com/concourse/concourse/issues/7284 is fixed
-- name: github-release
+- name: pull-request
   type: registry-image
-  source: {repository: aoldershaw/github-release-resource}
+  source:
+    repository: aoldershaw/github-pr-resource
 
 jobs:
 - name: unit
   public: true
   serial: true
+  <<: *status_notifications
   plan:
   - in_parallel:
     - get: concourse
+      resource: concourse-pr
       trigger: true
+    - get: concourse-base
     - get: unit-image
-      trigger: true
     - get: ci
-  - task: yarn-test
-    image: unit-image
-    file: ci/tasks/yarn-test.yml
+  - *pending_status_notification
+  - in_parallel:
+    - task: check-migration-order
+      timeout: 5m
+      file: ci/tasks/check-migration-order.yml
+    - task: yarn-analyse
+      attempts: 3
+      file: ci/tasks/yarn-analyse.yml
+    - task: yarn-test
+      attempts: 3
+      image: unit-image
+      file: ci/tasks/yarn-test.yml
+    - task: yarn-benchmark
+      attempts: 3
+      file: ci/tasks/yarn-benchmark.yml
   - in_parallel:
     - task: unit
       image: unit-image
       file: ci/tasks/unit.yml
-      input_mapping: {concourse: built-concourse}
       timeout: 1h
     - task: fly-darwin
       file: ci/tasks/fly-darwin.yml
@@ -44,95 +94,95 @@ jobs:
     - task: fly-windows
       file: ci/tasks/fly-windows.yml
       timeout: 1h
-  on_failure: &failed-concourse
-    put: notify
-    params:
-      mode: normal
-      alert_type: failed
 
-- name: dev-image
+- name: pr-image
   public: true
   serial: true
+  <<: *status_notifications
   plan:
   - in_parallel:
-      fail_fast: true
-      steps:
-      - get: concourse
-        trigger: true
-      - get: golang-builder-image
-        trigger: true
-        params: {format: oci}
-      - get: golang-builder-image-rootfs
-        resource: golang-builder-image
-        trigger: true
-        params: {format: rootfs}
-      - get: gdn
-        trigger: true
-      - get: containerd
-        trigger: true
-      - get: runc
-        trigger: true
-      - get: cni
-        trigger: true
-      - get: dumb-init
-        trigger: true
-      - get: resource-types-alpine-image
-      - get: unit-image
-      - get: oci-build-task
-      - get: ci
-  - in_parallel:
-      fail_fast: true
-      steps:
-      - task: yarn-build
-        image: unit-image
-        file: ci/tasks/yarn-build.yml
-      - task: fly-linux
-        file: ci/tasks/fly-build-linux.yml
-        image: golang-builder-image-rootfs
-      - task: fly-windows
-        file: ci/tasks/fly-build-windows.yml
-      - task: fly-darwin
-        file: ci/tasks/fly-build-darwin.yml
+    - get: concourse
+      resource: concourse-pr
+      trigger: true
+    - get: oci-build-task
+    - get: dev-image
+      params: {format: oci}
+    - get: unit-image
+    - get: ci
+  - *pending_status_notification
+  - task: yarn-build
+    image: unit-image
+    attempts: 3
+    file: ci/tasks/yarn-build.yml
   - task: build
     image: oci-build-task
     privileged: true
-    input_mapping: {concourse: built-concourse, resource-types-image: resource-types-alpine-image}
-    file: ci/tasks/build-dev-image.yml
-  - put: dev-image
+    config:
+      platform: linux
+      params:
+        CONTEXT: built-concourse
+        IMAGE_ARG_base_image: dev-image/image.tar
+        TARGET: with-fly
+      inputs: [{name: built-concourse}, {name: dev-image}]
+      outputs: [{name: image}]
+      caches: [{path: cache}]
+      run: {path: build}
+  - put: pr-image
     params: {image: image/image.tar}
-    get_params: {format: oci}
-  on_failure: *failed-concourse
+    get_params: {skip_download: true}
+
+- name: validate-labels
+  public: true
+  serial: true
+  <<: *status_notifications
+  plan:
+  - in_parallel:
+    - get: concourse
+      resource: concourse-pr
+      trigger: true
+    - get: ci
+    - get: validator
+  - *pending_status_notification
+  - task: validate-pr
+    timeout: 5m
+    file: ci/tasks/validate-pr.yml
+    params:
+      GITHUB_TOKEN: ((concourse_github_dummy.access_token))
 
 - name: containerd-integration
   public: true
-  max_in_flight: 1
+  serial: true
+  <<: *status_notifications
   plan:
   - in_parallel:
     - get: concourse
-      passed: [unit, dev-image]
+      resource: concourse-pr
+      passed: [pr-image]
       trigger: true
-    - get: dev-image
-      passed: [dev-image]
+    - get: pr-image
+      passed: [pr-image]
       trigger: true
     - get: ci
+  - *pending_status_notification
   - task: integration
-    image: dev-image
+    image: pr-image
     privileged: true
     timeout: 1h
     file: ci/tasks/containerd-integration.yml
-  on_failure: *failed-concourse
 
 - name: testflight
   public: true
-  max_in_flight: 1
+  serial: true
+  <<: *status_notifications
   plan:
   - in_parallel:
     - get: concourse
-      passed: [unit, dev-image]
+      resource: concourse-pr
+      passed: [pr-image]
       trigger: true
     - get: unit-image
-    - get: dev-image
-      passed: [dev-image]
+    - get: pr-image
+      passed: [pr-image]
       trigger: true
       params: {format: oci}
     - get: postgres-image
@@ -140,6 +190,7 @@ jobs:
     - get: postgres-image-legacy
       params: {format: oci}
     - get: ci
+  - *pending_status_notification
   - across:
     - var: runtime
       values:
@@ -158,42 +209,50 @@ jobs:
     params:
       RUNTIME: ((.:runtime))
     file: ci/tasks/docker-compose-testflight.yml
-    input_mapping: {postgres-image: ((.:postgres-image))}
-  on_failure: *failed-concourse
+    input_mapping: {postgres-image: ((.:postgres-image)), dev-image: pr-image}
 
 - name: watsjs
   public: true
-  max_in_flight: 1
+  serial: true
+  <<: *status_notifications
   plan:
   - in_parallel:
     - get: concourse
-      passed: [unit, dev-image]
+      resource: concourse-pr
+      passed: [pr-image]
       trigger: true
     - get: unit-image
-    - get: dev-image
-      passed: [dev-image]
+    - get: pr-image
+      passed: [pr-image]
       trigger: true
       params: {format: oci}
     - get: postgres-image
       params: {format: oci}
     - get: ci
+  - *pending_status_notification
+  - task: yarn-build
+    image: unit-image
+    attempts: 3
+    file: ci/tasks/yarn-build.yml
   - task: watsjs
     image: unit-image
     privileged: true
     timeout: 1h
     file: ci/tasks/docker-compose-watsjs.yml
-  on_failure: *failed-concourse
+    input_mapping: {concourse: built-concourse, dev-image: pr-image}
 
 - name: integration
   public: true
   serial: true
+  <<: *status_notifications
   plan:
   - in_parallel:
     - get: concourse
-      passed: [unit, dev-image]
+      resource: concourse-pr
+      passed: [pr-image]
       trigger: true
-    - get: dev-image
-      passed: [dev-image]
+    - get: pr-image
+      passed: [pr-image]
       params: {format: oci}
       trigger: true
     - get: unit-image
@@ -204,11 +263,12 @@ jobs:
     - get: vault-image
       params: {format: oci}
     - get: ci
+  - *pending_status_notification
   - task: integration
     privileged: true
     image: unit-image
     file: ci/tasks/integration.yml
-  on_failure: *failed-concourse
+    input_mapping: {dev-image: pr-image}
 
 - name: build-concourse
   public: true
@@ -216,18 +276,15 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
-      passed: [dev-image, testflight, watsjs, integration]
+      resource: concourse-pr
+      passed: [pr-image, testflight, watsjs, integration]
       trigger: true
     - get: unit-image
-      passed: [dev-image]
-    - get: dev-image
-      passed: [dev-image]
+    - get: pr-image
+      passed: [pr-image]
       trigger: true
     - get: golang-builder-image
-      passed: [dev-image]
     - get: ci
-    - get: resource-types-alpine-image
-      passed: [dev-image]
   - in_parallel:
     - task: fly-linux
       file: ci/tasks/fly-build-linux.yml
@@ -241,14 +298,15 @@ jobs:
       steps:
         - task: hoist-linux-dependencies
           file: ci/tasks/hoist-linux-dependencies.yml
-          image: dev-image
+          image: pr-image
         - task: hoist-resource-types-alpine
           file: ci/tasks/hoist-linux-resource-types.yml
-          image: resource-types-alpine-image
+          image: pr-image
           output_mapping: {resource-types: resource-types-alpine}
         - task: yarn-build
           file: ci/tasks/yarn-build.yml
           image: unit-image
+          attempts: 3
   - task: get-dev-version
     file: ci/tasks/get-dev-version.yml
     image: golang-builder-image
@@ -279,7 +337,7 @@ jobs:
     - put: darwin-dev
       params: {file: concourse-darwin/concourse-*.tgz}
       inputs: [concourse-darwin]
-  on_failure: *failed-concourse
+  on_failure: *on_failure_slack
 
 - name: build-image
   old_name: build-rc-image
@@ -288,6 +346,7 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
+      resource: concourse-pr
       passed: [build-concourse]
       trigger: true
     - get: unit-image
@@ -308,14 +367,16 @@ jobs:
     inputs: [image-alpine]
     params:
       image: image-alpine/image.tar
-  on_failure: *failed-concourse
+  on_failure: *on_failure_slack
 
 - name: bin-smoke
   public: true
   serial: true
+  <<: *status_notifications
   plan:
   - in_parallel:
     - get: concourse
+      resource: concourse-pr
       passed: [build-concourse]
       trigger: true
     - get: linux-dev-alpine
@@ -323,6 +384,7 @@ jobs:
       trigger: true
     - get: unit-image
     - get: ci
+  - *pending_status_notification
   - across:
     - var: runtime
       values:
@@ -338,21 +400,22 @@ jobs:
         GCP_PROJECT: cf-concourse-production
         GCP_KEY: ((concourse_smoke_gcp_key))
         SSH_KEY: ((concourse_smoke_ssh_key))
-        WORKSPACE: branch-((branch_slug))-bin-smoke-((.:runtime))
+        WORKSPACE: pr-((number))-bin-smoke-((.:runtime))
         TF_VAR_RUNTIME: ((.:runtime))
     - task: smoke
       image: unit-image
       file: ci/tasks/smoke.yml
       input_mapping: {endpoint-info: outputs}
     timeout: 20m
-  on_failure: *failed-concourse
 
 - name: bin-smoke-lts
   public: true
   serial: true
+  <<: *status_notifications
   plan:
   - in_parallel:
     - get: concourse
+      resource: concourse-pr
       passed: [build-concourse]
       trigger: true
     - get: linux-dev-alpine
@@ -360,6 +423,7 @@ jobs:
       trigger: true
     - get: unit-image
     - get: ci
+  - *pending_status_notification
   - across:
     - var: runtime
       values:
@@ -382,7 +446,7 @@ jobs:
         GCP_PROJECT: cf-concourse-production
         GCP_KEY: ((concourse_smoke_gcp_key))
         SSH_KEY: ((concourse_smoke_ssh_key))
-        WORKSPACE: branch-((branch_slug))-bin-smoke-lts-((.:runtime))
+        WORKSPACE: pr-((number))-bin-smoke-lts-((.:runtime))
         TF_VAR_GCP_IMAGE: ((.:gcp-image))
         TF_VAR_RUNTIME: ((.:runtime))
     - task: smoke
@@ -390,7 +454,6 @@ jobs:
       file: ci/tasks/smoke.yml
       input_mapping: {endpoint-info: outputs}
     timeout: 20m
-  on_failure: *failed-concourse
 
 - name: bump-prod-web
   public: true
@@ -415,13 +478,13 @@ jobs:
       PATCH:
         concourse_web_image_repo: ((.:concourse_image_repo))
         concourse_web_image_digest: ((.:concourse_image_digest))
-      COMMIT: bump production web to branch ((branch))
+      COMMIT: bump production web to PR ((number))
   - put: infrastructure-bump
     inputs: [infrastructure-bumped]
     params:
       repository: infrastructure-bumped
       branch: master
-  on_failure: *failed-concourse
+  on_failure: *on_failure_slack
 
 - name: bump-prod-workers
   public: true
@@ -466,28 +529,29 @@ jobs:
         concourse_worker_image_digest: ((.:concourse_image_digest))
         concourse_windows_bundle_url: ((.:concourse_windows_bundle_url))
         concourse_darwin_bundle_url: ((.:concourse_darwin_bundle_url))
-      COMMIT: bump production workers to branch ((branch))
+      COMMIT: bump production workers to PR ((number))
   - put: infrastructure-bump
     inputs: [infrastructure-bumped]
     params:
       repository: infrastructure-bumped
       branch: master
-  on_failure: *failed-concourse
+  on_failure: *on_failure_slack
 
 resources:
-- name: concourse
+- name: concourse-base
   type: git
-  icon: &git-icon github
+  icon: github
   source:
     uri: https://github.com/concourse/concourse.git
     branch: ((branch))
 
-# - name: concourse-master
-#   type: git
-#   icon: *git-icon
-#   source:
-#     uri: https://github.com/concourse/concourse.git
-#     branch: master
+- name: concourse-pr
+  type: pull-request
+  icon: source-pull
+  source:
+    repository: concourse/concourse
+    access_token: ((pull_requests_access_token))
+    number: ((number))
 
 - name: ci
   type: git
@@ -520,12 +584,21 @@ resources:
     password: ((basic_auth.password))
     concourse_url: https://ci.concourse-ci.org
 
-- name: dev-image
+- name: pr-image
   type: registry-image
-  icon: &image-icon docker
+  icon: *image-icon
   source:
     repository: concourse/dev
-    tag: branch-((branch_slug))
+    tag: pr-((number))
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: dev-image
+  type: registry-image
+  icon: *image-icon
+  source:
+    repository: concourse/dev
+    tag: ((dev_image_tag))
     username: ((docker.username))
     password: ((docker.password))
 
@@ -534,7 +607,7 @@ resources:
   icon: *image-icon
   source:
     repository: concourse/concourse
-    tag: latest
+    tag: ((concourse_image_tag))
     username: ((docker.username))
     password: ((docker.password))
 
@@ -571,50 +644,18 @@ resources:
   icon: *image-icon
   source: {repository: vault}
 
-- name: dumb-init
-  type: github-release
-  icon: &release-icon package-variant-closed
-  source:
-    owner: Yelp
-    repository: dumb-init
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: gdn
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: cloudfoundry
-    repository: garden-runc-release
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: containerd
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: containerd
-    repository: containerd
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: runc
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: opencontainers
-    repository: runc
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: cni
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: containernetworking
-    repository: plugins
-    access_token: ((concourse_github_dummy.access_token))
-
 - name: oci-build-task
   type: registry-image
   icon: *image-icon
   source: {repository: vito/oci-build-task}
+
+- name: validator
+  type: github-release
+  icon: github
+  source:
+    owner: clarafu
+    repository: release-me
+    access_token: ((pull_requests_access_token))
 
 - name: linux-dev-alpine
   type: gcs
@@ -622,7 +663,7 @@ resources:
   source:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
-    regexp: branch/((branch_slug))/concourse-(.*)\.linux-alpine\.amd64\.tgz
+    regexp: pr/((number))/concourse-(.*)\.linux-alpine\.amd64\.tgz
 
 - name: windows-dev
   type: gcs
@@ -630,7 +671,7 @@ resources:
   source:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
-    regexp: branch/((branch_slug))/concourse-(.*)\.windows\.amd64\.zip
+    regexp: pr/((number))/concourse-(.*)\.windows\.amd64\.zip
 
 - name: darwin-dev
   type: gcs
@@ -638,7 +679,7 @@ resources:
   source:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
-    regexp: branch/((branch_slug))/concourse-(.*)\.darwin\.amd64\.tgz
+    regexp: pr/((number))/concourse-(.*)\.darwin\.amd64\.tgz
 
 - name: concourse-docker
   type: git
@@ -646,20 +687,11 @@ resources:
   source:
     uri: https://github.com/concourse/concourse-docker
 
-- name: resource-types-alpine-image
-  type: registry-image
-  icon: &image-icon docker
-  source:
-    repository: concourse/resource-types
-    tag: latest
-    username: ((docker.username))
-    password: ((docker.password))
-
 - name: concourse-dev-alpine-image
   type: registry-image
   icon: *image-icon
   source:
     repository: concourse/concourse-dev
-    tag: branch-((branch_slug))
+    tag: pr-((number))
     username: ((docker.username))
     password: ((docker.password))

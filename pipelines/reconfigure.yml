@@ -383,18 +383,6 @@ jobs:
       file: concourse-for-k8s/ci/pipeline.yml
       vars:
         concourse_chart_branch: release/6.7.x
-    - set_pipeline: branch
-      file: pipelines-and-tasks/pipelines/branch.yml
-      instance_vars:
-        branch: rewrite-atc-worker
-      vars:
-        branch_slug: rewrite-atc-worker
-    - set_pipeline: branch
-      file: pipelines-and-tasks/pipelines/branch.yml
-      instance_vars:
-        branch: plan-refactor
-      vars:
-        branch_slug: plan-refactor
     - set_pipeline: infrastructure-report
       file: pipelines-and-tasks/pipelines/infrastructure-report.yml
     on_failure: *notify
