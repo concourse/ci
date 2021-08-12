@@ -24,6 +24,7 @@ resources:
     uri: https://github.com/concourse/ci
     paths:
     - pipelines/pr.yml
+    - pipelines/pr-deploy.yml
 
 - name: teams
   type: git
