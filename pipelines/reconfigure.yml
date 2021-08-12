@@ -457,8 +457,8 @@ jobs:
     file: ci/tasks/jq.yml
     params:
       VARS:
-        all_prs: ((all_prs))
-        deploy_prs: ((deploy_prs))
+        all_prs: ((.:all_prs))
+        deploy_prs: ((.:deploy_prs))
       EXPR: .all_prs - .deploy_prs
     output_mapping: {result: non-deploy-prs}
   - load_var: non_deploy_prs
