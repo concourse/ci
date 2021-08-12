@@ -52,8 +52,11 @@ resource_types:
 
 - name: pull-request
   type: registry-image
-  source:
-    repository: aoldershaw/github-pr-resource
+  source: {repository: aoldershaw/github-pr-resource}
+
+- name: manual-trigger-guard
+  type: registry-image
+  source: {repository: aoldershaw/manual-trigger-guard}
 
 jobs:
 - name: unit
@@ -459,6 +462,8 @@ jobs:
   public: true
   serial: true
   plan:
+  - put: allow-maintainers-guard
+    on_failure: *on_failure_slack
   - in_parallel:
     - get: infrastructure
     - get: concourse-image
@@ -490,6 +495,8 @@ jobs:
   public: true
   serial: true
   plan:
+  - put: allow-maintainers-guard
+    on_failure: *on_failure_slack
   - in_parallel:
     - get: infrastructure
     - get: concourse-image
@@ -695,3 +702,10 @@ resources:
     tag: pr-((number))
     username: ((docker.username))
     password: ((docker.password))
+
+- name: allow-maintainers-guard
+  type: manual-trigger-guard
+  expose_build_created_by: true
+  source:
+    access_token: ((pull_requests_access_token))
+    teams: [concourse/maintainers]
