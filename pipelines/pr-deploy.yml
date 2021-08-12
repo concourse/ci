@@ -14,8 +14,8 @@ icons:
 pending_status_notification: &pending_status_notification
   put: concourse-status-update
   resource: concourse-pr
-  inputs: [concourse-pr]
-  params: {path: concourse-pr, status: pending, context: $BUILD_JOB_NAME}
+  inputs: [concourse]
+  params: {path: concourse, status: pending, context: $BUILD_JOB_NAME}
   get_params: {skip_download: true}
 
 
@@ -28,14 +28,14 @@ on_failure_slack: &on_failure_slack
 status_notifications: &status_notifications
   on_success:
     put: concourse-pr
-    inputs: [concourse-pr]
-    params: {path: concourse-pr, status: success, context: $BUILD_JOB_NAME}
+    inputs: [concourse]
+    params: {path: concourse, status: success, context: $BUILD_JOB_NAME}
     get_params: {skip_download: true}
   on_failure:
     in_parallel:
     - put: concourse-pr
-      inputs: [concourse-pr]
-      params: {path: concourse-pr, status: failure, context: $BUILD_JOB_NAME}
+      inputs: [concourse]
+      params: {path: concourse, status: failure, context: $BUILD_JOB_NAME}
       get_params: {skip_download: true}
     - *on_failure_slack
 
