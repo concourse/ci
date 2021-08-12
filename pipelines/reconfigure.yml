@@ -126,6 +126,15 @@ resources:
     access_token: ((pull_requests_access_token))
     base_branch: master
 
+- name: concourse-deploy-prs
+  type: pull-request
+  check_every: 2m
+  source:
+    repository: concourse/concourse
+    access_token: ((pull_requests_access_token))
+    base_branch: master
+    labels: [deploy]
+
 jobs:
 - name: reconfigure-self
   plan:
@@ -431,22 +440,49 @@ jobs:
 - name: reconfigure-prs
   plan:
   - in_parallel:
-    - get: ignored
+    - get: ci
       resource: pipelines-and-tasks
       passed: [reconfigure-self]
     - get: pr-pipeline
       trigger: true
     - get: concourse-prs
       trigger: true
-  - load_var: concourse_prs
+    - get: concourse-deploy-prs
+      trigger: true
+  - load_var: all_prs
     file: concourse-prs/prs.json
+  - load_var: deploy_prs
+    file: concourse-deploy-prs/prs.json
+  - task: non-deploy-prs
+    file: ci/tasks/jq.yml
+    params:
+      VARS:
+        all_prs: ((all_prs))
+        deploy_prs: ((deploy_prs))
+      EXPR: .all_prs - .deploy_prs
+    output_mapping: {result: non-deploy-prs}
+  - load_var: non_deploy_prs
+    file: non-deploy-prs/result.json
   - across:
     - var: pr
-      values: ((.:concourse_prs))
+      values: ((.:non_deploy_prs))
       max_in_flight: all
     set_pipeline: pr
     team: contributor
     file: pr-pipeline/pipelines/pr.yml
+    instance_vars:
+      number: ((.:pr.number))
+    vars:
+      branch: master
+      dev_image_tag: latest
+      concourse_image_tag: latest
+  - across:
+    - var: pr
+      values: ((.:deploy_prs))
+      max_in_flight: all
+    set_pipeline: pr
+    team: contributor
+    file: pr-pipeline/pipelines/pr-deploy.yml
     instance_vars:
       number: ((.:pr.number))
     vars:

@@ -1,0 +1,19 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: stedolan/jq}
+
+params:
+  VARS:
+  EXPR:
+
+outputs:
+- name: result
+
+run:
+  path: sh
+  args:
+  - -ce
+  - echo "$VARS" | jq "$EXPR" > result/result.json
