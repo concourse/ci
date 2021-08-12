@@ -3,10 +3,11 @@ platform: linux
 
 image_resource:
   type: registry-image
-  source: {repository: stedolan/jq}
+  source: {repository: jetbrainsinfra/jq}
 
 params:
-  VARS:
+  # VAR_*
+  # e.g. VAR_foo=123, VAR_bar=[1,"2",3] --> {"foo": 123, "bar": [1, "2", 3]}
   EXPR:
 
 outputs:
@@ -15,5 +16,11 @@ outputs:
 run:
   path: sh
   args:
-  - -ce
-  - echo "$VARS" | jq "$EXPR" > result/result.json
+  - -c
+  - |
+    set -euo pipefail
+    env | \
+      jq --raw-input --slurp 'split("\n") | .[] | select(startswith("VAR_")) | sub("^VAR_"; "")' | \
+      jq '[capture( "(?<key>[^=]*)=(?<value>.*)" )] | from_entries | map_values(fromjson)' | \
+      jq --slurp add | \
+      jq "$EXPR" > result/result.json
