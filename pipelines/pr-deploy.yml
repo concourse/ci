@@ -76,6 +76,7 @@ jobs:
     - task: check-migration-order
       timeout: 5m
       file: ci/tasks/check-migration-order.yml
+      input_mapping: {concourse-pr: concourse}
     - task: yarn-analyse
       attempts: 3
       file: ci/tasks/yarn-analyse.yml
@@ -91,6 +92,7 @@ jobs:
       image: unit-image
       file: ci/tasks/unit.yml
       timeout: 1h
+      attempts: 3
     - task: fly-darwin
       file: ci/tasks/fly-darwin.yml
       timeout: 1h
