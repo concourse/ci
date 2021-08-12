@@ -151,6 +151,7 @@ jobs:
     file: ci/tasks/validate-pr.yml
     params:
       GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+    input_mapping: {concourse-pr: concourse}
 
 - name: containerd-integration
   public: true
