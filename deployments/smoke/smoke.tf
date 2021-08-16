@@ -84,7 +84,8 @@ resource "google_compute_instance" "smoke" {
     inline = [
       "set -e -x",
       "[ -e /var/lib/cloud ] && until [ -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done",
-      "apt-get update",
+      # --allow-releaseinfo-change prevents the upgrade from failing when Debian ships a new major release.
+      "apt-get --allow-releaseinfo-change update",
       "apt-get -y install postgresql",
       "sudo -i -u postgres createuser concourse",
       "sudo -i -u postgres createdb --owner=concourse concourse",
