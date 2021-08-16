@@ -278,6 +278,7 @@ jobs:
       resource: concourse-pr
       passed: [pr-image, testflight, watsjs, integration]
       trigger: true
+      params: {fetch_tags: true}
     - get: unit-image
     - get: pr-image
       passed: [pr-image]
@@ -567,7 +568,6 @@ resources:
     repository: concourse/concourse
     access_token: ((pull_requests_access_token))
     number: ((number))
-    fetch_tags: true
 
 - name: ci
   type: git
