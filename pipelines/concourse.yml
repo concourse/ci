@@ -593,14 +593,12 @@ jobs:
       - task: concourse-linux-alpine
         file: ci/tasks/concourse-build-linux.yml
         image: golang-builder-image
-        params:
-          PLATFORM: linux
+        params: {PLATFORM: linux}
         input_mapping: {concourse: built-concourse, resource-types: resource-types-alpine}
         output_mapping: {concourse-tarball: concourse-linux-alpine}
       - task: concourse-linux-ubuntu
         image: golang-builder-image
-        params:
-          PLATFORM: linux-ubuntu
+        params: {PLATFORM: linux}
         file: ci/tasks/concourse-build-linux.yml
         input_mapping: {concourse: built-concourse, resource-types: resource-types-ubuntu}
         output_mapping: {concourse-tarball: concourse-linux-ubuntu}
