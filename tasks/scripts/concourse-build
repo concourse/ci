@@ -61,10 +61,10 @@ pushd $output
   if [ "$GOOS" = "windows" ]; then
     archive=concourse-${version}.${GOOS}.${GOARCH}.zip
     apt-get update && apt-get install -y zip
-    zip "$archive" "$bin_name"
+    zip "$archive" concourse
   else
     archive=concourse-${version}.${GOOS}.${GOARCH}.tgz
-    tar -czf "$archive" "$bin_name"
+    tar -czf "$archive" concourse
   fi
   shasum "$archive" > "${archive}.sha1"
 
