@@ -85,7 +85,7 @@ resource "google_compute_instance" "smoke" {
       "set -e -x",
       "[ -e /var/lib/cloud ] && until [ -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done",
       # On Debian, apt-get update will fail in the event of a new major release, but --allow-releaseinfo-change prevents that
-      len(regexall(".*debian.*", var.GCP_IMAGE)) > 0 ? "apt-get --allow-releaseinfo-change update" : "apt-get update",
+      length(regexall(".*debian.*", var.GCP_IMAGE)) > 0 ? "apt-get --allow-releaseinfo-change update" : "apt-get update",
       "apt-get -y install postgresql",
       "sudo -i -u postgres createuser concourse",
       "sudo -i -u postgres createdb --owner=concourse concourse",
