@@ -72,7 +72,8 @@ jobs:
     - get: unit-image
     - get: ci
   - *pending_status_notification
-  - in_parallel:
+  - timeout: 10m
+    in_parallel:
     - task: check-migration-order
       timeout: 5m
       file: ci/tasks/check-migration-order.yml
@@ -87,11 +88,16 @@ jobs:
     - task: yarn-benchmark
       attempts: 3
       file: ci/tasks/yarn-benchmark.yml
-  - task: unit
-    image: unit-image
-    file: ci/tasks/unit.yml
-    timeout: 1h
-    attempts: 3
+  - timeout: 1h
+    in_parallel:
+    - task: unit
+      image: unit-image
+      file: ci/tasks/unit.yml
+      attempts: 3
+    - task: unit-baggageclaim
+      image: unit-image
+      file: ci/tasks/unit-baggageclaim.yml
+      privileged: true
 
 - name: pr-image
   public: true

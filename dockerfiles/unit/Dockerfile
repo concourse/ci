@@ -12,7 +12,9 @@ RUN apt-get update && apt-get -y install \
       iproute2 \
       gnupg2 \
       software-properties-common \
-      unzip
+      unzip \
+      file \
+      btrfs-progs
 
 # install PostgreSQL for DB tests
 ENV DEBIAN_FRONTEND noninteractive

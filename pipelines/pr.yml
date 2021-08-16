@@ -191,13 +191,20 @@ jobs:
     file: ci/tasks/yarn-benchmark.yml
     input_mapping: {concourse: concourse-pr}
     tags: [pr]
-  - task: unit
-    image: unit-image
-    attempts: 3
-    timeout: 1h
-    file: ci/tasks/unit.yml
-    input_mapping: {concourse: built-concourse}
-    tags: [pr]
+  - timeout: 1h
+    in_parallel:
+    - task: unit
+      image: unit-image
+      attempts: 3
+      file: ci/tasks/unit.yml
+      input_mapping: {concourse: built-concourse}
+      tags: [pr]
+    - task: unit-baggageclaim
+      image: unit-image
+      file: ci/tasks/unit-baggageclaim.yml
+      privileged: true
+      input_mapping: {concourse: built-concourse}
+      tags: [pr]
 
 - name: validate-labels
   public: true
