@@ -11,9 +11,10 @@ if [ -z "${PLATFORM}" ]; then
   exit 1
 fi
 
-version="$(cat version/version)"
+export GOOS="${PLATFORM:-$(go env GOOS)}"
+export GOARCH="amd64"
 
-archive=concourse-${version}.${PLATFORM}.amd64.tgz
+version="$(cat version/version)"
 
 final_version=""
 ldflags=""
@@ -23,10 +24,19 @@ if [ -e final-version/version ]; then
 fi
 
 pushd concourse
-  go build -o concourse -ldflags "$ldflags" ./cmd/concourse
+  bin="concourse"
+  if [ "$GOOS" = "windows" ]; then
+    bin+=".exe"
+  fi
+
+  go build -o "$bin" -ldflags "$ldflags" ./cmd/concourse
 
   if [ -n "$final_version" ]; then
-    test "$(./concourse --version)" = "$final_version"
+    if [ "$GOOS" = "linux" ]; then
+      test "$(./concourse --version)" = "$final_version"
+    else
+      echo "skipping --version check for platform $GOOS"
+    fi
   fi
 popd
 
@@ -48,7 +58,14 @@ cp -a fly-windows/fly-*.zip $fly_assets
 cp -a fly-darwin/fly-*.tgz $fly_assets
 
 pushd $output
-  tar -czf $archive concourse
+  if [ "$GOOS" = "windows" ]; then
+    archive=concourse-${version}.${GOOS}.${GOARCH}.zip
+    apt-get update && apt-get install -y zip
+    zip "$archive" concourse.exe
+  else
+    archive=concourse-${version}.${GOOS}.${GOARCH}.tgz
+    tar -czf "$archive" concourse
+  fi
   shasum "$archive" > "${archive}.sha1"
 
   rm -r concourse

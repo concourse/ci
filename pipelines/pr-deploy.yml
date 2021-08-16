@@ -286,12 +286,20 @@ jobs:
     - get: ci
   - in_parallel:
     - task: fly-linux
-      file: ci/tasks/fly-build-linux.yml
+      file: ci/tasks/fly-build-cross-compile.yml
       image: golang-builder-image
+      params: {GOOS: linux}
+      output_mapping: {fly: fly-linux}
     - task: fly-windows
-      file: ci/tasks/fly-build-windows.yml
+      file: ci/tasks/fly-build-cross-compile.yml
+      image: golang-builder-image
+      params: {GOOS: windows}
+      output_mapping: {fly: fly-windows}
     - task: fly-darwin
-      file: ci/tasks/fly-build-darwin.yml
+      file: ci/tasks/fly-build-cross-compile.yml
+      image: golang-builder-image
+      params: {GOOS: darwin}
+      output_mapping: {fly: fly-darwin}
   - in_parallel:
       fail_fast: true
       steps:
@@ -313,19 +321,23 @@ jobs:
       fail_fast: true
       steps:
       - task: concourse-linux-alpine
-        file: ci/tasks/concourse-build-linux.yml
+        file: ci/tasks/concourse-build.yml
         image: golang-builder-image
-        params:
-          PLATFORM: linux
+        params: {PLATFORM: linux}
         input_mapping: {concourse: built-concourse, resource-types: resource-types-alpine}
-        output_mapping: {concourse-tarball: concourse-linux-alpine}
+        output_mapping: {concourse-archive: concourse-linux-alpine}
       - task: concourse-windows
-        file: ci/tasks/concourse-build-windows.yml
+        file: ci/tasks/concourse-build.yml
+        image: golang-builder-image
+        params: {PLATFORM: windows}
         input_mapping: {concourse: built-concourse}
+        output_mapping: {concourse-archive: concourse-windows}
       - task: concourse-darwin
-        file: ci/tasks/concourse-build-darwin.yml
+        file: ci/tasks/concourse-build.yml
+        image: golang-builder-image
+        params: {PLATFORM: darwin}
         input_mapping: {concourse: built-concourse}
-        output_mapping: {concourse-tarball: concourse-darwin}
+        output_mapping: {concourse-archive: concourse-darwin}
   - in_parallel:
     - put: linux-dev-alpine
       params: {file: concourse-linux-alpine/concourse-*.tgz}
