@@ -326,19 +326,19 @@ jobs:
         image: golang-builder-image
         params: {PLATFORM: linux}
         input_mapping: {concourse: built-concourse, resource-types: resource-types-alpine}
-        output_mapping: {concourse-archive: concourse-linux-alpine}
+        output_mapping: {concourse-tarball: concourse-linux-alpine}
       - task: concourse-windows
         file: ci/tasks/concourse-build.yml
         image: golang-builder-image
         params: {PLATFORM: windows}
         input_mapping: {concourse: built-concourse}
-        output_mapping: {concourse-archive: concourse-windows}
+        output_mapping: {concourse-tarball: concourse-windows}
       - task: concourse-darwin
         file: ci/tasks/concourse-build.yml
         image: golang-builder-image
         params: {PLATFORM: darwin}
         input_mapping: {concourse: built-concourse}
-        output_mapping: {concourse-archive: concourse-darwin}
+        output_mapping: {concourse-tarball: concourse-darwin}
   - in_parallel:
     - put: linux-dev-alpine
       params: {file: concourse-linux-alpine/concourse-*.tgz}

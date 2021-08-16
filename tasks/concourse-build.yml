@@ -19,7 +19,7 @@ caches:
 - path: gopath
 
 outputs:
-- name: concourse-archive
+- name: concourse-tarball
 
 params:
   PLATFORM:
