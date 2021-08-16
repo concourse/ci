@@ -19,12 +19,6 @@ pending_status_notification: &pending_status_notification
   get_params: {skip_download: true}
 
 
-on_failure_slack: &on_failure_slack
-  put: notify
-  params:
-    mode: normal
-    alert_type: failed
-
 status_notifications: &status_notifications
   on_success:
     put: concourse-pr
@@ -32,12 +26,10 @@ status_notifications: &status_notifications
     params: {path: concourse, status: success, context: $BUILD_JOB_NAME}
     get_params: {skip_download: true}
   on_failure:
-    in_parallel:
-    - put: concourse-pr
-      inputs: [concourse]
-      params: {path: concourse, status: failure, context: $BUILD_JOB_NAME}
-      get_params: {skip_download: true}
-    - *on_failure_slack
+    put: concourse-pr
+    inputs: [concourse]
+    params: {path: concourse, status: failure, context: $BUILD_JOB_NAME}
+    get_params: {skip_download: true}
 
 resource_types:
 - name: gcs
@@ -355,7 +347,6 @@ jobs:
     - put: darwin-dev
       params: {file: concourse-darwin/concourse-*.tgz}
       inputs: [concourse-darwin]
-  on_failure: *on_failure_slack
 
 - name: build-image
   old_name: build-rc-image
@@ -385,7 +376,6 @@ jobs:
     inputs: [image-alpine]
     params:
       image: image-alpine/image.tar
-  on_failure: *on_failure_slack
 
 # - name: bin-smoke
 #   public: true
@@ -478,7 +468,6 @@ jobs:
   serial: true
   plan:
   - put: allow-maintainers-guard
-    on_failure: *on_failure_slack
   - in_parallel:
     - get: infrastructure
     - get: concourse-image
@@ -504,14 +493,12 @@ jobs:
     params:
       repository: infrastructure-bumped
       branch: master
-  on_failure: *on_failure_slack
 
 - name: bump-prod-workers
   public: true
   serial: true
   plan:
   - put: allow-maintainers-guard
-    on_failure: *on_failure_slack
   - in_parallel:
     - get: infrastructure
     - get: concourse-image
@@ -557,7 +544,6 @@ jobs:
     params:
       repository: infrastructure-bumped
       branch: master
-  on_failure: *on_failure_slack
 
 resources:
 - name: concourse-base
@@ -596,15 +582,6 @@ resources:
     uri: git@github.com:concourse/infrastructure.git
     branch: master
     private_key: ((greenpeace_private_key))
-
-- name: notify
-  type: slack-notifier
-  icon: slack
-  source:
-    url: ((slack_hooks.concourse-interrupt))
-    username: ((basic_auth.username))
-    password: ((basic_auth.password))
-    concourse_url: https://ci.concourse-ci.org
 
 - name: pr-image
   type: registry-image
