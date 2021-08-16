@@ -87,18 +87,11 @@ jobs:
     - task: yarn-benchmark
       attempts: 3
       file: ci/tasks/yarn-benchmark.yml
-  - in_parallel:
-    - task: unit
-      image: unit-image
-      file: ci/tasks/unit.yml
-      timeout: 1h
-      attempts: 3
-    - task: fly-darwin
-      file: ci/tasks/fly-darwin.yml
-      timeout: 1h
-    - task: fly-windows
-      file: ci/tasks/fly-windows.yml
-      timeout: 1h
+  - task: unit
+    image: unit-image
+    file: ci/tasks/unit.yml
+    timeout: 1h
+    attempts: 3
 
 - name: pr-image
   public: true
