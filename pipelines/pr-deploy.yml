@@ -85,7 +85,6 @@ jobs:
     - task: unit
       image: unit-image
       file: ci/tasks/unit.yml
-      attempts: 3
     - task: unit-baggageclaim
       image: unit-image
       file: ci/tasks/unit-baggageclaim.yml

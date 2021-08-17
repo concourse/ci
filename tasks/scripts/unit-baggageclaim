@@ -69,5 +69,5 @@ go mod download
 
 go install -mod=mod github.com/onsi/ginkgo/ginkgo
 
-ginkgo -r -race -nodes 4 --failOnPending --randomizeAllSpecs --keepGoing -skip=":skip" "$@"
+ginkgo -r -race -nodes 4 --failOnPending -flakeAttempts=3 --randomizeAllSpecs --keepGoing -skip=":skip" "$@"
 

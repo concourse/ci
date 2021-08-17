@@ -195,7 +195,6 @@ jobs:
     in_parallel:
     - task: unit
       image: unit-image
-      attempts: 3
       file: ci/tasks/unit.yml
       input_mapping: {concourse: built-concourse}
       tags: [pr]
