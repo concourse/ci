@@ -274,7 +274,7 @@ jobs:
   - in_parallel:
     - get: concourse
       resource: concourse-pr
-      passed: [pr-image, testflight, watsjs, integration]
+      passed: [unit, pr-image, testflight, watsjs, integration]
       trigger: true
       params: {fetch_tags: true}
     - get: unit-image
