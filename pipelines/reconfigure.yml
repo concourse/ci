@@ -450,27 +450,27 @@ jobs:
   - load_var: non_deploy_prs
     file: non-deploy-prs/result.json
   - across:
-    - var: pr
+    - var: non_deploy_pr
       values: ((.:non_deploy_prs))
       max_in_flight: all
     set_pipeline: pr
     team: contributor
     file: pr-pipeline/pipelines/pr.yml
     instance_vars:
-      number: ((.:pr.number))
+      number: ((.:non_deploy_pr.number))
     vars:
       branch: master
       dev_image_tag: latest
       concourse_image_tag: latest
   - across:
-    - var: pr
+    - var: deploy_pr
       values: ((.:deploy_prs))
       max_in_flight: all
     set_pipeline: pr
     team: contributor
     file: pr-pipeline/pipelines/pr-deploy.yml
     instance_vars:
-      number: ((.:pr.number))
+      number: ((.:deploy_pr.number))
     vars:
       branch: master
       dev_image_tag: latest
