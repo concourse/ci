@@ -102,6 +102,8 @@ config:
   - name: #@ "resource-image-dev-" + distro
     path: image
   - name: trivy-db
+  - name: ci
+  params: #@ determine_scan_ignore(distro)
   run:
     path: sh
     args:
@@ -110,13 +112,19 @@ config:
       mkdir db
       tar -xzf trivy-db/trivy-offline.db.tgz -C ./db
 
+      ignore_policy=""
+      if [ -f "$IGNORE_POLICY_FILE" ]; then
+        ignore_policy="--ignore-policy $IGNORE_POLICY_FILE"
+      fi
+
       trivy \
         --cache-dir $(pwd) \
         image \
         --severity "HIGH,CRITICAL" \
         --ignore-unfixed \
         --exit-code 1 \
-        --input image/image.tar
+        --input image/image.tar \
+        $ignore_policy
 on_failure: #@ determine_channel(distro)
 on_error: #@ determine_channel(distro)
 #@ end
@@ -125,6 +133,7 @@ on_error: #@ determine_channel(distro)
 name: #@ lts_string("scan-image", lts)
 plan:
 - in_parallel:
+  - get: ci
   - get: resource-repo
     resource: #@ lts_string("resource-repo", lts)
     passed:
@@ -191,6 +200,14 @@ plan:
   params:
     mode: normal
     alert_type: failed
+  #@ end
+#@ end
+
+#@ def determine_scan_ignore(distro):
+  #@ if distro == "alpine":
+  IGNORE_POLICY_FILE: ci/trivy-ignore/resource-alpine.rego
+  #@ else:
+  IGNORE_POLICY_FILE: ""
   #@ end
 #@ end
 
