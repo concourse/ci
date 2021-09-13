@@ -48,10 +48,10 @@ resource_types:
   type: registry-image
   source: {repository: concourse/helm-chart-resource}
 
-# TODO: get rid of this when https://github.com/concourse/concourse/issues/7284 is fixed
+# TODO: get rid of this v1.6.4 is deployed in CI
 - name: github-release
   type: registry-image
-  source: {repository: aoldershaw/github-release-resource}
+  source: {repository: concourse/github-release-resource}
 
 - name: pull-request
   type: registry-image

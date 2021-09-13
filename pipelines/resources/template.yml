@@ -506,6 +506,11 @@ resource_types:
   #! https://github.com/mockersf/concourse-slack-notifier/pull/86 is merged
   source: {repository: aoldershaw/concourse-slack-notifier}
 
+  #! TODO: get rid of this v1.6.4 is deployed in CI
+- name: github-release
+  type: registry-image
+  source: {repository: concourse/github-release-resource}
+
 resources:
 - name: alpine
   type: registry-image
