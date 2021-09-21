@@ -177,56 +177,115 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: bosh-io-release-resource
-      trigger: true
-    - get: bosh-io-stemcell-resource
-      trigger: true
-    - get: cf-resource
-      trigger: true
-    - get: docker-image-resource
-      trigger: true
-    - get: git-resource
-      trigger: true
-    - get: github-release-resource
-      trigger: true
-    - get: hg-resource
-      trigger: true
-    - get: pool-resource
-      trigger: true
-    - get: registry-image-resource
-      trigger: true
-    - get: s3-resource
-      trigger: true
-    - get: semver-resource
-      trigger: true
-    - get: time-resource
-      trigger: true
-    - get: tracker-resource
-      trigger: true
-    - get: mock-resource
-      trigger: true
     - get: builder
       trigger: true
     - get: periodic-check
       trigger: true
     - get: ci
   - in_parallel:
-    - task: build-alpine
-      image: builder
-      privileged: true
-      params:
-        BUILD_ARG_distro: alpine
-      file: ci/tasks/build-resource-types-image.yml
-    - task: build-ubuntu
-      output_mapping: {image: image_ubuntu}
-      image: builder
-      privileged: true
-      params:
-        BUILD_ARG_distro: ubuntu
-      file: ci/tasks/build-resource-types-image.yml
+    - do:
+      - in_parallel:
+        - get: bosh-io-release-resource-alpine
+          trigger: true
+        - get: bosh-io-stemcell-resource-alpine
+          trigger: true
+        - get: cf-resource-alpine
+          trigger: true
+        - get: docker-image-resource-alpine
+          trigger: true
+        - get: git-resource-alpine
+          trigger: true
+        - get: github-release-resource-alpine
+          trigger: true
+        - get: hg-resource-alpine
+          trigger: true
+        - get: mock-resource-alpine
+          trigger: true
+        - get: pool-resource-alpine
+          trigger: true
+        - get: registry-image-resource-alpine
+          trigger: true
+        - get: s3-resource-alpine
+          trigger: true
+        - get: semver-resource-alpine
+          trigger: true
+        - get: time-resource-alpine
+          trigger: true
+        - get: tracker-resource-alpine
+          trigger: true
+      - task: build-alpine
+        input_mapping:
+          bosh-io-release-resource: bosh-io-release-resource-alpine
+          bosh-io-stemcell-resource: bosh-io-stemcell-resource-alpine
+          cf-resource: cf-resource-alpine
+          docker-image-resource: docker-image-resource-alpine
+          git-resource: git-resource-alpine
+          github-release-resource: github-release-resource-alpine
+          hg-resource: hg-resource-alpine
+          mock-resource: mock-resource-alpine
+          pool-resource: pool-resource-alpine
+          registry-image-resource: registry-image-resource-alpine
+          s3-resource: s3-resource-alpine
+          semver-resource: semver-resource-alpine
+          time-resource: time-resource-alpine
+          tracker-resource: tracker-resource-alpine
+        output_mapping: {image: image_alpine}
+        image: builder
+        privileged: true
+        file: ci/tasks/build-resource-types-image.yml
+    - do:
+      - in_parallel:
+        - get: bosh-io-release-resource-ubuntu
+          trigger: true
+        - get: bosh-io-stemcell-resource-ubuntu
+          trigger: true
+        - get: cf-resource-ubuntu
+          trigger: true
+        - get: docker-image-resource-ubuntu
+          trigger: true
+        - get: git-resource-ubuntu
+          trigger: true
+        - get: github-release-resource-ubuntu
+          trigger: true
+        - get: hg-resource-ubuntu
+          trigger: true
+        - get: mock-resource-ubuntu
+          trigger: true
+        - get: pool-resource-ubuntu
+          trigger: true
+        - get: registry-image-resource-ubuntu
+          trigger: true
+        - get: s3-resource-ubuntu
+          trigger: true
+        - get: semver-resource-ubuntu
+          trigger: true
+        - get: time-resource-ubuntu
+          trigger: true
+        - get: tracker-resource-ubuntu
+          trigger: true
+      - task: build-ubuntu
+        input_mapping:
+          bosh-io-release-resource: bosh-io-release-resource-ubuntu
+          bosh-io-stemcell-resource: bosh-io-stemcell-resource-ubuntu
+          cf-resource: cf-resource-ubuntu
+          docker-image-resource: docker-image-resource-ubuntu
+          git-resource: git-resource-ubuntu
+          github-release-resource: github-release-resource-ubuntu
+          hg-resource: hg-resource-ubuntu
+          mock-resource: mock-resource-ubuntu
+          pool-resource: pool-resource-ubuntu
+          registry-image-resource: registry-image-resource-ubuntu
+          s3-resource: s3-resource-ubuntu
+          semver-resource: semver-resource-ubuntu
+          time-resource: time-resource-ubuntu
+          tracker-resource: tracker-resource-ubuntu
+        output_mapping: {image: image_ubuntu}
+        image: builder
+        privileged: true
+        file: ci/tasks/build-resource-types-image.yml
   - in_parallel:
     - put: resource-types-alpine-image
-      params: {image: image/image.tar}
+      params: {image: image_alpine/image.tar}
       get_params: {format: oci}
     - put: resource-types-ubuntu-image
       params: {image: image_ubuntu/image.tar}
@@ -1965,131 +2024,257 @@ resources:
   source:
     repository: cloudfoundry-incubator/backup-and-restore-sdk-release
 
-- name: mock-resource
-  type: github-release
+- name: mock-resource-alpine
+  type: registry-image
   icon: *release-icon
   source:
-    owner: concourse
-    repository: mock-resource
-    access_token: ((concourse_github_dummy.access_token))
-    semver_constraint: ((resource_type_versions.mock))
+    repository: concourse/mock-resource
+    tag: ((resource_type_versions.mock))-alpine
+    username: ((docker.username))
+    password: ((docker.password))
 
-- name: bosh-io-release-resource
-  type: github-release
+- name: mock-resource-ubuntu
+  type: registry-image
   icon: *release-icon
   source:
-    owner: concourse
-    repository: bosh-io-release-resource
-    access_token: ((concourse_github_dummy.access_token))
-    semver_constraint: ((resource_type_versions.bosh-io-release))
+    repository: concourse/mock-resource
+    tag: ((resource_type_versions.mock))-ubuntu
+    username: ((docker.username))
+    password: ((docker.password))
 
-- name: bosh-io-stemcell-resource
-  type: github-release
+- name: bosh-io-release-resource-alpine
+  type: registry-image
   icon: *release-icon
   source:
-    owner: concourse
-    repository: bosh-io-stemcell-resource
-    access_token: ((concourse_github_dummy.access_token))
-    semver_constraint: ((resource_type_versions.bosh-io-stemcell))
+    repository: concourse/bosh-io-release-resource
+    tag: ((resource_type_versions.bosh-io-release))-alpine
+    username: ((docker.username))
+    password: ((docker.password))
 
-- name: cf-resource
-  type: github-release
+- name: bosh-io-release-resource-ubuntu
+  type: registry-image
   icon: *release-icon
   source:
-    owner: cloudfoundry-community
-    repository: cf-resource
-    access_token: ((concourse_github_dummy.access_token))
-    semver_constraint: ((resource_type_versions.cf))
+    repository: concourse/bosh-io-release-resource
+    tag: ((resource_type_versions.bosh-io-release))-ubuntu
+    username: ((docker.username))
+    password: ((docker.password))
 
-- name: docker-image-resource
-  type: github-release
+- name: bosh-io-stemcell-resource-alpine
+  type: registry-image
   icon: *release-icon
   source:
-    owner: concourse
-    repository: docker-image-resource
-    access_token: ((concourse_github_dummy.access_token))
-    semver_constraint: ((resource_type_versions.docker-image))
+    repository: concourse/bosh-io-stemcell-resource
+    tag: ((resource_type_versions.bosh-io-stemcell))-alpine
+    username: ((docker.username))
+    password: ((docker.password))
 
-- name: git-resource
-  type: github-release
+- name: bosh-io-stemcell-resource-ubuntu
+  type: registry-image
   icon: *release-icon
   source:
-    owner: concourse
-    repository: git-resource
-    access_token: ((concourse_github_dummy.access_token))
-    semver_constraint: ((resource_type_versions.git))
+    repository: concourse/bosh-io-stemcell-resource
+    tag: ((resource_type_versions.bosh-io-stemcell))-ubuntu
+    username: ((docker.username))
+    password: ((docker.password))
 
-- name: github-release-resource
-  type: github-release
+- name: cf-resource-alpine
+  type: registry-image
   icon: *release-icon
   source:
-    owner: concourse
-    repository: github-release-resource
-    access_token: ((concourse_github_dummy.access_token))
-    semver_constraint: ((resource_type_versions.github-release))
+    repository: concourse/cf-resource
+    tag: ((resource_type_versions.cf))-alpine
+    username: ((docker.username))
+    password: ((docker.password))
 
-- name: hg-resource
-  type: github-release
+- name: cf-resource-ubuntu
+  type: registry-image
   icon: *release-icon
   source:
-    owner: concourse
-    repository: hg-resource
-    access_token: ((concourse_github_dummy.access_token))
-    semver_constraint: ((resource_type_versions.hg))
+    repository: concourse/cf-resource
+    tag: ((resource_type_versions.cf))-ubuntu
+    username: ((docker.username))
+    password: ((docker.password))
 
-- name: pool-resource
-  type: github-release
+- name: docker-image-resource-alpine
+  type: registry-image
   icon: *release-icon
   source:
-    owner: concourse
-    repository: pool-resource
-    access_token: ((concourse_github_dummy.access_token))
-    semver_constraint: ((resource_type_versions.pool))
+    repository: concourse/docker-image-resource
+    tag: ((resource_type_versions.docker-image))-alpine
+    username: ((docker.username))
+    password: ((docker.password))
 
-- name: registry-image-resource
-  type: github-release
+- name: docker-image-resource-ubuntu
+  type: registry-image
   icon: *release-icon
   source:
-    owner: concourse
-    repository: registry-image-resource
-    access_token: ((concourse_github_dummy.access_token))
-    semver_constraint: ((resource_type_versions.registry-image))
+    repository: concourse/docker-image-resource
+    tag: ((resource_type_versions.docker-image))-ubuntu
+    username: ((docker.username))
+    password: ((docker.password))
 
-- name: s3-resource
-  type: github-release
+- name: git-resource-alpine
+  type: registry-image
   icon: *release-icon
   source:
-    owner: concourse
-    repository: s3-resource
-    access_token: ((concourse_github_dummy.access_token))
-    semver_constraint: ((resource_type_versions.s3))
+    repository: concourse/git-resource
+    tag: ((resource_type_versions.git))-alpine
+    username: ((docker.username))
+    password: ((docker.password))
 
-- name: semver-resource
-  type: github-release
+- name: git-resource-ubuntu
+  type: registry-image
   icon: *release-icon
   source:
-    owner: concourse
-    repository: semver-resource
-    access_token: ((concourse_github_dummy.access_token))
-    semver_constraint: ((resource_type_versions.semver))
+    repository: concourse/git-resource
+    tag: ((resource_type_versions.git))-ubuntu
+    username: ((docker.username))
+    password: ((docker.password))
 
-- name: time-resource
-  type: github-release
+- name: github-release-resource-alpine
+  type: registry-image
   icon: *release-icon
   source:
-    owner: concourse
-    repository: time-resource
-    access_token: ((concourse_github_dummy.access_token))
-    semver_constraint: ((resource_type_versions.time))
+    repository: concourse/github-release-resource
+    tag: ((resource_type_versions.github-release))-alpine
+    username: ((docker.username))
+    password: ((docker.password))
 
-- name: tracker-resource
-  type: github-release
+- name: github-release-resource-ubuntu
+  type: registry-image
   icon: *release-icon
   source:
-    owner: concourse
-    repository: tracker-resource
-    access_token: ((concourse_github_dummy.access_token))
-    semver_constraint: ((resource_type_versions.tracker))
+    repository: concourse/github-release-resource
+    tag: ((resource_type_versions.github-release))-ubuntu
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: hg-resource-alpine
+  type: registry-image
+  icon: *release-icon
+  source:
+    repository: concourse/hg-resource
+    tag: ((resource_type_versions.hg))-alpine
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: hg-resource-ubuntu
+  type: registry-image
+  icon: *release-icon
+  source:
+    repository: concourse/hg-resource
+    tag: ((resource_type_versions.hg))-ubuntu
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: pool-resource-alpine
+  type: registry-image
+  icon: *release-icon
+  source:
+    repository: concourse/pool-resource
+    tag: ((resource_type_versions.pool))-alpine
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: pool-resource-ubuntu
+  type: registry-image
+  icon: *release-icon
+  source:
+    repository: concourse/pool-resource
+    tag: ((resource_type_versions.pool))-ubuntu
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: registry-image-resource-alpine
+  type: registry-image
+  icon: *release-icon
+  source:
+    repository: concourse/registry-image-resource
+    tag: ((resource_type_versions.registry-image))-alpine
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: registry-image-resource-ubuntu
+  type: registry-image
+  icon: *release-icon
+  source:
+    repository: concourse/registry-image-resource
+    tag: ((resource_type_versions.registry-image))-ubuntu
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: s3-resource-alpine
+  type: registry-image
+  icon: *release-icon
+  source:
+    repository: concourse/s3-resource
+    tag: ((resource_type_versions.s3))-alpine
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: s3-resource-ubuntu
+  type: registry-image
+  icon: *release-icon
+  source:
+    repository: concourse/s3-resource
+    tag: ((resource_type_versions.s3))-ubuntu
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: semver-resource-alpine
+  type: registry-image
+  icon: *release-icon
+  source:
+    repository: concourse/semver-resource
+    tag: ((resource_type_versions.semver))-alpine
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: semver-resource-ubuntu
+  type: registry-image
+  icon: *release-icon
+  source:
+    repository: concourse/semver-resource
+    tag: ((resource_type_versions.semver))-ubuntu
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: time-resource-alpine
+  type: registry-image
+  icon: *release-icon
+  source:
+    repository: concourse/time-resource
+    tag: ((resource_type_versions.time))-alpine
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: time-resource-ubuntu
+  type: registry-image
+  icon: *release-icon
+  source:
+    repository: concourse/time-resource
+    tag: ((resource_type_versions.time))-ubuntu
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: tracker-resource-alpine
+  type: registry-image
+  icon: *release-icon
+  source:
+    repository: concourse/tracker-resource
+    tag: ((resource_type_versions.tracker))-alpine
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: tracker-resource-ubuntu
+  type: registry-image
+  icon: *release-icon
+  source:
+    repository: concourse/tracker-resource
+    tag: ((resource_type_versions.tracker))-ubuntu
+    username: ((docker.username))
+    password: ((docker.password))
 
 - name: concourse-image-dpkg-list
   type: gcs
