@@ -2,7 +2,7 @@ platform: linux
 
 image_resource:
   type: registry-image
-  source: {repository: concourse/builder}
+  source: {repository: concourse/oci-build-task}
 
 params:
   DOCKERFILE: ci/dockerfiles/resource-types/Dockerfile
@@ -29,7 +29,7 @@ outputs:
 - name: image
 
 run:
-  path: bash
+  path: sh
   args:
   - -c
   - |
@@ -37,11 +37,11 @@ run:
 
     for resource in $(ls | grep resource); do
         echo repacking ${resource}
-        pushd ${resource}
+        cd ${resource}
             mv metadata.json resource_metadata.json
             tar czf rootfs.tgz --directory=rootfs/ .
             rm -rf ./rootfs/
-        popd
+        cd -
     done;
 
     build
