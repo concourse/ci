@@ -5,7 +5,6 @@ image_resource:
   source: {repository: concourse/builder}
 
 params:
-  BUILD_ARG_distro: ubuntu
   DOCKERFILE: ci/dockerfiles/resource-types/Dockerfile
   REPOSITORY: concourse/dev
 
@@ -29,4 +28,20 @@ inputs:
 outputs:
 - name: image
 
-run: {path: build}
+run:
+  path: bash
+  args:
+  - -c
+  - |
+    set -euo pipefail
+
+    for resource in $(ls | grep resource); do
+        echo repacking ${resource}
+        pushd ${resource}
+            mv metadata.json resource_metadata.json
+            tar czf rootfs.tgz --directory=rootfs/ .
+            rm -rf ./rootfs/
+        popd
+    done;
+
+    build
