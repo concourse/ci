@@ -35,7 +35,7 @@ if __name__ == '__main__':
         versions = yaml.safe_load(file)
 
     # ~x.y.z is a semver constraint meaning "any patch versions in the x.y series >= z"
-    versions = {resource_type: remove_prefix(version, 'v') for resource_type, version in versions.items()}
+    versions = {resource_type: "~" + remove_prefix(version, 'v') for resource_type, version in versions.items()}
 
     i = 0
     while True:
