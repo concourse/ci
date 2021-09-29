@@ -5,7 +5,7 @@ FROM busybox
   COPY cf-resource/                /usr/local/concourse/resource-types/cf/
   COPY docker-image-resource/      /usr/local/concourse/resource-types/docker-image/
   COPY git-resource/               /usr/local/concourse/resource-types/git/
-  COPY github-release-resource/    /usr/local/concourse/resource-types/github/
+  COPY github-release-resource/    /usr/local/concourse/resource-types/github-release/
   COPY hg-resource/                /usr/local/concourse/resource-types/hg/
   COPY mock-resource/              /usr/local/concourse/resource-types/mock/
   COPY pool-resource/              /usr/local/concourse/resource-types/pool/
