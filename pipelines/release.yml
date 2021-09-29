@@ -2044,7 +2044,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/mock-resource
-    tag: ((resource_type_versions.mock))-alpine
+    semver_constraint: ((resource_type_versions.mock))
+    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2053,7 +2054,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/mock-resource
-    tag: ((resource_type_versions.mock))-ubuntu
+    semver_constraint: ((resource_type_versions.mock))
+    variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2062,7 +2064,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/bosh-io-release-resource
-    tag: ((resource_type_versions.bosh-io-release))-alpine
+    semver_constraint: ((resource_type_versions.bosh-io-release))
+    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2071,7 +2074,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/bosh-io-release-resource
-    tag: ((resource_type_versions.bosh-io-release))-ubuntu
+    semver_constraint: ((resource_type_versions.bosh-io-release))
+    variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2080,7 +2084,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/bosh-io-stemcell-resource
-    tag: ((resource_type_versions.bosh-io-stemcell))-alpine
+    semver_constraint: ((resource_type_versions.bosh-io-stemcell))
+    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2089,7 +2094,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/bosh-io-stemcell-resource
-    tag: ((resource_type_versions.bosh-io-stemcell))-ubuntu
+    semver_constraint: ((resource_type_versions.bosh-io-stemcell))
+    variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2098,7 +2104,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/cf-resource
-    tag: ((resource_type_versions.cf))-alpine
+    semver_constraint: ((resource_type_versions.cf))
+    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2107,7 +2114,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/cf-resource
-    tag: ((resource_type_versions.cf))-ubuntu
+    semver_constraint: ((resource_type_versions.cf))
+    variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2116,7 +2124,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/docker-image-resource
-    tag: ((resource_type_versions.docker-image))-alpine
+    semver_constraint: ((resource_type_versions.docker-image))
+    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2125,7 +2134,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/docker-image-resource
-    tag: ((resource_type_versions.docker-image))-ubuntu
+    semver_constraint: ((resource_type_versions.docker-image))
+    variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2134,7 +2144,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/git-resource
-    tag: ((resource_type_versions.git))-alpine
+    semver_constraint: ((resource_type_versions.git))
+    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2143,7 +2154,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/git-resource
-    tag: ((resource_type_versions.git))-ubuntu
+    semver_constraint: ((resource_type_versions.git))
+    variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2152,7 +2164,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/github-release-resource
-    tag: ((resource_type_versions.github-release))-alpine
+    semver_constraint: ((resource_type_versions.github-release))
+    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2161,7 +2174,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/github-release-resource
-    tag: ((resource_type_versions.github-release))-ubuntu
+    semver_constraint: ((resource_type_versions.github-release))
+    variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2170,7 +2184,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/hg-resource
-    tag: ((resource_type_versions.hg))-alpine
+    semver_constraint: ((resource_type_versions.hg))
+    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2179,7 +2194,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/hg-resource
-    tag: ((resource_type_versions.hg))-ubuntu
+    semver_constraint: ((resource_type_versions.hg))
+    variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2188,7 +2204,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/pool-resource
-    tag: ((resource_type_versions.pool))-alpine
+    semver_constraint: ((resource_type_versions.pool))
+    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2197,7 +2214,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/pool-resource
-    tag: ((resource_type_versions.pool))-ubuntu
+    semver_constraint: ((resource_type_versions.pool))
+    variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2206,7 +2224,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/registry-image-resource
-    tag: ((resource_type_versions.registry-image))-alpine
+    semver_constraint: ((resource_type_versions.registry-image))
+    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2215,7 +2234,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/registry-image-resource
-    tag: ((resource_type_versions.registry-image))-ubuntu
+    semver_constraint: ((resource_type_versions.registry-image))
+    variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2224,7 +2244,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/s3-resource
-    tag: ((resource_type_versions.s3))-alpine
+    semver_constraint: ((resource_type_versions.s3))
+    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2233,7 +2254,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/s3-resource
-    tag: ((resource_type_versions.s3))-ubuntu
+    semver_constraint: ((resource_type_versions.s3))
+    variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2242,7 +2264,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/semver-resource
-    tag: ((resource_type_versions.semver))-alpine
+    semver_constraint: ((resource_type_versions.semver))
+    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2251,7 +2274,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/semver-resource
-    tag: ((resource_type_versions.semver))-ubuntu
+    semver_constraint: ((resource_type_versions.semver))
+    variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2260,7 +2284,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/time-resource
-    tag: ((resource_type_versions.time))-alpine
+    semver_constraint: ((resource_type_versions.time))
+    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2269,7 +2294,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/time-resource
-    tag: ((resource_type_versions.time))-ubuntu
+    semver_constraint: ((resource_type_versions.time))
+    variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2278,7 +2304,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/tracker-resource
-    tag: ((resource_type_versions.tracker))-alpine
+    semver_constraint: ((resource_type_versions.tracker))
+    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
@@ -2287,7 +2314,8 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/tracker-resource
-    tag: ((resource_type_versions.tracker))-ubuntu
+    semver_constraint: ((resource_type_versions.tracker))
+    variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 

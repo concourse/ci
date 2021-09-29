@@ -42,7 +42,7 @@ run:
             rm -rf ./rootfs/
 
             vr=$(cat tag)
-            version=$(echo ${vr%-*})
+            version=$(echo ${vr%%-*})
             privileged=$(if [[ ${resource} == "docker-image" ]]; then echo true; else echo false; fi;)
             version_history=$(if [[ ${resource} == "time" ]]; then echo true; else echo false; fi;)
 
