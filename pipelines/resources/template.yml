@@ -91,6 +91,8 @@ plan:
 - #@ template.replace(extra_steps(distro))
 - put: #@ lts_string("resource-image-dev-" + distro, lts)
   params: {image: built-resource-image/image.tar}
+  get_params:
+    skip_download: true
 #@ end
 
 #@ def scan_task(distro):
@@ -372,16 +374,22 @@ plan:
       image: resource-image-dev-alpine/image.tar
       version: ((.:version))
       bump_aliases: true
+    get_params:
+      skip_download: true
   - put: resource-image-alpine
     params:
       image: resource-image-dev-alpine/image.tar
       version: ((.:version))
       bump_aliases: true
+    get_params:
+      skip_download: true
   - put: resource-image-ubuntu
     params:
       image: resource-image-dev-ubuntu/image.tar
       version: ((.:version))
       bump_aliases: true
+    get_params:
+      skip_download: true
   - put: resource-repo-release
     params:
       commitish: resource-repo/.git/ref
@@ -438,12 +446,16 @@ plan:
       version: ((.:version))
       bump_aliases: true
       additional_tags: date-tag/tag
+    get_params:
+      skip_download: true
   #@ if distro == "alpine":
   - put: resource-image
     params:
       image: built-resource-image/image.tar
       version: ((.:version))
       bump_aliases: true
+    get_params:
+      skip_download: true
   #@ end
 #@ end
 
