@@ -1,0 +1,8 @@
+platform: linux
+
+inputs:
+- name: concourse
+- name: ci
+
+run:
+  path: ci/tasks/scripts/check-gofmt.sh
