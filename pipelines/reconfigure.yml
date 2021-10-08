@@ -332,7 +332,7 @@ jobs:
           cf: ~1.1.3
           docker-image: ~1.6.1
           git: ~1.14.0
-          github-release: ~1.6.2
+          github-release: ~1.6.4
           hg: ~1.2.4
           mock: ~0.12.2
           pool: ~1.2.1
