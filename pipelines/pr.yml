@@ -349,3 +349,23 @@ jobs:
     input_mapping: {concourse: concourse-pr, dev-image: pr-image}
     file: ci/tasks/integration.yml
     tags: [pr]
+
+- name: go-format-check
+  public: true
+  serial: true
+  <<: *status_notifications
+  plan:
+  - in_parallel:
+    - get: concourse-pr
+      tags: [pr]
+      trigger: true
+    - get: unit-image
+      tags: [pr]
+    - get: ci
+      tags: [pr]
+  - *pending_status_notification
+  - task: check-format-for-go-files
+    input_mapping:
+      concourse: concourse-pr
+    tags: [pr]
+    file: ci/tasks/check-gofmt.yml

@@ -100,3 +100,6 @@ RUN mkdir -p /root/.pki/nssdb && \
     -t "TCu,Cu,Tu" \
     -i $LETS_ENCRYPT_STAGING_CA_CERT \
     -d sql:/root/.pki/nssdb
+
+# install goimports CLI for formatting go files
+RUN go install golang.org/x/tools/cmd/goimports@latest
