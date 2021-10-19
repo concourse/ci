@@ -365,6 +365,7 @@ jobs:
       tags: [pr]
   - *pending_status_notification
   - task: check-format-for-go-files
+    image: unit-image
     input_mapping:
       concourse: concourse-pr
     tags: [pr]
