@@ -94,7 +94,7 @@ report_vm_bosh () {
   info "$(echo $gce_bosh | jq 'length') of which follow the BOSH naming scheme \"vm-\""
 
   # Topgun BOSH environment
-  topgun_director="bosh-bbl-env-manitoba-2020-10-01t19-18z" # hard coded for now
+  topgun_director="bosh-bbl-env-caspian-2021-10-07t03-59z" # hard coded for now
   gce_topgun_bosh=$(echo $gce_bosh | jq --arg director $topgun_director '[ .[] | select (.labels.director ==  $director) ]')
 
   # unknown_vms=$(echo $gce_bosh | jq '[ .[].name ]')
