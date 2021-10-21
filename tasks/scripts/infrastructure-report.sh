@@ -103,6 +103,10 @@ report_vm_bosh () {
   gsutil -m cp -r gs://bosh-topgun-bbl-state/ . > /dev/null 2>&1
   pushd bosh-topgun-bbl-state > /dev/null
     eval "$(bbl print-env)"
+
+    # clean up bosh director for disk space releasing
+    bosh clean-up --all
+
     topgun_vms=$(bosh vms --json | jq '[ .Tables[].Rows[].vm_cid ]')
     info "  There are $(echo $topgun_vms | jq 'length') VMs managed by the Topgun BOSH director ($topgun_director) and GCE reports $(echo $gce_topgun_bosh | jq 'length') VM instances"
     info ""
