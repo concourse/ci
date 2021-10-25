@@ -23,6 +23,7 @@ unique_to_base=$(comm -23 "$migrations_on_base" "$actual_pr_migrations")
   echo "pr removed migrations:"
   echo "$unique_to_base"
   echo "and prs cannot remove migrations."
+  echo "If your PR is removing migrations that are not part of any released version of concourse you can change the title of your PR to include 'skip-migrations-check' in it to skip this check"
   exit 1
 }
 
