@@ -410,6 +410,7 @@ plan:
 
 #@ def rebuild_images(distro):
 name: #@ "republish-images-" + distro
+serial_groups: [build]
 on_failure: &failed-ci
   put: notify
   params:
