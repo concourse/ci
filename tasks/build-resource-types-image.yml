@@ -38,8 +38,6 @@ run:
         echo repacking ${resource}
         cd ${resource}
             resource=$(echo ${resource%-resource})
-            tar czf rootfs.tgz --directory=rootfs/ .
-            rm -rf ./rootfs/
 
             vr=$(cat tag)
             version=$(echo ${vr%%-*})
