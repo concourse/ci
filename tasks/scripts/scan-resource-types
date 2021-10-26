@@ -26,12 +26,11 @@ for resource in *; do
   trivy \
     --cache-dir "$cache_dir" \
     --quiet \
-    filesystem \
+    filesystem $ignore_policy \
     --severity "HIGH,CRITICAL" \
     --ignore-unfixed \
     --exit-code 1 \
-    --input . \
-    $ignore_policy
+    .
 
   if [ $? -ne 0 ]; then
     failed="${failed}\n-${resource}"
