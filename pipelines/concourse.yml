@@ -177,10 +177,7 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: builder
-      trigger: true
-    - get: periodic-check
-      trigger: true
+    - get: oci-build-task
     - get: ci
   - in_parallel:
     - do:
@@ -230,7 +227,7 @@ jobs:
           time-resource: time-resource-alpine
           tracker-resource: tracker-resource-alpine
         output_mapping: {image: image_alpine}
-        image: builder
+        image: oci-build-task
         privileged: true
         file: ci/tasks/build-resource-types-image.yml
     - do:
@@ -280,7 +277,7 @@ jobs:
           time-resource: time-resource-ubuntu
           tracker-resource: tracker-resource-ubuntu
         output_mapping: {image: image_ubuntu}
-        image: builder
+        image: oci-build-task
         privileged: true
         file: ci/tasks/build-resource-types-image.yml
   - in_parallel:
