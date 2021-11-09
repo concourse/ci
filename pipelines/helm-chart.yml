@@ -17,7 +17,7 @@ groups:
   jobs:
   - merge-dev-into-master
   - concourse-app-bump
-  - postgres-app-bump
+  - postgres-chart-bump
 
 - name: publish
   jobs:
@@ -57,7 +57,7 @@ jobs:
       repository: concourse-chart-bumped
       merge: true
 
-- name: postgres-app-bump
+- name: postgres-chart-bump
   public: true
   serial: true
   plan:
@@ -66,8 +66,8 @@ jobs:
       trigger: true
     - get: concourse-chart
     - get: ci
-  - task: bump-postgres-app-version
-    file: ci/tasks/bump-postgres-app-version.yml
+  - task: bump-postgres-chart-version
+    file: ci/tasks/bump-postgres-chart-version.yml
   - put: concourse-chart
     inputs: [concourse-chart-bumped]
     params:
