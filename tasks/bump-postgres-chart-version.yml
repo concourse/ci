@@ -14,4 +14,4 @@ outputs:
   path: concourse-chart
 
 run:
-  path: ci/tasks/scripts/bump-postgres-app-version
+  path: ci/tasks/scripts/bump-postgres-chart-version
