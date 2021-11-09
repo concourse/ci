@@ -9,6 +9,8 @@ pushd concourse-chart
   sed -i "s/imageTag: .*/imageTag: \"${concourse_version}\"/g" values.yaml
   sed -i "s/Concourse image version | .* |/Concourse image version | \`${concourse_version}\` |/g" README.md
 
+  git diff
+
   git config --global user.email "ci@localhost"
   git config --global user.name "CI Bot"
 
