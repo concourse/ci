@@ -143,6 +143,9 @@ jobs:
   serial: true
   plan:
   - in_parallel:
+    - get: postgres-chart-release
+      passed: [postgres-chart-bump]
+      trigger: true
     - get: version
       params: {bump: patch}
     - get: concourse-chart
