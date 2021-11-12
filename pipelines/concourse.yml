@@ -871,7 +871,6 @@ jobs:
     - var: gcp-image
       values:
       - debian-10-buster-v20210122
-      - ubuntu-1604-lts
       - ubuntu-1804-lts
       - ubuntu-2004-lts
       max_in_flight: 1
