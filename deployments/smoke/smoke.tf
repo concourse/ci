@@ -46,6 +46,7 @@ resource "google_compute_firewall" "smoke" {
   }
 
   target_tags = ["smoke"]
+  source_tags = ["smoke"]
 }
 
 resource "google_compute_instance" "smoke" {
