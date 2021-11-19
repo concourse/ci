@@ -10,8 +10,6 @@ pushd concourse-chart
 
   helm dependency update
 
-  git diff
-
   git config --global user.email "ci@localhost"
   git config --global user.name "CI Bot"
 
