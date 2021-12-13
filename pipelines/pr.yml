@@ -273,7 +273,7 @@ jobs:
       values:
       - guardian
       - containerd
-      max_in_flight: all
+      max_in_flight: 1
     task: testflight
     timeout: 1h
     privileged: true
