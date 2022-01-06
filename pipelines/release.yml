@@ -1132,69 +1132,6 @@ jobs:
   on_failure: *failed-concourse
   on_error: *failed-concourse
 
-- name: bosh-topgun
-  public: true
-  serial: true
-  interruptible: true
-  plan:
-  - in_parallel:
-    # these don't trigger, to ensure that the job gets triggered by
-    # concourse-release, which is unfortunately decoupled from the resource
-    # that we 'put' to.
-    - get: concourse
-      passed: [bosh-upload-releases]
-    - get: unit-image
-      passed: [bosh-upload-releases]
-    - get: version
-      passed: [bosh-upload-releases]
-    - get: concourse-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: postgres-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: bpm-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: bbr-sdk-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: gcp-bionic-stemcell
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: vault-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: credhub-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: uaa-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: bbr
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: ci
-  - task: bosh-topgun
-    tags: [bosh]
-    file: ci/tasks/topgun.yml
-    image: unit-image
-    input_mapping:
-      stemcell: gcp-bionic-stemcell
-    params:
-      DEPLOYMENT_NAME_PREFIX: concourse-topgun-((release_minor))
-      BOSH_ENVIRONMENT: https://10.0.0.6:25555
-      BOSH_CA_CERT: ((testing_bosh_ca_cert))
-      BOSH_CLIENT: ((testing_bosh_client.id))
-      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
-      # AWS_REGION: ((topgun_aws_ssm.region))
-      # AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
-      # AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
-      SKIP_PACKAGES: "k8s"
-      RELEASE_NAME_SUFFIX: ((release_minor))
-  on_failure: *failed-concourse
-  on_error: *failed-concourse
-
 - name: create-draft-release
   public: true
   plan:
@@ -1205,7 +1142,6 @@ jobs:
       passed:
       - build-rc
       - bosh-smoke
-      - bosh-topgun
       - bosh-check-props
     - get: final-version
       resource: version
@@ -1213,13 +1149,11 @@ jobs:
       passed:
       - build-rc
       - bosh-smoke
-      - bosh-topgun
       - bosh-check-props
     - get: unit-image
       passed:
       - build-rc
       - bosh-smoke
-      - bosh-topgun
     - get: linux-rc
       passed: [build-rc, build-rc-image]
     - get: linux-rc-ubuntu
@@ -1233,16 +1167,14 @@ jobs:
     - get: concourse-rc-image-ubuntu
       passed: [k8s-topgun, build-rc-image]
     - get: concourse-release
-      passed: [bosh-smoke, bosh-topgun]
+      passed: [bosh-smoke]
       params: {tarball: false}
     - get: bpm-release
-      passed: [bosh-smoke, bosh-topgun]
+      passed: [bosh-smoke]
     - get: postgres-release
-      passed: [bosh-smoke, bosh-topgun]
+      passed: [bosh-smoke]
     - get: credhub-release
-      passed: [bosh-topgun]
     - get: uaa-release
-      passed: [bosh-topgun]
   - task: extract-resource-type-versions
     file: ci/tasks/extract-resource-type-versions.yml
   - in_parallel:
@@ -1305,7 +1237,7 @@ jobs:
     - get: uaa-release
       passed: [create-draft-release]
     - get: gcp-bionic-stemcell
-      passed: [bosh-smoke, bosh-topgun]
+      passed: [bosh-smoke]
   - put: version
     params: {file: final-version/version}
 
