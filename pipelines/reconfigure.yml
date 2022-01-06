@@ -34,13 +34,6 @@ resources:
     paths:
     - teams
 
-- name: booklit-ci
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/vito/booklit
-    paths: [ci]
-
 - name: concourse-for-k8s
   type: git
   icon: github
@@ -230,8 +223,6 @@ jobs:
     - get: pipelines-and-tasks
       trigger: true
       passed: [unit]
-    - get: booklit-ci
-      trigger: true
     - get: concourse-for-k8s
       trigger: true
     - get: dex-ci
@@ -267,8 +258,6 @@ jobs:
     - set_pipeline: dutyfree
       team: dutyfree
       file: resource-types-website-ci/ci/pipeline.yml
-    - set_pipeline: booklit
-      file: booklit-ci/ci/pipeline.yml
     - set_pipeline: update-dex
       file: dex-ci/ci/pipeline.yml
     - set_pipeline: release
