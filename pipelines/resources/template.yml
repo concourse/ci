@@ -192,17 +192,10 @@ plan:
 #@ end
 
 #@ def determine_channel(distro):
-  #@ if resource_name == "git" and distro == "alpine":
   put: notify-interrupt
   params:
     mode: normal
     alert_type: failed
-  #@ else:
-  put: notify
-  params:
-    mode: normal
-    alert_type: failed
-  #@ end
 #@ end
 
 #@ def determine_scan_ignore(distro):
