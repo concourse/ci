@@ -27,6 +27,8 @@ terraform apply \
   --auto-approve \
   --var project=$GCP_PROJECT \
 
+terraform taint google_compute_instance.smoke
+
 {
   terraform output -json | \
     jq -r 'keys[] as $k | "\($k) \(.[$k].value)"'
