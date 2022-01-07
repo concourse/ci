@@ -10,6 +10,11 @@ resources:
     interval: 24h
     days: [Monday]
 
+- name: every-day
+  type: time
+  source:
+    interval: 24h
+
 - name: dockerfile
   type: git
   icon: github
@@ -87,6 +92,44 @@ jobs:
       run: {path: build}
   - put: image
     params: {image: image/image.tar}
+
+- name: clean-up-bosh-director
+  plan:
+  - get: every-day
+    trigger: true
+  - get: image
+  - task: clean
+    image: image
+    config:
+      platform: linux
+      params:
+        GCP_JSON_KEY: ((gcp_json_key))
+      run:
+        path: bash
+        args:
+        - "-ec"
+        - |
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcp.key.json
+          cat > $GOOGLE_APPLICATION_CREDENTIALS <<EOF
+          $GCP_JSON_KEY
+          EOF
+
+          project=$(echo $GCP_JSON_KEY | jq -r '.project_id')
+          gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS --project $project
+
+          gsutil -m cp -r gs://bosh-topgun-bbl-state/ . > /dev/null 2>&1
+          pushd bosh-topgun-bbl-state > /dev/null
+            eval "$(bbl print-env)"
+
+            # clean up bosh director for disk space releasing
+            bosh clean-up --all -n
+          popd > /dev/null
+  on_success:
+    put: notify
+    params:
+      mode: concise
+      message: Bosh cleaned up
+      alert_type: success
 
 - name: generate-report
   plan:
