@@ -106,7 +106,8 @@ report_vm_bosh () {
     topgun_vms=$(bosh vms --json | jq '[ .Tables[].Rows[].vm_cid ]')
     info "  There are $(echo $topgun_vms | jq 'length') VMs managed by the Topgun BOSH director ($topgun_director) and GCE reports $(echo $gce_topgun_bosh | jq 'length') VM instances"
     info ""
-    unknown_vms=$(echo $unknown_vms | jq --argjson used "$topgun_vms" '[ .[] | select( [.name] | inside($used) | not) ]')
+    echo "$topgun_vms" > /tmp/topgun_vms
+    unknown_vms=$(echo $unknown_vms | jq --slurpfile used /tmp/topgun_vms '[ .[] | select( [.name] | inside($used) | not) ]')
   popd > /dev/null
 
   # BOSH director and jumpbox vms
@@ -114,7 +115,8 @@ report_vm_bosh () {
   info "  There are $(echo $toplevel_vms | jq 'length') top level VMs, i.e. BOSH directors and jumpboxes (There should only really be one environment, \"$topgun_director\" which is used for Topgun. Any others should be investigated)"
   info $toplevel_vms | jq -r '.[] | "  - " + .name + " [type: " + .labels.name + ", tags: " + ( .tags.items | join(",") ) + "]"'
   info ""
-  unknown_vms=$(echo $unknown_vms | jq --argjson used "$toplevel_vms" '. - $used')
+  echo "$toplevel_vms" > /tmp/toplevel_vms
+  unknown_vms=$(echo $unknown_vms | jq --slurpfile used /tmp/toplevel_vms '. - $used')
 
   # unknown BOSH directors
   vms_with_unknown_directors=$(echo $unknown_vms | jq '[ .[] | select( .labels.director != null ) ]')
@@ -124,7 +126,8 @@ report_vm_bosh () {
     warn "  There are ${vms_with_unknown_directors_count} VMs managed by other BOSH directors (Any non-Topgun environment needs to be investigated to see why they exist. Note: Topgun VMs might show up here if they're deleted recently, you can ignore any that has $topgun_director as the director)"
     info $vms_with_unknown_directors | jq -r '.[] | "  - " + .name + " [director: " + .labels.director + "]"'
     info ""
-    unknown_vms=$(echo $unknown_vms | jq --argjson used "$vms_with_unknown_directors" '. - $used')
+    echo "$vms_with_unknown_directors" > /tmp/vms_with_unknown_directors
+    unknown_vms=$(echo $unknown_vms | jq --slurpfile used /tmp/vms_with_unknown_directors '. - $used')
   fi
 
   # unknown BOSH vms
@@ -194,7 +197,8 @@ report_disks_gke () {
       pv_disks=$(echo $pvs | jq '[ .[].spec.gcePersistentDisk.pdName ]')
       unused_pvs=$gce_disks
       unused_pvs=$(echo $unused_pvs | jq '[ .[] | select(.labels."goog-gke-node" == null ) ]') # filter out node disks
-      unused_pvs=$(echo $unused_pvs | jq --argjson used "$pv_disks" '[ .[] | select( [.name] | inside($used) | not) ]') # filter out pv disks
+      echo "$pv_disks" > /tmp/pv_disks
+      unused_pvs=$(echo $unused_pvs | jq --slurpfile used /tmp/pv_disks '[ .[] | select( [.name] | inside($used) | not) ]') # filter out pv disks
       info $unused_pvs | jq -r '.[] | "    * " + .name'
     else
       info "  - GKE ${name} cluster has ${nodes_count} nodes + ${pv_count} PVs = ${gke_count} disks, and GCE reported ${gce_count} persistant disks"
