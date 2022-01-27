@@ -686,7 +686,7 @@ jobs:
         file: ci/tasks/concourse-build-linux.yml
         input_mapping: {concourse: built-concourse, resource-types: resource-types-ubuntu}
         output_mapping: {concourse-tarball: concourse-linux-ubuntu}
-        params: {PLATFORM: linux}
+        params: {PLATFORM: linux-ubuntu}
       - task: concourse-windows
         file: ci/tasks/concourse-build-windows.yml
         input_mapping: {concourse: built-concourse}

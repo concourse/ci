@@ -656,7 +656,7 @@ jobs:
         output_mapping: {concourse-tarball: concourse-linux-alpine}
       - task: concourse-linux-ubuntu
         image: golang-builder-image
-        params: {PLATFORM: linux}
+        params: {PLATFORM: linux-ubuntu}
         file: ci/tasks/concourse-build-linux.yml
         input_mapping: {concourse: built-concourse, resource-types: resource-types-ubuntu}
         output_mapping: {concourse-tarball: concourse-linux-ubuntu}
