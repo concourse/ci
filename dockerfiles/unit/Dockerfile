@@ -23,8 +23,8 @@ RUN add-apt-repository "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_relea
 RUN apt-get update && apt-get -y install postgresql-13
 ENV PATH $PATH:/usr/lib/postgresql/13/bin
 
-# install Node 12.x
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
+# install Node 16.x
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash -
 RUN apt-get update && apt-get install -y nodejs
 
 # install Yarn for web UI tests
