@@ -8,8 +8,8 @@ stty columns 80
 
 pushd concourse
   yarn install
-  yarn build
   yarn test
+  yarn build
 popd
 
 cp -a ./concourse/. ./built-concourse
