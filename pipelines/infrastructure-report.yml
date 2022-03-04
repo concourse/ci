@@ -122,7 +122,7 @@ jobs:
             eval "$(bbl print-env)"
 
             # clean up bosh director for disk space releasing
-            bosh clean-up --all -n
+            bosh clean-up -n
           popd > /dev/null
   on_success:
     put: notify
