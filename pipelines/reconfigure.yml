@@ -263,56 +263,6 @@ jobs:
     - set_pipeline: release
       file: pipelines-and-tasks/pipelines/release.yml
       instance_vars:
-        version: 7.4.x
-      vars:
-        release_major: '7'
-        release_minor: '7.4'
-        latest_release: '7.3'
-        concourse_smoke_deployment_name: concourse-smoke-7-4
-        slack_hook: ((slack_hooks.concourse-private))
-        resource_type_versions:
-          bosh-io-release: ~1.1.1
-          bosh-io-stemcell: ~1.1.1
-          cf: ~1.1.3
-          docker-image: ~1.6.1
-          git: ~1.14.0
-          github-release: ~1.6.4
-          hg: ~1.2.4
-          mock: ~0.12.2
-          pool: ~1.2.1
-          registry-image: ~1.4.0
-          s3: ~1.1.2
-          semver: ~1.3.2
-          time: ~1.6.1
-          tracker: ~1.0.6
-    - set_pipeline: release
-      file: pipelines-and-tasks/pipelines/release.yml
-      instance_vars:
-        version: 7.5.x
-      vars:
-        release_major: '7'
-        release_minor: '7.5'
-        latest_release: '7.4'
-        concourse_smoke_deployment_name: concourse-smoke-7-5
-        slack_hook: ((slack_hooks.concourse-private))
-        resource_type_versions:
-          bosh-io-release: ~1.1.3
-          bosh-io-stemcell: ~1.1.2
-          cf: ~1.1.4
-          docker-image: ~1.6.2
-          git: ~1.14.4
-          github-release: ~1.6.4
-          hg: ~1.2.6
-          mock: ~0.12.3
-          pool: ~1.2.4
-          registry-image: ~1.4.1
-          s3: ~1.1.3
-          semver: ~1.3.4
-          time: ~1.6.2
-          tracker: ~1.0.8
-    - set_pipeline: release
-      file: pipelines-and-tasks/pipelines/release.yml
-      instance_vars:
         version: 7.6.x
       vars:
         release_major: '7'
@@ -334,6 +284,31 @@ jobs:
           s3: ~1.1.3
           semver: ~1.3.4
           time: ~1.6.2
+          tracker: ~1.0.8
+    - set_pipeline: release
+      file: pipelines-and-tasks/pipelines/release.yml
+      instance_vars:
+        version: 7.7.x
+      vars:
+        release_major: '7'
+        release_minor: '7.7'
+        latest_release: '7.6'
+        concourse_smoke_deployment_name: concourse-smoke-7-7
+        slack_hook: ((slack_hooks.concourse-private))
+        resource_type_versions:
+          bosh-io-release: ~1.1.3
+          bosh-io-stemcell: ~1.1.2
+          cf: ~1.1.4
+          docker-image: ~1.6.2
+          git: ~1.14.5
+          github-release: ~1.6.4
+          hg: ~1.2.6
+          mock: ~0.12.3
+          pool: ~1.2.4
+          registry-image: ~1.5.0
+          s3: ~1.2.0
+          semver: ~1.3.4
+          time: ~1.6.3
           tracker: ~1.0.8
     # TEMPLATE FOR NEXT RELEASE
     # to create a new release pipeline, copy (but don't delete!) this template,
