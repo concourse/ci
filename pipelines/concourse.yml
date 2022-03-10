@@ -1927,7 +1927,7 @@ resources:
   source:
     endpoint: storage.googleapis.com
     bucket: golang
-    regexp: 'go(\d+\.\d+(\.\d+)?)\.linux-amd64\.tar\.gz'
+    regexp: 'go(\d+\.\d+(\.\d+)?)\.linux-amd64\.tar\.gz$'
 
 - name: resource-types-alpine-image
   type: registry-image
