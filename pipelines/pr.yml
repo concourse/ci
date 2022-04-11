@@ -345,6 +345,7 @@ jobs:
   - *pending_status_notification
   - task: integration
     timeout: 1h
+    attempts: 3
     privileged: true
     input_mapping: {concourse: concourse-pr, dev-image: pr-image}
     file: ci/tasks/integration.yml
