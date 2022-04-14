@@ -18,6 +18,7 @@ if [ -e final-version/version ]; then
 fi
 
 tags=""
+platform_flags=""
 
 pushd concourse
   ldflags+=' -extldflags "-static"'
@@ -25,9 +26,10 @@ pushd concourse
   if [[ "$platform" == "darwin" ]]; then
     export CGO_ENABLED=1
     tags+=' osusergo'
+    platform_flags+='-buildvcs=false'
   fi
 
-  go build -a -tags "$tags" -ldflags "$ldflags" -o $output/fly ./fly
+  go build -a -tags "$tags" -ldflags "$ldflags" $platform_flags -o $output/fly ./fly
 popd
 
 pushd $output
