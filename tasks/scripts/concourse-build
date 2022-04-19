@@ -25,11 +25,16 @@ fi
 
 pushd concourse
   bin_name="concourse"
+  extra_flags=""
   if [ "$GOOS" = "windows" ]; then
     bin_name+=".exe"
   fi
 
-  go build -o "$bin_name" -ldflags "$ldflags" ./cmd/concourse
+  if [ "$GOOS" = "darwin" ]; then
+    extra_flags="-buildvcs=false"
+  fi
+
+  go build -o "$bin_name" -ldflags "$ldflags" $extra_flags ./cmd/concourse
 
   if [ -n "$final_version" ]; then
     if [ "$GOOS" = "linux" ]; then
