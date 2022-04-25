@@ -1044,6 +1044,7 @@ jobs:
       - gcp-bionic-stemcell/*.tgz
       vars:
         deployment_name: concourse-smoke
+        stemcell_variant: bionic
   - task: discover-bosh-endpoint-info
     tags: [bosh]
     file: ci/tasks/discover-bosh-endpoint-info.yml
@@ -1102,6 +1103,7 @@ jobs:
       - gcp-bionic-stemcell/*.tgz
       vars:
         deployment_name: concourse-smoke-guardian
+        stemcell_variant: bionic
   - task: discover-bosh-endpoint-info
     tags: [bosh]
     file: ci/tasks/discover-bosh-endpoint-info.yml
