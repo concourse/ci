@@ -981,8 +981,6 @@ jobs:
       trigger: true
     - get: bpm-release
       trigger: true
-    - get: gcp-bionic-stemcell
-      trigger: true
     - get: bbr-sdk-release
       trigger: true
     - get: vault-release
@@ -1026,7 +1024,6 @@ jobs:
       passed: [bosh-upload-releases]
       trigger: true
     - get: gcp-bionic-stemcell
-      passed: [bosh-upload-releases]
       trigger: true
     - get: ci
   - put: smoke-deployment
