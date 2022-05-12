@@ -14,5 +14,5 @@ pushd concourse-chart
   git config --global user.name "CI Bot"
 
   git add -A
-  git commit -m "bump chart version"
+  git diff-index --quiet HEAD || git commit -m 'bump chart version'
 popd
