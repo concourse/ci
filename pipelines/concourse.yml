@@ -1397,7 +1397,7 @@ resources:
   type: slack-notifier
   icon: slack
   source:
-    url: ((slack_hook))
+    url: ((slack_hooks.concourse-interrupt))
     username: ((basic_auth.username))
     password: ((basic_auth.password))
     concourse_url: https://ci.concourse-ci.org
