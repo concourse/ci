@@ -262,8 +262,6 @@ jobs:
       file: dex-ci/ci/pipeline.yml
     - set_pipeline: release
       file: pipelines-and-tasks/pipelines/release.yml
-    - set_pipeline: release
-      file: pipelines-and-tasks/pipelines/release.yml
       instance_vars:
         version: 7.8.x
       vars:
