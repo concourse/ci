@@ -192,7 +192,7 @@ plan:
 #@ end
 
 #@ def determine_channel(distro):
-  put: notify-interrupt
+  put: notify
   params:
     mode: normal
     alert_type: failed
@@ -732,15 +732,6 @@ resources:
     repository: vito/oci-build-task
 
 - name: notify
-  type: slack-notifier
-  icon: slack
-  source:
-    url: ((slack_hooks.concourse-private))
-    username: ((basic_auth.username))
-    password: ((basic_auth.password))
-    concourse_url: https://ci.concourse-ci.org
-
-- name: notify-interrupt
   type: slack-notifier
   icon: slack
   source:
