@@ -15,6 +15,7 @@ main () {
 }
 
 forward_atc_port () {
+  ulimit -n 65536
   kubectl port-forward \
     --namespace $RELEASE_NAME \
     deployment/$RELEASE_NAME-web \
