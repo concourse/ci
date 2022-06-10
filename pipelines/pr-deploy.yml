@@ -656,7 +656,7 @@ resources:
 - name: postgres-image-legacy
   type: registry-image
   icon: *image-icon
-  source: {repository: postgres, tag: 9.5}
+  source: {repository: postgres, tag: 11}
 
 - name: vault-image
   type: registry-image
