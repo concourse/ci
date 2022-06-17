@@ -316,10 +316,8 @@ jobs:
         trigger: true
       - get: resource-types-alpine-image
         passed: [resource-types-images]
-        trigger: true
       - get: resource-types-ubuntu-image
         passed: [resource-types-images]
-        trigger: true
       - get: unit-image
       - get: oci-build-task
       - get: ci
