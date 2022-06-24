@@ -6,6 +6,7 @@ inputs:
 
 params:
   GCP_JSON_KEY:
+  BBL_ENV:
 
 run:
   path: ci/tasks/scripts/infrastructure-report.sh

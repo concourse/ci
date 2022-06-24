@@ -104,6 +104,7 @@ jobs:
       platform: linux
       params:
         GCP_JSON_KEY: ((gcp_json_key))
+        BBL_ENV: ((bbl_env))
       run:
         path: bash
         args:
@@ -117,13 +118,14 @@ jobs:
           project=$(echo $GCP_JSON_KEY | jq -r '.project_id')
           gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS --project $project
 
-          gsutil -m cp -r gs://bosh-topgun-bbl-state/ . > /dev/null 2>&1
-          pushd bosh-topgun-bbl-state > /dev/null
-            eval "$(bbl print-env)"
+          cat > bbl-env <<EOF
+          $BBL_ENV
+          EOF
 
-            # clean up bosh director for disk space releasing
-            bosh clean-up -n
-          popd > /dev/null
+          source bbl-env
+
+          # clean up bosh director for disk space releasing
+          bosh clean-up -n
   on_success:
     put: notify
     params:
@@ -143,6 +145,7 @@ jobs:
     file: ci/tasks/infrastructure-report.yml
     params:
       GCP_JSON_KEY: ((gcp_json_key))
+      BBL_ENV: ((bbl_env))
   on_success:
     put: notify
     params:
