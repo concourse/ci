@@ -100,16 +100,15 @@ report_vm_bosh () {
   # unknown_vms=$(echo $gce_bosh | jq '[ .[].name ]')
   unknown_vms=$gce_bosh
 
-  cat > bbl-env <<EOF
-  $BBL_ENV
-  EOF
-
-  source bbl-env
-  topgun_vms=$(bosh vms --json | jq '[ .Tables[].Rows[].vm_cid ]')
-  info "  There are $(echo $topgun_vms | jq 'length') VMs managed by the Topgun BOSH director ($topgun_director) and GCE reports $(echo $gce_topgun_bosh | jq 'length') VM instances"
-  info ""
-  echo "$topgun_vms" > /tmp/topgun_vms
-  unknown_vms=$(echo $unknown_vms | jq --slurpfile used /tmp/topgun_vms '[ .[] | select( [.name] | inside($used) | not) ]')
+  gsutil -m cp -r gs://bosh-topgun-bbl-state/ . > /dev/null 2>&1
+  pushd bosh-topgun-bbl-state > /dev/null
+    eval "$(bbl print-env)"
+    topgun_vms=$(bosh vms --json | jq '[ .Tables[].Rows[].vm_cid ]')
+    info "  There are $(echo $topgun_vms | jq 'length') VMs managed by the Topgun BOSH director ($topgun_director) and GCE reports $(echo $gce_topgun_bosh | jq 'length') VM instances"
+    info ""
+    echo "$topgun_vms" > /tmp/topgun_vms
+    unknown_vms=$(echo $unknown_vms | jq --slurpfile used /tmp/topgun_vms '[ .[] | select( [.name] | inside($used) | not) ]')
+  popd > /dev/null
 
   # BOSH director and jumpbox vms
   toplevel_vms=$(echo $unknown_vms | jq '[ .[] | select( .labels.director == "bosh-init" ) ]')
