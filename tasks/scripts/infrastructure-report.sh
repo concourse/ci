@@ -106,8 +106,8 @@ report_vm_bosh () {
     topgun_vms=$(bosh vms --json | jq '[ .Tables[].Rows[].vm_cid ]')
     info "  There are $(echo $topgun_vms | jq 'length') VMs managed by the Topgun BOSH director ($topgun_director) and GCE reports $(echo $gce_topgun_bosh | jq 'length') VM instances"
     info ""
-    echo "$topgun_vms" > /tmp/topgun_vms
-    unknown_vms=$(echo $unknown_vms | jq --slurpfile used /tmp/topgun_vms '[ .[] | select( [.name] | inside($used) | not) ]')
+    echo "$topgun_vms" | jq '.[]' > /tmp/topgun_vms
+    unknown_vms=$(echo $unknown_vms | jq --slurpfile used /tmp/topgun_vms '[ .[] | select([.name] | inside($used) | not) ]')
   popd > /dev/null
 
   # BOSH director and jumpbox vms
@@ -115,8 +115,8 @@ report_vm_bosh () {
   info "  There are $(echo $toplevel_vms | jq 'length') top level VMs, i.e. BOSH directors and jumpboxes (There should only really be one environment, \"$topgun_director\" which is used for Topgun. Any others should be investigated)"
   info $toplevel_vms | jq -r '.[] | "  - " + .name + " [type: " + .labels.name + ", tags: " + ( .tags.items | join(",") ) + "]"'
   info ""
-  echo "$toplevel_vms" > /tmp/toplevel_vms
-  unknown_vms=$(echo $unknown_vms | jq --slurpfile used /tmp/toplevel_vms '[ .[] | select( [.name] | inside($used) | not) ]')
+  echo "$toplevel_vms" | jq '.[]' > /tmp/toplevel_vms
+  unknown_vms=$(echo $unknown_vms | jq --slurpfile used /tmp/toplevel_vms '. - $used')
 
   # unknown BOSH directors
   vms_with_unknown_directors=$(echo $unknown_vms | jq '[ .[] | select( .labels.director != null ) ]')
@@ -126,8 +126,8 @@ report_vm_bosh () {
     warn "  There are ${vms_with_unknown_directors_count} VMs managed by other BOSH directors (Any non-Topgun environment needs to be investigated to see why they exist. Note: Topgun VMs might show up here if they're deleted recently, you can ignore any that has $topgun_director as the director)"
     info $vms_with_unknown_directors | jq -r '.[] | "  - " + .name + " [director: " + .labels.director + "]"'
     info ""
-    echo "$vms_with_unknown_directors" > /tmp/vms_with_unknown_directors
-    unknown_vms=$(echo $unknown_vms | jq --slurpfile used /tmp/vms_with_unknown_directors '[ .[] | select( [.name] | inside($used) | not) ]')
+    echo "$vms_with_unknown_directors" | jq '.[]' > /tmp/vms_with_unknown_directors
+    unknown_vms=$(echo $unknown_vms | jq --slurpfile used /tmp/vms_with_unknown_directors '. - $used')
   fi
 
   # unknown BOSH vms
@@ -135,7 +135,7 @@ report_vm_bosh () {
   if [ $unknown_vms_count -ne 0 ]
   then
     warn "  There are $(echo $unknown_vms | jq 'length') VMs that follow the BOSH naming scheme but does not fit into any of the previous groups. (These can almost always be safely deleted)"
-    info $unknown_vms | jq -r '.[] | "  - " + .name'
+    info $unknown_vms | jq -r '.[]'
     info ""
   fi
 }
