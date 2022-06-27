@@ -116,7 +116,7 @@ report_vm_bosh () {
   info $toplevel_vms | jq -r '.[] | "  - " + .name + " [type: " + .labels.name + ", tags: " + ( .tags.items | join(",") ) + "]"'
   info ""
   echo "$toplevel_vms" > /tmp/toplevel_vms
-  unknown_vms=$(echo $unknown_vms | jq --slurpfile used /tmp/toplevel_vms '. - $used')
+  unknown_vms=$(echo $unknown_vms | jq --slurpfile used /tmp/toplevel_vms '[ .[] | select( [.name] | inside($used) | not) ]')
 
   # unknown BOSH directors
   vms_with_unknown_directors=$(echo $unknown_vms | jq '[ .[] | select( .labels.director != null ) ]')
@@ -127,7 +127,7 @@ report_vm_bosh () {
     info $vms_with_unknown_directors | jq -r '.[] | "  - " + .name + " [director: " + .labels.director + "]"'
     info ""
     echo "$vms_with_unknown_directors" > /tmp/vms_with_unknown_directors
-    unknown_vms=$(echo $unknown_vms | jq --slurpfile used /tmp/vms_with_unknown_directors '. - $used')
+    unknown_vms=$(echo $unknown_vms | jq --slurpfile used /tmp/vms_with_unknown_directors '[ .[] | select( [.name] | inside($used) | not) ]')
   fi
 
   # unknown BOSH vms
