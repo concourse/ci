@@ -305,6 +305,7 @@ jobs:
         trigger: true
         params: {format: rootfs}
       - get: gdn
+        version: {tag: 'v1.20.8'}
         trigger: true
       - get: containerd
         trigger: true
