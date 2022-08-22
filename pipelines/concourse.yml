@@ -107,14 +107,14 @@ jobs:
     - get: oci-build-task
     - get: golang-linux
       trigger: true
-    - get: ubuntu-bionic
+    - get: ubuntu-jammy
       trigger: true
       params: {format: oci}
   - task: build
     image: oci-build-task
     privileged: true
     file: ci/tasks/build-golang-builder-image.yml
-    input_mapping: {base-image: ubuntu-bionic}
+    input_mapping: {base-image: ubuntu-jammy}
   - load_var: version
     file: golang-linux/version
   - in_parallel:
@@ -1438,7 +1438,7 @@ resources:
     repository: concourse/golang-builder
     username: ((docker.username))
     password: ((docker.password))
-    variant: bionic
+    variant: jammy
 
 - name: golang-builder-image-latest
   type: registry-image
@@ -1969,11 +1969,11 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: ubuntu-bionic
+- name: ubuntu-jammy
   type: registry-image
   icon: *image-icon
   source:
     repository: ubuntu
-    tag: bionic
+    tag: jammy
     username: ((docker.username))
     password: ((docker.password))

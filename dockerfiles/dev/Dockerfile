@@ -17,7 +17,7 @@ RUN apt-get update && apt-get -y install \
       curl \
       file \
       tree \
-      btrfs-tools
+      btrfs-progs
 
 COPY dumb-init/dumb-init_*_x86_64 /usr/local/bin/dumb-init
 RUN chmod +x /usr/local/bin/dumb-init
