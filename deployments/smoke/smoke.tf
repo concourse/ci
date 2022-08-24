@@ -51,7 +51,7 @@ resource "google_compute_firewall" "smoke" {
 
 resource "google_compute_instance" "smoke" {
   name         = "smoke-${random_pet.smoke.id}"
-  machine_type = "e2-highcpu-8"
+  machine_type = "e2-custom-4"
   zone         = data.google_compute_zones.available.names[0]
   tags         = ["smoke"]
 
