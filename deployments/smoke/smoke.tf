@@ -74,14 +74,14 @@ resource "google_compute_instance" "smoke" {
     sshKeys = "root:${file("keys/id_rsa.pub")}"
   }
 
-  connection {
-    type        = "ssh"
-    host        = google_compute_address.smoke.address
-    user        = "root"
-    private_key = file("keys/id_rsa")
-  }
-
   provisioner "remote-exec" {
+    connection {
+      type        = "ssh"
+      host        = google_compute_address.smoke.address
+      user        = "root"
+      private_key = file("keys/id_rsa")
+    }
+
     inline = [
       "set -e -x",
       "[ -e /var/lib/cloud ] && until [ -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done",
