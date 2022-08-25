@@ -80,7 +80,7 @@ RUN curl -L https://releases.hashicorp.com/vault/0.7.3/vault_0.7.3_linux_amd64.z
       rm /tmp/vault.zip
 
 # install Terraform, ssh and jq for bin-smoke
-RUN curl -fsSL https://releases.hashicorp.com/terraform/0.14.5/terraform_0.14.5_linux_amd64.zip -o /tmp/terraform.zip && \
+RUN curl -fsSL https://releases.hashicorp.com/terraform/1.2.8/terraform_1.2.8_linux_amd64.zip -o /tmp/terraform.zip && \
       unzip /tmp/terraform.zip -d /usr/local/bin && \
       rm /tmp/terraform.zip
 RUN apt-get update && apt-get -y install jq openssh-client libnss3-tools
