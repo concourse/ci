@@ -37,7 +37,7 @@ run_helm_deploy() {
     --create-namespace \
     --set "concourse.web.auth.mainTeam.localUser=admin" \
     --set "concourse.web.kubernetes.enabled=false" \
-    --set "concourse.worker.baggageclaim.driver=naive" \
+    --set "concourse.worker.baggageclaim.driver=overlay" \
     --set "image=$CONCOURSE_IMAGE" \
     --set "imageDigest=$CONCOURSE_DIGEST" \
     --set "persistence.enabled=false" \
