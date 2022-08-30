@@ -73,7 +73,6 @@ groups:
   - build-rc-image
   - scan-rc-image
   - bin-smoke
-  - bin-smoke-lts
   - bump-prod-to-rc
 
 - name: k8s
@@ -923,57 +922,6 @@ jobs:
         image: unit-image
         file: ci/tasks/smoke.yml
         input_mapping: {endpoint-info: outputs}
-  on_failure: *failed-concourse
-  on_error: *failed-concourse
-
-- name: bin-smoke-lts
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed: [build-rc]
-      trigger: true
-    - get: version
-      passed: [build-rc]
-      trigger: true
-    - get: linux-rc-ubuntu
-      passed: [build-rc]
-      trigger: true
-    - get: unit-image
-    - get: ci
-  - load_var: concourse_version
-    file: version/version
-  - across:
-    - var: runtime
-      values:
-      - guardian
-      - containerd
-      max_in_flight: all
-    - var: gcp-image
-      values:
-      - debian-10-buster-v20210122
-      - ubuntu-1804-lts
-      - ubuntu-2004-lts
-      max_in_flight: 1
-    do:
-    - task: terraform-smoke
-      image: unit-image
-      file: ci/tasks/terraform-smoke.yml
-      input_mapping: {linux-rc: linux-rc-ubuntu}
-      params:
-        GCP_PROJECT: cf-concourse-production
-        GCP_KEY: ((concourse_smoke_gcp_key))
-        SSH_KEY: ((concourse_smoke_ssh_key))
-        WORKSPACE: release-((release_minor))-((.:runtime))-lts
-        CONCOURSE_VERSION: ((.:concourse_version))
-        TF_VAR_GCP_IMAGE: ((.:gcp-image))
-        TF_VAR_RUNTIME: ((.:runtime))
-    - task: smoke
-      image: unit-image
-      file: ci/tasks/smoke.yml
-      input_mapping: {endpoint-info: outputs}
-    timeout: 20m
   on_failure: *failed-concourse
   on_error: *failed-concourse
 
