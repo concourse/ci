@@ -1051,7 +1051,7 @@ jobs:
       trigger: true
     - get: bpm-release
       trigger: true
-    - get: gcp-bionic-stemcell
+    - get: gcp-jammy-stemcell
       trigger: true
     - get: bbr-sdk-release
       trigger: true
@@ -1097,7 +1097,7 @@ jobs:
     - get: bpm-release
       passed: [bosh-upload-releases]
       trigger: true
-    - get: gcp-bionic-stemcell
+    - get: gcp-jammy-stemcell
       passed: [bosh-upload-releases]
       trigger: true
     - get: ci
@@ -1110,10 +1110,10 @@ jobs:
       - postgres-release/*.tgz
       - bpm-release/*.tgz
       stemcells:
-      - gcp-bionic-stemcell/*.tgz
+      - gcp-jammy-stemcell/*.tgz
       vars:
         deployment_name: ((concourse_smoke_deployment_name))
-        stemcell_variant: bionic
+        stemcell_variant: jammy
   - task: discover-bosh-endpoint-info
     tags: [bosh]
     file: ci/tasks/discover-bosh-endpoint-info.yml
@@ -1237,7 +1237,7 @@ jobs:
       passed: [create-draft-release]
     - get: uaa-release
       passed: [create-draft-release]
-    - get: gcp-bionic-stemcell
+    - get: gcp-jammy-stemcell
       passed: [bosh-smoke]
   - put: version
     params: {file: final-version/version}
@@ -1256,13 +1256,13 @@ jobs:
         trigger: true
       - get: version
         passed: [shipit]
-      - get: gcp-bionic-stemcell
+      - get: gcp-jammy-stemcell
         passed: [shipit]
     - in_parallel:
       - load_var: concourse-version
         file: version/version
       - load_var: stemcell-version
-        file: gcp-bionic-stemcell/version
+        file: gcp-jammy-stemcell/version
     - in_parallel:
       - task: discover-postgresql-version
         file: ci/tasks/discover-component-version.yml
@@ -1858,7 +1858,7 @@ resources:
   icon: *image-icon
   source:
     repository: concourse/golang-builder
-    variant: bionic
+    variant: jammy
     username: ((docker.username))
     password: ((docker.password))
 
@@ -1867,10 +1867,10 @@ resources:
   icon: *image-icon
   source: {repository: concourse/oci-build-task}
 
-- name: gcp-bionic-stemcell
+- name: gcp-jammy-stemcell
   type: bosh-io-stemcell
   icon: *release-icon
-  source: {name: bosh-google-kvm-ubuntu-bionic-go_agent}
+  source: {name: bosh-google-kvm-ubuntu-jammy-go_agent}
 
 - name: cbd
   type: git
