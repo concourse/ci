@@ -3,7 +3,13 @@ FROM ${base_image}
 
 # base dependencies + jq
 RUN apt-get update && \
-  apt-get install -y apt-transport-https ca-certificates gnupg software-properties-common curl jq
+  apt-get install -y \
+  apt-transport-https \
+  ca-certificates \
+  gnupg \
+  software-properties-common \
+  curl \
+  jq
 
 # terraform
 RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add - && \

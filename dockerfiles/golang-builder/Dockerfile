@@ -1,7 +1,3 @@
-# TODO (vito): rolling forward to bionic or fossa breaks watsjs - pending
-# investigation
-#
-# concourse/concourse#6427
 ARG base_image
 FROM ${base_image}
 

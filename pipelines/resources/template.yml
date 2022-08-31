@@ -187,7 +187,7 @@ plan:
 #@ if distro == "alpine":
 #@   return "alpine"
 #@ elif distro == "ubuntu":
-#@   return "ubuntu-bionic"
+#@   return "ubuntu-image"
 #@ end
 #@ end
 
@@ -297,6 +297,7 @@ plan:
       type: registry-image
       source:
         repository: ubuntu
+        tag: jammy
     inputs:
     - name: version
     - name: resource-image-dev-alpine-rootfs
@@ -536,21 +537,21 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: ubuntu-bionic
+- name: ubuntu-image
   type: registry-image
   icon: docker
   source:
     repository: ubuntu
-    tag: bionic
+    tag: jammy
     username: ((docker.username))
     password: ((docker.password))
 
-- name: ubuntu-bionic-lts
+- name: ubuntu-image-lts
   type: registry-image
   icon: docker
   source:
     repository: ubuntu
-    tag: bionic
+    tag: jammy
     username: ((docker.username))
     password: ((docker.password))
 
@@ -559,7 +560,7 @@ resources:
   icon: docker
   source:
     repository: concourse/golang-builder
-    variant: bionic
+    variant: jammy
     username: ((docker.username))
     password: ((docker.password))
 

@@ -46,12 +46,12 @@ resources:
   source:
     repository: vito/oci-build-task
 
-- name: ubuntu-bionic
+- name: ubuntu-image
   type: registry-image
   icon: docker
   source:
     repository: ubuntu
-    tag: bionic
+    tag: jammy
     username: ((docker.username))
     password: ((docker.password))
 
@@ -72,7 +72,7 @@ jobs:
     trigger: true
   - in_parallel:
     - get: oci-build-task
-    - get: ubuntu-bionic
+    - get: ubuntu-image
       params: {format: oci}
   - task: build
     image: oci-build-task
@@ -81,10 +81,10 @@ jobs:
       platform: linux
       params:
         CONTEXT: ci/dockerfiles/infrastructure-report
-        IMAGE_ARG_base_image: ubuntu-bionic/image.tar
+        IMAGE_ARG_base_image: ubuntu-image/image.tar
       inputs:
         - name: ci
-        - name: ubuntu-bionic
+        - name: ubuntu-image
       outputs:
         - name: image
       caches:
