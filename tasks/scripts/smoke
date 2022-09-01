@@ -44,6 +44,4 @@ fly --version
 
 $DIR/wait-worker
 
-# remove --serial after dex serialization failure is fixed:
-# https://github.com/concourse/concourse/issues/3890
-$DIR/watsjs --serial test/smoke.js
+$DIR/watsjs --serial --timeout="${MAX_TICKS}s" test/smoke.js

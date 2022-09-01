@@ -509,7 +509,7 @@ jobs:
       KUBE_CONFIG: ((k8s_topgun.kube_config))
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
       RELEASE_NAME: concourse-smoke
-      MAX_TICKS: 180
+      MAX_TICKS: 300
   - task: delete
     image: unit-image
     file: ci/tasks/k8s-delete.yml
@@ -844,6 +844,7 @@ jobs:
       image: unit-image
       file: ci/tasks/smoke.yml
       input_mapping: {endpoint-info: outputs}
+      params: {MAX_TICKS: 300}
     timeout: 20m
   on_failure: *failed-concourse
 
