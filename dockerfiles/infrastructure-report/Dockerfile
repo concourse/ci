@@ -9,7 +9,8 @@ RUN apt-get update && \
   gnupg \
   software-properties-common \
   curl \
-  jq
+  jq \
+  google-cloud-sdk-gke-gcloud-auth-plugin
 
 # terraform
 RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add - && \

@@ -6,7 +6,7 @@ inputs:
 
 params:
   GCP_JSON_KEY:
+  USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
 
 run:
   path: ci/tasks/scripts/infrastructure-report.sh
-
