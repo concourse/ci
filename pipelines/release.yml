@@ -917,6 +917,7 @@ jobs:
           SSH_KEY: ((concourse_smoke_ssh_key))
           WORKSPACE: release-((release_minor))
           CONCOURSE_VERSION: ((.:concourse_version))
+          TF_VAR_GCP_IMAGE: ubuntu-2204-lts
           TF_VAR_RUNTIME: ((.:runtime))
       - task: smoke
         image: unit-image
