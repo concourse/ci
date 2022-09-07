@@ -29,9 +29,9 @@ RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | tee /usr/share/
 
 
 # bosh cli
-RUN curl -Lo ./bosh https://github.com/cloudfoundry/bosh-cli/releases/download/v6.4.4/bosh-cli-6.4.4-linux-amd64 && \
+RUN curl -Lo ./bosh https://github.com/cloudfoundry/bosh-cli/releases/download/v7.0.1/bosh-cli-7.0.1-linux-amd64 && \
   install bosh /usr/local/bin
 
 # bbl
-RUN curl -Lo ./bbl https://github.com/cloudfoundry/bosh-bootloader/releases/download/v8.4.41/bbl-v8.4.41_linux_x86-64 && \
+RUN curl -Lo ./bbl https://github.com/cloudfoundry/bosh-bootloader/releases/download/v8.4.110/bbl-v8.4.110_linux_x86-64 && \
   install bbl /usr/local/bin
