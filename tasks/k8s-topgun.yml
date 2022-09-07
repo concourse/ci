@@ -21,6 +21,7 @@ params:
   CONCOURSE_IMAGE_NAME:
   KUBE_CONFIG:
   SERVICE_ACCOUNT_KEY:
+  USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
 
 run:
   path: ci/tasks/scripts/k8s-topgun

@@ -9,8 +9,7 @@ RUN apt-get update && \
   gnupg \
   software-properties-common \
   curl \
-  jq \
-  google-cloud-sdk-gke-gcloud-auth-plugin
+  jq
 
 # terraform
 RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add - && \
@@ -24,9 +23,9 @@ RUN curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packa
   apt-get update && apt-get install -y kubectl
 
 # gcloud
-RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - && \
+RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | tee /usr/share/keyrings/cloud.google.gpg >/dev/null && \
   echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
-  apt-get update && apt-get install -y google-cloud-sdk
+  apt-get update && apt-get install -y google-cloud-sdk google-cloud-sdk-gke-gcloud-auth-plugin
 
 
 # bosh cli
