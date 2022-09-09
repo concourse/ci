@@ -19,3 +19,11 @@ ensure_kube_config() {
   echo "$SERVICE_ACCOUNT_KEY" > ~/service-account.json
   export GOOGLE_APPLICATION_CREDENTIALS=~/service-account.json
 }
+
+gke_auth() {
+  echo "$SERVICE_ACCOUNT_KEY" > ~/service-account.json
+  export GOOGLE_APPLICATION_CREDENTIALS=~/service-account.json
+
+  gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+  gcloud container clusters get-credentials k8s-topgun --project cf-concourse-production --zone us-central1-a
+}

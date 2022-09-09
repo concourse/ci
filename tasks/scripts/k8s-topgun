@@ -11,7 +11,7 @@ source "$DIR/k8s-helpers.sh"
 export GOPATH=$PWD/gopath
 export PATH=$GOPATH/bin:$PATH
 
-ensure_kube_config
+gke_auth
 
 mkdir -p helm-charts/stable
 cp -r prometheus-chart/prometheus helm-charts/stable
