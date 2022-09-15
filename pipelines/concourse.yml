@@ -561,7 +561,6 @@ jobs:
     input_mapping: {concourse-rc-image: concourse-dev-alpine-image}
     params:
       IN_CLUSTER: "true"
-      KUBE_CONFIG: ((k8s_topgun.kube_config))
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
       CONCOURSE_IMAGE_NAME: concourse/concourse-dev
   on_failure: *failed-concourse
@@ -889,6 +888,7 @@ jobs:
       image: unit-image
       file: ci/tasks/smoke.yml
       input_mapping: {endpoint-info: outputs}
+      params: {MAX_TICKS: 300}
     timeout: 20m
   on_failure: *failed-concourse
 

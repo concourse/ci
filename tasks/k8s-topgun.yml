@@ -17,9 +17,9 @@ caches:
 - path: gopath
 
 params:
-  CONCOURSE_CHART_DIR:
+  IN_CLUSTER: "false"
+  K8S_ENGINE: "GKE"
   CONCOURSE_IMAGE_NAME:
-  KUBE_CONFIG:
   SERVICE_ACCOUNT_KEY:
   USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
 
