@@ -93,7 +93,6 @@ jobs:
     image: unit-image
     params:
       IN_CLUSTER: "true"
-      KUBE_CONFIG: ((k8s_topgun.kube_config))
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
       CONCOURSE_IMAGE_NAME: ((concourse_image_name))
 
@@ -131,5 +130,4 @@ jobs:
     image: unit-image
     input_mapping: {concourse: chart-pr}
     params:
-      KUBE_CONFIG: ((k8s_topgun.kube_config))
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))

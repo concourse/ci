@@ -20,7 +20,7 @@ readonly DIR=$(cd $(dirname $0) && pwd)
 source "$DIR/k8s-helpers.sh"
 
 main() {
-  ensure_kube_config
+  gke_auth
   run_helm_deploy
 }
 

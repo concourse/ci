@@ -12,13 +12,14 @@ readonly DIR=$(cd $(dirname $0) && pwd)
 source "$DIR/k8s-helpers.sh"
 
 main() {
-  ensure_kube_config
+  gke_auth
   delete_release
 }
 
 delete_release() {
   helm version
   helm delete "$RELEASE_NAME" --namespace "$RELEASE_NAME"
+  kubectl delete "pvc/data-$RELEASE_NAME-postgresql-0" -n "$RELEASE_NAME"
 }
 
 main "$@"

@@ -2,7 +2,6 @@
 platform: linux
 
 params:
-  KUBE_CONFIG:
   SERVICE_ACCOUNT_KEY:
 
 inputs:

@@ -15,7 +15,7 @@ function cleanup {
 }
 trap cleanup EXIT
 
-ensure_kube_config
+gke_auth
 
 helm lint concourse
 helm dependency update ./concourse

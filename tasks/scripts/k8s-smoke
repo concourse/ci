@@ -9,7 +9,7 @@ readonly DIR=$(cd $(dirname $0) && pwd)
 source "$DIR/k8s-helpers.sh"
 
 main () {
-  ensure_kube_config
+  gke_auth
   forward_atc_port
   run_test
 }

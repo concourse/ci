@@ -6,7 +6,6 @@ image_resource:
   source: {repository: concourse/unit}
 
 params:
-  KUBE_CONFIG:
   SERVICE_ACCOUNT_KEY:
   RELEASE_NAME:
 

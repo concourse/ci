@@ -490,7 +490,6 @@ jobs:
       image: unit-image
       file: ci/tasks/k8s-delete.yml
       params:
-        KUBE_CONFIG: ((k8s_topgun.kube_config))
         SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
         RELEASE_NAME: concourse-smoke
         CONCOURSE_IMAGE: concourse/concourse-dev
@@ -499,7 +498,6 @@ jobs:
     input_mapping: {image-info: concourse-dev-alpine-image}
     file: ci/tasks/k8s-deploy.yml
     params:
-      KUBE_CONFIG: ((k8s_topgun.kube_config))
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
       RELEASE_NAME: concourse-smoke
       CONCOURSE_IMAGE: concourse/concourse-dev
@@ -507,7 +505,6 @@ jobs:
     image: unit-image
     file: ci/tasks/k8s-smoke.yml
     params:
-      KUBE_CONFIG: ((k8s_topgun.kube_config))
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
       RELEASE_NAME: concourse-smoke
       MAX_TICKS: 300
@@ -515,7 +512,6 @@ jobs:
     image: unit-image
     file: ci/tasks/k8s-delete.yml
     params:
-      KUBE_CONFIG: ((k8s_topgun.kube_config))
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
       RELEASE_NAME: concourse-smoke
       CONCOURSE_IMAGE: concourse/concourse-dev
