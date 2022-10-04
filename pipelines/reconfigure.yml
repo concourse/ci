@@ -271,6 +271,7 @@ jobs:
         latest_release: "6.6"
         concourse_smoke_deployment_name: "concourse-smoke-6-7"
         slack_hook: ((slack_hooks.concourse-interrupt))
+        stemcell_name: bionic
         resource_type_versions:
           bosh-io-release: ~1.0.5
           bosh-io-stemcell: ~1.0.5
@@ -302,6 +303,7 @@ jobs:
         latest_release: "6.7"
         concourse_smoke_deployment_name: "concourse-smoke-6-8"
         slack_hook: ((slack_hooks.concourse-interrupt))
+        stemcell_name: jammy
         resource_type_versions:
           bosh-io-release: ~1.0.5
           bosh-io-stemcell: ~1.0.5
@@ -328,6 +330,7 @@ jobs:
         latest_release: '7.7'
         concourse_smoke_deployment_name: concourse-smoke-7-8
         slack_hook: ((slack_hooks.concourse-private))
+        stemcell_name: bionic
         resource_type_versions:
           bosh-io-release: ~1.1.3
           bosh-io-stemcell: ~1.1.2
@@ -359,6 +362,7 @@ jobs:
         latest_release: '7.8'
         concourse_smoke_deployment_name: concourse-smoke-7-9
         slack_hook: ((slack_hooks.concourse-private))
+        stemcell_name: jammy
         resource_type_versions:
           bosh-io-release: ~1.1.3
           bosh-io-stemcell: ~1.1.2
