@@ -1862,6 +1862,7 @@ resources:
   source:
     owner: cloudfoundry
     repository: garden-runc-release
+    semver_constraint: ((dep_bin_versions.gdn))
     access_token: ((concourse_github_dummy.access_token))
 
 - name: containerd
@@ -1870,6 +1871,7 @@ resources:
   source:
     owner: containerd
     repository: containerd
+    semver_constraint: ((dep_bin_versions.containerd))
     access_token: ((concourse_github_dummy.access_token))
 
 - name: runc
@@ -1878,6 +1880,7 @@ resources:
   source:
     owner: opencontainers
     repository: runc
+    semver_constraint: ((dep_bin_versions.runc))
     access_token: ((concourse_github_dummy.access_token))
 
 - name: cni
@@ -1886,6 +1889,7 @@ resources:
   source:
     owner: containernetworking
     repository: plugins
+    semver_constraint: ((dep_bin_versions.cni))
     access_token: ((concourse_github_dummy.access_token))
 
 - name: postgres-release
