@@ -997,17 +997,11 @@ jobs:
       trigger: true
     - get: bpm-release
       trigger: true
-    - get: gcp-ubuntu-stemcell
-      trigger: true
-    - get: bbr-sdk-release
-      trigger: true
     - get: vault-release
       trigger: true
     - get: credhub-release
       trigger: true
     - get: uaa-release
-      trigger: true
-    - get: bbr
       trigger: true
     - get: ci
   - task: upload-releases
@@ -1044,7 +1038,6 @@ jobs:
       passed: [bosh-upload-releases]
       trigger: true
     - get: gcp-ubuntu-stemcell
-      passed: [bosh-upload-releases]
       trigger: true
     - get: ci
   - put: smoke-deployment
@@ -1120,8 +1113,6 @@ jobs:
       passed: [bosh-smoke]
     - get: postgres-release
       passed: [bosh-smoke]
-    - get: credhub-release
-    - get: uaa-release
   - task: extract-resource-type-versions
     file: ci/tasks/extract-resource-type-versions.yml
   - in_parallel:
@@ -1178,10 +1169,6 @@ jobs:
     - get: bpm-release
       passed: [create-draft-release]
     - get: postgres-release
-      passed: [create-draft-release]
-    - get: credhub-release
-      passed: [create-draft-release]
-    - get: uaa-release
       passed: [create-draft-release]
     - get: gcp-ubuntu-stemcell
       passed: [bosh-smoke]
@@ -1313,9 +1300,8 @@ jobs:
     - get: postgres-release
       passed: [shipit]
     - get: credhub-release
-      passed: [shipit]
     - get: uaa-release
-      passed: [shipit]
+    - get: bbr-sdk-release
   - task: bump-versions
     file: cbd/ci/bump-versions.yml
     input_mapping: {concourse-bosh-deployment: cbd}
@@ -1842,14 +1828,6 @@ resources:
   source:
     owner: Yelp
     repository: dumb-init
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: bbr
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: cloudfoundry-incubator
-    repository: bosh-backup-and-restore
     access_token: ((concourse_github_dummy.access_token))
 
 - name: gdn
