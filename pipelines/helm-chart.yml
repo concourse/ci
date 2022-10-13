@@ -15,7 +15,6 @@
 groups:
 - name: dependencies
   jobs:
-  - merge-dev-into-master
   - concourse-app-bump
   - postgres-chart-bump
 
@@ -27,18 +26,6 @@ groups:
 
 
 jobs:
-- name: merge-dev-into-master
-  public: true
-  serial: true
-  plan:
-  - get: concourse-chart-dev
-  - put: merge-dev-into-master
-    resource: concourse-chart
-    inputs: [concourse-chart-dev]
-    params:
-      repository: concourse-chart-dev
-      merge: true
-
 - name: concourse-app-bump
   public: true
   serial: true
@@ -145,7 +132,6 @@ jobs:
   - in_parallel:
     - get: postgres-chart-release
       passed: [postgres-chart-bump]
-      trigger: true
     - get: version
       params: {bump: patch}
     - get: concourse-chart
@@ -181,22 +167,14 @@ resources:
     driver: gcs
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
-    key: chart-version
+    key: helm/((version))-chart-version
 
 - name: concourse-chart
   type: git
   icon: github
   source:
     uri: git@github.com:concourse/concourse-chart.git
-    branch: master
-    private_key: ((concourse_chart_private_key))
-
-- name: concourse-chart-dev
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:concourse/concourse-chart.git
-    branch: dev
+    branch: ((concourse-chart-branch))
     private_key: ((concourse_chart_private_key))
 
 - name: chart-repo
@@ -225,6 +203,7 @@ resources:
   source:
     owner: concourse
     repository: concourse
+    semver_constraint: ~((version))
     access_token: ((concourse_github_dummy.access_token))
 
 - name: postgres-chart-release
