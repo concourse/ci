@@ -1,10 +1,12 @@
 ---
-platform: linux
+platform: darwin
 
 params:
   REPOSITORY: concourse/dev
   DOCKERFILE: ci/dockerfiles/dev/Dockerfile
   IMAGE_ARG_base_image: golang-builder-image/image.tar
+  IMAGE_PLATFORM: linux/arm64,linux/amd64
+  OUTPUT_OCI: true
 
 inputs:
 - name: ci

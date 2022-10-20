@@ -6,6 +6,8 @@ params:
   DOCKERFILE: ci/dockerfiles/golang-builder/Dockerfile
   CONTEXT: .
   IMAGE_ARG_base_image: base-image/image.tar
+  IMAGE_PLATFORM: linux/arm64,linux/amd64
+  OUTPUT_OCI: true
 
 inputs:
 - name: ci
