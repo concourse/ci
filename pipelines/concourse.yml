@@ -118,8 +118,8 @@ jobs:
     privileged: true
     file: ci/tasks/build-golang-builder-image.yml
     params:
-      IMAGE_ARG_base_image_tag: ((.:base_image_tag))
-      IMAGE_ARG_golang_version: ((.:golang_version))
+      BUILD_ARG_base_image_tag: ((.:base_image_tag))
+      BUILD_ARG_golang_version: ((.:golang_version))
   - in_parallel:
     - put: golang-builder-image
       params:
