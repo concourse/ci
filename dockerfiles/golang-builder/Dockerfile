@@ -1,5 +1,5 @@
-ARG base_image
-FROM ${base_image}
+ARG base_image_tag
+FROM ubuntu:${base_image_tag}
 
 # gcc for cgo
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -8,10 +8,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
-COPY ./golang-linux/go*.linux-amd64.tar.gz /go.linux-amd64.tgz
+ARG golang_version
+RUN wget https://storage.googleapis.com/golang/go${golang_version}.linux-${BUILDARCH}.tar.gz
+COPY ./golang-linux/go*.linux-*.tar.gz /go.linux-*.tgz
 
-RUN tar -C /usr/local -xzf /go.linux-amd64.tgz \
-  && rm /go.linux-amd64.tgz
+RUN tar -C /usr/local -xzf /go.linux-*.tgz \
+  && rm /go.linux-*.tgz
 
 ENV GOPATH /go
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH

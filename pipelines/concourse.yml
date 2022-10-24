@@ -108,26 +108,30 @@ jobs:
       trigger: true
     - get: ubuntu-image
       trigger: true
-      params: {format: oci}
+      params: {skip_download: true}
+  - load_var: golang_version
+    file: golang-linux/version
+  - load_var: base_image_tag
+    file: ubuntu-image/tag
   - task: build
     image: oci-build-task
     privileged: true
     file: ci/tasks/build-golang-builder-image.yml
-    input_mapping: {base-image: ubuntu-image}
-  - load_var: version
-    file: golang-linux/version
+    params:
+      IMAGE_ARG_base_image_tag: ((.:base_image_tag))
+      IMAGE_ARG_golang_version: ((.:golang_version))
   - in_parallel:
     - put: golang-builder-image
       params:
         image: image
-        version: ((.:version))
+        version: ((.:golang_version))
         bump_aliases: true
 
     # push to latest (+ bare semver tags) to make local dev a bit easier
     - put: golang-builder-image-latest
       params:
         image: image
-        version: ((.:version))
+        version: ((.:golang_version))
         bump_aliases: true
   on_failure: *failed-ci
 
