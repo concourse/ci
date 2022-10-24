@@ -8,5 +8,7 @@ go get github.com/onsi/gomega
 # without it ginkgo will complain that package not found
 # this is due to both go -> 1.17 and ginkgo -> 2.0
 go get golang.org/x/sys/unix
+go get github.com/go-logr/logr
+
 go get -d -v ./...
 ginkgo -flake-attempts 3 -r ci/tasks/scripts
