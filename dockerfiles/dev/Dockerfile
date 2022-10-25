@@ -19,7 +19,8 @@ RUN apt-get update && apt-get -y install \
       tree \
       btrfs-progs
 
-COPY dumb-init/dumb-init_*_x86_64 /usr/local/bin/dumb-init
+ARG TARGETARCH
+RUN if [ "$TARGETARCH" = "arm64" ] ; then dumb-init/dumb-init_*_aarch64 /usr/local/bin/dumb-init ; else COPY dumb-init/dumb-init_*_x86_64 /usr/local/bin/dumb-init ; fi
 RUN chmod +x /usr/local/bin/dumb-init
 
 # Add container runtime dependencies
@@ -31,14 +32,19 @@ RUN chmod +x /usr/local/bin/dumb-init
 #   - runc
 #   - cni plugins
 #   - iptables (needed by cni plugins)
-COPY gdn/gdn-* /usr/local/concourse/bin/gdn
+ARG gdn_tag
+RUN git clone https://github.com/cloudfoundry/guardian.git /go/guardian
+WORKDIR /go/guardian
+RUN git checkout ${gdn_tag}
+RUN go build -ldflags "-extldflags '-static'" -mod=vendor -o gdn ./cmd/gdn
+COPY gdn /usr/local/concourse/bin
 
 # Copies files from the bin directory of the tarball to /usr/local/concourse/bin
-ADD containerd/containerd-*-linux-amd64.tar.gz /usr/local/concourse
+ADD containerd/containerd-*-linux-$TARGETARCH.tar.gz /usr/local/concourse
 
-COPY runc/runc.amd64 /usr/local/concourse/bin/runc
+COPY runc/runc.$TARGETARCH /usr/local/concourse/bin/runc
 
-ADD cni/cni-plugins-linux-amd64-*.tgz /usr/local/concourse/bin
+ADD cni/cni-plugins-linux-$TARGETARCH-*.tgz /usr/local/concourse/bin
 RUN apt install -y iptables
 
 RUN chmod -R +x /usr/local/concourse/bin

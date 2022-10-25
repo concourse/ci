@@ -300,9 +300,6 @@ jobs:
       steps:
       - get: concourse
         trigger: true
-      - get: golang-builder-image
-        trigger: true
-        params: {format: oci}
       - get: golang-builder-image-rootfs
         resource: golang-builder-image
         trigger: true
@@ -341,9 +338,14 @@ jobs:
     image: oci-build-task
     privileged: true
     input_mapping: {concourse: built-concourse, resource-types-image: resource-types-alpine-image}
+    params:
+      IMAGE_PLATFORM: linux/amd64,linux/arm64
+      OUTPUT_OCI: true
+      IMAGE_ARG_base_image:
+      BUILD_ARG_gdn_tag: gdn/tag
     file: ci/tasks/build-dev-image.yml
   - put: dev-image
-    params: {image: image}
+    params: {image: image/image}
     get_params: {format: oci}
   on_failure: *failed-concourse
 

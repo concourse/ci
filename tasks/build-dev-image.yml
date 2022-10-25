@@ -1,12 +1,13 @@
 ---
-platform: darwin
+platform: linux
 
 params:
   REPOSITORY: concourse/dev
   DOCKERFILE: ci/dockerfiles/dev/Dockerfile
+  BUILD_ARG_gdn_tag:
   IMAGE_ARG_base_image: golang-builder-image/image.tar
-  IMAGE_PLATFORM: linux/arm64,linux/amd64
-  OUTPUT_OCI: true
+  IMAGE_PLATFORM: linux/amd64
+  OUTPUT_OCI: false
 
 inputs:
 - name: ci
@@ -14,6 +15,7 @@ inputs:
 - name: concourse
 - name: gdn
 - name: golang-builder-image
+  optional: true
 - name: containerd
   optional: true
 - name: runc
@@ -21,6 +23,7 @@ inputs:
 - name: cni
   optional: true
 - name: resource-types-image
+  optional: true
 - name: fly-linux
 - name: fly-windows
 - name: fly-darwin
