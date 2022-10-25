@@ -57,8 +57,10 @@ config:
   params:
     DOCKERFILE: #@ resource_name + "-resource/dockerfiles/" + distro + "/Dockerfile"
     ADDITIONAL_TARGETS: tests
-    IMAGE_ARG_base_image: #@ determine_base(distro) + "/image.tar"
-    IMAGE_ARG_builder_image: golang-builder/image.tar
+    BUILD_ARG_base_image: #@ determine_base(distro)
+    BUILD_ARG_builder_image: concourse/golang-builder
+    IMAGE_PLATFORM: linux/amd64,linux/arm64
+    OCI_OUTPUT: true
     _: #@ template.replace(build_params(resource_name))
   run: {path: build}
 #@ end
@@ -81,10 +83,10 @@ plan:
   - get: #@ determine_base(distro)
     resource: #@ lts_string(determine_base(distro), lts)
     trigger: true
-    params: {format: oci}
+    params: {format: oci, skip_download: true}
   - get: golang-builder
     trigger: true
-    params: {format: oci}
+    params: {format: oci, skip_download: true}
   - get: oci-build-task
   - #@ template.replace(extra_get_steps(distro))
 - #@ build_task(resource_name, distro)
@@ -730,7 +732,7 @@ resources:
   type: registry-image
   icon: docker
   source:
-    repository: vito/oci-build-task
+    repository: concourse/oci-build-task
 
 - name: notify
   type: slack-notifier
