@@ -1,6 +1,6 @@
-# used for building concourse/dev. this shortens the dev feedback loop by:
+# used for building concourse/dev multi-arch.
 #
-# * baking in the gdn binary
+# * compile gdn binary
 # * baking in the containerd binaries (+ runc, cni plugins, iptables)
 # * baking in fly binaries
 # * baking in resource types
@@ -17,28 +17,29 @@ RUN apt-get update && apt-get -y install \
       curl \
       file \
       tree \
-      btrfs-progs
+      btrfs-progs \
+      dumb-init
 
-COPY dumb-init/dumb-init_*_x86_64 /usr/local/bin/dumb-init
-RUN chmod +x /usr/local/bin/dumb-init
+ARG TARGETARCH
 
 # Add container runtime dependencies
 #
-# For guardian backend:
-#   - gdn
 # For containerd backend:
 #   - containerd binaries
 #   - runc
 #   - cni plugins
 #   - iptables (needed by cni plugins)
-COPY gdn/gdn-* /usr/local/concourse/bin/gdn
+RUN git clone https://github.com/cloudfoundry/guardian.git /go/guardian
+WORKDIR /go/guardian
+RUN go build -ldflags "-extldflags '-static'" -mod=vendor -o gdn ./cmd/gdn
+COPY gdn /usr/local/concourse/bin
 
 # Copies files from the bin directory of the tarball to /usr/local/concourse/bin
-ADD containerd/containerd-*-linux-amd64.tar.gz /usr/local/concourse
+ADD containerd/containerd-*-linux-$TARGETARCH.tar.gz /usr/local/concourse
 
-COPY runc/runc.amd64 /usr/local/concourse/bin/runc
+COPY runc/runc.$TARGETARCH /usr/local/concourse/bin/runc
 
-ADD cni/cni-plugins-linux-amd64-*.tgz /usr/local/concourse/bin
+ADD cni/cni-plugins-linux-$TARGETARCH-*.tgz /usr/local/concourse/bin
 RUN apt install -y iptables
 
 RUN chmod -R +x /usr/local/concourse/bin

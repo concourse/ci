@@ -304,15 +304,11 @@ jobs:
         resource: golang-builder-image
         trigger: true
         params: {format: rootfs}
-      - get: gdn
-        trigger: true
       - get: containerd
         trigger: true
       - get: runc
         trigger: true
       - get: cni
-        trigger: true
-      - get: dumb-init
         trigger: true
       - get: resource-types-alpine-image
         passed: [resource-types-images]
@@ -334,15 +330,11 @@ jobs:
         file: ci/tasks/fly-build-windows.yml
       - task: fly-darwin
         file: ci/tasks/fly-build-darwin.yml
-  - load_var: gdn_tag
-    file: gdn/tag
   - task: build
     image: oci-build-task
     privileged: true
     input_mapping: {concourse: built-concourse, resource-types-image: resource-types-alpine-image}
-    params:
-      BUILD_ARG_gdn_tag: ((.:gdn_tag))
-    file: ci/tasks/build-dev-image.yml
+    file: ci/tasks/build-dev-image-multi-arch.yml
   - put: dev-image
     params: {image: image/image}
     get_params: {format: oci}
@@ -1464,28 +1456,12 @@ resources:
   icon: *image-icon
   source: {repository: vault}
 
-- name: dumb-init
+- name: bbr
   type: github-release
   icon: &release-icon package-variant-closed
   source:
-    owner: Yelp
-    repository: dumb-init
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: bbr
-  type: github-release
-  icon: *release-icon
-  source:
     owner: cloudfoundry-incubator
     repository: bosh-backup-and-restore
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: gdn
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: cloudfoundry
-    repository: garden-runc-release
     access_token: ((concourse_github_dummy.access_token))
 
 - name: containerd
