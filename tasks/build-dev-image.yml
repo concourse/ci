@@ -5,9 +5,8 @@ params:
   REPOSITORY: concourse/dev
   DOCKERFILE: ci/dockerfiles/dev/Dockerfile
   BUILD_ARG_gdn_tag:
-  IMAGE_ARG_base_image: golang-builder-image/image.tar
-  IMAGE_PLATFORM: linux/amd64
-  OUTPUT_OCI: false
+  IMAGE_PLATFORM: linux/amd64,linux/arm64
+  OUTPUT_OCI: true
 
 inputs:
 - name: ci
