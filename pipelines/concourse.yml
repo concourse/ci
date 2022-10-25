@@ -123,14 +123,14 @@ jobs:
   - in_parallel:
     - put: golang-builder-image
       params:
-        image: image
+        image: image/image
         version: ((.:golang_version))
         bump_aliases: true
 
     # push to latest (+ bare semver tags) to make local dev a bit easier
     - put: golang-builder-image-latest
       params:
-        image: image
+        image: image/image
         version: ((.:golang_version))
         bump_aliases: true
   on_failure: *failed-ci
