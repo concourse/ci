@@ -16,10 +16,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 ARG golang_version
-ARG BUILDARCH
-RUN curl https://storage.googleapis.com/golang/go${golang_version}.linux-${BUILDARCH}.tar.gz -o go.linux.tar.gz
+ARG TARGETARCH
+RUN curl https://storage.googleapis.com/golang/go${golang_version}.linux-${TARGETARCH}.tar.gz -o go.linux.tar.gz
 
-# if we tar -xzvf directly it will fail in arm platform for unknown reason
 RUN gzip -d go.linux.tar.gz
 RUN tar -C /usr/local -xf go.linux.tar && rm go.linux.tar
 
