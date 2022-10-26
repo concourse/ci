@@ -60,7 +60,7 @@ config:
     BUILD_ARG_base_image: #@ determine_base(distro)
     BUILD_ARG_builder_image: concourse/golang-builder
     IMAGE_PLATFORM: linux/amd64,linux/arm64
-    OCI_OUTPUT: true
+    OUTPUT_OCI: true
     _: #@ template.replace(build_params(resource_name))
   run: {path: build}
 #@ end
