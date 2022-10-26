@@ -29,13 +29,14 @@ ARG TARGETARCH
 #   - runc
 #   - cni plugins
 #   - iptables (needed by cni plugins)
-RUN git clone https://github.com/cloudfoundry/guardian.git /go/guardian
-WORKDIR /go/guardian
-RUN go build -ldflags "-extldflags '-static'" -mod=vendor -o gdn ./cmd/gdn
-COPY gdn /usr/local/concourse/bin
 
 # Copies files from the bin directory of the tarball to /usr/local/concourse/bin
 ADD containerd/containerd-*-linux-$TARGETARCH.tar.gz /usr/local/concourse
+
+RUN git clone https://github.com/cloudfoundry/guardian.git /go/guardian
+WORKDIR /go/guardian
+RUN go build -ldflags "-extldflags '-static'" -mod=vendor -o gdn ./cmd/gdn
+RUN mv gdn /usr/local/concourse/bin
 
 COPY runc/runc.$TARGETARCH /usr/local/concourse/bin/runc
 
