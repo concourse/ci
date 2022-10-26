@@ -31,7 +31,7 @@ CONTEXT: #@ resource_name + "-resource"
   #@ end
 #@ end
 
-#@ def build_task(resource_name, distro):
+#@ def build_task(resource_name, distro, platform):
 task: build
 privileged: true
 image: oci-build-task
@@ -50,7 +50,7 @@ config:
     ADDITIONAL_TARGETS: tests
     BUILD_ARG_base_image: #@ determine_base(distro)
     BUILD_ARG_builder_image: concourse/golang-builder
-    IMAGE_PLATFORM: linux/amd64,linux/arm64
+    IMAGE_PLATFORM: #@ platform
     OUTPUT_OCI: true
     _: #@ template.replace(build_params(resource_name))
   run: {path: build}
@@ -79,10 +79,10 @@ plan:
     params: {format: oci, skip_download: true}
   - get: oci-build-task
   - #@ template.replace(extra_get_steps(distro))
-- #@ build_task(resource_name, distro)
+- #@ build_task(resource_name, distro, "linux/amd64,linux/arm64")
 - #@ template.replace(extra_steps(distro))
 - put: #@ "resource-image-dev-" + distro
-  params: {image: built-resource-image/image.tar}
+  params: {image: built-resource-image/image}
   get_params:
     skip_download: true
 #@ end
@@ -218,7 +218,7 @@ plan:
     path: resource-pr
     status: pending
 - do:
-  - #@ build_task(resource_name, distro)
+  - #@ build_task(resource_name, distro, "linux/amd64")
   - #@ template.replace(extra_steps(distro))
   on_failure:
     put: resource-pr
@@ -404,7 +404,7 @@ plan:
   - #@ template.replace(extra_get_steps(distro))
 - load_var: version
   file: version/version
-- #@ build_task(resource_name, distro)
+- #@ build_task(resource_name, distro, "linux/amd64,linux/arm64")
 - #@ template.replace(extra_steps(distro))
 - task: #@ distro + "-date-tag"
   image: oci-build-task
