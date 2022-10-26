@@ -60,6 +60,8 @@ COPY ./resource-types-image/rootfs/usr/local/concourse/resource-types/ /usr/loca
 # can cause build failures if e.g. files are removed locally)
 COPY concourse /src
 
+# If not link, gcc will fail by /go/bin/as not found error
+RUN ln -s /usr/bin/as /go/bin/as
 # build the init executable for containerd
 RUN gcc -O2 -static -o /usr/local/concourse/bin/init /src/cmd/init/init.c
 
