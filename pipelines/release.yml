@@ -1652,6 +1652,7 @@ resources:
   source:
     driver: gcs
     json_key: ((concourse_artifacts_json_key))
+
     bucket: concourse-artifacts
     key: version-((release_minor))
     initial_version: ((release_minor)).0-rc.0

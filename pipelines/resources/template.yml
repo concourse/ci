@@ -10,15 +10,6 @@
 #@  return "concourse"
 #@ end
 
-#@ def lts_string(str, lts):
-  #@ if lts == True:
-  #@ return str + "-lts"
-  #@ else:
-  #@ return str
-  #@ end
-#@ end
-
-
 #@ def build_params(resource_name):
   #@ if resource_name == "registry-image":
 CONTEXT: #@ resource_name + "-resource"
@@ -65,8 +56,8 @@ config:
   run: {path: build}
 #@ end
 
-#@ def build_image(distro, lts):
-name: #@ lts_string("build-" + distro, lts)
+#@ def build_image(distro):
+name: #@ "build-" + distro
 serial_groups: [build]
 on_failure: &failed-ci
   put: notify
@@ -78,10 +69,9 @@ plan:
   - get: daily-trigger
     trigger: true
   - get: #@ resource_name + "-resource"
-    resource: #@ lts_string("resource-repo", lts)
+    resource: resource-repo
     trigger: true
   - get: #@ determine_base(distro)
-    resource: #@ lts_string(determine_base(distro), lts)
     trigger: true
     params: {format: oci, skip_download: true}
   - get: golang-builder
@@ -91,8 +81,8 @@ plan:
   - #@ template.replace(extra_get_steps(distro))
 - #@ build_task(resource_name, distro)
 - #@ template.replace(extra_steps(distro))
-- put: #@ lts_string("resource-image-dev-" + distro, lts)
-  params: {image: built-resource-image/image}
+- put: #@ "resource-image-dev-" + distro
+  params: {image: built-resource-image/image.tar}
   get_params:
     skip_download: true
 #@ end
@@ -133,26 +123,21 @@ on_failure: #@ determine_channel(distro)
 on_error: #@ determine_channel(distro)
 #@ end
 
-#@ def scan_image(lts):
-name: #@ lts_string("scan-image", lts)
+#@ def scan_image():
+name: scan-image
 plan:
 - in_parallel:
   - get: ci
   - get: resource-repo
-    resource: #@ lts_string("resource-repo", lts)
     passed:
-    - #@ lts_string("build-alpine", lts)
-    - #@ lts_string("build-ubuntu", lts)
+    - build-alpine
+    - build-ubuntu
   - get: resource-image-dev-alpine
-    resource: #@ lts_string("resource-image-dev-alpine", lts)
-    passed:
-    - #@ lts_string("build-alpine", lts)
+    passed: [build-alpine]
     params: {format: oci}
     trigger: true
   - get: resource-image-dev-ubuntu
-    resource: #@ lts_string("resource-image-dev-ubuntu", lts)
-    passed:
-    - #@ lts_string("build-ubuntu", lts)
+    passed: [build-ubuntu]
     params: {format: oci}
     trigger: true
   - get: trivy
@@ -189,7 +174,7 @@ plan:
 #@ if distro == "alpine":
 #@   return "alpine"
 #@ elif distro == "ubuntu":
-#@   return "ubuntu-image"
+#@   return "ubuntu"
 #@ end
 #@ end
 
@@ -258,38 +243,29 @@ plan:
   #@ else: return []
 #@ end
 
-#@ def publish_job(bump, lts):
-name: #@ lts_string("publish-" + bump, lts)
+#@ def publish_job(bump):
+name: #@ "publish-" + bump
 plan:
 - in_parallel:
   - get: resource-repo
-    resource: #@ lts_string("resource-repo", lts)
-    passed:
-      - #@ lts_string("scan-image", lts)
+    passed: [scan-image]
   - get: ci
   - get: release-me
   - get: resource-image-dev-alpine
-    resource: #@ lts_string("resource-image-dev-alpine", lts)
-    passed:
-      - #@ lts_string("scan-image", lts)
+    passed: [scan-image]
     params: {format: oci}
   - get: resource-image-dev-alpine-rootfs
-    resource: #@ lts_string("resource-image-dev-alpine", lts)
-    passed:
-      - #@ lts_string("scan-image", lts)
+    resource: resource-image-dev-alpine
+    passed: [scan-image]
     params: {format: rootfs}
   - get: resource-image-dev-ubuntu
-    resource: #@ lts_string("resource-image-dev-ubuntu", lts)
-    passed:
-      - #@ lts_string("scan-image", lts)
+    passed: [scan-image]
     params: {format: oci}
   - get: resource-image-dev-ubuntu-rootfs
-    resource: #@ lts_string("resource-image-dev-ubuntu", lts)
-    passed:
-      - #@ lts_string("scan-image", lts)
+    resource: resource-image-dev-ubuntu
+    passed: [scan-image]
     params: {format: rootfs}
   - get: version
-    resource: #@ lts_string("version", lts)
     params:
       bump: #@ bump
 - task: create-release
@@ -399,7 +375,6 @@ plan:
   params:
     file: #@ "dpkg-file/" + resource_name + "-dpkg-list-*.txt"
 - put: version
-  resource: #@ lts_string("version", lts)
   params:
     file: version/version
 #@ end
@@ -468,32 +443,23 @@ plan:
 groups:
 - name: main
   jobs:
-  - prs-*[!s]
-  - build-*[!s]
-  - scan-*[!s]
-  - publish-*[!s]
+  - prs-*
+  - build-*
+  - scan-*
+  - publish-*
 - name: republish
   jobs:
   - republish-*
-- name: lts
-  jobs:
-  - build-*-lts
-  - scan-*-lts
-  - publish-*-lts
 
 jobs:
-- #@ build_image("alpine", False)
-- #@ build_image("ubuntu", False)
-- #@ build_image("alpine", True)
-- #@ build_image("ubuntu", True)
-- #@ scan_image(False)
-- #@ scan_image(True)
+- #@ build_image("alpine")
+- #@ build_image("ubuntu")
+- #@ scan_image()
 - #@ validate_pr("alpine")
 - #@ validate_pr("ubuntu")
-- #@ publish_job("major", False)
-- #@ publish_job("minor", False)
-- #@ publish_job("patch", False)
-- #@ publish_job("patch", True)
+- #@ publish_job("major")
+- #@ publish_job("minor")
+- #@ publish_job("patch")
 - #@ rebuild_images("alpine")
 - #@ rebuild_images("ubuntu")
 
@@ -532,25 +498,7 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: alpine-lts
-  type: registry-image
-  icon: docker
-  source:
-    repository: alpine
-    tag: 3.14
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: ubuntu-image
-  type: registry-image
-  icon: docker
-  source:
-    repository: ubuntu
-    tag: jammy
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: ubuntu-image-lts
+- name: ubuntu
   type: registry-image
   icon: docker
   source:
@@ -592,14 +540,6 @@ resources:
     private_key: ((concourse_bot_private_key))
     uri: #@ "git@github.com:concourse/" + resource_name + "-resource"
 
-- name: resource-repo-lts
-  type: git
-  icon: github
-  source:
-    branch: release/6.7.x
-    private_key: ((concourse_bot_private_key))
-    uri: #@ "git@github.com:concourse/" + resource_name + "-resource"
-
 - name: resource-repo-tags
   type: git
   icon: github
@@ -622,16 +562,6 @@ resources:
   icon: tag
   source:
     branch: version
-    driver: git
-    file: version
-    private_key: ((concourse_bot_private_key))
-    uri: #@ "git@github.com:" + github_owner() + "/" + resource_name + "-resource"
-
-- name: version-lts
-  type: semver
-  icon: tag
-  source:
-    branch: version-lts
     driver: git
     file: version
     private_key: ((concourse_bot_private_key))
@@ -688,24 +618,6 @@ resources:
     password: ((docker.password))
     repository: #@ "concourse/" + resource_name + "-resource"
     tag: dev-ubuntu
-    username: ((docker.username))
-
-- name: resource-image-dev-alpine-lts
-  type: registry-image
-  icon: docker
-  source:
-    repository: #@ "concourse/" + resource_name + "-resource"
-    tag: dev-lts
-    password: ((docker.password))
-    username: ((docker.username))
-
-- name: resource-image-dev-ubuntu-lts
-  type: registry-image
-  icon: docker
-  source:
-    password: ((docker.password))
-    repository: #@ "concourse/" + resource_name + "-resource"
-    tag: dev-ubuntu-lts
     username: ((docker.username))
 
 - name: dpkg-list-store
