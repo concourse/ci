@@ -92,7 +92,7 @@ plan:
 - #@ build_task(resource_name, distro)
 - #@ template.replace(extra_steps(distro))
 - put: #@ lts_string("resource-image-dev-" + distro, lts)
-  params: {image: built-resource-image/image.tar}
+  params: {image: built-resource-image/image}
   get_params:
     skip_download: true
 #@ end
@@ -439,7 +439,7 @@ plan:
 - in_parallel:
   - put: #@ "resource-image-" + distro
     params:
-      image: built-resource-image/image.tar
+      image: built-resource-image/image
       version: ((.:version))
       bump_aliases: true
       additional_tags: date-tag/tag
@@ -448,7 +448,7 @@ plan:
   #@ if distro == "alpine":
   - put: resource-image
     params:
-      image: built-resource-image/image.tar
+      image: built-resource-image/image
       version: ((.:version))
       bump_aliases: true
     get_params:
