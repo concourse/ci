@@ -59,6 +59,7 @@ groups:
   - resource-types-images
   - unit-image
   - build-golang-builder-image
+  - build-resource-types-builder-image
 
 - name: all
   jobs:
@@ -132,6 +133,31 @@ jobs:
       params:
         image: image/image
         version: ((.:golang_version))
+        bump_aliases: true
+  on_failure: *failed-ci
+
+- name: build-resource-types-builder-image
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: ci
+    - get: oci-build-task
+    - get: ubuntu-image
+      trigger: true
+      params: {skip_download: true}
+  - load_var: base_image_tag
+    file: ubuntu-image/tag
+  - task: build
+    image: oci-build-task
+    privileged: true
+    file: ci/tasks/build-resource-types-builder-image.yml
+    params:
+      BUILD_ARG_base_image_tag: ((.:base_image_tag))
+  - in_parallel:
+    - put: resource-types-builder-image-ubuntu
+      params:
+        image: image/image
         bump_aliases: true
   on_failure: *failed-ci
 
@@ -1951,6 +1977,15 @@ resources:
   icon: *image-icon
   source:
     repository: ubuntu
+    tag: jammy
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: resource-types-builder-image-ubuntu
+  type: registry-image
+  icon: &image-icon docker
+  source:
+    repository: concourse/resource-types-builder
     tag: jammy
     username: ((docker.username))
     password: ((docker.password))

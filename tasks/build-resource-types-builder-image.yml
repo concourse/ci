@@ -1,0 +1,22 @@
+---
+platform: linux
+
+params:
+  REPOSITORY: concourse/resource-types-buidler
+  DOCKERFILE: ci/dockerfiles/resource-types-builder/Dockerfile
+  CONTEXT: .
+  BUILD_ARG_base_image_tag: jammy
+  IMAGE_PLATFORM: linux/arm64,linux/amd64
+  OUTPUT_OCI: true
+
+inputs:
+- name: ci
+
+outputs:
+- name: image
+
+caches:
+- path: cache
+
+run:
+  path: build

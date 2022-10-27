@@ -40,7 +40,7 @@ config:
   platform: linux
   inputs:
   - name: #@ resource_name + "-resource"
-  - name: #@ determine_base(distro)
+  - name: #@ distro
   - name: golang-builder
   outputs:
   - name: built-resource-image
@@ -71,7 +71,7 @@ plan:
   - get: #@ resource_name + "-resource"
     resource: resource-repo
     trigger: true
-  - get: #@ determine_base(distro)
+  - get: #@ distro
     trigger: true
     params: {format: oci, skip_download: true}
   - get: golang-builder
@@ -174,7 +174,7 @@ plan:
 #@ if distro == "alpine":
 #@   return "alpine"
 #@ elif distro == "ubuntu":
-#@   return "ubuntu"
+#@   return "concourse/resource-types-builder:jammy"
 #@ end
 #@ end
 
@@ -204,7 +204,7 @@ plan:
   - get: resource-pr
     trigger: true
     version: every
-  - get: #@ determine_base(distro)
+  - get: #@ distro
     trigger: true
     params: {format: oci}
   - get: oci-build-task
@@ -393,7 +393,7 @@ plan:
     trigger: true
   - get: #@ resource_name + "-resource"
     resource: resource-repo-tags
-  - get: #@ determine_base(distro)
+  - get: #@ distro
     trigger: true
     params: {format: oci}
   - get: golang-builder
@@ -502,7 +502,8 @@ resources:
   type: registry-image
   icon: docker
   source:
-    repository: ubuntu
+    #! we need to tweak original image for ARM build
+    repository: concourse/resource-types-builder
     tag: jammy
     username: ((docker.username))
     password: ((docker.password))
