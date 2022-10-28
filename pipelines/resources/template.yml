@@ -79,7 +79,7 @@ plan:
     params: {format: oci, skip_download: true}
   - get: oci-build-task
   - #@ template.replace(extra_get_steps(distro))
-- #@ build_task(resource_name, distro, "linux/amd64,linux/arm64")
+- #@ build_task(resource_name, distro, "linux/amd64")
 - #@ template.replace(extra_steps(distro))
 - put: #@ "resource-image-dev-" + distro
   params: {image: built-resource-image/image}
@@ -404,7 +404,7 @@ plan:
   - #@ template.replace(extra_get_steps(distro))
 - load_var: version
   file: version/version
-- #@ build_task(resource_name, distro, "linux/amd64,linux/arm64")
+- #@ build_task(resource_name, distro, "linux/amd64")
 - #@ template.replace(extra_steps(distro))
 - task: #@ distro + "-date-tag"
   image: oci-build-task
