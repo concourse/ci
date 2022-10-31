@@ -329,6 +329,11 @@ jobs:
           semver: ~1.2.3
           time: ~1.4.1
           tracker: ~1.0.7
+        dep_bin_versions:
+          gdn: "*"
+          cni: "*"
+          runc: "*"
+          containerd: "*"
     - set_pipeline: release
       file: pipelines-and-tasks/pipelines/release.yml
       instance_vars:
@@ -388,6 +393,11 @@ jobs:
           semver: ~1.4.0
           time: ~1.6.3
           tracker: ~1.0.8
+        dep_bin_versions:
+          gdn: "*"
+          cni: "*"
+          runc: "*"
+          containerd: "*"
     # TEMPLATE FOR NEXT RELEASE
     # to create a new release pipeline, copy (but don't delete!) this template,
     # replacing MAJOR, MINOR, PREV_MAJOR, PREV_MINOR, and SLACK_CHANNEL
