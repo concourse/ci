@@ -273,9 +273,9 @@ jobs:
     - set_pipeline: release
       file: pipelines-and-tasks/pipelines/release.yml
       instance_vars:
-        gcp_image: ubuntu-1804-lts
         version: 6.7.x
       vars:
+        gcp_image: ubuntu-1804-lts
         release_major: '6'
         release_minor: '6.7'
         latest_release: '6.6'
@@ -305,9 +305,9 @@ jobs:
     - set_pipeline: release
       file: pipelines-and-tasks/pipelines/release.yml
       instance_vars:
-        gcp_image: ubuntu-2204-lts
         version: 6.8.x
       vars:
+        gcp_image: ubuntu-2204-lts-cgroups-v1
         release_major: "6"
         release_minor: "6.8"
         latest_release: "6.7"
@@ -337,9 +337,9 @@ jobs:
     - set_pipeline: release
       file: pipelines-and-tasks/pipelines/release.yml
       instance_vars:
-        gcp_image: ubuntu-1804-lts
         version: 7.8.x
       vars:
+        gcp_image: ubuntu-1804-lts
         release_major: '7'
         release_minor: '7.8'
         latest_release: '7.7'
@@ -369,9 +369,9 @@ jobs:
     - set_pipeline: release
       file: pipelines-and-tasks/pipelines/release.yml
       instance_vars:
-        gcp_image: ubuntu-2204-lts
         version: 7.9.x
       vars:
+        gcp_image: ubuntu-2204-lts-cgroups-v1
         release_major: '7'
         release_minor: '7.9'
         latest_release: '7.8'
