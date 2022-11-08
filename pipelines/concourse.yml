@@ -334,13 +334,18 @@ jobs:
         trigger: true
       - get: runc
         trigger: true
+      - get: gdn
+        trigger: true
       - get: cni
+        trigger: true
+      - get: dumb-init
         trigger: true
       - get: resource-types-alpine-image
         passed: [resource-types-images]
       - get: resource-types-ubuntu-image
         passed: [resource-types-images]
       - get: unit-image
+      - get: golang-builder-image
       - get: oci-build-task
       - get: ci
   - in_parallel:
@@ -360,9 +365,9 @@ jobs:
     image: oci-build-task
     privileged: true
     input_mapping: {concourse: built-concourse, resource-types-image: resource-types-alpine-image}
-    file: ci/tasks/build-dev-image-multi-arch.yml
+    file: ci/tasks/build-dev-image.yml
   - put: dev-image
-    params: {image: image/image}
+    params: {image: image/image.tar}
     get_params: {format: oci}
   on_failure: *failed-concourse
 
@@ -1504,6 +1509,22 @@ resources:
   source:
     owner: opencontainers
     repository: runc
+    access_token: ((concourse_github_dummy.access_token))
+
+- name: dumb-init
+  type: github-release
+  icon: *release-icon
+  source:
+    owner: Yelp
+    repository: dumb-init
+    access_token: ((concourse_github_dummy.access_token))
+
+- name: gdn
+  type: github-release
+  icon: *release-icon
+  source:
+    owner: cloudfoundry
+    repository: garden-runc-release
     access_token: ((concourse_github_dummy.access_token))
 
 - name: cni
