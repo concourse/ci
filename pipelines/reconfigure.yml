@@ -239,7 +239,7 @@ jobs:
       instance_vars:
         version: 6
       vars:
-        concourse-chart-branch: release/6.7.x
+        concourse-chart-branch: release/6.8.x
     - set_pipeline: helm-chart
       file: pipelines-and-tasks/pipelines/helm-chart.yml
       instance_vars:
