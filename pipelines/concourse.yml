@@ -345,8 +345,12 @@ jobs:
       - get: resource-types-ubuntu-image
         passed: [resource-types-images]
       - get: unit-image
+        trigger: true
       - get: golang-builder-image
+        trigger: true
+        params: {format: oci}
       - get: oci-build-task
+        trigger: true
       - get: ci
   - in_parallel:
       fail_fast: true
