@@ -432,10 +432,6 @@ jobs:
     #       semver: ""
     #       time: ""
     #       tracker: ""
-    - set_pipeline: enterprise-helm-chart
-      file: concourse-for-k8s/ci/pipeline.yml
-      vars:
-        concourse_chart_branch: release/6.7.x
     - set_pipeline: infrastructure-report
       file: pipelines-and-tasks/pipelines/infrastructure-report.yml
     on_failure: *notify
