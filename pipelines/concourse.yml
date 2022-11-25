@@ -174,8 +174,7 @@ jobs:
   - task: yarn-test
     image: unit-image
     file: ci/tasks/yarn-test.yml
-  - timeout: 1h
-    in_parallel:
+  - in_parallel:
     - task: unit
       image: unit-image
       file: ci/tasks/unit.yml
@@ -440,7 +439,6 @@ jobs:
     task: testflight
     image: unit-image
     privileged: true
-    timeout: 1h
     params:
       RUNTIME: ((.:runtime))
     file: ci/tasks/docker-compose-testflight.yml
