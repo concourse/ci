@@ -1,0 +1,18 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: concourse/unit}
+
+params:
+  GCP_PROJECT:
+  GCP_KEY:
+  SSH_KEY:
+  WORKSPACE: default
+
+inputs:
+- name: ci
+
+run:
+  path: ci/tasks/scripts/terraform-cleanup
