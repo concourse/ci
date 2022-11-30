@@ -877,15 +877,17 @@ jobs:
       file: ci/tasks/smoke.yml
       input_mapping: {endpoint-info: outputs}
       params: {MAX_TICKS: 300}
-    ensure:
-      task: terraform-cleanup
-      image: unit-image
-      file: ci/tasks/terraform-cleanup.yml
-      params:
-        GCP_PROJECT: cf-concourse-production
-        GCP_KEY: ((concourse_smoke_gcp_key))
-        SSH_KEY: ((concourse_smoke_ssh_key))
-        WORKSPACE: bin-smoke-((.:runtime))
+      ensure:
+        task: terraform-cleanup
+        image: unit-image
+        file: ci/tasks/terraform-cleanup.yml
+        params:
+          GCP_PROJECT: cf-concourse-production
+          GCP_KEY: ((concourse_smoke_gcp_key))
+          SSH_KEY: ((concourse_smoke_ssh_key))
+          WORKSPACE: bin-smoke-((.:runtime))
+          TF_VAR_GCP_IMAGE: ((.:gcp-image))
+          TF_VAR_RUNTIME: ((.:runtime))
     timeout: 20m
   on_failure: *failed-concourse
 

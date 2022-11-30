@@ -10,6 +10,9 @@ params:
   GCP_KEY:
   SSH_KEY:
   WORKSPACE: default
+  # variables consumed by terraform and their default values
+  TF_VAR_GCP_IMAGE: "ubuntu-1804-lts"
+  TF_VAR_RUNTIME: "guardian"
 
 inputs:
 - name: ci
