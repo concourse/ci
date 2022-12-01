@@ -21,6 +21,7 @@ outputs:
 
 params:
   PLATFORM: linux
+  VARIANT: ubuntu
 
 run:
   path: ci/tasks/scripts/concourse-build

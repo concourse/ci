@@ -675,13 +675,13 @@ jobs:
         image: golang-builder-image
         input_mapping: {concourse: built-concourse, resource-types: resource-types-alpine}
         output_mapping: {concourse-tarball: concourse-linux-alpine}
-        params: {PLATFORM: linux}
+        params: {PLATFORM: linux, VARIANT: alpine}
       - task: concourse-linux-ubuntu
         image: golang-builder-image
         file: ci/tasks/concourse-build-linux.yml
         input_mapping: {concourse: built-concourse, resource-types: resource-types-ubuntu}
         output_mapping: {concourse-tarball: concourse-linux-ubuntu}
-        params: {PLATFORM: linux}
+        params: {PLATFORM: linux, VARIANT: ubuntu}
       - task: concourse-windows
         file: ci/tasks/concourse-build-windows.yml
         input_mapping: {concourse: built-concourse}
@@ -1663,7 +1663,7 @@ resources:
   source:
     bucket: concourse-artifacts
     json_key: ((concourse_artifacts_json_key))
-    regexp: rcs/concourse-(.*)-linux-amd64.tgz
+    regexp: rcs/concourse-(.*)-linux-alpine-amd64.tgz
 
 - name: linux-rc-ubuntu
   type: gcs

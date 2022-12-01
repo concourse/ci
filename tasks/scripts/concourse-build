@@ -67,8 +67,11 @@ pushd $output
     archive=concourse-${version}.${GOOS}.${GOARCH}.zip
     apt-get update && apt-get install -y zip
     zip "$archive" concourse
-  else
+  elif [ "$GOOS" = "darwin" ]; then
     archive=concourse-${version}.${GOOS}.${GOARCH}.tgz
+    tar -czf "$archive" concourse
+  else
+    archive=concourse-${version}.${GOOS}-${VARIANT}.${GOARCH}.tgz
     tar -czf "$archive" concourse
   fi
   shasum "$archive" > "${archive}.sha1"
