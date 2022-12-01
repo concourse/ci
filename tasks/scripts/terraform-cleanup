@@ -17,4 +17,5 @@ terraform init
 terraform workspace select "$WORKSPACE"
 
 terraform destroy \
+  --var project=$GCP_PROJECT \
   --auto-approve
