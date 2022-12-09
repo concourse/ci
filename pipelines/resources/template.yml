@@ -51,7 +51,6 @@ config:
     BUILD_ARG_base_image: #@ determine_base(distro)
     BUILD_ARG_builder_image: concourse/golang-builder
     IMAGE_PLATFORM: #@ platform
-    OUTPUT_OCI: true
     _: #@ template.replace(build_params(resource_name))
   run: {path: build}
 #@ end
@@ -82,7 +81,7 @@ plan:
 - #@ build_task(resource_name, distro, "linux/amd64")
 - #@ template.replace(extra_steps(distro))
 - put: #@ "resource-image-dev-" + distro
-  params: {image: built-resource-image/image}
+  params: {image: built-resource-image/image.tar}
   get_params:
     skip_download: true
 #@ end
@@ -414,7 +413,7 @@ plan:
 - in_parallel:
   - put: #@ "resource-image-" + distro
     params:
-      image: built-resource-image/image
+      image: built-resource-image/image.tar
       version: ((.:version))
       bump_aliases: true
       additional_tags: date-tag/tag
@@ -423,7 +422,7 @@ plan:
   #@ if distro == "alpine":
   - put: resource-image
     params:
-      image: built-resource-image/image
+      image: built-resource-image/image.tar
       version: ((.:version))
       bump_aliases: true
     get_params:
