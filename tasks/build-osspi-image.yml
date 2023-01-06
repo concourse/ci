@@ -1,0 +1,22 @@
+---
+platform: linux
+
+params:
+  REPOSITORY: concourse/osspi
+  DOCKERFILE: ci/dockerfiles/osspi/Dockerfile
+  CONTEXT: .
+  BUILD_ARG_base_image_tag: jammy
+  IMAGE_PLATFORM: linux/amd64
+  OUTPUT_OCI: true
+
+inputs:
+- name: ci
+
+outputs:
+- name: image
+
+caches:
+- path: cache
+
+run:
+  path: build
