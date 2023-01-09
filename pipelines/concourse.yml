@@ -59,7 +59,6 @@ groups:
   - unit-image
   - build-golang-builder-image
   - build-resource-types-builder-image
-  - build-osspi-image
 
 - name: all
   jobs:
@@ -156,31 +155,6 @@ jobs:
       BUILD_ARG_base_image_tag: ((.:base_image_tag))
   - in_parallel:
     - put: resource-types-builder-image-ubuntu
-      params:
-        image: image/image
-        bump_aliases: true
-  on_failure: *failed-ci
-
-- name: build-osspi-image
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: ci
-    - get: oci-build-task
-    - get: ubuntu-image
-      trigger: true
-      params: {skip_download: true}
-  - load_var: base_image_tag
-    file: ubuntu-image/tag
-  - task: build
-    image: oci-build-task
-    privileged: true
-    file: ci/tasks/build-osspi-image.yml
-    params:
-      BUILD_ARG_base_image_tag: ((.:base_image_tag))
-  - in_parallel:
-    - put: osspi-image
       params:
         image: image/image
         bump_aliases: true
@@ -1999,15 +1973,6 @@ resources:
   icon: *image-icon
   source:
     repository: ubuntu
-    tag: jammy
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: osspi-image
-  type: registry-image
-  icon: *image-icon
-  source:
-    repository: concourse/osspi
     tag: jammy
     username: ((docker.username))
     password: ((docker.password))
