@@ -856,7 +856,7 @@ jobs:
       values:
       # TODO: until gdn support jammy
       # https://github.com/cloudfoundry/guardian/issues/301
-      # - ubuntu-1804-lts
+      - ubuntu-1804-lts
       # - ubuntu-2204-lts
       - ubuntu-2204-lts-cgroups-v1
       max_in_flight: 1
