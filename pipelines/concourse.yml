@@ -856,7 +856,6 @@ jobs:
       max_in_flight: all
     - var: gcp-image
       values:
-      - ubuntu-1804-lts
       - ubuntu-2204-lts-cgroups-v1
       max_in_flight: 1
     do:
@@ -912,6 +911,7 @@ jobs:
       max_in_flight: all
     - var: gcp-image
       values:
+      - ubuntu-1804-lts
       - ubuntu-2204-lts
       max_in_flight: 1
     do:
