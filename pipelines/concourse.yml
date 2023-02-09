@@ -38,6 +38,7 @@ groups:
   - build-concourse
   - build-image
   - bin-smoke
+  - bin-smoke-rapid
   - check-docker-mounts
   - bump-prod-*
 
@@ -836,6 +837,7 @@ jobs:
 - name: bin-smoke
   public: true
   serial: true
+  serial_groups: [bin-smoke]
   plan:
   - in_parallel:
     - get: concourse
@@ -854,11 +856,63 @@ jobs:
       max_in_flight: all
     - var: gcp-image
       values:
-      # TODO: until gdn support jammy
-      # https://github.com/cloudfoundry/guardian/issues/301
       - ubuntu-1804-lts
-      # - ubuntu-2204-lts
       - ubuntu-2204-lts-cgroups-v1
+      max_in_flight: 1
+    do:
+    - task: terraform-smoke
+      image: unit-image
+      file: ci/tasks/terraform-smoke.yml
+      input_mapping: {linux-rc: linux-dev-ubuntu}
+      params:
+        GCP_PROJECT: cf-concourse-production
+        GCP_KEY: ((concourse_smoke_gcp_key))
+        SSH_KEY: ((concourse_smoke_ssh_key))
+        WORKSPACE: bin-smoke-((.:runtime))
+        TF_VAR_GCP_IMAGE: ((.:gcp-image))
+        TF_VAR_RUNTIME: ((.:runtime))
+    - task: smoke
+      image: unit-image
+      file: ci/tasks/smoke.yml
+      input_mapping: {endpoint-info: outputs}
+      params: {MAX_TICKS: 300}
+      ensure:
+        task: terraform-cleanup
+        image: unit-image
+        file: ci/tasks/terraform-cleanup.yml
+        params:
+          GCP_PROJECT: cf-concourse-production
+          GCP_KEY: ((concourse_smoke_gcp_key))
+          SSH_KEY: ((concourse_smoke_ssh_key))
+          WORKSPACE: bin-smoke-((.:runtime))
+          TF_VAR_GCP_IMAGE: ((.:gcp-image))
+          TF_VAR_RUNTIME: ((.:runtime))
+    timeout: 20m
+  on_failure: *failed-concourse
+
+- name: bin-smoke-rapid
+  public: true
+  serial: true
+  serial_groups: [bin-smoke]
+  plan:
+  - in_parallel:
+    - get: concourse
+      passed: [build-concourse]
+      trigger: true
+    - get: linux-dev-ubuntu
+      passed: [build-concourse]
+      trigger: true
+    - get: unit-image
+    - get: ci
+  - across:
+    - var: runtime
+      values:
+      - guardian
+      - containerd
+      max_in_flight: all
+    - var: gcp-image
+      values:
+      - ubuntu-2204-lts
       max_in_flight: 1
     do:
     - task: terraform-smoke
