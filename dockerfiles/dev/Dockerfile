@@ -31,7 +31,7 @@ RUN chmod +x /usr/local/bin/dumb-init
 #   - runc
 #   - cni plugins
 #   - iptables (needed by cni plugins)
-COPY gdn/gdn-* /usr/local/concourse/bin/gdn
+COPY gdn/gdn-[0-9]*.*.* /usr/local/concourse/bin/gdn
 
 # Copies files from the bin directory of the tarball to /usr/local/concourse/bin
 ADD containerd/containerd-*-linux-amd64.tar.gz /usr/local/concourse
