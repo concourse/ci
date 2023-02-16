@@ -848,9 +848,9 @@ jobs:
     - get: ci
     - get: trivy
       trigger: true
-    - get: trivy-db
-      trigger: true
-      params: {globs: [trivy-offline.db.tgz]}
+  - task: extract-trivy-db
+    file: ci/tasks/extract-trivy-db.yml
+    image: trivy
   - in_parallel:
       steps:
         - task: scan-alpine
@@ -1416,7 +1416,6 @@ jobs:
     - get: builder
     - get: ci
     - get: trivy
-    - get: trivy-db
     - get: postgres-image
       params: {format: oci}
   - load_var: image_version
@@ -1448,6 +1447,9 @@ jobs:
       file: ci/tasks/validate-binary-version.yml
       params:
         EXPECTED_VERSION: ((.:image_version))
+    - task: extract-trivy-db
+      file: ci/tasks/extract-trivy-db.yml
+      image: trivy
     - try:
         in_parallel:
         - task: scan-image-alpine
@@ -2229,14 +2231,6 @@ resources:
   type: registry-image
   source:
     repository: aquasec/trivy
-
-- name: trivy-db
-  type: github-release
-  icon: database
-  source:
-    owner: aquasecurity
-    repository: trivy-db
-    access_token: ((concourse_github_dummy.access_token))
 
 - name: concourse-prs
   type: pull-request

@@ -5,7 +5,7 @@ set -e
 echo "unpacking vulnerability db"
 cache_dir=`pwd`
 mkdir -p "${cache_dir}/db"
-tar -xzf trivy-db/trivy-offline.db.tgz -C "${cache_dir}/db"
+tar -xvf trivy-db/db.tar.gz -C "${cache_dir}/db"
 
 ignore_policy=""
 if [ -f "$IGNORE_POLICY_FILE" ]; then
