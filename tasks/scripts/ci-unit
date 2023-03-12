@@ -2,7 +2,7 @@
 
 export GO111MODULE=auto
 
-go get github.com/onsi/ginkgo/ginkgo
+go get github.com/onsi/ginkgo/v2/ginkgo
 go get github.com/onsi/gomega
 # TODO not sure why we have to explicitly call it here
 # without it ginkgo will complain that package not found
