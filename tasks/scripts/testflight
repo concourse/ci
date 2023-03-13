@@ -12,6 +12,6 @@ go mod download
 
 go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo
 
-ginkgo -r -nodes=4 -race -keepGoing -slowSpecThreshold=15 -flakeAttempts=3 ./testflight "$@"
+ginkgo -r -nodes=4 -race -keepGoing -slowSpecThreshold=15 -flake-attempts=3 ./testflight "$@"
 
 docker-compose logs > ../docker-compose.log
