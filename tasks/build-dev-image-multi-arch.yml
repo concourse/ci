@@ -10,6 +10,7 @@ params:
 inputs:
 - name: ci
 - name: concourse
+- name: gdn
 - name: containerd
   optional: true
 - name: runc

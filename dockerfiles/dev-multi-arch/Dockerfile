@@ -33,10 +33,8 @@ ARG TARGETARCH
 # Copies files from the bin directory of the tarball to /usr/local/concourse/bin
 ADD containerd/containerd-*-linux-$TARGETARCH.tar.gz /usr/local/concourse
 
-RUN git clone https://github.com/cloudfoundry/guardian.git /go/guardian
-WORKDIR /go/guardian
-RUN go build -ldflags "-extldflags '-static'" -mod=vendor -o gdn ./cmd/gdn
-RUN mv gdn /usr/local/concourse/bin
+RUN if [[ "$TARGETARCH" = "amd64" ]] ; then cp gdn/gdn-[0-9]*.*.* /usr/local/concourse/bin/gdn
+ ; else cp gdn/gdn-$TARGETARCH-[0-9]*.*.* /usr/local/concourse/bin/gdn ; fi
 
 COPY runc/runc.$TARGETARCH /usr/local/concourse/bin/runc
 
