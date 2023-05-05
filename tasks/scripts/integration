@@ -45,4 +45,4 @@ cd concourse
 
 go mod download
 
-go test -parallel=4 ./integration/... "$@"
+go test -parallel=2 ./integration/... "$@"
