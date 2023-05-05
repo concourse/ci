@@ -51,4 +51,4 @@ go mod download
 
 go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo
 
-ginkgo -nodes=8 -race -keep-going -poll-progress-after=300s -flake-attempts=3 -skip="$SKIP" --progress -r --skip-package="$SKIP_PACKAGES" "$@" ./topgun/$SUITE
+ginkgo -nodes=4 -race -keep-going -poll-progress-after=300s -flake-attempts=3 -skip="$SKIP" --progress -r --skip-package="$SKIP_PACKAGES" "$@" ./topgun/$SUITE
