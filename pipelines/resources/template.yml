@@ -31,7 +31,7 @@ CONTEXT: #@ resource_name + "-resource"
   #@ end
 #@ end
 
-#@ def build_task(resource_name, distro, platform):
+#@ def build_task(resource_name, platform):
 task: build
 privileged: true
 image: oci-build-task
@@ -40,23 +40,23 @@ config:
   platform: linux
   inputs:
   - name: #@ resource_name + "-resource"
-  - name: #@ distro
+  - name: paketo-jammy
   - name: golang-builder
   outputs:
   - name: built-resource-image
     path: image
   params:
-    DOCKERFILE: #@ resource_name + "-resource/dockerfiles/" + distro + "/Dockerfile"
+    DOCKERFILE: #@ resource_name + "-resource/Dockerfile"
     ADDITIONAL_TARGETS: tests
-    BUILD_ARG_base_image: #@ determine_base(distro)
+    BUILD_ARG_base_image: paketobuildpacks/run-jammy-((paketo-variant))
     BUILD_ARG_builder_image: concourse/golang-builder
     IMAGE_PLATFORM: #@ platform
     _: #@ template.replace(build_params(resource_name))
   run: {path: build}
 #@ end
 
-#@ def build_image(distro):
-name: #@ "build-" + distro
+#@ def build_image():
+name: build
 serial_groups: [build]
 on_failure: &failed-ci
   put: notify
@@ -70,56 +70,20 @@ plan:
   - get: #@ resource_name + "-resource"
     resource: resource-repo
     trigger: true
-  - get: #@ distro
+  - get: paketo-jammy
     trigger: true
     params: {format: oci, skip_download: true}
   - get: golang-builder
     trigger: true
     params: {format: oci, skip_download: true}
   - get: oci-build-task
-  - #@ template.replace(extra_get_steps(distro))
-- #@ build_task(resource_name, distro, "linux/amd64")
-- #@ template.replace(extra_steps(distro))
-- put: #@ "resource-image-dev-" + distro
+  - #@ template.replace(extra_get_steps())
+- #@ build_task(resource_name, "linux/amd64")
+- #@ template.replace(extra_steps())
+- put: resource-image-dev
   params: {image: built-resource-image/image.tar}
   get_params:
     skip_download: true
-#@ end
-
-#@ def scan_task(distro):
-task: #@ "scan-" + distro
-image: trivy
-config:
-  platform: linux
-  inputs:
-  - name: #@ "resource-image-dev-" + distro
-    path: image
-  - name: trivy-db
-  - name: ci
-  params: #@ determine_scan_ignore(distro)
-  run:
-    path: sh
-    args:
-    - -c
-    - |
-      mkdir db
-      tar -xzf trivy-db/trivy-offline.db.tgz -C ./db
-
-      ignore_policy=""
-      if [ -f "$IGNORE_POLICY_FILE" ]; then
-        ignore_policy="--ignore-policy $IGNORE_POLICY_FILE"
-      fi
-
-      trivy \
-        --cache-dir $(pwd) \
-        image \
-        --severity "HIGH,CRITICAL" \
-        --ignore-unfixed \
-        --exit-code 1 \
-        --input image/image.tar \
-        $ignore_policy
-on_failure: #@ determine_channel(distro)
-on_error: #@ determine_channel(distro)
 #@ end
 
 #@ def scan_image():
@@ -129,14 +93,9 @@ plan:
   - get: ci
   - get: resource-repo
     passed:
-    - build-alpine
-    - build-ubuntu
-  - get: resource-image-dev-alpine
-    passed: [build-alpine]
-    params: {format: oci}
-    trigger: true
-  - get: resource-image-dev-ubuntu
-    passed: [build-ubuntu]
+    - build
+  - get: resource-image-dev
+    passed: [build]
     params: {format: oci}
     trigger: true
   - get: trivy
@@ -145,12 +104,41 @@ plan:
     trigger: true
     params: {globs: [trivy-offline.db.tgz]}
 - try:
-    in_parallel:
-      - #@ scan_task("alpine")
-      - #@ scan_task("ubuntu")
+    task: scan
+    image: trivy
+    config:
+      platform: linux
+      inputs:
+      - name: resource-image-dev
+        path: image
+      - name: trivy-db
+      - name: ci
+      run:
+        path: sh
+        args:
+        - -c
+        - |
+          mkdir db
+          tar -xzf trivy-db/trivy-offline.db.tgz -C ./db
+
+          ignore_policy=""
+          if [ -f "$IGNORE_POLICY_FILE" ]; then
+            ignore_policy="--ignore-policy $IGNORE_POLICY_FILE"
+          fi
+
+          trivy \
+            --cache-dir $(pwd) \
+            image \
+            --severity "HIGH,CRITICAL" \
+            --ignore-unfixed \
+            --exit-code 1 \
+            --input image/image.tar \
+            $ignore_policy
+    on_failure: #@ determine_channel()
+    on_error: #@ determine_channel()
 #@ end
 
-#@ def extra_steps(distro):
+#@ def extra_steps():
   #@ if resource_name == "docker-image":
 - task: smoke-test
   image: built-resource-image
@@ -169,31 +157,15 @@ plan:
   #@ else: return []
 #@ end
 
-#@ def determine_base(distro):
-#@ if distro == "alpine":
-#@   return "alpine"
-#@ elif distro == "ubuntu":
-#@   return "concourse/resource-types-builder:jammy"
-#@ end
-#@ end
-
-#@ def determine_channel(distro):
+#@ def determine_channel():
   put: notify
   params:
     mode: normal
     alert_type: failed
 #@ end
 
-#@ def determine_scan_ignore(distro):
-  #@ if distro == "alpine":
-  IGNORE_POLICY_FILE: ci/trivy-ignore/resource-alpine.rego
-  #@ else:
-  IGNORE_POLICY_FILE: ""
-  #@ end
-#@ end
-
-#@ def validate_pr(distro):
-name: #@ "prs-" + distro
+#@ def validate_pr():
+name: prs
 public: true
 serial: true
 serial_groups:
@@ -203,38 +175,38 @@ plan:
   - get: resource-pr
     trigger: true
     version: every
-  - get: #@ distro
+  - get: paketo-jammy
     trigger: true
     params: {format: oci}
   - get: oci-build-task
   - get: golang-builder
     params: {format: oci}
-  - #@ template.replace(extra_get_steps(distro))
+  - #@ template.replace(extra_get_steps())
 - put: #@ resource_name + "-resource"
   resource: resource-pr
   params:
-    context: #@ "status-" + distro
+    context: status
     path: resource-pr
     status: pending
 - do:
-  - #@ build_task(resource_name, distro, "linux/amd64")
-  - #@ template.replace(extra_steps(distro))
+  - #@ build_task(resource_name, "linux/amd64")
+  - #@ template.replace(extra_steps())
   on_failure:
     put: resource-pr
     params:
-      context: #@ "status-" + distro
+      context: status
       path: resource-pr
       status: failure
   on_success:
     put: resource-pr
     params:
-      context: #@ "status-" + distro
+      context: status
       path: resource-pr
       status: success
 #@ end
 
 
-#@ def extra_get_steps(distro):
+#@ def extra_get_steps():
   #@ if resource_name == "cf":
 - get: cf-cli
   trigger: true
@@ -250,18 +222,11 @@ plan:
     passed: [scan-image]
   - get: ci
   - get: release-me
-  - get: resource-image-dev-alpine
+  - get: resource-image-dev
     passed: [scan-image]
     params: {format: oci}
-  - get: resource-image-dev-alpine-rootfs
-    resource: resource-image-dev-alpine
-    passed: [scan-image]
-    params: {format: rootfs}
-  - get: resource-image-dev-ubuntu
-    passed: [scan-image]
-    params: {format: oci}
-  - get: resource-image-dev-ubuntu-rootfs
-    resource: resource-image-dev-ubuntu
+  - get: resource-image-dev-rootfs
+    resource: resource-image-dev
     passed: [scan-image]
     params: {format: rootfs}
   - get: version
@@ -277,8 +242,7 @@ plan:
         tag: jammy
     inputs:
     - name: version
-    - name: resource-image-dev-alpine-rootfs
-    - name: resource-image-dev-ubuntu-rootfs
+    - name: resource-image-dev-rootfs
     outputs:
     - name: release
     run:
@@ -299,17 +263,12 @@ plan:
         version="$(cat version/number)"
         echo "v${version}" > release/name
 
-        pushd resource-image-dev-alpine-rootfs
+        pushd resource-image-dev-rootfs
           cp ../resource_metadata.json .
           tar -czf rootfs.tgz -C rootfs .
-          tar -czf ../release/(@= resource_name @)-resource-${version}-alpine.tgz rootfs.tgz resource_metadata.json
+          tar -czf ../release/(@= resource_name @)-resource-${version}.tgz rootfs.tgz resource_metadata.json
         popd
 
-        pushd resource-image-dev-ubuntu-rootfs
-          cp ../resource_metadata.json .
-          tar -czf rootfs.tgz -C rootfs .
-          tar -czf ../release/(@= resource_name @)-resource-${version}-ubuntu.tgz rootfs.tgz resource_metadata.json
-        popd
 - task: build-release-notes
   file: ci/tasks/build-release-notes.yml
   params:
@@ -320,7 +279,7 @@ plan:
   input_mapping:
     repo: resource-repo
 - task: generate-dpkg-list
-  image: resource-image-dev-ubuntu-rootfs
+  image: resource-image-dev-rootfs
   config:
     platform: linux
     inputs:
@@ -342,21 +301,7 @@ plan:
 - in_parallel:
   - put: resource-image
     params:
-      image: resource-image-dev-alpine/image.tar
-      version: ((.:version))
-      bump_aliases: true
-    get_params:
-      skip_download: true
-  - put: resource-image-alpine
-    params:
-      image: resource-image-dev-alpine/image.tar
-      version: ((.:version))
-      bump_aliases: true
-    get_params:
-      skip_download: true
-  - put: resource-image-ubuntu
-    params:
-      image: resource-image-dev-ubuntu/image.tar
+      image: resource-image-dev/image.tar
       version: ((.:version))
       bump_aliases: true
     get_params:
@@ -378,8 +323,8 @@ plan:
     file: version/version
 #@ end
 
-#@ def rebuild_images(distro):
-name: #@ "republish-images-" + distro
+#@ def rebuild_images():
+name: republish-images
 serial_groups: [build]
 on_failure: &failed-ci
   put: notify
@@ -392,7 +337,7 @@ plan:
     trigger: true
   - get: #@ resource_name + "-resource"
     resource: resource-repo-tags
-  - get: #@ distro
+  - get: paketo-jammy
     trigger: true
     params: {format: oci}
   - get: golang-builder
@@ -400,34 +345,24 @@ plan:
   - get: oci-build-task
   - get: version
   - get: ci
-  - #@ template.replace(extra_get_steps(distro))
+  - #@ template.replace(extra_get_steps())
 - load_var: version
   file: version/version
-- #@ build_task(resource_name, distro, "linux/amd64")
-- #@ template.replace(extra_steps(distro))
-- task: #@ distro + "-date-tag"
+- #@ build_task(resource_name, "linux/amd64")
+- #@ template.replace(extra_steps())
+- task: date-tag
   image: oci-build-task
   file: ci/tasks/tag-version-with-date.yml
   params:
-    VERSION: #@ "((.:version))-" + distro
-- in_parallel:
-  - put: #@ "resource-image-" + distro
-    params:
-      image: built-resource-image/image.tar
-      version: ((.:version))
-      bump_aliases: true
-      additional_tags: date-tag/tag
-    get_params:
-      skip_download: true
-  #@ if distro == "alpine":
-  - put: resource-image
-    params:
-      image: built-resource-image/image.tar
-      version: ((.:version))
-      bump_aliases: true
-    get_params:
-      skip_download: true
-  #@ end
+    VERSION: ((.:version))
+- put: resource-image
+  params:
+    image: built-resource-image/image.tar
+    version: ((.:version))
+    bump_aliases: true
+    additional_tags: date-tag/tag
+  get_params:
+    skip_download: true
 #@ end
 
 #@ def unique_version_history():
@@ -442,8 +377,8 @@ plan:
 groups:
 - name: main
   jobs:
-  - prs-*
-  - build-*
+  - prs
+  - build
   - scan-*
   - publish-*
 - name: republish
@@ -451,16 +386,13 @@ groups:
   - republish-*
 
 jobs:
-- #@ build_image("alpine")
-- #@ build_image("ubuntu")
+- #@ build_image()
 - #@ scan_image()
-- #@ validate_pr("alpine")
-- #@ validate_pr("ubuntu")
+- #@ validate_pr()
 - #@ publish_job("major")
 - #@ publish_job("minor")
 - #@ publish_job("patch")
-- #@ rebuild_images("alpine")
-- #@ rebuild_images("ubuntu")
+- #@ rebuild_images()
 
 resource_types:
 - name: pull-request
@@ -488,22 +420,12 @@ resource_types:
     tag: 1.6.0
 
 resources:
-- name: alpine
-  type: registry-image
-  icon: docker
-  source:
-    repository: alpine
-    tag: latest
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: ubuntu
+- name: paketo-jammy
   type: registry-image
   icon: docker
   source:
     #! we need to tweak original image for ARM build
-    repository: concourse/resource-types-builder
-    tag: jammy
+    repository: paketobuildpacks/run-jammy-((paketo-variant))
     username: ((docker.username))
     password: ((docker.password))
 
@@ -584,40 +506,13 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: resource-image-alpine
-  type: registry-image
-  icon: docker
-  source:
-    repository: #@ "concourse/" + resource_name + "-resource"
-    variant: alpine
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: resource-image-ubuntu
-  type: registry-image
-  icon: docker
-  source:
-    repository: #@ "concourse/" + resource_name + "-resource"
-    variant: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: resource-image-dev-alpine
+- name: resource-image-dev
   type: registry-image
   icon: docker
   source:
     repository: #@ "concourse/" + resource_name + "-resource"
     tag: dev
     password: ((docker.password))
-    username: ((docker.username))
-
-- name: resource-image-dev-ubuntu
-  type: registry-image
-  icon: docker
-  source:
-    password: ((docker.password))
-    repository: #@ "concourse/" + resource_name + "-resource"
-    tag: dev-ubuntu
     username: ((docker.username))
 
 - name: dpkg-list-store

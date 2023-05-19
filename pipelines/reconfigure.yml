@@ -195,13 +195,40 @@ jobs:
       - datadog-event
       - mock
     input_mapping: {pipelines: pipelines-and-tasks}
-  - across:
-    - var: type
-      values: *resources
-      max_in_flight: all
-    set_pipeline: resource
-    instance_vars: {type: ((.:type))}
-    file: rendered_pipelines/((.:type)).yml
+  - in_parallel:
+    - across:
+      - var: type
+        values:
+        - time
+        - registry-image
+        - cf
+        - bosh-io-release
+        - bosh-io-stemcell
+        - github-release
+        - datadog-event
+        max_in_flight: all
+      set_pipeline: resource
+      instance_vars: {type: ((.:type))}
+      file: rendered_pipelines/((.:type)).yml
+      vars:
+        paketo-variant: static
+    - across:
+      - var: type
+        values:
+        - git
+        - docker-image
+        - tracker
+        - hg
+        - semver
+        - s3
+        - pool
+        - mock
+        max_in_flight: all
+      set_pipeline: resource
+      instance_vars: {type: ((.:type))}
+      file: rendered_pipelines/((.:type)).yml
+      vars:
+        paketo-variant: base
 
 - name: unit
   plan:
