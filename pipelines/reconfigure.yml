@@ -200,7 +200,6 @@ jobs:
       - var: type
         values:
         - time
-        - registry-image
         - cf
         - bosh-io-release
         - bosh-io-stemcell
@@ -217,6 +216,7 @@ jobs:
         values:
         - git
         - docker-image
+        - registry-image
         - tracker
         - hg
         - semver
