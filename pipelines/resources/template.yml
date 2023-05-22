@@ -46,7 +46,7 @@ config:
   - name: built-resource-image
     path: image
   params:
-    DOCKERFILE: #@ resource_name + "-resource/Dockerfile"
+    DOCKERFILE: #@ resource_name + "-resource/dockerfiles/ubuntu/Dockerfile"
     ADDITIONAL_TARGETS: tests
     BUILD_ARG_base_image: paketobuildpacks/run-jammy-((paketo-variant))
     BUILD_ARG_builder_image: concourse/golang-builder
