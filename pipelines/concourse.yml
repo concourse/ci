@@ -209,6 +209,8 @@ jobs:
     - get: ci
     - get: registry-image-resource
       trigger: true
+    - get: docker-image-resource
+      trigger: true
   - in_parallel:
     - do:
       - in_parallel:
@@ -217,8 +219,6 @@ jobs:
         - get: bosh-io-stemcell-resource-alpine
           trigger: true
         - get: cf-resource-alpine
-          trigger: true
-        - get: docker-image-resource-alpine
           trigger: true
         - get: git-resource-alpine
           trigger: true
@@ -243,7 +243,6 @@ jobs:
           bosh-io-release-resource: bosh-io-release-resource-alpine
           bosh-io-stemcell-resource: bosh-io-stemcell-resource-alpine
           cf-resource: cf-resource-alpine
-          docker-image-resource: docker-image-resource-alpine
           git-resource: git-resource-alpine
           github-release-resource: github-release-resource-alpine
           hg-resource: hg-resource-alpine
@@ -264,8 +263,6 @@ jobs:
         - get: bosh-io-stemcell-resource-ubuntu
           trigger: true
         - get: cf-resource-ubuntu
-          trigger: true
-        - get: docker-image-resource-ubuntu
           trigger: true
         - get: git-resource-ubuntu
           trigger: true
@@ -290,7 +287,6 @@ jobs:
           bosh-io-release-resource: bosh-io-release-resource-ubuntu
           bosh-io-stemcell-resource: bosh-io-stemcell-resource-ubuntu
           cf-resource: cf-resource-ubuntu
-          docker-image-resource: docker-image-resource-ubuntu
           git-resource: git-resource-ubuntu
           github-release-resource: github-release-resource-ubuntu
           hg-resource: hg-resource-ubuntu
@@ -1632,21 +1628,12 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: docker-image-resource-alpine
+- name: docker-image-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/docker-image-resource
-    variant: alpine
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: docker-image-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/docker-image-resource
-    variant: ubuntu
+    tag: dev
     username: ((docker.username))
     password: ((docker.password))
 
