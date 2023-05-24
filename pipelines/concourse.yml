@@ -221,6 +221,8 @@ jobs:
       trigger: true
     - get: s3-resource
       trigger: true
+    - get: pool-resource
+      trigger: true
   - in_parallel:
     - do:
       - in_parallel:
@@ -234,8 +236,6 @@ jobs:
           trigger: true
         - get: mock-resource-alpine
           trigger: true
-        - get: pool-resource-alpine
-          trigger: true
         - get: time-resource-alpine
           trigger: true
       - task: build-alpine
@@ -245,7 +245,6 @@ jobs:
           cf-resource: cf-resource-alpine
           github-release-resource: github-release-resource-alpine
           mock-resource: mock-resource-alpine
-          pool-resource: pool-resource-alpine
           time-resource: time-resource-alpine
         output_mapping: {image: image_alpine}
         image: oci-build-task
@@ -263,8 +262,6 @@ jobs:
           trigger: true
         - get: mock-resource-ubuntu
           trigger: true
-        - get: pool-resource-ubuntu
-          trigger: true
         - get: time-resource-ubuntu
           trigger: true
       - task: build-ubuntu
@@ -274,7 +271,6 @@ jobs:
           cf-resource: cf-resource-ubuntu
           github-release-resource: github-release-resource-ubuntu
           mock-resource: mock-resource-ubuntu
-          pool-resource: pool-resource-ubuntu
           time-resource: time-resource-ubuntu
         output_mapping: {image: image_ubuntu}
         image: oci-build-task
@@ -1653,21 +1649,12 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: pool-resource-alpine
+- name: pool-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/pool-resource
-    variant: alpine
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: pool-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/pool-resource
-    variant: ubuntu
+    tag: dev
     username: ((docker.username))
     password: ((docker.password))
 
