@@ -217,6 +217,8 @@ jobs:
       trigger: true
     - get: hg-resource
       trigger: true
+    - get: semver-resource
+      trigger: true
   - in_parallel:
     - do:
       - in_parallel:
@@ -234,8 +236,6 @@ jobs:
           trigger: true
         - get: s3-resource-alpine
           trigger: true
-        - get: semver-resource-alpine
-          trigger: true
         - get: time-resource-alpine
           trigger: true
       - task: build-alpine
@@ -247,7 +247,6 @@ jobs:
           mock-resource: mock-resource-alpine
           pool-resource: pool-resource-alpine
           s3-resource: s3-resource-alpine
-          semver-resource: semver-resource-alpine
           time-resource: time-resource-alpine
         output_mapping: {image: image_alpine}
         image: oci-build-task
@@ -269,8 +268,6 @@ jobs:
           trigger: true
         - get: s3-resource-ubuntu
           trigger: true
-        - get: semver-resource-ubuntu
-          trigger: true
         - get: time-resource-ubuntu
           trigger: true
       - task: build-ubuntu
@@ -282,7 +279,6 @@ jobs:
           mock-resource: mock-resource-ubuntu
           pool-resource: pool-resource-ubuntu
           s3-resource: s3-resource-ubuntu
-          semver-resource: semver-resource-ubuntu
           time-resource: time-resource-ubuntu
         output_mapping: {image: image_ubuntu}
         image: oci-build-task
@@ -1706,21 +1702,12 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: semver-resource-alpine
+- name: semver-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/semver-resource
-    variant: alpine
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: semver-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/semver-resource
-    variant: ubuntu
+    tag: dev
     username: ((docker.username))
     password: ((docker.password))
 
