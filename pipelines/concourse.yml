@@ -207,6 +207,8 @@ jobs:
   - in_parallel:
     - get: oci-build-task
     - get: ci
+    - get: registry-image-resource
+      trigger: true
   - in_parallel:
     - do:
       - in_parallel:
@@ -228,8 +230,6 @@ jobs:
           trigger: true
         - get: pool-resource-alpine
           trigger: true
-        - get: registry-image-resource-alpine
-          trigger: true
         - get: s3-resource-alpine
           trigger: true
         - get: semver-resource-alpine
@@ -249,7 +249,6 @@ jobs:
           hg-resource: hg-resource-alpine
           mock-resource: mock-resource-alpine
           pool-resource: pool-resource-alpine
-          registry-image-resource: registry-image-resource-alpine
           s3-resource: s3-resource-alpine
           semver-resource: semver-resource-alpine
           time-resource: time-resource-alpine
@@ -278,8 +277,6 @@ jobs:
           trigger: true
         - get: pool-resource-ubuntu
           trigger: true
-        - get: registry-image-resource-ubuntu
-          trigger: true
         - get: s3-resource-ubuntu
           trigger: true
         - get: semver-resource-ubuntu
@@ -299,7 +296,6 @@ jobs:
           hg-resource: hg-resource-ubuntu
           mock-resource: mock-resource-ubuntu
           pool-resource: pool-resource-ubuntu
-          registry-image-resource: registry-image-resource-ubuntu
           s3-resource: s3-resource-ubuntu
           semver-resource: semver-resource-ubuntu
           time-resource: time-resource-ubuntu
@@ -1726,21 +1722,12 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: registry-image-resource-alpine
+- name: registry-image-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/registry-image-resource
-    variant: alpine
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: registry-image-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/registry-image-resource
-    variant: ubuntu
+    tag: dev
     username: ((docker.username))
     password: ((docker.password))
 
