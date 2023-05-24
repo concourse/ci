@@ -213,6 +213,8 @@ jobs:
       trigger: true
     - get: git-resource
       trigger: true
+    - get: tracker-resource
+      trigger: true
   - in_parallel:
     - do:
       - in_parallel:
@@ -236,8 +238,6 @@ jobs:
           trigger: true
         - get: time-resource-alpine
           trigger: true
-        - get: tracker-resource-alpine
-          trigger: true
       - task: build-alpine
         input_mapping:
           bosh-io-release-resource: bosh-io-release-resource-alpine
@@ -250,7 +250,6 @@ jobs:
           s3-resource: s3-resource-alpine
           semver-resource: semver-resource-alpine
           time-resource: time-resource-alpine
-          tracker-resource: tracker-resource-alpine
         output_mapping: {image: image_alpine}
         image: oci-build-task
         privileged: true
@@ -277,8 +276,6 @@ jobs:
           trigger: true
         - get: time-resource-ubuntu
           trigger: true
-        - get: tracker-resource-ubuntu
-          trigger: true
       - task: build-ubuntu
         input_mapping:
           bosh-io-release-resource: bosh-io-release-resource-ubuntu
@@ -291,7 +288,6 @@ jobs:
           s3-resource: s3-resource-ubuntu
           semver-resource: semver-resource-ubuntu
           time-resource: time-resource-ubuntu
-          tracker-resource: tracker-resource-ubuntu
         output_mapping: {image: image_ubuntu}
         image: oci-build-task
         privileged: true
@@ -1759,21 +1755,12 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: tracker-resource-alpine
+- name: tracker-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/tracker-resource
-    variant: alpine
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: tracker-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/tracker-resource
-    variant: ubuntu
+    tag: dev
     username: ((docker.username))
     password: ((docker.password))
 
