@@ -215,6 +215,8 @@ jobs:
       trigger: true
     - get: tracker-resource
       trigger: true
+    - get: hg-resource
+      trigger: true
   - in_parallel:
     - do:
       - in_parallel:
@@ -225,8 +227,6 @@ jobs:
         - get: cf-resource-alpine
           trigger: true
         - get: github-release-resource-alpine
-          trigger: true
-        - get: hg-resource-alpine
           trigger: true
         - get: mock-resource-alpine
           trigger: true
@@ -244,7 +244,6 @@ jobs:
           bosh-io-stemcell-resource: bosh-io-stemcell-resource-alpine
           cf-resource: cf-resource-alpine
           github-release-resource: github-release-resource-alpine
-          hg-resource: hg-resource-alpine
           mock-resource: mock-resource-alpine
           pool-resource: pool-resource-alpine
           s3-resource: s3-resource-alpine
@@ -264,8 +263,6 @@ jobs:
           trigger: true
         - get: github-release-resource-ubuntu
           trigger: true
-        - get: hg-resource-ubuntu
-          trigger: true
         - get: mock-resource-ubuntu
           trigger: true
         - get: pool-resource-ubuntu
@@ -282,7 +279,6 @@ jobs:
           bosh-io-stemcell-resource: bosh-io-stemcell-resource-ubuntu
           cf-resource: cf-resource-ubuntu
           github-release-resource: github-release-resource-ubuntu
-          hg-resource: hg-resource-ubuntu
           mock-resource: mock-resource-ubuntu
           pool-resource: pool-resource-ubuntu
           s3-resource: s3-resource-ubuntu
@@ -1656,21 +1652,12 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: hg-resource-alpine
+- name: hg-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/hg-resource
-    variant: alpine
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: hg-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/hg-resource
-    variant: ubuntu
+    tag: dev
     username: ((docker.username))
     password: ((docker.password))
 
