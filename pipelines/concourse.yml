@@ -223,6 +223,8 @@ jobs:
       trigger: true
     - get: pool-resource
       trigger: true
+    - get: mock-resource
+      trigger: true
   - in_parallel:
     - do:
       - in_parallel:
@@ -234,8 +236,6 @@ jobs:
           trigger: true
         - get: github-release-resource-alpine
           trigger: true
-        - get: mock-resource-alpine
-          trigger: true
         - get: time-resource-alpine
           trigger: true
       - task: build-alpine
@@ -244,7 +244,6 @@ jobs:
           bosh-io-stemcell-resource: bosh-io-stemcell-resource-alpine
           cf-resource: cf-resource-alpine
           github-release-resource: github-release-resource-alpine
-          mock-resource: mock-resource-alpine
           time-resource: time-resource-alpine
         output_mapping: {image: image_alpine}
         image: oci-build-task
@@ -260,8 +259,6 @@ jobs:
           trigger: true
         - get: github-release-resource-ubuntu
           trigger: true
-        - get: mock-resource-ubuntu
-          trigger: true
         - get: time-resource-ubuntu
           trigger: true
       - task: build-ubuntu
@@ -270,7 +267,6 @@ jobs:
           bosh-io-stemcell-resource: bosh-io-stemcell-resource-ubuntu
           cf-resource: cf-resource-ubuntu
           github-release-resource: github-release-resource-ubuntu
-          mock-resource: mock-resource-ubuntu
           time-resource: time-resource-ubuntu
         output_mapping: {image: image_ubuntu}
         image: oci-build-task
@@ -1532,21 +1528,12 @@ resources:
     repository: plugins
     access_token: ((concourse_github_dummy.access_token))
 
-- name: mock-resource-alpine
+- name: mock-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/mock-resource
-    variant: alpine
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: mock-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/mock-resource
-    variant: ubuntu
+    tag: dev
     username: ((docker.username))
     password: ((docker.password))
 
