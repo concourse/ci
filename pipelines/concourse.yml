@@ -315,7 +315,7 @@ jobs:
   - task: build
     image: oci-build-task
     privileged: true
-    input_mapping: {concourse: built-concourse}
+    input_mapping: {concourse: built-concourse, resource-types-image: resource-types-ubuntu-image}
     file: ci/tasks/build-dev-image-multi-arch.yml
   - put: dev-image
     params: {image: image/image}
