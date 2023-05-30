@@ -41,7 +41,6 @@ config:
   inputs:
   - name: #@ resource_name + "-resource"
   - name: base-image
-  - name: golang-builder
   outputs:
   - name: built-resource-image
     path: image
@@ -72,10 +71,10 @@ plan:
     trigger: true
   - get: base-image
     trigger: true
-    params: {format: oci, skip_download: true}
+    params: {format: oci}
   - get: golang-builder
     trigger: true
-    params: {format: oci, skip_download: true}
+    params: {skip_download: true}
   - get: oci-build-task
   - #@ template.replace(extra_get_steps())
 - #@ build_task(resource_name, "linux/amd64")
@@ -159,8 +158,6 @@ plan:
     trigger: true
     params: {format: oci}
   - get: oci-build-task
-  - get: golang-builder
-    params: {format: oci}
   - #@ template.replace(extra_get_steps())
 - put: #@ resource_name + "-resource"
   resource: resource-pr
@@ -320,8 +317,6 @@ plan:
   - get: base-image
     trigger: true
     params: {format: oci}
-  - get: golang-builder
-    params: {format: oci}
   - get: oci-build-task
   - get: version
   - get: ci
@@ -406,6 +401,7 @@ resources:
   source:
     #! we need to tweak original image for ARM build
     repository: ((base-image))
+    tag: latest
     username: ((docker.username))
     password: ((docker.password))
 
