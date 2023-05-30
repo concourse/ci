@@ -2,7 +2,6 @@ FROM busybox
 
   COPY bosh-io-release-resource/   /usr/local/concourse/resource-types/bosh-io-release/
   COPY bosh-io-stemcell-resource/  /usr/local/concourse/resource-types/bosh-io-stemcell/
-  COPY cf-resource/                /usr/local/concourse/resource-types/cf/
   COPY docker-image-resource/      /usr/local/concourse/resource-types/docker-image/
   COPY git-resource/               /usr/local/concourse/resource-types/git/
   COPY github-release-resource/    /usr/local/concourse/resource-types/github-release/

@@ -188,8 +188,6 @@ jobs:
           trigger: true
         - get: bosh-io-stemcell-resource-alpine
           trigger: true
-        - get: cf-resource-alpine
-          trigger: true
         - get: docker-image-resource-alpine
           trigger: true
         - get: git-resource-alpine
@@ -216,7 +214,6 @@ jobs:
         input_mapping:
           bosh-io-release-resource: bosh-io-release-resource-alpine
           bosh-io-stemcell-resource: bosh-io-stemcell-resource-alpine
-          cf-resource: cf-resource-alpine
           docker-image-resource: docker-image-resource-alpine
           git-resource: git-resource-alpine
           github-release-resource: github-release-resource-alpine
@@ -237,8 +234,6 @@ jobs:
         - get: bosh-io-release-resource-ubuntu
           trigger: true
         - get: bosh-io-stemcell-resource-ubuntu
-          trigger: true
-        - get: cf-resource-ubuntu
           trigger: true
         - get: docker-image-resource-ubuntu
           trigger: true
@@ -266,7 +261,6 @@ jobs:
         input_mapping:
           bosh-io-release-resource: bosh-io-release-resource-ubuntu
           bosh-io-stemcell-resource: bosh-io-stemcell-resource-ubuntu
-          cf-resource: cf-resource-ubuntu
           docker-image-resource: docker-image-resource-ubuntu
           git-resource: git-resource-ubuntu
           github-release-resource: github-release-resource-ubuntu
@@ -1959,26 +1953,6 @@ resources:
   source:
     repository: concourse/bosh-io-stemcell-resource
     semver_constraint: ((resource_type_versions.bosh-io-stemcell))
-    variant: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: cf-resource-alpine
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/cf-resource
-    semver_constraint: ((resource_type_versions.cf))
-    variant: alpine
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: cf-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/cf-resource
-    semver_constraint: ((resource_type_versions.cf))
     variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))

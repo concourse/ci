@@ -183,7 +183,6 @@ jobs:
       - time
       - docker-image
       - registry-image
-      - cf
       - bosh-io-release
       - bosh-io-stemcell
       - tracker
@@ -200,7 +199,6 @@ jobs:
       - var: type
         values:
         - time
-        - cf
         - bosh-io-release
         - bosh-io-stemcell
         - github-release

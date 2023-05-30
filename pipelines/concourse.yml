@@ -249,49 +249,35 @@ jobs:
       trigger: true
     - get: mock-resource
       trigger: true
+    - get: bosh-io-release-resource
+      trigger: true
+    - get: time-resource
+      trigger: true
   - in_parallel:
     - do:
       - in_parallel:
-        - get: bosh-io-release-resource-alpine
-          trigger: true
         - get: bosh-io-stemcell-resource-alpine
-          trigger: true
-        - get: cf-resource-alpine
           trigger: true
         - get: github-release-resource-alpine
           trigger: true
-        - get: time-resource-alpine
-          trigger: true
       - task: build-alpine
         input_mapping:
-          bosh-io-release-resource: bosh-io-release-resource-alpine
           bosh-io-stemcell-resource: bosh-io-stemcell-resource-alpine
-          cf-resource: cf-resource-alpine
           github-release-resource: github-release-resource-alpine
-          time-resource: time-resource-alpine
         output_mapping: {image: image_alpine}
         image: oci-build-task
         privileged: true
         file: ci/tasks/build-resource-types-image.yml
     - do:
       - in_parallel:
-        - get: bosh-io-release-resource-ubuntu
-          trigger: true
         - get: bosh-io-stemcell-resource-ubuntu
-          trigger: true
-        - get: cf-resource-ubuntu
           trigger: true
         - get: github-release-resource-ubuntu
           trigger: true
-        - get: time-resource-ubuntu
-          trigger: true
       - task: build-ubuntu
         input_mapping:
-          bosh-io-release-resource: bosh-io-release-resource-ubuntu
           bosh-io-stemcell-resource: bosh-io-stemcell-resource-ubuntu
-          cf-resource: cf-resource-ubuntu
           github-release-resource: github-release-resource-ubuntu
-          time-resource: time-resource-ubuntu
         output_mapping: {image: image_ubuntu}
         image: oci-build-task
         privileged: true
@@ -1593,24 +1579,6 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/bosh-io-stemcell-resource
-    variant: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: cf-resource-alpine
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/cf-resource
-    variant: alpine
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: cf-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/cf-resource
     variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
