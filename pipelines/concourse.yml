@@ -289,8 +289,6 @@ jobs:
         trigger: true
       - get: dumb-init
         trigger: true
-      - get: resource-types-alpine-image
-        passed: [resource-types-images]
       - get: resource-types-ubuntu-image
         passed: [resource-types-images]
       - get: unit-image
@@ -317,7 +315,7 @@ jobs:
   - task: build
     image: oci-build-task
     privileged: true
-    input_mapping: {concourse: built-concourse, resource-types-image: resource-types-alpine-image}
+    input_mapping: {concourse: built-concourse}
     file: ci/tasks/build-dev-image-multi-arch.yml
   - put: dev-image
     params: {image: image/image}
@@ -585,8 +583,6 @@ jobs:
     - get: golang-builder-image
       passed: [dev-image]
     - get: ci
-    - get: resource-types-alpine-image
-      passed: [dev-image]
     - get: resource-types-ubuntu-image
       passed: [dev-image]
   - in_parallel:
@@ -603,10 +599,6 @@ jobs:
         - task: hoist-linux-dependencies
           file: ci/tasks/hoist-linux-dependencies.yml
           image: dev-image
-        - task: hoist-resource-types-alpine
-          file: ci/tasks/hoist-linux-resource-types.yml
-          image: resource-types-alpine-image
-          output_mapping: {resource-types: resource-types-alpine}
         - task: hoist-resource-types-ubuntu
           file: ci/tasks/hoist-linux-resource-types.yml
           image: resource-types-ubuntu-image
@@ -1800,15 +1792,6 @@ resources:
     endpoint: storage.googleapis.com
     bucket: golang
     regexp: 'go(\d+\.\d+(\.\d+)?)\.linux-amd64\.tar\.gz$'
-
-- name: resource-types-alpine-image
-  type: registry-image
-  icon: &image-icon docker
-  source:
-    repository: concourse/resource-types
-    tag: latest
-    username: ((docker.username))
-    password: ((docker.password))
 
 - name: resource-types-ubuntu-image
   type: registry-image
