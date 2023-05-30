@@ -211,7 +211,7 @@ jobs:
       instance_vars: {type: ((.:type))}
       file: rendered_pipelines/((.:type)).yml
       vars:
-        paketo-variant: static
+        base-image: concourse/resource-types-base-image-static
     - across:
       - var: type
         values:
@@ -228,7 +228,7 @@ jobs:
       instance_vars: {type: ((.:type))}
       file: rendered_pipelines/((.:type)).yml
       vars:
-        paketo-variant: base
+        base-image: paketobuildpacks/run-jammy-base
 
 - name: unit
   plan:

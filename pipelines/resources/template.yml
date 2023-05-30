@@ -40,7 +40,7 @@ config:
   platform: linux
   inputs:
   - name: #@ resource_name + "-resource"
-  - name: paketo-jammy
+  - name: base-image
   - name: golang-builder
   outputs:
   - name: built-resource-image
@@ -48,7 +48,7 @@ config:
   params:
     DOCKERFILE: #@ resource_name + "-resource/Dockerfile"
     ADDITIONAL_TARGETS: tests
-    BUILD_ARG_base_image: paketobuildpacks/run-jammy-((paketo-variant))
+    IMAGE_ARG_base_image: base-image/image.tar
     BUILD_ARG_builder_image: concourse/golang-builder
     IMAGE_PLATFORM: #@ platform
     _: #@ template.replace(build_params(resource_name))
@@ -70,7 +70,7 @@ plan:
   - get: #@ resource_name + "-resource"
     resource: resource-repo
     trigger: true
-  - get: paketo-jammy
+  - get: base-image
     trigger: true
     params: {format: oci, skip_download: true}
   - get: golang-builder
@@ -155,7 +155,7 @@ plan:
   - get: resource-pr
     trigger: true
     version: every
-  - get: paketo-jammy
+  - get: base-image
     trigger: true
     params: {format: oci}
   - get: oci-build-task
@@ -317,7 +317,7 @@ plan:
     trigger: true
   - get: #@ resource_name + "-resource"
     resource: resource-repo-tags
-  - get: paketo-jammy
+  - get: base-image
     trigger: true
     params: {format: oci}
   - get: golang-builder
@@ -400,12 +400,12 @@ resource_types:
     tag: 1.6.0
 
 resources:
-- name: paketo-jammy
+- name: base-image
   type: registry-image
   icon: docker
   source:
     #! we need to tweak original image for ARM build
-    repository: paketobuildpacks/run-jammy-((paketo-variant))
+    repository: ((base-image))
     username: ((docker.username))
     password: ((docker.password))
 

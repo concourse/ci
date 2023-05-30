@@ -60,6 +60,7 @@ groups:
   - unit-image
   - build-golang-builder-image
   - build-resource-types-builder-image
+  - build-resource-types-base-image-static
 
 - name: all
   jobs:
@@ -159,6 +160,29 @@ jobs:
       params:
         image: image/image
         bump_aliases: true
+  on_failure: *failed-ci
+
+- name: build-resource-types-base-image-static
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: ci
+    - get: oci-build-task
+    - get: paketo-jammy-static-image
+      trigger: true
+      params: {format: oci}
+  - task: build
+    image: oci-build-task
+    privileged: true
+    file: ci/tasks/build-resource-types-base-image-static.yml
+    params:
+      IMAGE_ARG_base_image: paketo-jammy-static-image/image.tar
+  - in_parallel:
+    - put: resource-types-base-image-static
+      params:
+        image: image/image
+        additional_tags: paketo-jammy-static-image/tag
   on_failure: *failed-ci
 
 - name: unit
@@ -1914,11 +1938,28 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
+- name: paketo-jammy-static-image
+  type: registry-image
+  icon: *image-icon
+  source:
+    repository: paketobuildpacks/run-jammy-static
+    username: ((docker.username))
+    password: ((docker.password))
+
 - name: resource-types-builder-image-ubuntu
   type: registry-image
   icon: &image-icon docker
   source:
     repository: concourse/resource-types-builder
     tag: jammy
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: resource-types-base-image-static
+  type: registry-image
+  icon: &image-icon docker
+  source:
+    repository: concourse/resource-types-base-image-static
+    tag: latest
     username: ((docker.username))
     password: ((docker.password))

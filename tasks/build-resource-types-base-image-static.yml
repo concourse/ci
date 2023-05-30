@@ -1,0 +1,23 @@
+---
+platform: linux
+
+params:
+  REPOSITORY: concourse/resource-types-base-image-static
+  DOCKERFILE: ci/dockerfiles/resource-types-base-image-static/Dockerfile
+  CONTEXT: .
+  IMAGE_ARG_base_image: paketobuildpacks/run-jammy-static
+  IMAGE_PLATFORM: linux/amd64
+  OUTPUT_OCI: true
+
+inputs:
+- name: ci
+- name: paketo-jammy-static-image
+
+outputs:
+- name: image
+
+caches:
+- path: cache
+
+run:
+  path: build
