@@ -255,36 +255,16 @@ jobs:
       trigger: true
     - get: bosh-io-stemcell-resource
       trigger: true
-  - in_parallel:
-    - do:
-      - in_parallel:
-        - get: github-release-resource-alpine
-          trigger: true
-      - task: build-alpine
-        input_mapping:
-          github-release-resource: github-release-resource-alpine
-        output_mapping: {image: image_alpine}
-        image: oci-build-task
-        privileged: true
-        file: ci/tasks/build-resource-types-image.yml
-    - do:
-      - in_parallel:
-        - get: github-release-resource-ubuntu
-          trigger: true
-      - task: build-ubuntu
-        input_mapping:
-          github-release-resource: github-release-resource-ubuntu
-        output_mapping: {image: image_ubuntu}
-        image: oci-build-task
-        privileged: true
-        file: ci/tasks/build-resource-types-image.yml
-  - in_parallel:
-    - put: resource-types-alpine-image
-      params: {image: image_alpine/image.tar}
-      get_params: {format: oci}
-    - put: resource-types-ubuntu-image
-      params: {image: image_ubuntu/image.tar}
-      get_params: {format: oci}
+    - get: github-release-resource
+      trigger: true
+  - task: build-ubuntu
+    output_mapping: {image: image_ubuntu}
+    image: oci-build-task
+    privileged: true
+    file: ci/tasks/build-resource-types-image.yml
+  - put: resource-types-ubuntu-image
+    params: {image: image_ubuntu/image.tar}
+    get_params: {format: oci}
 
 - name: dev-image
   public: true
@@ -1579,21 +1559,12 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: github-release-resource-alpine
+- name: github-release-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/github-release-resource
-    variant: alpine
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: github-release-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/github-release-resource
-    variant: ubuntu
+    tag: dev
     username: ((docker.username))
     password: ((docker.password))
 
