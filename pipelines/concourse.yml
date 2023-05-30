@@ -450,10 +450,6 @@ jobs:
     - get: concourse
       passed: [build-image]
       trigger: true
-    - get: concourse-dev-alpine-image
-      passed: [build-image]
-      params: {format: oci}
-      trigger: true
     - get: concourse-dev-ubuntu-image
       passed: [build-image]
       params: {format: oci}
@@ -472,7 +468,7 @@ jobs:
         CONCOURSE_IMAGE: concourse/concourse-dev
   - task: deploy
     image: unit-image
-    input_mapping: {image-info: concourse-dev-alpine-image}
+    input_mapping: {image-info: concourse-dev-ubuntu-image}
     file: ci/tasks/k8s-deploy.yml
     params:
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
@@ -503,11 +499,6 @@ jobs:
       passed: [k8s-smoke]
       tags: [k8s-topgun]
       trigger: true
-    - get: concourse-dev-alpine-image
-      params: {format: oci}
-      passed: [k8s-smoke]
-      tags: [k8s-topgun]
-      trigger: true
     - get: concourse-dev-ubuntu-image
       params: {format: oci}
       passed: [k8s-smoke]
@@ -531,7 +522,7 @@ jobs:
     file: ci/tasks/k8s-topgun.yml
     tags: [k8s-topgun]
     image: unit-image
-    input_mapping: {concourse-rc-image: concourse-dev-alpine-image}
+    input_mapping: {concourse-rc-image: concourse-dev-ubuntu-image}
     params:
       IN_CLUSTER: "true"
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
@@ -544,9 +535,6 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
-      passed: [build-image]
-      trigger: true
-    - get: concourse-dev-alpine-image
       passed: [build-image]
       trigger: true
     - get: concourse-dev-ubuntu-image
@@ -612,12 +600,6 @@ jobs:
   - in_parallel:
       fail_fast: true
       steps:
-      - task: concourse-linux-alpine
-        file: ci/tasks/concourse-build-linux.yml
-        image: golang-builder-image
-        params: {PLATFORM: linux, VARIANT: alpine}
-        input_mapping: {concourse: built-concourse, resource-types: resource-types-alpine}
-        output_mapping: {concourse-tarball: concourse-linux-alpine}
       - task: concourse-linux-ubuntu
         image: golang-builder-image
         params: {PLATFORM: linux, VARIANT: ubuntu}
@@ -632,9 +614,6 @@ jobs:
         input_mapping: {concourse: built-concourse}
         output_mapping: {concourse-tarball: concourse-darwin}
   - in_parallel:
-    - put: linux-dev-alpine
-      params: {file: concourse-linux-alpine/concourse-*.tgz}
-      inputs: [concourse-linux-alpine]
     - put: linux-dev-ubuntu
       params: {file: concourse-linux-ubuntu/concourse-*.tgz}
       inputs: [concourse-linux-ubuntu]
@@ -656,9 +635,6 @@ jobs:
       passed: [build-concourse]
       trigger: true
     - get: unit-image
-    - get: linux-dev-alpine
-      trigger: true
-      passed: [build-concourse]
     - get: linux-dev-ubuntu
       trigger: true
       passed: [build-concourse]
@@ -666,32 +642,16 @@ jobs:
       trigger: true
     - get: oci-build-task
     - get: ci
-  - in_parallel:
-      fail_fast: true
-      steps:
-        - task: build-alpine
-          file: concourse-docker/ci/build-image.yml
-          image: oci-build-task
-          input_mapping: {linux-rc: linux-dev-alpine}
-          output_mapping: {image: image-alpine}
-          privileged: true
-        - task: build-ubuntu
-          file: concourse-docker/ci/build-image.yml
-          image: oci-build-task
-          input_mapping: {linux-rc: linux-dev-ubuntu}
-          output_mapping: {image: image-ubuntu}
-          privileged: true
-  - in_parallel:
-      fail_fast: true
-      steps:
-        - put: concourse-dev-alpine-image
-          inputs: [image-alpine]
-          params:
-            image: image-alpine/image.tar
-        - put: concourse-dev-ubuntu-image
-          inputs: [image-ubuntu]
-          params:
-            image: image-ubuntu/image.tar
+  - task: build-ubuntu
+    file: concourse-docker/ci/build-image.yml
+    image: oci-build-task
+    input_mapping: {linux-rc: linux-dev-ubuntu}
+    output_mapping: {image: image-ubuntu}
+    privileged: true
+  - put: concourse-dev-ubuntu-image
+    inputs: [image-ubuntu]
+    params:
+      image: image-ubuntu/image.tar
   on_failure: *failed-concourse
 
 - name: bump-prod-web
@@ -700,10 +660,6 @@ jobs:
   plan:
   - in_parallel:
     - get: infrastructure
-    - get: concourse-image
-      resource: concourse-dev-alpine-image
-      passed: [build-image]
-      params: {skip_download: true}
   - load_var: concourse_image_repo
     file: concourse-image/repository
   - load_var: concourse_image_digest
@@ -732,7 +688,7 @@ jobs:
   - in_parallel:
     - get: infrastructure
     - get: concourse-image
-      resource: concourse-dev-alpine-image
+      resource: concourse-dev-ubuntu-image
       passed: [build-image]
       params: {skip_download: true}
     - get: windows-dev
@@ -894,7 +850,7 @@ jobs:
   - in_parallel:
     - get: concourse
       trigger: true
-    - get: concourse-dev-alpine-image
+    - get: concourse-dev-ubuntu-image
       passed: [build-image]
       params: {format: oci}
       trigger: true
@@ -905,7 +861,7 @@ jobs:
     privileged: true
     image: unit-image
     file: ci/tasks/quickstart-smoke.yml
-    input_mapping: {concourse-rc-image: concourse-dev-alpine-image}
+    input_mapping: {concourse-rc-image: concourse-dev-ubuntu-image}
     params:
       RELEASE_NAME: concourse-smoke
   on_failure: *failed-concourse
@@ -1628,14 +1584,6 @@ resources:
   icon: *image-icon
   source: {repository: concourse/oci-build-task}
 
-- name: linux-dev-alpine
-  type: gcs
-  icon: linux
-  source:
-    bucket: concourse-artifacts
-    json_key: ((concourse_artifacts_json_key))
-    regexp: dev/concourse-(.*)\.linux-alpine\.amd64\.tgz
-
 - name: linux-dev-ubuntu
   type: gcs
   icon: linux
@@ -1799,15 +1747,6 @@ resources:
   source:
     repository: concourse/resource-types
     tag: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: concourse-dev-alpine-image
-  type: registry-image
-  icon: *image-icon
-  source:
-    repository: concourse/concourse-dev
-    tag: latest
     username: ((docker.username))
     password: ((docker.password))
 
