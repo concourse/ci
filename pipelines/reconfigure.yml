@@ -203,7 +203,6 @@ jobs:
         - bosh-io-stemcell
         - github-release
         - datadog-event
-        - mock
         max_in_flight: all
       set_pipeline: resource
       instance_vars: {type: ((.:type))}
@@ -221,6 +220,7 @@ jobs:
         - semver
         - s3
         - pool
+        - mock
         max_in_flight: all
       set_pipeline: resource
       instance_vars: {type: ((.:type))}
