@@ -291,6 +291,7 @@ jobs:
         trigger: true
       - get: resource-types-ubuntu-image
         passed: [resource-types-images]
+        trigger: true
       - get: unit-image
         trigger: true
       - get: golang-builder-image
