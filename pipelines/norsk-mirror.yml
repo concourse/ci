@@ -10,18 +10,21 @@ resources:
   source:
     private_key: ((norsk_deploy_key))
     uri: git@github.com:pivotal/oslo-scan-status.git
+    branch: master
     paths: [ p-concourse/* ]
 - name: 4.2.x-scan-status
   type: git
   source:
     private_key: ((norsk_deploy_key))
     uri: git@github.com:pivotal/oslo-scan-status.git
+    branch: master
     paths: [ p-concourse-4.2.x/* ]
 - name: 5.5.x-scan-status
   type: git
   source:
     private_key: ((norsk_deploy_key))
     uri: git@github.com:pivotal/oslo-scan-status.git
+    branch: master
     paths: [ p-concourse-5.5.x/* ]
 - name: ci
   type: git

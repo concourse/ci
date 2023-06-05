@@ -3,6 +3,7 @@ resources:
   type: git
   source:
     uri: https://github.com/concourse/drills.git
+    branch: master
 - name: 30m-timer
   type: time
   source:

@@ -68,6 +68,7 @@ resources:
   icon: github
   source:
     uri: https://github.com/concourse/ci
+    branch: master
 
 - name: concourse-image
   type: registry-image

@@ -1536,6 +1536,7 @@ resources:
   icon: github
   source:
     uri: git@github.com:concourse/infrastructure.git
+    branch: master
     private_key: ((greenpeace_private_key))
 
 - name: infrastructure-bump
@@ -1551,6 +1552,7 @@ resources:
   icon: *git-icon
   source:
     uri: https://github.com/concourse/concourse-docker.git
+    branch: master
     branch: release/((release_minor)).x
 
 - name: notify
