@@ -44,7 +44,7 @@ resource_types:
 
 - name: pull-request
   type: registry-image
-  source: {repository: aoldershaw/github-pr-resource}
+  source: {repository: loggregatorbot/github-pr-resource}
 
 - name: manual-trigger-guard
   type: registry-image
