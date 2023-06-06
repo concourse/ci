@@ -37,7 +37,7 @@ resource_types:
 - name: pull-request
   type: registry-image
   source:
-    repository: loggregatorbot/github-pr-resource
+    repository: aoldershaw/github-pr-resource
 
 resources:
 - name: concourse-base
