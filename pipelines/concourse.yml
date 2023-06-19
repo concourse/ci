@@ -451,7 +451,7 @@ jobs:
     - get: concourse
       passed: [build-image]
       trigger: true
-    - get: concourse-dev-ubuntu-image
+    - get: concourse-dev-image
       passed: [build-image]
       params: {format: oci}
       trigger: true
@@ -469,7 +469,7 @@ jobs:
         CONCOURSE_IMAGE: concourse/concourse-dev
   - task: deploy
     image: unit-image
-    input_mapping: {image-info: concourse-dev-ubuntu-image}
+    input_mapping: {image-info: concourse-dev-image}
     file: ci/tasks/k8s-deploy.yml
     params:
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
@@ -500,7 +500,7 @@ jobs:
       passed: [k8s-smoke]
       tags: [k8s-topgun]
       trigger: true
-    - get: concourse-dev-ubuntu-image
+    - get: concourse-dev-image
       params: {format: oci}
       passed: [k8s-smoke]
       tags: [k8s-topgun]
@@ -523,7 +523,7 @@ jobs:
     file: ci/tasks/k8s-topgun.yml
     tags: [k8s-topgun]
     image: unit-image
-    input_mapping: {concourse-rc-image: concourse-dev-ubuntu-image}
+    input_mapping: {concourse-rc-image: concourse-dev-image}
     params:
       IN_CLUSTER: "true"
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
@@ -538,7 +538,7 @@ jobs:
     - get: concourse
       passed: [build-image]
       trigger: true
-    - get: concourse-dev-ubuntu-image
+    - get: concourse-dev-image
       passed: [build-image]
       trigger: true
     - get: linux-dev-ubuntu
@@ -649,7 +649,7 @@ jobs:
     input_mapping: {linux-rc: linux-dev-ubuntu}
     output_mapping: {image: image-ubuntu}
     privileged: true
-  - put: concourse-dev-ubuntu-image
+  - put: concourse-dev-image
     inputs: [image-ubuntu]
     params:
       image: image-ubuntu/image.tar
@@ -689,7 +689,7 @@ jobs:
   - in_parallel:
     - get: infrastructure
     - get: concourse-image
-      resource: concourse-dev-ubuntu-image
+      resource: concourse-dev-image
       passed: [build-image]
       params: {skip_download: true}
     - get: windows-dev
@@ -851,7 +851,7 @@ jobs:
   - in_parallel:
     - get: concourse
       trigger: true
-    - get: concourse-dev-ubuntu-image
+    - get: concourse-dev-image
       passed: [build-image]
       params: {format: oci}
       trigger: true
@@ -862,7 +862,7 @@ jobs:
     privileged: true
     image: unit-image
     file: ci/tasks/quickstart-smoke.yml
-    input_mapping: {concourse-rc-image: concourse-dev-ubuntu-image}
+    input_mapping: {concourse-rc-image: concourse-dev-image}
     params:
       RELEASE_NAME: concourse-smoke
   on_failure: *failed-concourse
@@ -1753,12 +1753,12 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: concourse-dev-ubuntu-image
+- name: concourse-dev-image
   type: registry-image
   icon: *image-icon
   source:
     repository: concourse/concourse-dev
-    tag: ubuntu
+    tag: latest
     username: ((docker.username))
     password: ((docker.password))
 
