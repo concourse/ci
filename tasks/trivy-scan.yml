@@ -7,7 +7,6 @@ image_resource:
 
 inputs:
 - name: image
-- name: trivy-db
 - name: ci
 
 run:

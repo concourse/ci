@@ -99,9 +99,6 @@ plan:
     trigger: true
   - get: trivy
     trigger: true
-  - get: trivy-db
-    trigger: true
-    params: {globs: [trivy-offline.db.tgz]}
 - task: scan
   image: trivy
   file: ci/tasks/trivy-scan.yml
@@ -414,14 +411,6 @@ resources:
     repository: aquasec/trivy
     username: ((docker.username))
     password: ((docker.password))
-
-- name: trivy-db
-  type: github-release
-  icon: database
-  source:
-    owner: aquasecurity
-    repository: trivy-db
-    access_token: ((concourse_github_dummy.access_token))
 
 - name: resource-repo
   type: git
