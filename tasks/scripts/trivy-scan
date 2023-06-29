@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e
+
+mkdir db
+tar -xzf trivy-db/trivy-offline.db.tgz -C ./db
+
+ignore_policy=""
+if [ -f "$IGNORE_POLICY_FILE" ]; then
+  ignore_policy="--ignore-policy $IGNORE_POLICY_FILE"
+fi
+
+trivy \
+  --cache-dir $(pwd) \
+  image \
+  --severity "HIGH,CRITICAL" \
+  --ignore-unfixed \
+  --exit-code 1 \
+  --input image/image.tar \
+  $ignore_policy

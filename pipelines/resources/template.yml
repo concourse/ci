@@ -102,39 +102,12 @@ plan:
   - get: trivy-db
     trigger: true
     params: {globs: [trivy-offline.db.tgz]}
-- try:
-    task: scan
-    image: trivy
-    config:
-      platform: linux
-      inputs:
-      - name: resource-image-dev
-        path: image
-      - name: trivy-db
-      - name: ci
-      run:
-        path: sh
-        args:
-        - -c
-        - |
-          mkdir db
-          tar -xzf trivy-db/trivy-offline.db.tgz -C ./db
-
-          ignore_policy=""
-          if [ -f "$IGNORE_POLICY_FILE" ]; then
-            ignore_policy="--ignore-policy $IGNORE_POLICY_FILE"
-          fi
-
-          trivy \
-            --cache-dir $(pwd) \
-            image \
-            --severity "HIGH,CRITICAL" \
-            --ignore-unfixed \
-            --exit-code 1 \
-            --input image/image.tar \
-            $ignore_policy
-    on_failure: #@ determine_channel()
-    on_error: #@ determine_channel()
+- task: scan
+  image: trivy
+  file: ci/tasks/trivy-scan.yml
+  input_mapping: {image: resource-image-dev}
+  on_failure: #@ determine_channel()
+  on_error: #@ determine_channel()
 #@ end
 
 #@ def extra_steps():
