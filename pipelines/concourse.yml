@@ -574,6 +574,8 @@ jobs:
     - get: ci
     - get: resource-types-ubuntu-image
       passed: [dev-image]
+    - get: trivy
+      trigger: true
   - in_parallel:
     - task: fly-linux
       file: ci/tasks/fly-build-linux.yml
@@ -614,6 +616,13 @@ jobs:
         file: ci/tasks/concourse-build-darwin.yml
         input_mapping: {concourse: built-concourse}
         output_mapping: {concourse-tarball: concourse-darwin}
+  - task: scan
+    image: trivy
+    file: ci/tasks/trivy-scan-binary.yml
+    input_mapping:
+      binary-1: concourse-linux-ubuntu
+      binary-2: concourse-windows
+      binary-3: concourse-darwin
   - in_parallel:
     - put: linux-dev-ubuntu
       params: {file: concourse-linux-ubuntu/concourse-*.tgz}
@@ -1794,5 +1803,13 @@ resources:
   source:
     repository: concourse/resource-types-base-image-static
     tag: latest
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: trivy
+  type: registry-image
+  icon: docker
+  source:
+    repository: aquasec/trivy
     username: ((docker.username))
     password: ((docker.password))

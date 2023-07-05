@@ -1,0 +1,15 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: aquasec/trivy}
+
+inputs:
+- name: binary-1
+- name: binary-2
+- name: binary-3
+- name: ci
+
+run:
+  path: ci/tasks/scripts/trivy-scan-binary
