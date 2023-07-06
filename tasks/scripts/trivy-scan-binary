@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e
+
+for binary in "binary-1" "binary-2" "binary-3"; do
+  trivy \
+    --cache-dir $(pwd) \
+    fs \
+    --severity "HIGH,CRITICAL" \
+    --exit-code 0 \
+    "${binary}"/concourse-*
+done

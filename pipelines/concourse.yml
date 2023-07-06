@@ -645,14 +645,12 @@ jobs:
       passed: [build-concourse]
       trigger: true
     - get: unit-image
-    - get: syft-image
     - get: linux-dev-ubuntu
       trigger: true
       passed: [build-concourse]
     - get: concourse-docker
       trigger: true
     - get: oci-build-task
-    - get: tas-cve
     - get: ci
   - task: build-ubuntu
     file: concourse-docker/ci/build-image.yml
@@ -660,9 +658,6 @@ jobs:
     input_mapping: {linux-rc: linux-dev-ubuntu}
     output_mapping: {image: image-ubuntu}
     privileged: true
-  - task: generate-sbom
-    file: ci/tasks/generate-sbom.yml
-    image: syft-image
   - put: concourse-dev-image
     inputs: [image-ubuntu]
     params:
@@ -1430,11 +1425,6 @@ resources:
   icon: *image-icon
   source: {repository: vault}
 
-- name: syft-image
-  type: registry-image
-  icon: *image-icon
-  source: {repository: anchore/syft}
-
 - name: bbr
   type: github-release
   icon: &release-icon package-variant-closed
@@ -1481,14 +1471,6 @@ resources:
   source:
     owner: containernetworking
     repository: plugins
-    access_token: ((concourse_github_dummy.access_token))
-
-- name: tas-cve
-  type: github-release
-  icon: *release-icon
-  source:
-    owner: pivotal
-    repository: tas-cve
     access_token: ((concourse_github_dummy.access_token))
 
 - name: mock-resource
