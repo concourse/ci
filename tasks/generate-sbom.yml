@@ -1,0 +1,14 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: {repository: anchore/syft}
+
+inputs:
+- name: tas-cve
+- name: image
+- name: ci
+
+run:
+  path: ci/tasks/scripts/generate-sbom
