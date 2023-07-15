@@ -39,9 +39,10 @@ RUN add-apt-repository "deb https://dl.yarnpkg.com/debian/ stable main"
 RUN apt-get update && apt-get -y install yarn
 
 # install Docker
+ENV DOCKER_VERSION 5:24.0.2-1~ubuntu.22.04~jammy
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-RUN apt-get update && apt-get -y install docker-ce
+RUN apt-get update && apt-get -y install docker-ce=$DOCKER_VERSION docker-ce-cli=$DOCKER_VERSION docker-ce-rootless-extras=$DOCKER_VERSION
 
 # install Docker Compose
 RUN curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" \
