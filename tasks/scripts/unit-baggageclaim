@@ -42,14 +42,14 @@ function permit_device_control() {
 }
 
 function setup_loop_devices() {
-  for i in $(seq 64 67); do
+  for i in $(seq 4 7); do
     mknod -m 0660 /scratch/loop$i b 7 $i
     ln -s /scratch/loop$i /dev/loop$i
   done
 }
 
 function salt_earth() {
-  for i in $(seq 64 67); do
+  for i in $(seq 4 7); do
     losetup -d /dev/loop$i > /dev/null 2>&1 || true
   done
 }
