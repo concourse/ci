@@ -245,24 +245,6 @@ plan:
     GITHUB_BRANCH: master
   input_mapping:
     repo: resource-repo
-- task: generate-dpkg-list
-  image: resource-image-dev-rootfs
-  config:
-    platform: linux
-    inputs:
-    - name: version
-    outputs:
-    - name: dpkg-file
-    run:
-      path: bash
-      args:
-      - "-exc"
-      #@yaml/text-templated-strings
-      - |
-        VERSION="$(cat version/number)"
-        RESOURCE="(@= resource_name @)"
-        DPKG_FILE="${RESOURCE}-dpkg-list-${VERSION}.txt"
-        dpkg -l > "dpkg-file/${DPKG_FILE}"
 - load_var: version
   file: version/version
 - in_parallel:
@@ -282,9 +264,6 @@ plan:
       name: release/name
       tag: version/version
       tag_prefix: v
-- put: dpkg-list-store
-  params:
-    file: #@ "dpkg-file/" + resource_name + "-dpkg-list-*.txt"
 - put: version
   params:
     file: version/version
@@ -472,13 +451,6 @@ resources:
     tag: dev
     password: ((docker.password))
     username: ((docker.username))
-
-- name: dpkg-list-store
-  type: gcs
-  source:
-    bucket: concourse-ubuntu-dpkg-list
-    json_key: ((concourse_dpkg_list_json_key))
-    regexp: #@ resource_name + "-dpkg-list-(.*).txt"
 
 - name: ci
   type: git
