@@ -181,108 +181,40 @@ jobs:
     - get: periodic-check
       trigger: true
     - get: ci
-  - in_parallel:
-    - do:
-      - in_parallel:
-        - get: bosh-io-release-resource-alpine
-          trigger: true
-        - get: bosh-io-stemcell-resource-alpine
-          trigger: true
-        - get: docker-image-resource-alpine
-          trigger: true
-        - get: git-resource-alpine
-          trigger: true
-        - get: github-release-resource-alpine
-          trigger: true
-        - get: hg-resource-alpine
-          trigger: true
-        - get: mock-resource-alpine
-          trigger: true
-        - get: pool-resource-alpine
-          trigger: true
-        - get: registry-image-resource-alpine
-          trigger: true
-        - get: s3-resource-alpine
-          trigger: true
-        - get: semver-resource-alpine
-          trigger: true
-        - get: time-resource-alpine
-          trigger: true
-        - get: tracker-resource-alpine
-          trigger: true
-      - task: build-alpine
-        input_mapping:
-          bosh-io-release-resource: bosh-io-release-resource-alpine
-          bosh-io-stemcell-resource: bosh-io-stemcell-resource-alpine
-          docker-image-resource: docker-image-resource-alpine
-          git-resource: git-resource-alpine
-          github-release-resource: github-release-resource-alpine
-          hg-resource: hg-resource-alpine
-          mock-resource: mock-resource-alpine
-          pool-resource: pool-resource-alpine
-          registry-image-resource: registry-image-resource-alpine
-          s3-resource: s3-resource-alpine
-          semver-resource: semver-resource-alpine
-          time-resource: time-resource-alpine
-          tracker-resource: tracker-resource-alpine
-        output_mapping: {image: image_alpine}
-        image: builder
-        privileged: true
-        file: ci/tasks/build-resource-types-image.yml
-    - do:
-      - in_parallel:
-        - get: bosh-io-release-resource-ubuntu
-          trigger: true
-        - get: bosh-io-stemcell-resource-ubuntu
-          trigger: true
-        - get: docker-image-resource-ubuntu
-          trigger: true
-        - get: git-resource-ubuntu
-          trigger: true
-        - get: github-release-resource-ubuntu
-          trigger: true
-        - get: hg-resource-ubuntu
-          trigger: true
-        - get: mock-resource-ubuntu
-          trigger: true
-        - get: pool-resource-ubuntu
-          trigger: true
-        - get: registry-image-resource-ubuntu
-          trigger: true
-        - get: s3-resource-ubuntu
-          trigger: true
-        - get: semver-resource-ubuntu
-          trigger: true
-        - get: time-resource-ubuntu
-          trigger: true
-        - get: tracker-resource-ubuntu
-          trigger: true
-      - task: build-ubuntu
-        input_mapping:
-          bosh-io-release-resource: bosh-io-release-resource-ubuntu
-          bosh-io-stemcell-resource: bosh-io-stemcell-resource-ubuntu
-          docker-image-resource: docker-image-resource-ubuntu
-          git-resource: git-resource-ubuntu
-          github-release-resource: github-release-resource-ubuntu
-          hg-resource: hg-resource-ubuntu
-          mock-resource: mock-resource-ubuntu
-          pool-resource: pool-resource-ubuntu
-          registry-image-resource: registry-image-resource-ubuntu
-          s3-resource: s3-resource-ubuntu
-          semver-resource: semver-resource-ubuntu
-          time-resource: time-resource-ubuntu
-          tracker-resource: tracker-resource-ubuntu
-        output_mapping: {image: image_ubuntu}
-        image: builder
-        privileged: true
-        file: ci/tasks/build-resource-types-image.yml
-  - in_parallel:
-    - put: resource-types-alpine-image
-      params: {image: image_alpine/image.tar}
-      get_params: {format: oci}
-    - put: resource-types-ubuntu-image
-      params: {image: image_ubuntu/image.tar}
-      get_params: {format: oci}
+    - get: bosh-io-release-resource
+      trigger: true
+    - get: bosh-io-stemcell-resource
+      trigger: true
+    - get: docker-image-resource
+      trigger: true
+    - get: git-resource
+      trigger: true
+    - get: github-release-resource
+      trigger: true
+    - get: hg-resource
+      trigger: true
+    - get: mock-resource
+      trigger: true
+    - get: pool-resource
+      trigger: true
+    - get: registry-image-resource
+      trigger: true
+    - get: s3-resource
+      trigger: true
+    - get: semver-resource
+      trigger: true
+    - get: time-resource
+      trigger: true
+    - get: tracker-resource
+      trigger: true
+  - task: build-ubuntu
+    output_mapping: {image: image_ubuntu}
+    image: builder
+    privileged: true
+    file: ci/tasks/build-resource-types-image.yml
+  - put: resource-types-image
+    params: {image: image_ubuntu/image.tar}
+    get_params: {format: oci}
 
 - name: dev-image
   public: true
@@ -312,10 +244,7 @@ jobs:
         trigger: true
       - get: dumb-init
         trigger: true
-      - get: resource-types-alpine-image
-        passed: [resource-types-images]
-        trigger: true
-      - get: resource-types-ubuntu-image
+      - get: resource-types-image
         passed: [resource-types-images]
         trigger: true
       - get: builder
@@ -336,7 +265,7 @@ jobs:
   - task: build
     image: builder
     privileged: true
-    input_mapping: {concourse: built-concourse, resource-types-image: resource-types-alpine-image}
+    input_mapping: {concourse: built-concourse}
     file: ci/tasks/build-dev-image.yml
   - put: dev-image
     params: {image: image/image.tar}
@@ -461,9 +390,6 @@ jobs:
     - get: concourse-rc-image
       passed: [build-rc-image]
       trigger: true
-    - get: concourse-rc-image-ubuntu
-      passed: [build-rc-image]
-      trigger: true
     - get: version
       passed: [build-rc-image]
       trigger: true
@@ -491,10 +417,6 @@ jobs:
       passed: [build-rc-image]
       trigger: true
     - get: concourse-rc-image
-      passed: [build-rc-image]
-      params: {format: oci}
-      trigger: true
-    - get: concourse-rc-image-ubuntu
       passed: [build-rc-image]
       params: {format: oci}
       trigger: true
@@ -553,11 +475,6 @@ jobs:
       trigger: true
       tags: [k8s-topgun]
     - get: concourse-rc-image
-      passed: [k8s-smoke]
-      trigger: true
-      params: {format: oci}
-      tags: [k8s-topgun]
-    - get: concourse-rc-image-ubuntu
       passed: [k8s-smoke]
       trigger: true
       params: {format: oci}
@@ -629,9 +546,7 @@ jobs:
       passed: [rc]
       params: {bump: final}
     - get: ci
-    - get: resource-types-alpine-image
-      passed: [dev-image]
-    - get: resource-types-ubuntu-image
+    - get: resource-types-image
       passed: [dev-image]
   - in_parallel:
     - task: fly-linux
@@ -647,13 +562,9 @@ jobs:
         - task: hoist-linux-dependencies
           file: ci/tasks/hoist-linux-dependencies.yml
           image: dev-image
-        - task: hoist-resource-types-alpine
-          file: ci/tasks/hoist-linux-resource-types.yml
-          image: resource-types-alpine-image
-          output_mapping: {resource-types: resource-types-alpine}
         - task: hoist-resource-types-ubuntu
           file: ci/tasks/hoist-linux-resource-types.yml
-          image: resource-types-ubuntu-image
+          image: resource-types-image
           output_mapping: {resource-types: resource-types-ubuntu}
         - task: yarn-build
           file: ci/tasks/yarn-build.yml
@@ -664,12 +575,6 @@ jobs:
   - in_parallel:
       fail_fast: true
       steps:
-      - task: concourse-linux-alpine
-        file: ci/tasks/concourse-build-linux.yml
-        image: golang-builder-image
-        input_mapping: {concourse: built-concourse, resource-types: resource-types-alpine}
-        output_mapping: {concourse-tarball: concourse-linux-alpine}
-        params: {PLATFORM: linux, VARIANT: alpine}
       - task: concourse-linux-ubuntu
         image: golang-builder-image
         file: ci/tasks/concourse-build-linux.yml
@@ -683,9 +588,6 @@ jobs:
         file: ci/tasks/concourse-build-darwin.yml
         output_mapping: {concourse-tarball: concourse-darwin}
   - in_parallel:
-    - task: validate-linux-rc
-      file: ci/tasks/validate-linux-rc.yml
-      input_mapping: {concourse-tarball: concourse-linux-alpine}
     - task: validate-linux-rc-ubuntu
       file: ci/tasks/validate-linux-rc.yml
       input_mapping: {concourse-tarball: concourse-linux-ubuntu}
@@ -695,9 +597,6 @@ jobs:
       file: ci/tasks/validate-darwin-rc.yml
       input_mapping: {concourse-tarball: concourse-darwin}
   - in_parallel:
-    - put: linux-rc
-      params: {file: concourse-linux-alpine/concourse-*.tgz}
-      inputs: [concourse-linux-alpine]
     - put: linux-rc-ubuntu
       params: {file: concourse-linux-ubuntu/concourse-*.tgz}
       inputs: [concourse-linux-ubuntu]
@@ -722,9 +621,6 @@ jobs:
     - get: version
       passed: [build-rc]
       trigger: true
-    - get: linux-rc
-      trigger: true
-      passed: [build-rc]
     - get: linux-rc-ubuntu
       trigger: true
       passed: [build-rc]
@@ -733,33 +629,17 @@ jobs:
     - get: builder
     - get: ci
     - get: trivy
-  - in_parallel:
-      fail_fast: true
-      steps:
-        - task: build-alpine
-          file: concourse-docker/ci/build-image.yml
-          image: builder
-          output_mapping: {image: image-alpine}
-          privileged: true
-        - task: build-ubuntu
-          file: concourse-docker/ci/build-image.yml
-          image: builder
-          input_mapping: {linux-rc: linux-rc-ubuntu}
-          output_mapping: {image: image-ubuntu}
-          privileged: true
-  - in_parallel:
-      fail_fast: true
-      steps:
-        - put: concourse-rc-image
-          inputs: [image-alpine, version]
-          params:
-            image: image-alpine/image.tar
-            additional_tags: version/version
-        - put: concourse-rc-image-ubuntu
-          inputs: [image-ubuntu, version]
-          params:
-            image: image-ubuntu/image.tar
-            additional_tags: version/version
+  - task: build-ubuntu
+    file: concourse-docker/ci/build-image.yml
+    image: builder
+    input_mapping: {linux-rc: linux-rc-ubuntu}
+    output_mapping: {image: image-ubuntu}
+    privileged: true
+  - put: concourse-rc-image
+    inputs: [image-ubuntu, version]
+    params:
+      image: image-ubuntu/image.tar
+      additional_tags: version/version
   on_failure: *failed-concourse
   on_error: *failed-concourse
 
@@ -830,15 +710,6 @@ jobs:
       passed: [build-rc-image]
       params: {format: rootfs}
       trigger: true
-    - get: concourse-rc-image-ubuntu
-      passed: [build-rc-image]
-      params: {format: oci}
-      trigger: true
-    - get: concourse-rc-image-ubuntu-rootfs
-      resource: concourse-rc-image-ubuntu
-      passed: [build-rc-image]
-      params: {format: rootfs}
-      trigger: true
     - get: ci
     - get: trivy
       trigger: true
@@ -847,28 +718,16 @@ jobs:
     image: trivy
   - in_parallel:
       steps:
-        - task: scan-alpine
+        - task: scan-ubuntu
           file: ci/tasks/scan-image.yml
           image: trivy
           input_mapping: {image: concourse-rc-image}
           params:
             IGNORE_POLICY_FILE: ci/trivy-ignore/((release_minor))-image.rego
-        - task: scan-ubuntu
-          file: ci/tasks/scan-image.yml
-          image: trivy
-          input_mapping: {image: concourse-rc-image-ubuntu}
-          params:
-            IGNORE_POLICY_FILE: ci/trivy-ignore/((release_minor))-image.rego
-        - task: scan-resource-types-alpine
-          file: ci/tasks/scan-resource-types.yml
-          image: trivy
-          input_mapping: {image: concourse-rc-image-rootfs}
-          params:
-            IGNORE_POLICY_FILE: ci/trivy-ignore/((release_minor))-resource-types.rego
         - task: scan-resource-types-ubuntu
           file: ci/tasks/scan-resource-types.yml
           image: trivy
-          input_mapping: {image: concourse-rc-image-ubuntu-rootfs}
+          input_mapping: {image: concourse-rc-image-rootfs}
           params:
             IGNORE_POLICY_FILE: ci/trivy-ignore/((release_minor))-resource-types.rego
 
@@ -1088,8 +947,6 @@ jobs:
       passed:
       - build-rc
       - bosh-smoke
-    - get: linux-rc
-      passed: [build-rc, build-rc-image]
     - get: linux-rc-ubuntu
       passed: [build-rc, build-rc-image, bosh-check-props]
     - get: windows-rc
@@ -1097,8 +954,6 @@ jobs:
     - get: darwin-rc
       passed: [build-rc]
     - get: concourse-rc-image
-      passed: [k8s-topgun, build-rc-image]
-    - get: concourse-rc-image-ubuntu
       passed: [k8s-topgun, build-rc-image]
     - get: concourse-release
       passed: [bosh-smoke]
@@ -1145,8 +1000,6 @@ jobs:
       resource: version
       params: {bump: final}
       passed: [create-draft-release]
-    - get: linux-rc
-      passed: [create-draft-release]
     - get: linux-rc-ubuntu
       passed: [create-draft-release]
     - get: windows-rc
@@ -1154,8 +1007,6 @@ jobs:
     - get: darwin-rc
       passed: [create-draft-release]
     - get: concourse-rc-image
-      passed: [create-draft-release]
-    - get: concourse-rc-image-ubuntu
       passed: [create-draft-release]
     - get: concourse-release
       passed: [create-draft-release]
@@ -1230,7 +1081,7 @@ jobs:
       passed: [shipit]
     - get: unit-image
       passed: [shipit]
-    - get: linux-rc
+    - get: linux-rc-ubuntu
       passed: [shipit]
     - get: windows-rc
       passed: [shipit]
@@ -1309,7 +1160,7 @@ jobs:
   serial: true
   plan:
   - in_parallel:
-    - get: linux-rc
+    - get: linux-rc-ubuntu
       passed: [shipit]
       trigger: true
     - get: ci
@@ -1333,9 +1184,6 @@ jobs:
     - get: concourse-rc-image
       passed: [shipit]
       params: {format: oci}
-    - get: concourse-rc-image-ubuntu
-      passed: [shipit]
-      params: {format: oci}
   - load_var: image_version
     file: version/version
   - in_parallel:
@@ -1345,23 +1193,17 @@ jobs:
         image: concourse-rc-image/image.tar
         version: ((.:image_version))
         bump_aliases: true
-    - put: concourse-image-ubuntu
-      inputs: [concourse-rc-image-ubuntu]
-      params:
-        image: concourse-rc-image-ubuntu/image.tar
-        version: ((.:image_version))
-        bump_aliases: true
     - put: concourse-image-harbor
-      inputs: [concourse-rc-image-ubuntu]
+      inputs: [concourse-rc-image]
       params:
-        image: concourse-rc-image-ubuntu/image.tar
+        image: concourse-rc-image/image.tar
         version: ((.:image_version))
         bump_aliases: true
 
 - name: generate-dpkg-list
   plan:
   - in_parallel:
-    - get: concourse-image-ubuntu
+    - get: concourse-image
       passed: [publish-image]
       params: {format: rootfs}
       trigger: true
@@ -1371,7 +1213,7 @@ jobs:
     - get: ci
   - task: generate-dpkg-list
     file: ci/tasks/generate-dpkg-list.yml
-    image: concourse-image-ubuntu
+    image: concourse-image
     params: {COMPONENT_NAME: "concourse"}
   - put: concourse-image-dpkg-list
     params: {file: "dpkg-list/concourse-*.txt"}
@@ -1402,8 +1244,6 @@ jobs:
       passed: [shipit]
     - get: version
       passed: [shipit]
-    - get: linux-rc
-      passed: [shipit]
     - get: linux-rc-ubuntu
       passed: [shipit]
     - get: concourse-docker
@@ -1414,28 +1254,15 @@ jobs:
       params: {format: oci}
   - load_var: image_version
     file: version/version
-  - in_parallel:
-    - task: build-alpine
-      file: concourse-docker/ci/build-image.yml
-      image: builder
-      output_mapping: {image: image-alpine}
-      privileged: true
-      params:
-        UNPACK_ROOTFS: true
-    - task: build-ubuntu
-      file: concourse-docker/ci/build-image.yml
-      image: builder
-      input_mapping: {linux-rc: linux-rc-ubuntu}
-      output_mapping: {image: image-ubuntu}
-      privileged: true
-      params:
-        UNPACK_ROOTFS: true
+  - task: build-ubuntu
+    file: concourse-docker/ci/build-image.yml
+    image: builder
+    input_mapping: {linux-rc: linux-rc-ubuntu}
+    output_mapping: {image: image-ubuntu}
+    privileged: true
+    params:
+      UNPACK_ROOTFS: true
   - in_parallel: # sanity checks
-    - task: validate-binary-version-alpine
-      image: image-alpine
-      file: ci/tasks/validate-binary-version.yml
-      params:
-        EXPECTED_VERSION: ((.:image_version))
     - task: validate-binary-version-ubuntu
       image: image-ubuntu
       file: ci/tasks/validate-binary-version.yml
@@ -1445,56 +1272,28 @@ jobs:
       file: ci/tasks/extract-trivy-db.yml
       image: trivy
     - try:
-        in_parallel:
-        - task: scan-image-alpine
-          file: ci/tasks/scan-image.yml
-          image: trivy
-          input_mapping: {image: image-alpine}
-          params:
-            IGNORE_POLICY_FILE: ci/trivy-ignore/((release_minor))-image.rego
-        - task: scan-image-ubuntu
-          file: ci/tasks/scan-image.yml
-          image: trivy
-          input_mapping: {image: image-ubuntu}
-          params:
-            IGNORE_POLICY_FILE: ci/trivy-ignore/((release_minor))-image.rego
-        on_failure: *failed-concourse
-        on_error: *failed-concourse
+        task: scan-image-ubuntu
+        file: ci/tasks/scan-image.yml
+        image: trivy
+        input_mapping: {image: image-ubuntu}
+        params:
+          IGNORE_POLICY_FILE: ci/trivy-ignore/((release_minor))-image.rego
+      on_failure: *failed-concourse
+      on_error: *failed-concourse
+  - task: watsjs-smoke-ubuntu
+    image: unit-image
+    privileged: true
+    timeout: 1h
+    file: ci/tasks/docker-compose-watsjs-smoke.yml
+    input_mapping: {dev-image: image-ubuntu}
   - in_parallel:
-    - task: watsjs-smoke-ubuntu
-      image: unit-image
-      privileged: true
-      timeout: 1h
-      file: ci/tasks/docker-compose-watsjs-smoke.yml
-      input_mapping: {dev-image: image-ubuntu}
-    - task: watsjs-smoke-alpine
-      image: unit-image
-      privileged: true
-      timeout: 1h
-      file: ci/tasks/docker-compose-watsjs-smoke.yml
-      input_mapping: {dev-image: image-alpine}
-  - in_parallel:
-    - task: alpine-date-tag
-      image: unit-image
-      file: ci/tasks/tag-version-with-date.yml
-      output_mapping: {date-tag: alpine-date-tag}
-      params:
-        VERSION: ((.:image_version))-alpine
     - task: ubuntu-date-tag
       image: unit-image
       file: ci/tasks/tag-version-with-date.yml
       output_mapping: {date-tag: ubuntu-date-tag}
       params:
         VERSION: ((.:image_version))-ubuntu
-  - in_parallel:
     - put: concourse-image
-      inputs: detect
-      params:
-        image: image-alpine/image.tar
-        version: ((.:image_version))
-        bump_aliases: true
-        additional_tags: alpine-date-tag/tag
-    - put: concourse-image-ubuntu
       inputs: detect
       params:
         image: image-ubuntu/image.tar
@@ -1564,22 +1363,13 @@ resources:
     password: ((basic_auth.password))
     concourse_url: https://ci.concourse-ci.org
 
-- name: resource-types-alpine-image
+
+- name: resource-types-image
   type: registry-image
   icon: *image-icon
   source:
     repository: concourse/resource-types
     tag: release-((release_minor))
-    username: ((docker.username))
-    password: ((docker.password))
-
-
-- name: resource-types-ubuntu-image
-  type: registry-image
-  icon: *image-icon
-  source:
-    repository: concourse/resource-types
-    tag: release-((release_minor))-ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
@@ -1601,15 +1391,6 @@ resources:
     password: ((docker.password))
     tag: release-((release_minor))
 
-- name: concourse-rc-image-ubuntu
-  type: registry-image
-  icon: *image-icon
-  source:
-    repository: concourse/concourse-rc
-    username: ((docker.username))
-    password: ((docker.password))
-    tag: release-((release_minor))-ubuntu
-
 - name: latest-concourse-image
   type: registry-image
   icon: *image-icon
@@ -1627,15 +1408,6 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: concourse-image-ubuntu
-  type: registry-image
-  icon: *image-icon
-  source:
-    repository: concourse/concourse
-    username: ((docker.username))
-    password: ((docker.password))
-    variant: ubuntu
-
 - name: concourse-image-harbor
   type: registry-image
   icon: *image-icon
@@ -1643,7 +1415,6 @@ resources:
     repository: ((dev_image_registry.url))/concourse
     username: ((dev_image_registry.username))
     password: ((dev_image_registry.password))
-    variant: ubuntu
 
 - name: version
   type: semver
@@ -1655,14 +1426,6 @@ resources:
     bucket: concourse-artifacts
     key: version-((release_minor))
     initial_version: ((release_minor)).0-rc.0
-
-- name: linux-rc
-  type: gcs
-  icon: linux
-  source:
-    bucket: concourse-artifacts
-    json_key: ((concourse_artifacts_json_key))
-    regexp: rcs/concourse-(.*)\.linux-alpine\.amd64\.tgz
 
 - name: linux-rc-ubuntu
   type: gcs
@@ -1899,263 +1662,120 @@ resources:
   source:
     repository: cloudfoundry-incubator/backup-and-restore-sdk-release
 
-- name: mock-resource-alpine
+- name: mock-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/mock-resource
     semver_constraint: ((resource_type_versions.mock))
-    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
-- name: mock-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/mock-resource
-    semver_constraint: ((resource_type_versions.mock))
-    variant: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: bosh-io-release-resource-alpine
+- name: bosh-io-release-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/bosh-io-release-resource
     semver_constraint: ((resource_type_versions.bosh-io-release))
-    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
-- name: bosh-io-release-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/bosh-io-release-resource
-    semver_constraint: ((resource_type_versions.bosh-io-release))
-    variant: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: bosh-io-stemcell-resource-alpine
+- name: bosh-io-stemcell-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/bosh-io-stemcell-resource
     semver_constraint: ((resource_type_versions.bosh-io-stemcell))
-    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
-- name: bosh-io-stemcell-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/bosh-io-stemcell-resource
-    semver_constraint: ((resource_type_versions.bosh-io-stemcell))
-    variant: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: docker-image-resource-alpine
+- name: docker-image-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/docker-image-resource
     semver_constraint: ((resource_type_versions.docker-image))
-    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
-- name: docker-image-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/docker-image-resource
-    semver_constraint: ((resource_type_versions.docker-image))
-    variant: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: git-resource-alpine
+- name: git-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/git-resource
     semver_constraint: ((resource_type_versions.git))
-    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
-- name: git-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/git-resource
-    semver_constraint: ((resource_type_versions.git))
-    variant: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: github-release-resource-alpine
+- name: github-release-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/github-release-resource
     semver_constraint: ((resource_type_versions.github-release))
-    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
-- name: github-release-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/github-release-resource
-    semver_constraint: ((resource_type_versions.github-release))
-    variant: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: hg-resource-alpine
+- name: hg-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/hg-resource
     semver_constraint: ((resource_type_versions.hg))
-    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
-- name: hg-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/hg-resource
-    semver_constraint: ((resource_type_versions.hg))
-    variant: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: pool-resource-alpine
+- name: pool-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/pool-resource
     semver_constraint: ((resource_type_versions.pool))
-    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
-- name: pool-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/pool-resource
-    semver_constraint: ((resource_type_versions.pool))
-    variant: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: registry-image-resource-alpine
+- name: registry-image-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/registry-image-resource
     semver_constraint: ((resource_type_versions.registry-image))
-    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
-- name: registry-image-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/registry-image-resource
-    semver_constraint: ((resource_type_versions.registry-image))
-    variant: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: s3-resource-alpine
+- name: s3-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/s3-resource
     semver_constraint: ((resource_type_versions.s3))
-    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
-- name: s3-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/s3-resource
-    semver_constraint: ((resource_type_versions.s3))
-    variant: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: semver-resource-alpine
+- name: semver-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/semver-resource
     semver_constraint: ((resource_type_versions.semver))
-    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
-- name: semver-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/semver-resource
-    semver_constraint: ((resource_type_versions.semver))
-    variant: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: time-resource-alpine
+- name: time-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/time-resource
     semver_constraint: ((resource_type_versions.time))
-    variant: alpine
     username: ((docker.username))
     password: ((docker.password))
 
-- name: time-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/time-resource
-    semver_constraint: ((resource_type_versions.time))
-    variant: ubuntu
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: tracker-resource-alpine
+- name: tracker-resource
   type: registry-image
   icon: *release-icon
   source:
     repository: concourse/tracker-resource
     semver_constraint: ((resource_type_versions.tracker))
-    variant: alpine
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: tracker-resource-ubuntu
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/tracker-resource
-    semver_constraint: ((resource_type_versions.tracker))
-    variant: ubuntu
     username: ((docker.username))
     password: ((docker.password))
 
