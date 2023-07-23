@@ -8,7 +8,6 @@ cd concourse
 # ensure all resource types are bundled
 resource_types='bosh-io-release
 bosh-io-stemcell
-cf
 docker-image
 git
 github-release
