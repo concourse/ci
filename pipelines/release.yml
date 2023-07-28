@@ -964,6 +964,7 @@ jobs:
       passed: [bosh-smoke]
   - task: extract-resource-type-versions
     file: ci/tasks/extract-resource-type-versions.yml
+    input_mapping: {linux-rc: linux-rc-ubuntu}
   - in_parallel:
     - task: build-release-name
       file: ci/tasks/build-release-name.yml
