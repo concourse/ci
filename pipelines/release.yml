@@ -1274,15 +1274,15 @@ jobs:
     - task: extract-trivy-db
       file: ci/tasks/extract-trivy-db.yml
       image: trivy
-    - try:
-        task: scan-image-ubuntu
-        file: ci/tasks/scan-image.yml
-        image: trivy
-        input_mapping: {image: image-ubuntu}
-        params:
-          IGNORE_POLICY_FILE: ci/trivy-ignore/((release_minor))-image.rego
-      on_failure: *failed-concourse
-      on_error: *failed-concourse
+  - try:
+      task: scan-image-ubuntu
+      file: ci/tasks/scan-image.yml
+      image: trivy
+      input_mapping: {image: image-ubuntu}
+      params:
+        IGNORE_POLICY_FILE: ci/trivy-ignore/((release_minor))-image.rego
+    on_failure: *failed-concourse
+    on_error: *failed-concourse
   - task: watsjs-smoke-ubuntu
     image: unit-image
     privileged: true
