@@ -1093,6 +1093,7 @@ jobs:
     - task: prep-release-assets
       file: ci/tasks/prep-release-assets.yml
       image: unit-image
+      input_mapping: {linux-rc: linux-rc-ubuntu}
     - task: build-release-name
       file: ci/tasks/build-release-name.yml
       image: unit-image
