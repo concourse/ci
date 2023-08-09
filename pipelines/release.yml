@@ -1281,30 +1281,29 @@ jobs:
       input_mapping: {image: image-ubuntu}
       params:
         IGNORE_POLICY_FILE: ci/trivy-ignore/((release_minor))-image.rego
-    on_failure: *failed-concourse
-    on_error: *failed-concourse
+      on_failure: *failed-concourse
+      on_error: *failed-concourse
   - task: watsjs-smoke-ubuntu
     image: unit-image
     privileged: true
     timeout: 1h
     file: ci/tasks/docker-compose-watsjs-smoke.yml
     input_mapping: {dev-image: image-ubuntu}
-  - in_parallel:
-    - task: ubuntu-date-tag
-      image: unit-image
-      file: ci/tasks/tag-version-with-date.yml
-      output_mapping: {date-tag: ubuntu-date-tag}
-      params:
-        VERSION: ((.:image_version))-ubuntu
-    - put: concourse-image
-      inputs: detect
-      params:
-        image: image-ubuntu/image.tar
-        version: ((.:image_version))
-        bump_aliases: true
-        additional_tags: ubuntu-date-tag/tag
-  on_failure: *failed-concourse
-  on_error: *failed-concourse
+  - task: ubuntu-date-tag
+    image: unit-image
+    file: ci/tasks/tag-version-with-date.yml
+    output_mapping: {ubuntu-date-tag: date-tag}
+    params:
+      VERSION: ((.:image_version))-ubuntu
+  - put: concourse-image
+    inputs: detect
+    params:
+      image: image-ubuntu/image.tar
+      version: ((.:image_version))
+      bump_aliases: true
+      additional_tags: ubuntu-date-tag/tag
+    on_failure: *failed-concourse
+    on_error: *failed-concourse
 
 resources:
 - name: concourse
