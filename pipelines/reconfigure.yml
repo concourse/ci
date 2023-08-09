@@ -386,7 +386,6 @@ jobs:
         resource_type_versions:
           bosh-io-release: ~1.2.0
           bosh-io-stemcell: ~1.2.0
-          cf: ~1.1.4
           docker-image: ~1.8.0
           git: ~1.15.0
           github-release: ~1.9.0
