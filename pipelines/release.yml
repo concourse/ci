@@ -1167,6 +1167,7 @@ jobs:
     - get: ci
   - task: extract-resource-type-versions
     file: ci/tasks/extract-resource-type-versions.yml
+    input_mapping: {linux-rc: linux-rc-ubuntu}
   - task: pin-resource-type-versions
     file: ci/tasks/pin-resource-type-versions.yml
     params:
