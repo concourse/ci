@@ -6,7 +6,7 @@ image_resource:
   source: {repository: busybox}
 
 outputs:
-- name: date-tag
+- name: ubuntu-date-tag
 
 params:
   VERSION: ~
@@ -16,4 +16,4 @@ run:
   args:
     - -ce
     - |
-      echo ${VERSION}-$(date +"%Y%m%d") > date-tag/tag
+      echo ${VERSION}-$(date +"%Y%m%d") > ubuntu-date-tag/tag

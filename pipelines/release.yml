@@ -1292,7 +1292,6 @@ jobs:
   - task: ubuntu-date-tag
     image: unit-image
     file: ci/tasks/tag-version-with-date.yml
-    output_mapping: {ubuntu-date-tag: date-tag}
     params:
       VERSION: ((.:image_version))-ubuntu
   - put: concourse-image
