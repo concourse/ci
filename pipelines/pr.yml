@@ -115,7 +115,8 @@ resources:
 - name: oci-build-task
   type: registry-image
   icon: docker
-  source: {repository: vito/oci-build-task}
+  source:
+    repository: concourse/oci-build-task
 
 jobs:
 - name: pr-image
