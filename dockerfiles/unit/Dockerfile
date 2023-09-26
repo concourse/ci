@@ -26,8 +26,8 @@ apt-get update && apt-get install -y google-cloud-sdk google-cloud-sdk-gke-gclou
 ENV DEBIAN_FRONTEND noninteractive
 RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN add-apt-repository "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main"
-RUN apt-get update && apt-get -y install postgresql-13
-ENV PATH $PATH:/usr/lib/postgresql/13/bin
+RUN apt-get update && apt-get -y install postgresql-15
+ENV PATH $PATH:/usr/lib/postgresql/15/bin
 
 # install Node 16.x
 RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
