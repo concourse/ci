@@ -45,4 +45,5 @@ cd concourse
 
 go mod download
 
-go test -parallel=2 ./integration/... "$@"
+go test -parallel=2 -skip=Ops ./integration/... "$@"
+go test ./integration/ops "$@"
