@@ -351,7 +351,7 @@ jobs:
         stemcell_name: jammy
         ci_branch: master
         resource_type_versions:
-          bosh-io-release: ~1.2.1
+          bosh-io-release: ~1.2.2
           bosh-io-stemcell: ~1.2.0
           docker-image: ~1.8.1
           git: ~1.15.0
