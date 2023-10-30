@@ -1300,7 +1300,7 @@ jobs:
       image: image-ubuntu/image.tar
       version: ((.:image_version))
       bump_aliases: true
-      additional_tags: ubuntu-date-tag/tag
+      additional_tags: date-tag/tag
     on_failure: *failed-concourse
     on_error: *failed-concourse
 
