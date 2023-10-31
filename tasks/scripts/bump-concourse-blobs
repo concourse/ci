@@ -31,5 +31,5 @@ pushd bumped-concourse-release-repo/
   bosh -n upload-blobs
 
   git add -A
-  git commit -m "bump concourse"
+  git commit -m "bump concourse" --signoff
 popd

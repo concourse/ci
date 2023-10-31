@@ -10,9 +10,9 @@ pushd concourse-chart
 
   helm dependency update
 
-  git config --global user.email "ci@localhost"
+  git config --global user.email "ci@localhost.com"
   git config --global user.name "CI Bot"
 
   git add -A
-  git commit -m "bump postgres version"
+  git commit -m "bump postgres version" --signoff
 popd

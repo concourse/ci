@@ -10,9 +10,9 @@ pushd concourse-chart
 
   git diff
 
-  git config --global user.email "ci@localhost"
+  git config --global user.email "ci@localhost.com"
   git config --global user.name "CI Bot"
 
   git add -A
-  git diff-index --quiet HEAD || git commit -m 'bump chart version'
+  git diff-index --quiet HEAD || git commit -m 'bump chart version' --signoff
 popd
