@@ -36,8 +36,7 @@ ADD containerd/containerd-*-linux-$TARGETARCH.tar.gz /usr/local/concourse
 COPY gdn/gdn-* /usr/local/concourse/bin
 
 RUN cd /usr/local/concourse/bin && \
-  if [ "$TARGETARCH" = "amd64" ] ; then mv gdn-[0-9]*.*.* gdn ; else mv gdn-$TARGETARCH-[0-9]*.*.* gdn ; fi && \
-  rm gdn-*
+  mv gdn-linux-$TARGETARCH-[0-9]*.*.* gdn
 
 COPY runc/runc.$TARGETARCH /usr/local/concourse/bin/runc
 
