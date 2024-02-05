@@ -33,10 +33,7 @@ ARG TARGETARCH
 # Copies files from the bin directory of the tarball to /usr/local/concourse/bin
 ADD containerd/containerd-*-linux-$TARGETARCH.tar.gz /usr/local/concourse
 
-COPY gdn/gdn-* /usr/local/concourse/bin
-
-RUN cd /usr/local/concourse/bin && \
-  mv gdn-linux-$TARGETARCH-[0-9]*.*.* gdn
+COPY gdn/gdn-linux-$TARGETARCH-[0-9]*.*.* /usr/local/concourse/bin/gdn
 
 COPY runc/runc.$TARGETARCH /usr/local/concourse/bin/runc
 
