@@ -365,10 +365,10 @@ jobs:
           time: ~1.7.0
           tracker: ~1.1.0
         dep_bin_versions:
-          gdn: ~1.43.0
+          gdn: ~1.48.0
           cni: ~1.3.0
-          runc: ~1.1.9
-          containerd: ~1.7.7
+          runc: ~1.1.12
+          containerd: ~1.7.13
     # TEMPLATE FOR NEXT RELEASE
     # to create a new release pipeline, copy (but don't delete!) this template,
     # replacing MAJOR, MINOR, PREV_MAJOR, PREV_MINOR, and SLACK_CHANNEL
