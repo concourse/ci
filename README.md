@@ -13,7 +13,7 @@ Configuration files for BOSH- and terraform-managed deployments used in testing.
 A lot of Dockerfiles are used throughout the Concourse automation. Many of those are in the `/dockerfiles` folder.
 
 ## Overrides
-Overrides for `docker-compose`.
+Overrides for `docker compose`.
 
 ## Pipelines
 Pipeline definitions live here. Some highlights:

@@ -21,15 +21,15 @@ DOCKER_COMPOSE_FLAGS="-f concourse/docker-compose.yml -f ci/overrides/docker-com
 
 ci/tasks/scripts/generate-keys
 
-docker-compose \
+docker compose \
   $DOCKER_COMPOSE_FLAGS \
   -f ci/overrides/docker-compose.no-build.yml \
   up --no-build -d
 
 trap stop_docker_compose EXIT SIGTERM SIGINT
 function stop_docker_compose() {
-  docker-compose -f concourse/docker-compose.yml logs > docker-compose.log
-  docker-compose -f concourse/docker-compose.yml down
+  docker compose -f concourse/docker-compose.yml logs > docker-compose.log
+  docker compose -f concourse/docker-compose.yml down
   stop_docker
 }
 
