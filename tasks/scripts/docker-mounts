@@ -43,10 +43,10 @@ EOF
 
 cat > expected_privileged_docker_mounts <<EOF
 proc on /proc type proc (rw,nosuid,nodev,noexec,relatime)
-tmpfs on /dev type tmpfs (rw,nosuid,size=65536k,mode=755)
+tmpfs on /dev type tmpfs (rw,nosuid,size=65536k,mode=755,inode64)
 devpts on /dev/pts type devpts (rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666)
 sysfs on /sys type sysfs (rw,nosuid,nodev,noexec,relatime)
-tmpfs on /sys/fs/cgroup type tmpfs (rw,nosuid,nodev,noexec,relatime,mode=755)
+tmpfs on /sys/fs/cgroup type tmpfs (rw,nosuid,nodev,noexec,relatime,mode=755,inode64)
 cgroup on /sys/fs/cgroup/systemd type cgroup (rw,nosuid,nodev,noexec,relatime,xattr,name=systemd)
 cgroup on /sys/fs/cgroup/cpuset type cgroup (rw,nosuid,nodev,noexec,relatime,cpuset)
 cgroup on /sys/fs/cgroup/cpu,cpuacct type cgroup (rw,nosuid,nodev,noexec,relatime,cpu,cpuacct)
@@ -59,8 +59,9 @@ cgroup on /sys/fs/cgroup/net_cls,net_prio type cgroup (rw,nosuid,nodev,noexec,re
 cgroup on /sys/fs/cgroup/hugetlb type cgroup (rw,nosuid,nodev,noexec,relatime,hugetlb)
 cgroup on /sys/fs/cgroup/pids type cgroup (rw,nosuid,nodev,noexec,relatime,pids)
 cgroup on /sys/fs/cgroup/rdma type cgroup (rw,nosuid,nodev,noexec,relatime,rdma)
+cgroup on /sys/fs/cgroup/misc type cgroup (rw,nosuid,nodev,noexec,relatime,misc)
 mqueue on /dev/mqueue type mqueue (rw,nosuid,nodev,noexec,relatime)
-shm on /dev/shm type tmpfs (rw,nosuid,nodev,noexec,relatime,size=65536k)
+shm on /dev/shm type tmpfs (rw,nosuid,nodev,noexec,relatime,size=65536k,inode64)
 /dev/sdb on /etc/resolv.conf type ext4 (rw,relatime)
 /dev/sdb on /etc/hostname type ext4 (rw,relatime)
 /dev/sdb on /etc/hosts type ext4 (rw,relatime)
