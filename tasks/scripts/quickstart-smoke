@@ -9,7 +9,7 @@ start_docker
 # load in concourse/concourse-dev:latest
 [ -d concourse-rc-image ] && docker load -i concourse-rc-image/image.tar
 
-docker-compose -f docs/docker-compose.yml -f ci/overrides/docker-compose.latest-rc.yml up -d
+docker compose -f docs/docker-compose.yml -f ci/overrides/docker-compose.latest-rc.yml up -d
 
 # now run the watjs/smoke tests
 mkdir -p endpoint-info
@@ -22,7 +22,7 @@ popd
 ci/tasks/scripts/smoke
 
 pushd docs
-  docker-compose down
+  docker compose down
 popd
 
 stop_docker

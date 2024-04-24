@@ -43,11 +43,6 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 RUN apt-get update && apt-get -y install docker-ce
 
-# install Docker Compose
-RUN curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" \
-      -o /usr/local/bin/docker-compose && \
-      chmod +x /usr/local/bin/docker-compose
-
 # install Chrome for Puppeteer (watsjs/upgrade/downgrade/smoke)
 RUN curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 RUN add-apt-repository "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main"

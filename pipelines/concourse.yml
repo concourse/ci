@@ -1653,6 +1653,7 @@ resources:
   type: bosh-io-release
   icon: *release-icon
   source:
+    #TODO: migrate to https://github.com/cloudfoundry-community/vault-boshrelease ?
     repository: vito/vault-boshrelease
 
 - name: credhub-release

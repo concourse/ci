@@ -14,4 +14,4 @@ go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo
 
 ginkgo -r -nodes=4 --race --keep-going --poll-progress-after=15s --flake-attempts=3 ./testflight "$@"
 
-docker-compose logs > ../docker-compose.log
+docker compose logs > ../docker-compose.log
