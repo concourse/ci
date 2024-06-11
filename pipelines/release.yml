@@ -1190,19 +1190,12 @@ jobs:
       params: {format: oci}
   - load_var: image_version
     file: version/version
-  - in_parallel:
-    - put: concourse-image
-      inputs: [concourse-rc-image]
-      params:
-        image: concourse-rc-image/image.tar
-        version: ((.:image_version))
-        bump_aliases: true
-    - put: concourse-image-harbor
-      inputs: [concourse-rc-image]
-      params:
-        image: concourse-rc-image/image.tar
-        version: ((.:image_version))
-        bump_aliases: true
+  - put: concourse-image
+    inputs: [concourse-rc-image]
+    params:
+      image: concourse-rc-image/image.tar
+      version: ((.:image_version))
+      bump_aliases: true
 
 - name: generate-dpkg-list
   plan:
@@ -1409,14 +1402,6 @@ resources:
     repository: concourse/concourse
     username: ((docker.username))
     password: ((docker.password))
-
-- name: concourse-image-harbor
-  type: registry-image
-  icon: *image-icon
-  source:
-    repository: ((dev_image_registry.url))/concourse
-    username: ((dev_image_registry.username))
-    password: ((dev_image_registry.password))
 
 - name: version
   type: semver
