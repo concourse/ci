@@ -6,18 +6,6 @@ resource_types:
   type: registry-image
   source: {repository: frodenas/gcs-resource}
 
-- name: bosh-release
-  type: registry-image
-  source: {repository: dpb587/bosh-release-resource}
-
-- name: bosh-deployment
-  type: registry-image
-  source: {repository: cloudfoundry/bosh-deployment-resource}
-
-- name: slack-notifier
-  type: registry-image
-  source: {repository: mockersf/concourse-slack-notifier}
-
 - name: helm-chart
   type: registry-image
   source: {repository: linkyard/helm-chart-resource, tag: 2.17.0}
@@ -49,10 +37,6 @@ groups:
 - name: k8s
   jobs:
   - k8s-*
-
-- name: bosh
-  jobs:
-  - bosh-*
 
 - name: images
   jobs:
@@ -93,11 +77,6 @@ jobs:
       run: {path: build}
   - put: unit-image
     params: {image: image/image.tar}
-  on_failure: &failed-ci
-    put: notify
-    params:
-      mode: normal
-      alert_type: failed
 
 - name: build-golang-builder-image
   public: true
@@ -135,7 +114,6 @@ jobs:
         image: image/image
         version: ((.:golang_version))
         bump_aliases: true
-  on_failure: *failed-ci
 
 - name: build-resource-types-builder-image
   public: true
@@ -160,7 +138,6 @@ jobs:
       params:
         image: image/image
         bump_aliases: true
-  on_failure: *failed-ci
 
 - name: build-resource-types-base-image-static
   public: true
@@ -183,7 +160,6 @@ jobs:
       params:
         image: image/image
         additional_tags: paketo-jammy-static-image/tag
-  on_failure: *failed-ci
 
 - name: unit
   public: true
@@ -218,11 +194,6 @@ jobs:
     - task: unit-baggageclaim-windows
       file: ci/tasks/unit-baggageclaim-windows.yml
       input_mapping: {concourse: built-concourse}
-  on_failure: &failed-concourse
-    put: notify
-    params:
-      mode: normal
-      alert_type: failed
 
 - name: resource-types-images
   public: true
@@ -321,7 +292,6 @@ jobs:
   - put: dev-image
     params: {image: image/image}
     get_params: {format: oci}
-  on_failure: *failed-concourse
 
 - name: worker-runtime
   public: true
@@ -340,7 +310,6 @@ jobs:
     privileged: true
     timeout: 1h
     file: ci/tasks/containerd-integration.yml
-  on_failure: *failed-concourse
 
 - name: check-docker-mounts
   public: true
@@ -392,7 +361,6 @@ jobs:
       RUNTIME: ((.:runtime))
     file: ci/tasks/docker-compose-testflight.yml
     input_mapping: {postgres-image: ((.:postgres-image))}
-  on_failure: *failed-concourse
 
 - name: watsjs
   public: true
@@ -415,7 +383,6 @@ jobs:
     privileged: true
     timeout: 1h
     file: ci/tasks/docker-compose-watsjs.yml
-  on_failure: *failed-concourse
 
 - name: integration
   public: true
@@ -441,7 +408,6 @@ jobs:
     privileged: true
     image: unit-image
     file: ci/tasks/integration.yml
-  on_failure: *failed-concourse
 
 - name: k8s-smoke
   public: true
@@ -489,7 +455,6 @@ jobs:
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
       RELEASE_NAME: concourse-smoke
       CONCOURSE_IMAGE: concourse/concourse-dev
-  on_failure: *failed-concourse
 
 - name: k8s-topgun
   public: true
@@ -528,7 +493,6 @@ jobs:
       IN_CLUSTER: "true"
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
       CONCOURSE_IMAGE_NAME: concourse/concourse-dev
-  on_failure: *failed-concourse
 
 - name: k8s-check-helm-params
   public: true
@@ -553,7 +517,6 @@ jobs:
     image: unit-image
     input_mapping: {distribution: concourse-chart, linux-rc: linux-dev-ubuntu}
     params: {DISTRIBUTION: helm}
-  on_failure: *failed-concourse
 
 - name: build-concourse
   old_name: build-rc
@@ -624,7 +587,6 @@ jobs:
     - put: darwin-dev
       params: {file: concourse-darwin/concourse-*.tgz}
       inputs: [concourse-darwin]
-  on_failure: *failed-concourse
 
 - name: build-image
   old_name: build-rc-image
@@ -653,7 +615,6 @@ jobs:
     inputs: [image-ubuntu]
     params:
       image: image-ubuntu/image.tar
-  on_failure: *failed-concourse
 
 - name: bump-prod-web
   public: true
@@ -680,7 +641,6 @@ jobs:
     params:
       repository: infrastructure-bumped
       branch: master
-  on_failure: *failed-concourse
 
 - name: bump-prod-workers
   public: true
@@ -731,7 +691,6 @@ jobs:
     params:
       repository: infrastructure-bumped
       branch: master
-  on_failure: *failed-concourse
 
 - name: bin-smoke
   public: true
@@ -786,7 +745,6 @@ jobs:
           TF_VAR_GCP_IMAGE: ((.:gcp-image))
           TF_VAR_RUNTIME: ((.:runtime))
     timeout: 20m
-  on_failure: *failed-concourse
 
 - name: bin-smoke-rapid
   public: true
@@ -842,7 +800,6 @@ jobs:
       #     TF_VAR_GCP_IMAGE: ((.:gcp-image))
       #     TF_VAR_RUNTIME: ((.:runtime))
     timeout: 20m
-  on_failure: *failed-concourse
 
 - name: quickstart-smoke
   public: true
@@ -865,448 +822,6 @@ jobs:
     input_mapping: {concourse-rc-image: concourse-dev-image}
     params:
       RELEASE_NAME: concourse-smoke
-  on_failure: *failed-concourse
-
-- name: bosh-check-props
-  public: true
-  max_in_flight: 1
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed: [bin-smoke]
-      trigger: true
-    - get: unit-image
-    - get: linux-dev-ubuntu
-      passed: [bin-smoke]
-      trigger: true
-    - get: concourse-release-repo
-      trigger: true
-    - get: ci
-  - task: check-props
-    file: ci/tasks/check-distribution-env.yml
-    image: unit-image
-    input_mapping: {distribution: concourse-release-repo, linux-rc: linux-dev-ubuntu}
-    params: {DISTRIBUTION: bosh}
-  on_failure: *failed-concourse
-
-- name: bosh-bump
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed: [build-concourse]
-      trigger: true
-    - get: unit-image
-    - get: linux-dev-ubuntu
-      passed: [build-concourse]
-      trigger: true
-    - get: windows-dev
-      passed: [build-concourse]
-      trigger: true
-    - get: concourse-release-repo
-    - get: ci
-  - task: bump-concourse-blobs
-    file: ci/tasks/bump-concourse-blobs.yml
-    image: unit-image
-    input_mapping: { linux-rc: linux-dev-ubuntu, windows-rc: windows-dev }
-    params: {GCP_JSON_KEY: ((concourse_artifacts_json_key))}
-  - put: concourse-release-repo
-    params: {repository: bumped-concourse-release-repo}
-
-- name: bosh-upload-releases
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    # these don't trigger, to ensure that the job gets triggered by
-    # concourse-release, which is unfortunately decoupled from the resource
-    # that we 'put' to.
-    - get: concourse
-      passed: [bosh-bump]
-    - get: unit-image
-    - get: concourse-release
-      trigger: true
-    - get: postgres-release
-      trigger: true
-    - get: bpm-release
-      trigger: true
-    - get: gcp-jammy-stemcell
-      trigger: true
-    - get: bbr-sdk-release
-      trigger: true
-    - get: vault-release
-      trigger: true
-    - get: credhub-release
-      trigger: true
-    - get: uaa-release
-      trigger: true
-    - get: bbr
-      trigger: true
-    - get: ci
-  - task: upload-releases
-    tags: [bosh]
-    file: ci/tasks/upload-releases.yml
-    image: unit-image
-    params:
-      BOSH_ENVIRONMENT: https://10.0.0.6:25555
-      BOSH_CA_CERT: ((testing_bosh_ca_cert))
-      BOSH_CLIENT: ((testing_bosh_client.id))
-      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
-
-- name: bosh-smoke-containerd
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    # these don't trigger, to ensure that the job gets triggered by
-    # concourse-release, which is unfortunately decoupled from the resource
-    # that we 'put' to.
-    - get: concourse
-      passed: [bosh-upload-releases]
-    - get: unit-image
-      passed: [bosh-upload-releases]
-    - get: concourse-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: postgres-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: bpm-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: gcp-jammy-stemcell
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: ci
-  - put: smoke-deployment
-    tags: [bosh]
-    params:
-      recreate: true
-      manifest: ci/deployments/bosh-smoke.yml
-      ops_files:
-      - ci/deployments/bosh-operations/runtime-containerd.yml
-      releases:
-      - concourse-release/*.tgz
-      - postgres-release/*.tgz
-      - bpm-release/*.tgz
-      stemcells:
-      - gcp-jammy-stemcell/*.tgz
-      vars:
-        deployment_name: concourse-smoke
-        stemcell_variant: jammy
-  - task: discover-bosh-endpoint-info
-    tags: [bosh]
-    file: ci/tasks/discover-bosh-endpoint-info.yml
-    image: unit-image
-    params:
-      BOSH_ENVIRONMENT: https://10.0.0.6:25555
-      BOSH_CA_CERT: ((testing_bosh_ca_cert))
-      BOSH_CLIENT: ((testing_bosh_client.id))
-      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
-      BOSH_DEPLOYMENT: concourse-smoke
-      BOSH_INSTANCE_GROUP: concourse
-  - task: smoke
-    tags: [bosh]
-    image: unit-image
-    file: ci/tasks/smoke.yml
-    timeout: 1h
-  on_failure: *failed-concourse
-
-- name: bosh-smoke-guardian
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    # these don't trigger, to ensure that the job gets triggered by
-    # concourse-release, which is unfortunately decoupled from the resource
-    # that we 'put' to.
-    - get: concourse
-      passed: [bosh-upload-releases]
-    - get: unit-image
-      passed: [bosh-upload-releases]
-    - get: concourse-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: postgres-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: bpm-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: gcp-jammy-stemcell
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: ci
-  - put: smoke-deployment-guardian
-    tags: [bosh]
-    params:
-      recreate: true
-      manifest: ci/deployments/bosh-smoke.yml
-      ops_files:
-      - ci/deployments/bosh-operations/runtime-guardian.yml
-      releases:
-      - concourse-release/*.tgz
-      - postgres-release/*.tgz
-      - bpm-release/*.tgz
-      stemcells:
-      - gcp-jammy-stemcell/*.tgz
-      vars:
-        deployment_name: concourse-smoke-guardian
-        stemcell_variant: jammy
-  - task: discover-bosh-endpoint-info
-    tags: [bosh]
-    file: ci/tasks/discover-bosh-endpoint-info.yml
-    image: unit-image
-    params:
-      BOSH_ENVIRONMENT: https://10.0.0.6:25555
-      BOSH_CA_CERT: ((testing_bosh_ca_cert))
-      BOSH_CLIENT: ((testing_bosh_client.id))
-      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
-      BOSH_DEPLOYMENT: concourse-smoke-guardian
-      BOSH_INSTANCE_GROUP: concourse
-  - task: smoke
-    tags: [bosh]
-    image: unit-image
-    file: ci/tasks/smoke.yml
-    timeout: 1h
-  on_failure: *failed-concourse
-
-- name: bosh-topgun-core
-  public: true
-  serial: true
-  interruptible: true
-  plan:
-  - in_parallel:
-    # these don't trigger, to ensure that the job gets triggered by
-    # concourse-release, which is unfortunately decoupled from the resource
-    # that we 'put' to.
-    - get: concourse
-      passed: [bosh-upload-releases]
-    - get: unit-image
-      passed: [bosh-upload-releases]
-    - get: concourse-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: postgres-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: bpm-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: bbr-sdk-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: gcp-jammy-stemcell
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: vault-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: credhub-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: uaa-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: bbr
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: ci
-  - task: bosh-topgun
-    tags: [bosh]
-    file: ci/tasks/topgun.yml
-    image: unit-image
-    input_mapping:
-      stemcell: gcp-jammy-stemcell
-    params:
-      BOSH_ENVIRONMENT: https://10.0.0.6:25555
-      BOSH_CA_CERT: ((testing_bosh_ca_cert))
-      BOSH_CLIENT: ((testing_bosh_client.id))
-      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
-      # AWS_REGION: ((topgun_aws_ssm.region))
-      # AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
-      # AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
-      SUITE: core
-      STEMCELL_VARIANT: jammy
-  on_failure: *failed-concourse
-
-- name: bosh-topgun-runtime
-  public: true
-  serial: true
-  interruptible: true
-  plan:
-  - in_parallel:
-    # these don't trigger, to ensure that the job gets triggered by
-    # concourse-release, which is unfortunately decoupled from the resource
-    # that we 'put' to.
-    - get: concourse
-      passed: [bosh-upload-releases]
-    - get: unit-image
-      passed: [bosh-upload-releases]
-    - get: concourse-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: postgres-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: bpm-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: bbr-sdk-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: gcp-jammy-stemcell
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: vault-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: credhub-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: uaa-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: bbr
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: ci
-  - task: bosh-topgun
-    tags: [bosh]
-    file: ci/tasks/topgun.yml
-    image: unit-image
-    input_mapping:
-      stemcell: gcp-jammy-stemcell
-    params:
-      BOSH_ENVIRONMENT: https://10.0.0.6:25555
-      BOSH_CA_CERT: ((testing_bosh_ca_cert))
-      BOSH_CLIENT: ((testing_bosh_client.id))
-      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
-      # AWS_REGION: ((topgun_aws_ssm.region))
-      # AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
-      # AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
-      SUITE: runtime
-      STEMCELL_VARIANT: jammy
-  on_failure: *failed-concourse
-
-- name: bosh-topgun-both
-  public: true
-  serial: true
-  interruptible: true
-  plan:
-  - in_parallel:
-    # these don't trigger, to ensure that the job gets triggered by
-    # concourse-release, which is unfortunately decoupled from the resource
-    # that we 'put' to.
-    - get: concourse
-      passed: [bosh-upload-releases]
-    - get: unit-image
-      passed: [bosh-upload-releases]
-    - get: concourse-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: postgres-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: bpm-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: bbr-sdk-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: gcp-jammy-stemcell
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: vault-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: credhub-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: uaa-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: bbr
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: ci
-  - task: bosh-topgun
-    tags: [bosh]
-    file: ci/tasks/topgun.yml
-    image: unit-image
-    input_mapping:
-      stemcell: gcp-jammy-stemcell
-    params:
-      BOSH_ENVIRONMENT: https://10.0.0.6:25555
-      BOSH_CA_CERT: ((testing_bosh_ca_cert))
-      BOSH_CLIENT: ((testing_bosh_client.id))
-      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
-      # AWS_REGION: ((topgun_aws_ssm.region))
-      # AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
-      # AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
-      SUITE: both
-      STEMCELL_VARIANT: jammy
-  on_failure: *failed-concourse
-
-- name: bosh-topgun-pcf
-  public: true
-  serial: true
-  interruptible: true
-  plan:
-  - in_parallel:
-    # these don't trigger, to ensure that the job gets triggered by
-    # concourse-release, which is unfortunately decoupled from the resource
-    # that we 'put' to.
-    - get: concourse
-      passed: [bosh-upload-releases]
-    - get: unit-image
-      passed: [bosh-upload-releases]
-    - get: concourse-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: postgres-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: bpm-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: bbr-sdk-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: gcp-jammy-stemcell
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: vault-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: credhub-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: uaa-release
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: bbr
-      passed: [bosh-upload-releases]
-      trigger: true
-    - get: ci
-  - task: bosh-topgun
-    tags: [bosh]
-    file: ci/tasks/topgun.yml
-    image: unit-image
-    input_mapping:
-      stemcell: gcp-jammy-stemcell
-    params:
-      BOSH_ENVIRONMENT: https://10.0.0.6:25555
-      BOSH_CA_CERT: ((testing_bosh_ca_cert))
-      BOSH_CLIENT: ((testing_bosh_client.id))
-      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
-      # AWS_REGION: ((topgun_aws_ssm.region))
-      # AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
-      # AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
-      SUITE: pcf
-      STEMCELL_VARIANT: jammy
-  on_failure: *failed-concourse
 
 resources:
 - name: concourse
@@ -1314,21 +829,21 @@ resources:
   icon: &git-icon github
   source:
     uri: https://github.com/concourse/concourse.git
-    branch: master
+    branch: main
 
 - name: ci
   type: git
   icon: *git-icon
   source:
     uri: https://github.com/concourse/ci.git
-    branch: master
+    branch: main
 
 - name: ci-unit-image
   type: git
   icon: *git-icon
   source:
     uri: https://github.com/concourse/ci.git
-    branch: master
+    branch: main
     paths:
     - dockerfiles/unit
 
@@ -1337,25 +852,8 @@ resources:
   icon: github
   source:
     uri: git@github.com:concourse/infrastructure.git
-    branch: master
+    branch: main
     private_key: ((greenpeace_private_key))
-
-- name: infrastructure-bump
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:concourse/infrastructure.git
-    branch: master
-    private_key: ((greenpeace_private_key))
-
-- name: notify
-  type: slack-notifier
-  icon: slack
-  source:
-    url: ((slack_hooks.concourse-interrupt))
-    username: ((basic_auth.username))
-    password: ((basic_auth.password))
-    concourse_url: https://ci.concourse-ci.org
 
 - name: dev-image
   type: registry-image
@@ -1415,14 +913,6 @@ resources:
   type: registry-image
   icon: *image-icon
   source: {repository: vault}
-
-- name: bbr
-  type: github-release
-  icon: &release-icon package-variant-closed
-  source:
-    owner: cloudfoundry-incubator
-    repository: bosh-backup-and-restore
-    access_token: ((concourse_github_dummy.access_token))
 
 - name: containerd
   type: github-release
@@ -1631,43 +1121,6 @@ resources:
           credentials_source: static
           json_key: ((concourse_artifacts_json_key))
 
-- name: postgres-release
-  type: bosh-io-release
-  icon: *release-icon
-  source:
-    repository: cloudfoundry/postgres-release
-
-- name: bpm-release
-  type: bosh-io-release
-  icon: *release-icon
-  source:
-    repository: cloudfoundry/bpm-release
-
-- name: bbr-sdk-release
-  type: bosh-io-release
-  icon: *release-icon
-  source:
-    repository: cloudfoundry-incubator/backup-and-restore-sdk-release
-
-- name: vault-release
-  type: bosh-io-release
-  icon: *release-icon
-  source:
-    #TODO: migrate to https://github.com/cloudfoundry-community/vault-boshrelease ?
-    repository: vito/vault-boshrelease
-
-- name: credhub-release
-  type: bosh-io-release
-  icon: *release-icon
-  source:
-    repository: pivotal-cf/credhub-release
-
-- name: uaa-release
-  type: bosh-io-release
-  icon: *release-icon
-  source:
-    repository: cloudfoundry/uaa-release
-
 - name: concourse-release-repo
   type: git
   icon: *git-icon
@@ -1675,34 +1128,6 @@ resources:
     uri: git@github.com:concourse/concourse-bosh-release
     branch: master
     private_key: ((concourse_release_deploy_key))
-
-- name: smoke-deployment
-  tags: [bosh]
-  type: bosh-deployment
-  icon: fire
-  source:
-    target: https://10.0.0.6:25555
-    client: ((testing_bosh_client.id))
-    client_secret: ((testing_bosh_client.secret))
-    ca_cert: ((testing_bosh_ca_cert))
-    deployment: concourse-smoke
-
-- name: smoke-deployment-guardian
-  tags: [bosh]
-  type: bosh-deployment
-  icon: fire
-  source:
-    target: https://10.0.0.6:25555
-    client: ((testing_bosh_client.id))
-    client_secret: ((testing_bosh_client.secret))
-    ca_cert: ((testing_bosh_ca_cert))
-    deployment: concourse-smoke-guardian
-
-- name: gcp-jammy-stemcell
-  type: bosh-io-stemcell
-  icon: *release-icon
-  source:
-    name: bosh-google-kvm-ubuntu-jammy-go_agent
 
 - name: concourse-docker
   type: git
