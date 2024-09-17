@@ -1,8 +1,4 @@
 resource_types:
-- name: slack-notifier
-  type: registry-image
-  source: {repository: mockersf/concourse-slack-notifier}
-
 - name: pull-request
   type: registry-image
   source: {repository: aoldershaw/github-pr-resource}
@@ -13,7 +9,7 @@ resources:
   icon: github
   source:
     uri: https://github.com/concourse/ci
-    branch: master
+    branch: main
     paths:
     - pipelines
     - tasks
@@ -23,7 +19,7 @@ resources:
   icon: github
   source:
     uri: https://github.com/concourse/ci
-    branch: master
+    branch: main
     paths:
     - pipelines/pr.yml
     - pipelines/pr-deploy.yml
@@ -33,7 +29,7 @@ resources:
   icon: github
   source:
     uri: https://github.com/concourse/ci
-    branch: master
+    branch: main
     paths:
     - teams
 
@@ -63,15 +59,6 @@ resources:
     branch: master
     paths: [ci]
 
-- name: greenpeace
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:concourse/greenpeace.git
-    branch: master
-    paths: [pipelines, tasks]
-    private_key: ((greenpeace_private_key))
-
 - name: resource-types-website-ci
   type: git
   icon: github
@@ -100,12 +87,6 @@ resources:
     uri: https://github.com/concourse/examples
     branch: master
     paths: [pipelines]
-
-- name: notify
-  type: slack-notifier
-  icon: slack
-  source:
-    url: ((slack_hooks.concourse-private))
 
 - name: latest-concourse
   type: github-release
@@ -151,19 +132,6 @@ jobs:
       ADMIN_USERNAME: ((concourse.username))
       ADMIN_PASSWORD: ((concourse.password))
       CONCOURSE_URL: ((concourse.url))
-
-- name: reconfigure-greenpeace
-  plan:
-  - get: pipelines-and-tasks
-    passed: [reconfigure-self]
-  - get: greenpeace
-    trigger: true
-  - task: render-greenpeace-pipeline
-    file: greenpeace/tasks/render-ytt.yml
-    params:
-      ARGS: -v cluster=dispatcher -f greenpeace/pipelines/greenpeace.yml -f greenpeace/pipelines/data.yml
-  - set_pipeline: dispatcher-greenpeace
-    file: rendered/pipeline.yml
 
 - name: reconfigure-promote
   plan:
@@ -245,11 +213,6 @@ jobs:
   - task: unit
     file: pipelines-and-tasks/tasks/ci-unit.yml
     input_mapping: {ci: pipelines-and-tasks}
-  on_failure: &notify
-    put: notify
-    params:
-      mode: normal
-      alert_type: failed
 
 - name: reconfigure-pipelines
   plan:
@@ -405,38 +368,6 @@ jobs:
     #       tracker: ""
     - set_pipeline: infrastructure-report
       file: pipelines-and-tasks/pipelines/infrastructure-report.yml
-    on_failure: *notify
-    on_error: *notify
-
-- name: reconfigure-monitoring-pipeline
-  plan:
-  - get: pipelines-and-tasks
-    passed: [reconfigure-self]
-  - get: oxygen-mask
-    trigger: true
-  - get: ruby-alpine-image
-  - task: generate-monitor-yml
-    image: ruby-alpine-image
-    config:
-      platform: linux
-      inputs:
-      - name: oxygen-mask
-      outputs:
-      - name: oxygen-mask
-      run:
-        dir: oxygen-mask
-        path: sh
-        args:
-        - -c
-        - |
-          erb metrics_store=wavefront monitor.yml > gen-monitor.yml
-  - set_pipeline: monitoring-stats
-    file: oxygen-mask/gen-monitor.yml
-    vars:
-      atc_url: https://hush-house.pivotal.io
-      interval: 30s
-      team_name: main
-      pipeline_name: monitoring
 
 - name: reconfigure-example-pipelines
   plan:
