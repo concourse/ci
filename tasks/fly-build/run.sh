@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # vim: set ft=sh
 
-set -e -x
+set -euo pipefail
 
 export GOPATH=$PWD/gopath
 export PATH=$PWD/gopath/bin:$PATH

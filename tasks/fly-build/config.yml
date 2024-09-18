@@ -1,5 +1,5 @@
 ---
-platform: windows
+platform: linux
 
 inputs:
 - name: concourse
@@ -8,11 +8,14 @@ inputs:
   optional: true
 
 outputs:
-- name: fly-windows
+- name: fly
+
+params:
+  PLATFORM: ""
+  ARCH: ""
 
 caches:
 - path: gopath
 
 run:
-  path: powershell
-  args: [ci/tasks/scripts/fly-build.ps1]
+  path: ci/tasks/fly-build/run.sh

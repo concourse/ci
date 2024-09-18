@@ -305,17 +305,17 @@ jobs:
     - get: ci
   - in_parallel:
     - task: fly-linux
-      file: ci/tasks/fly-build-cross-compile.yml
+      file: ci/tasks/fly-build/config.yml
       image: golang-builder-image
       params: {GOOS: linux}
       output_mapping: {fly: fly-linux}
     - task: fly-windows
-      file: ci/tasks/fly-build-cross-compile.yml
+      file: ci/tasks/fly-build/config.yml
       image: golang-builder-image
       params: {GOOS: windows}
       output_mapping: {fly: fly-windows}
     - task: fly-darwin
-      file: ci/tasks/fly-build-cross-compile.yml
+      file: ci/tasks/fly-build/config.yml
       image: golang-builder-image
       params: {GOOS: darwin}
       output_mapping: {fly: fly-darwin}

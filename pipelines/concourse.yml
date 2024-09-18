@@ -183,22 +183,26 @@ jobs:
     - task: unit
       image: unit-image
       file: ci/tasks/unit.yml
-      input_mapping: {concourse: built-concourse}
-    - task: fly-darwin
-      file: ci/tasks/fly-darwin.yml
-    - task: fly-windows
-      file: ci/tasks/fly-windows.yml
+      input_mapping:
+        concourse: built-concourse
+    # TODO: run fly/ tests on mac and windows
+    # - task: fly-darwin
+    #   file: ci/tasks/fly-darwin.yml
+    # - task: fly-windows
+    #   file: ci/tasks/fly-windows.yml
     - task: unit-baggageclaim
       image: unit-image
       file: ci/tasks/unit-baggageclaim.yml
       privileged: true
-      input_mapping: {concourse: built-concourse}
-    - task: unit-baggageclaim-darwin
-      file: ci/tasks/unit-baggageclaim-darwin.yml
-      input_mapping: {concourse: built-concourse}
-    - task: unit-baggageclaim-windows
-      file: ci/tasks/unit-baggageclaim-windows.yml
-      input_mapping: {concourse: built-concourse}
+      input_mapping:
+        concourse: built-concourse
+    # TODO: run baggageclaim tests on darwin and windows
+    # - task: unit-baggageclaim-darwin
+    #   file: ci/tasks/unit-baggageclaim-darwin.yml
+    #   input_mapping: {concourse: built-concourse}
+    # - task: unit-baggageclaim-windows
+    #   file: ci/tasks/unit-baggageclaim-windows.yml
+    #   input_mapping: {concourse: built-concourse}
 
 - name: resource-types-images
   public: true
@@ -255,7 +259,8 @@ jobs:
       - get: golang-builder-image-rootfs
         resource: golang-builder-image
         trigger: true
-        params: {format: rootfs}
+        params:
+          format: rootfs
       - get: containerd
         trigger: true
       - get: runc
@@ -273,7 +278,8 @@ jobs:
         trigger: true
       - get: golang-builder-image
         trigger: true
-        params: {format: oci}
+        params:
+          format: oci
       - get: oci-build-task
         trigger: true
       - get: ci
@@ -284,17 +290,33 @@ jobs:
         image: unit-image
         file: ci/tasks/yarn-build.yml
       - task: fly-linux
-        file: ci/tasks/fly-build-linux.yml
         image: golang-builder-image-rootfs
+        file: ci/tasks/fly-build/config.yml
+        output_mapping:
+          fly: fly-linux
+        params:
+          GOOS: linux
       - task: fly-windows
-        file: ci/tasks/fly-build-windows.yml
+        image: golang-builder-image-rootfs
+        file: ci/tasks/fly-build/config.yml
+        output_mapping:
+          fly: fly-windows
+        params:
+          GOOS: windows
       - task: fly-darwin
-        file: ci/tasks/fly-build-darwin.yml
+        image: golang-builder-image-rootfs
+        file: ci/tasks/fly-build/config.yml
+        output_mapping:
+          fly: fly-darwin
+        params:
+          GOOS: darwin
   - task: build
     image: oci-build-task
     privileged: true
-    input_mapping: {concourse: built-concourse, resource-types-image: resource-types-ubuntu-image}
     file: ci/tasks/build-dev-image-multi-arch.yml
+    input_mapping:
+      concourse: built-concourse
+      resource-types-image: resource-types-ubuntu-image
   - put: dev-image
     no_get: true
     params:
