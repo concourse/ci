@@ -33,16 +33,6 @@ resources:
     paths:
     - teams
 
-- name: concourse-for-k8s
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:pivotal/concourse-for-k8s.git
-    branch: master
-    private_key: ((concourse_for_k8s_token))
-    paths:
-    - ci
-
 - name: dex-ci
   type: git
   icon: github
@@ -220,8 +210,6 @@ jobs:
     - get: pipelines-and-tasks
       trigger: true
       passed: [unit]
-    - get: concourse-for-k8s
-      trigger: true
     - get: dex-ci
       trigger: true
     - get: docs-ci
