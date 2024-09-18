@@ -1088,7 +1088,7 @@ resources:
     repository: concourse/resource-types
     tag: ubuntu
     username: ((docker.username))
-    password: ((docker.public_read))
+    password: ((docker.read_write))
 
 - name: concourse-dev-image
   type: registry-image
