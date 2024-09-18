@@ -411,8 +411,8 @@ resources:
   source:
     repository: #@ "concourse/" + resource_name + "-resource"
     tag: dev
-    password: ((docker.password))
-    username: ((docker.read_write))
+    username: ((docker.username))
+    password: ((docker.read_write))
 
 - name: ci
   type: git
@@ -435,8 +435,8 @@ resources:
   icon: docker
   source:
     repository: concourse/oci-build-task
-    password: ((docker.password))
-    username: ((docker.public_read))
+    username: ((docker.username))
+    password: ((docker.public_read))
 
 - name: daily-trigger
   type: time
