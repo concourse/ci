@@ -916,7 +916,7 @@ resources:
 
 - name: containerd
   type: github-release
-  icon: *release-icon
+  icon: &release-icon package-variant-closed
   source:
     owner: containerd
     repository: containerd
