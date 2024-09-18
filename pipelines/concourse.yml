@@ -75,7 +75,9 @@ jobs:
       caches: [{path: cache}]
       run: {path: build}
   - put: unit-image
-    params: {image: image/image.tar}
+    no_get: true
+    params:
+      image: image/image.tar
 
 - name: build-golang-builder-image
   public: true
@@ -102,6 +104,7 @@ jobs:
       BUILD_ARG_golang_version: ((.:golang_version))
   - in_parallel:
     - put: golang-builder-image
+      no_get: true
       params:
         image: image/image
         version: ((.:golang_version))
@@ -109,6 +112,7 @@ jobs:
 
     # push to latest (+ bare semver tags) to make local dev a bit easier
     - put: golang-builder-image-latest
+      no_get: true
       params:
         image: image/image
         version: ((.:golang_version))
@@ -134,6 +138,7 @@ jobs:
       BUILD_ARG_base_image_tag: ((.:base_image_tag))
   - in_parallel:
     - put: resource-types-builder-image-ubuntu
+      no_get: true
       params:
         image: image/image
         bump_aliases: true
@@ -156,6 +161,7 @@ jobs:
       IMAGE_ARG_base_image: paketo-jammy-static-image/image.tar
   - in_parallel:
     - put: resource-types-base-image-static
+      no_get: true
       params:
         image: image/image
         additional_tags: paketo-jammy-static-image/tag
@@ -233,8 +239,9 @@ jobs:
     privileged: true
     file: ci/tasks/build-resource-types-image.yml
   - put: resource-types-ubuntu-image
-    params: {image: image_ubuntu/image.tar}
-    get_params: {format: oci}
+    no_get: true
+    params:
+      image: image_ubuntu/image.tar
 
 - name: dev-image
   public: true
@@ -289,8 +296,9 @@ jobs:
     input_mapping: {concourse: built-concourse, resource-types-image: resource-types-ubuntu-image}
     file: ci/tasks/build-dev-image-multi-arch.yml
   - put: dev-image
-    params: {image: image/image}
-    get_params: {format: oci}
+    no_get: true
+    params:
+      image: image/image
 
 - name: worker-runtime
   public: true
@@ -578,13 +586,19 @@ jobs:
         output_mapping: {concourse-tarball: concourse-darwin}
   - in_parallel:
     - put: linux-dev-ubuntu
-      params: {file: concourse-linux-ubuntu/concourse-*.tgz}
+      no_get: true
+      params:
+        file: concourse-linux-ubuntu/concourse-*.tgz
       inputs: [concourse-linux-ubuntu]
     - put: windows-dev
-      params: {file: concourse-windows/concourse-*.zip}
+      no_get: true
+      params:
+        file: concourse-windows/concourse-*.zip
       inputs: [concourse-windows]
     - put: darwin-dev
-      params: {file: concourse-darwin/concourse-*.tgz}
+      no_get: true
+      params:
+        file: concourse-darwin/concourse-*.tgz
       inputs: [concourse-darwin]
 
 - name: build-image
@@ -611,6 +625,7 @@ jobs:
     output_mapping: {image: image-ubuntu}
     privileged: true
   - put: concourse-dev-image
+    no_get: true
     inputs: [image-ubuntu]
     params:
       image: image-ubuntu/image.tar
