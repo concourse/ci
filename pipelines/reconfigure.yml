@@ -57,19 +57,6 @@ resources:
     branch: master
     paths: [ci]
 
-- name: ruby-alpine-image
-  type: registry-image
-  source:
-    repository: ruby
-    tag: rc-alpine
-
-- name: oxygen-mask
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/oxygen-mask
-    branch: master
-
 - name: examples
   type: git
   icon: github
@@ -91,7 +78,7 @@ resources:
   source:
     repository: concourse/concourse
     access_token: ((pull_requests_access_token))
-    base_branch: master
+    base_branch: main
 
 - name: concourse-deploy-prs
   type: pull-request
@@ -99,7 +86,7 @@ resources:
   source:
     repository: concourse/concourse
     access_token: ((pull_requests_access_token))
-    base_branch: master
+    base_branch: main
     labels: [deploy]
 
 jobs:
@@ -300,7 +287,7 @@ jobs:
         concourse_smoke_deployment_name: concourse-smoke-7-11
         slack_hook: ((slack_hooks.concourse-private))
         stemcell_name: jammy
-        ci_branch: master
+        ci_branch: main
         resource_type_versions:
           bosh-io-release: ~1.2.2
           bosh-io-stemcell: ~1.2.0
@@ -402,7 +389,7 @@ jobs:
     instance_vars:
       number: ((.:non_deploy_pr.number))
     vars:
-      branch: master
+      branch: main
       dev_image_tag: latest
       concourse_image_tag: latest
   - across:
@@ -415,6 +402,6 @@ jobs:
     instance_vars:
       number: ((.:deploy_pr.number))
     vars:
-      branch: master
+      branch: main
       dev_image_tag: latest
       concourse_image_tag: latest
