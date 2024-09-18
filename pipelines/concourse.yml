@@ -28,7 +28,6 @@ groups:
   - bin-smoke
   - bin-smoke-rapid
   - check-docker-mounts
-  - bump-prod-*
 
 - name: quickstart
   jobs:
@@ -616,82 +615,6 @@ jobs:
     params:
       image: image-ubuntu/image.tar
 
-- name: bump-prod-web
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: infrastructure
-  - load_var: concourse_image_repo
-    file: concourse-image/repository
-  - load_var: concourse_image_digest
-    file: concourse-image/digest
-  - task: bump-versions
-    file: infrastructure/tasks/patch-yaml.yml
-    input_mapping: {repo: infrastructure}
-    output_mapping: {repo-bumped: infrastructure-bumped}
-    params:
-      FILE: terraform/environments/production/variables.yml
-      PATCH:
-        concourse_web_image_repo: ((.:concourse_image_repo))
-        concourse_web_image_digest: ((.:concourse_image_digest))
-      COMMIT: bump production web to concourse dev
-  - put: infrastructure-bump
-    inputs: [infrastructure-bumped]
-    params:
-      repository: infrastructure-bumped
-      branch: master
-
-- name: bump-prod-workers
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: infrastructure
-    - get: concourse-image
-      resource: concourse-dev-image
-      passed: [build-image]
-      params: {skip_download: true}
-    - get: windows-dev
-      passed: [build-concourse]
-      params: {skip_download: "true"}
-    - get: darwin-dev
-      passed: [build-concourse]
-      params: {skip_download: "true"}
-  - load_var: concourse_image_repo
-    file: concourse-image/repository
-  - load_var: concourse_image_digest
-    file: concourse-image/digest
-  - task: convert-windows-url
-    file: infrastructure/tasks/convert-gs-url.yml
-    input_mapping: {input: windows-dev}
-    output_mapping: {output: windows}
-  - task: convert-darwin-url
-    file: infrastructure/tasks/convert-gs-url.yml
-    input_mapping: {input: darwin-dev}
-    output_mapping: {output: darwin}
-  - load_var: concourse_windows_bundle_url
-    file: windows/url
-  - load_var: concourse_darwin_bundle_url
-    file: darwin/url
-  - task: bump-versions
-    file: infrastructure/tasks/patch-yaml.yml
-    input_mapping: {repo: infrastructure}
-    output_mapping: {repo-bumped: infrastructure-bumped}
-    params:
-      FILE: terraform/environments/production/variables.yml
-      PATCH:
-        concourse_worker_image_repo: ((.:concourse_image_repo))
-        concourse_worker_image_digest: ((.:concourse_image_digest))
-        concourse_windows_bundle_url: ((.:concourse_windows_bundle_url))
-        concourse_darwin_bundle_url: ((.:concourse_darwin_bundle_url))
-      COMMIT: bump production workers to concourse dev
-  - put: infrastructure-bump
-    inputs: [infrastructure-bumped]
-    params:
-      repository: infrastructure-bumped
-      branch: master
-
 - name: bin-smoke
   public: true
   serial: true
@@ -830,6 +753,7 @@ resources:
   source:
     uri: https://github.com/concourse/concourse.git
     branch: main
+    private_key: ((github/concourse/concourse.private_key))
 
 - name: ci
   type: git
@@ -837,6 +761,7 @@ resources:
   source:
     uri: https://github.com/concourse/ci.git
     branch: main
+    private_key: ((github/concourse/ci.private_key))
 
 - name: ci-unit-image
   type: git
@@ -844,16 +769,9 @@ resources:
   source:
     uri: https://github.com/concourse/ci.git
     branch: main
+    private_key: ((github/concourse/ci.private_key))
     paths:
     - dockerfiles/unit
-
-- name: infrastructure
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:concourse/infrastructure.git
-    branch: main
-    private_key: ((greenpeace_private_key))
 
 - name: dev-image
   type: registry-image
@@ -862,7 +780,7 @@ resources:
     repository: concourse/dev
     tag: latest
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.read_write))
 
 - name: concourse-image
   type: registry-image
@@ -871,7 +789,7 @@ resources:
     repository: concourse/concourse
     tag: latest
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.read_write))
 
 - name: unit-image
   type: registry-image
@@ -880,7 +798,7 @@ resources:
     repository: concourse/unit
     tag: latest
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.read_write))
 
 - name: golang-builder-image
   type: registry-image
@@ -888,7 +806,7 @@ resources:
   source:
     repository: concourse/golang-builder
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.read_write))
     variant: jammy
 
 - name: golang-builder-image-latest
@@ -897,22 +815,32 @@ resources:
   source:
     repository: concourse/golang-builder
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.read_write))
 
 - name: postgres-image
   type: registry-image
   icon: *image-icon
-  source: {repository: postgres}
+  source:
+    repository: postgres
+    username: ((docker.username))
+    password: ((docker.public_read))
 
 - name: postgres-image-legacy
   type: registry-image
   icon: *image-icon
-  source: {repository: postgres, tag: 11}
+  source:
+    repository: postgres
+    tag: 11
+    username: ((docker.username))
+    password: ((docker.public_read))
 
 - name: vault-image
   type: registry-image
   icon: *image-icon
-  source: {repository: vault}
+  source:
+    repository: hashicorp/vault
+    username: ((docker.username))
+    password: ((docker.public_read))
 
 - name: containerd
   type: github-release
@@ -920,7 +848,7 @@ resources:
   source:
     owner: containerd
     repository: containerd
-    access_token: ((concourse_github_dummy.access_token))
+    access_token: ((github/release_token))
 
 - name: runc
   type: github-release
@@ -928,7 +856,7 @@ resources:
   source:
     owner: opencontainers
     repository: runc
-    access_token: ((concourse_github_dummy.access_token))
+    access_token: ((github/release_token))
 
 - name: dumb-init
   type: github-release
@@ -936,7 +864,7 @@ resources:
   source:
     owner: Yelp
     repository: dumb-init
-    access_token: ((concourse_github_dummy.access_token))
+    access_token: ((github/release_token))
 
 - name: gdn
   type: github-release
@@ -944,7 +872,7 @@ resources:
   source:
     owner: cloudfoundry
     repository: garden-runc-release
-    access_token: ((concourse_github_dummy.access_token))
+    access_token: ((github/release_token))
 
 - name: cni
   type: github-release
@@ -952,7 +880,7 @@ resources:
   source:
     owner: containernetworking
     repository: plugins
-    access_token: ((concourse_github_dummy.access_token))
+    access_token: ((github/release_token))
 
 - name: mock-resource
   type: registry-image
@@ -961,7 +889,7 @@ resources:
     repository: concourse/mock-resource
     tag: dev
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: bosh-io-release-resource
   type: registry-image
@@ -970,7 +898,7 @@ resources:
     repository: concourse/bosh-io-release-resource
     tag: dev
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: bosh-io-stemcell-resource
   type: registry-image
@@ -979,7 +907,7 @@ resources:
     repository: concourse/bosh-io-stemcell-resource
     tag: dev
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: docker-image-resource
   type: registry-image
@@ -988,7 +916,7 @@ resources:
     repository: concourse/docker-image-resource
     tag: dev
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: git-resource
   type: registry-image
@@ -997,7 +925,7 @@ resources:
     repository: concourse/git-resource
     tag: dev
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: github-release-resource
   type: registry-image
@@ -1006,7 +934,7 @@ resources:
     repository: concourse/github-release-resource
     tag: dev
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: hg-resource
   type: registry-image
@@ -1015,7 +943,7 @@ resources:
     repository: concourse/hg-resource
     tag: dev
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: pool-resource
   type: registry-image
@@ -1024,7 +952,7 @@ resources:
     repository: concourse/pool-resource
     tag: dev
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: registry-image-resource
   type: registry-image
@@ -1033,7 +961,7 @@ resources:
     repository: concourse/registry-image-resource
     tag: dev
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: s3-resource
   type: registry-image
@@ -1042,7 +970,7 @@ resources:
     repository: concourse/s3-resource
     tag: dev
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: semver-resource
   type: registry-image
@@ -1051,7 +979,7 @@ resources:
     repository: concourse/semver-resource
     tag: dev
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: time-resource
   type: registry-image
@@ -1060,7 +988,7 @@ resources:
     repository: concourse/time-resource
     tag: dev
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: tracker-resource
   type: registry-image
@@ -1069,12 +997,15 @@ resources:
     repository: concourse/tracker-resource
     tag: dev
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: oci-build-task
   type: registry-image
   icon: *image-icon
-  source: {repository: concourse/oci-build-task}
+  source:
+    repository: concourse/oci-build-task
+    username: ((docker.username))
+    password: ((docker.public_read))
 
 - name: linux-dev-ubuntu
   type: gcs
@@ -1106,28 +1037,7 @@ resources:
   source:
     uri: https://github.com/concourse/docs
     branch: master
-
-- name: concourse-release
-  type: bosh-release
-  icon: *release-icon
-  source:
-    uri: https://github.com/concourse/concourse-bosh-release
-    branch: master
-    dev_releases: true
-    private_config: &release_private_config
-      blobstore:
-        provider: gcs
-        options:
-          credentials_source: static
-          json_key: ((concourse_artifacts_json_key))
-
-- name: concourse-release-repo
-  type: git
-  icon: *git-icon
-  source:
-    uri: git@github.com:concourse/concourse-bosh-release
-    branch: master
-    private_key: ((concourse_release_deploy_key))
+    private_key: ((github/concourse/docs.private_key))
 
 - name: concourse-docker
   type: git
@@ -1135,6 +1045,7 @@ resources:
   source:
     uri: https://github.com/concourse/concourse-docker
     branch: master
+    private_key: ((github/concourse/concourse-docker.private_key))
 
 - name: concourse-chart
   type: git
@@ -1142,7 +1053,7 @@ resources:
   source:
     uri: git@github.com:concourse/concourse-chart.git
     branch: dev
-    private_key: ((concourse_chart_private_key))
+    private_key: ((github/concourse/concourse-chart.private_key))
 
 - name: prometheus-chart
   type: helm-chart
@@ -1177,7 +1088,7 @@ resources:
     repository: concourse/resource-types
     tag: ubuntu
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: concourse-dev-image
   type: registry-image
@@ -1186,7 +1097,7 @@ resources:
     repository: concourse/concourse-dev
     tag: latest
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.read_write))
 
 - name: ubuntu-image
   type: registry-image
@@ -1195,7 +1106,7 @@ resources:
     repository: ubuntu
     tag: jammy
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: paketo-jammy-static-image
   type: registry-image
@@ -1203,7 +1114,7 @@ resources:
   source:
     repository: paketobuildpacks/run-jammy-static
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: resource-types-builder-image-ubuntu
   type: registry-image
@@ -1212,7 +1123,7 @@ resources:
     repository: concourse/resource-types-builder
     tag: jammy
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.read_write))
 
 - name: resource-types-base-image-static
   type: registry-image
@@ -1221,4 +1132,4 @@ resources:
     repository: concourse/resource-types-base-image-static
     tag: latest
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.read_write))
