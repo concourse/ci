@@ -3,12 +3,6 @@
 #@ load("@ytt:assert", "assert")
 
 #@ resource_name = data.values.resource_name or assert.fail("resource name must be specified")
-#@ def github_owner():
-#@   if resource_name == "cf":
-#@     return "cloudfoundry-community"
-#@   end
-#@  return "concourse"
-#@ end
 
 #@ def build_params(resource_name):
   #@ if resource_name == "registry-image":
@@ -57,11 +51,6 @@ config:
 #@ def build_image():
 name: build
 serial_groups: [build]
-on_failure: &failed-ci
-  put: notify
-  params:
-    mode: normal
-    alert_type: failed
 plan:
 - in_parallel:
   - get: daily-trigger
@@ -103,8 +92,6 @@ plan:
   image: trivy
   file: ci/tasks/trivy-scan.yml
   input_mapping: {image: resource-image-dev}
-  on_failure: #@ determine_channel()
-  on_error: #@ determine_channel()
 #@ end
 
 #@ def extra_steps():
@@ -124,13 +111,6 @@ plan:
     run:
       path: /bin/true
   #@ else: return []
-#@ end
-
-#@ def determine_channel():
-  put: notify
-  params:
-    mode: normal
-    alert_type: failed
 #@ end
 
 #@ def validate_pr():
@@ -239,9 +219,9 @@ plan:
 - task: build-release-notes
   file: ci/tasks/build-release-notes.yml
   params:
-    GITHUB_OWNER: #@ github_owner()
+    GITHUB_OWNER: concourse
     GITHUB_REPO: #@ resource_name + "-resource"
-    GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+    GITHUB_TOKEN: ((github/concourse/release_token))
     GITHUB_BRANCH: master
   input_mapping:
     repo: resource-repo
@@ -272,11 +252,6 @@ plan:
 #@ def rebuild_images():
 name: republish-images
 serial_groups: [build]
-on_failure: &failed-ci
-  put: notify
-  params:
-    mode: normal
-    alert_type: failed
 plan:
 - in_parallel:
   - get: daily-trigger
@@ -350,19 +325,6 @@ resource_types:
   source:
     repository: frodenas/gcs-resource
 
-- name: slack-notifier
-  type: registry-image
-  #! Switch back to mockersf/concourse-slack-notifier once
-  #! https://github.com/mockersf/concourse-slack-notifier/pull/86 is merged
-  source: {repository: aoldershaw/concourse-slack-notifier}
-
-  #! TODO: get rid of this when registry image resource v1.6.0 is deployed in CI
-- name: registry-image
-  type: registry-image
-  source:
-    repository: concourse/registry-image-resource
-    tag: 1.6.0
-
 resources:
 - name: base-image
   type: registry-image
@@ -372,7 +334,7 @@ resources:
     repository: ((base-image))
     tag: latest
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: golang-builder
   type: registry-image
@@ -381,7 +343,7 @@ resources:
     repository: concourse/golang-builder
     variant: jammy
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: trivy
   type: registry-image
@@ -389,14 +351,14 @@ resources:
   source:
     repository: aquasec/trivy
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.public_read))
 
 - name: resource-repo
   type: git
   icon: github
   source:
     branch: master
-    private_key: ((concourse_bot_private_key))
+    private_key: #@ "((github/concourse/" + resource_name + ".private_key))"
     uri: #@ "git@github.com:concourse/" + resource_name + "-resource"
 
 - name: resource-repo-tags
@@ -404,7 +366,7 @@ resources:
   icon: github
   source:
     branch: master
-    private_key: ((concourse_bot_private_key))
+    private_key: #@ "((github/concourse/" + resource_name + ".private_key))"
     uri: #@ "git@github.com:concourse/" + resource_name + "-resource"
     tag_filter: "v*"
 
@@ -412,8 +374,8 @@ resources:
   type: github-release
   icon: package-variant-closed
   source:
-    access_token: ((concourse_bot_access_token))
-    owner: #@ github_owner()
+    access_token: ((github/concourse/release_token))
+    owner: concourse
     repository: #@ resource_name + "-resource"
 
 - name: version
@@ -423,17 +385,17 @@ resources:
     branch: version
     driver: git
     file: version
-    private_key: ((concourse_bot_private_key))
-    uri: #@ "git@github.com:" + github_owner() + "/" + resource_name + "-resource"
+    private_key: #@ "((github/concourse/" + resource_name + ".private_key))"
+    uri: #@ "git@github.com:concourse/" + resource_name + "-resource"
 
 - name: resource-pr
   type: pull-request
   icon: source-pull
   check_every: 2m
   source:
-    access_token: ((pull_requests_access_token))
+    access_token: ((github/concourse/pr_token))
     base_branch: master
-    repository: #@ github_owner() + "/" + resource_name + "-resource"
+    repository: #@ "concourse/" + resource_name + "-resource"
 
 - name: resource-image
   type: registry-image
@@ -441,7 +403,7 @@ resources:
   source:
     repository: #@ "concourse/" + resource_name + "-resource"
     username: ((docker.username))
-    password: ((docker.password))
+    password: ((docker.read_write))
 
 - name: resource-image-dev
   type: registry-image
@@ -450,13 +412,14 @@ resources:
     repository: #@ "concourse/" + resource_name + "-resource"
     tag: dev
     password: ((docker.password))
-    username: ((docker.username))
+    username: ((docker.read_write))
 
 - name: ci
   type: git
   icon: github
   source:
     uri: https://github.com/concourse/ci.git
+    private_key: ((github/concourse/ci.private_key))
     branch: master
 
 - name: release-me
@@ -465,22 +428,15 @@ resources:
   source:
     owner: clarafu
     repository: release-me
-    access_token: ((concourse_github_dummy.access_token))
+    access_token: ((github/release_token))
 
 - name: oci-build-task
   type: registry-image
   icon: docker
   source:
     repository: concourse/oci-build-task
-
-- name: notify
-  type: slack-notifier
-  icon: slack
-  source:
-    url: ((slack_hooks.concourse-interrupt))
-    username: ((basic_auth.username))
-    password: ((basic_auth.password))
-    concourse_url: https://ci.concourse-ci.org
+    password: ((docker.password))
+    username: ((docker.public_read))
 
 - name: daily-trigger
   type: time
