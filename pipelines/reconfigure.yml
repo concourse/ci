@@ -10,6 +10,7 @@ resources:
   source:
     uri: https://github.com/concourse/ci
     branch: main
+    private_key: ((github/concourse/ci.private_key))
     paths:
     - pipelines
     - tasks
@@ -20,6 +21,7 @@ resources:
   source:
     uri: https://github.com/concourse/ci
     branch: main
+    private_key: ((github/concourse/ci.private_key))
     paths:
     - pipelines/pr.yml
     - pipelines/pr-deploy.yml
@@ -30,6 +32,7 @@ resources:
   source:
     uri: https://github.com/concourse/ci
     branch: main
+    private_key: ((github/concourse/ci.private_key))
     paths:
     - teams
 
@@ -38,6 +41,7 @@ resources:
   icon: github
   source:
     uri: https://github.com/concourse/dex
+    private_key: ((github/concourse/dex.private_key))
     branch: maintenance
     paths: [ci]
 
@@ -46,6 +50,7 @@ resources:
   icon: github
   source:
     uri: https://github.com/concourse/docs
+    private_key: ((github/concourse/docs.private_key))
     branch: master
     paths: [ci]
 
@@ -54,6 +59,7 @@ resources:
   icon: github
   source:
     uri: https://github.com/concourse/resource-types-website
+    private_key: ((github/concourse/resource-types-website.private_key))
     branch: master
     paths: [ci]
 
@@ -62,6 +68,7 @@ resources:
   icon: github
   source:
     uri: https://github.com/concourse/examples
+    private_key: ((github/concourse/examples.private_key))
     branch: master
     paths: [pipelines]
 
@@ -70,14 +77,14 @@ resources:
   source:
     owner: concourse
     repository: concourse
-    access_token: ((concourse_github_dummy.access_token))
+    access_token: ((github/concourse/release_token))
 
 - name: concourse-prs
   type: pull-request
   check_every: 2m
   source:
     repository: concourse/concourse
-    access_token: ((pull_requests_access_token))
+    access_token: ((github/concourse/pr_token))
     base_branch: main
 
 - name: concourse-deploy-prs
@@ -85,7 +92,7 @@ resources:
   check_every: 2m
   source:
     repository: concourse/concourse
-    access_token: ((pull_requests_access_token))
+    access_token: ((github/concourse/pr_token))
     base_branch: main
     labels: [deploy]
 
