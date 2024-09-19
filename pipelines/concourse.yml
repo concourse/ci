@@ -263,6 +263,9 @@ jobs:
           format: rootfs
       - get: containerd
         trigger: true
+        params:
+          globs:
+            - "*linux-amd64*"
       - get: runc
         trigger: true
       - get: gdn
