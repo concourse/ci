@@ -12,12 +12,18 @@ pushd concourse
   # Some weird networking stuff going on with hetzner hosted workers. Running
   # this command multiple times works around the network issues. Possibly related to IPv6
   set +e
-  yarn build
-  yarn build
-  yarn build
-  yarn build
-  yarn build
+  for i in {1..5}; do
+    yarn build
+    if [[ $? -eq 0 ]]; then
+      break
+    fi
+  done
   set -e
+
+  if [[ $? -eq 1 ]]; then
+    echo "yarn command failed too many times"
+    exit 1
+  fi
 popd
 
 cp -a ./concourse/. ./built-concourse
