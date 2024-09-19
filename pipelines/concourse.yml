@@ -266,6 +266,7 @@ jobs:
         params:
           globs:
             - "*linux-amd64*"
+            - "*linux-arm64*"
       - get: runc
         trigger: true
       - get: gdn
