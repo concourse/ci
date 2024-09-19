@@ -8,8 +8,24 @@ stty columns 80
 
 pushd concourse
   yarn install
+
+  # Some weird networking stuff going on with hetzner hosted workers. Running
+  # this command multiple times works around the network issues. Possibly related to IPv6
+  set +e
+  for i in {1..5}; do
+    yarn build
+    if [[ $? -eq 0 ]]; then
+      break
+    fi
+  done
+  set -e
+
+  if [[ $? -eq 1 ]]; then
+    echo "yarn command failed too many times"
+    exit 1
+  fi
+
   yarn test
-  yarn build
 popd
 
 cp -a ./concourse/. ./built-concourse
