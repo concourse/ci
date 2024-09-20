@@ -1,7 +1,7 @@
 #!/bin/bash
 # vim: set ft=sh
 
-set -e -x
+set -euo pipefail
 
 export GOPATH=$PWD/gopath
 export PATH=$GOPATH/bin:$PATH
@@ -10,7 +10,7 @@ function permit_device_control() {
   local devices_mount_info=$(cat /proc/self/cgroup | grep devices)
 
   if [ -z "$devices_mount_info" ]; then
-    # cgroups not set up; must not be in a container
+    echo "cgroups not set up; must not be in a container"
     return
   fi
 
@@ -18,7 +18,7 @@ function permit_device_control() {
   local devices_subdir=$(echo $devices_mount_info | cut -d: -f3)
 
   if [ "$devices_subdir" = "/" ]; then
-    # we're in the root devices cgroup; must not be in a container
+    echo "we're in the root devices cgroup; must not be in a container"
     return
   fi
 
@@ -31,6 +31,7 @@ function permit_device_control() {
 
   if ! mountpoint -q ${cgroup_dir}; then
     if ! mount -t cgroup -o $devices_subsytems none ${cgroup_dir}; then
+      echo "failed to mount ${devices_subsytems} at ${cgroup_dir}"
       return 1
     fi
   fi
@@ -67,7 +68,7 @@ export TMPDIR=/scratch
 
 go mod download
 
-go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo
+go install github.com/onsi/ginkgo/v2/ginkgo
 
 ginkgo -r -race -nodes 4 --failOnPending -flake-attempts=3 --randomizeAllSpecs --keep-going -skip=":skip" "$@"
 
