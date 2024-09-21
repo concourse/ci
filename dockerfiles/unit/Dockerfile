@@ -103,7 +103,7 @@ RUN mkdir -p /root/.pki/nssdb && \
 RUN go install golang.org/x/tools/cmd/goimports@latest
 
 # Install ginkgo since its one of the main test runners we use
-RUN go install github.com/onsi/ginkgo/v2/ginkgo
+RUN go install github.com/onsi/ginkgo/v2/ginkgo@latest
 
 # Install bpftool for loading bpf programs for certain tests (i.e. unit-baggageclaim)
 # TODO: don't hardcode the version
