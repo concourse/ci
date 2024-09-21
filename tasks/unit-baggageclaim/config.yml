@@ -14,5 +14,5 @@ caches:
 - path: gopath/
 
 run:
-  path: ci/tasks/scripts/unit-baggageclaim
+  path: ci/tasks/unit-baggageclaim/run.sh
 

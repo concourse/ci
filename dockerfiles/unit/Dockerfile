@@ -14,13 +14,10 @@ RUN apt-get update && apt-get -y install \
       software-properties-common \
       unzip \
       file \
-      btrfs-progs
-
-# install gcloud
-# RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
-RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
-echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
-apt-get update && apt-get install -y google-cloud-sdk google-cloud-sdk-gke-gcloud-auth-plugin
+      btrfs-progs \
+      gcc-multilib \
+      clang \
+      libbpf-dev
 
 # install PostgreSQL for DB tests
 ENV DEBIAN_FRONTEND noninteractive
@@ -104,3 +101,13 @@ RUN mkdir -p /root/.pki/nssdb && \
 
 # install goimports CLI for formatting go files
 RUN go install golang.org/x/tools/cmd/goimports@latest
+
+# Install ginkgo since its one of the main test runners we use
+RUN go install github.com/onsi/ginkgo/v2/ginkgo
+
+# Install bpftool for loading bpf programs for certain tests (i.e. unit-baggageclaim)
+# TODO: don't hardcode the version
+RUN curl -L "https://github.com/libbpf/bpftool/releases/download/v7.4.0/bpftool-v7.4.0-amd64.tar.gz" -o bpf.tar.gz && \
+  tar xzf bpf.tar.gz --directory /usr/bin/local && \
+  chmod +x /usr/bin/local/bpftool && \
+  rm bpf.tar.gz
