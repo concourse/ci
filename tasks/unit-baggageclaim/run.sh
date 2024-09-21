@@ -19,7 +19,7 @@ function permit_device_control() {
   clang -O2 -target bpf -c "${dir}/allow_device_control.c" -o allow_device_control.o
 
   # remove any currently attached cgroup_device programs
-  attached_id=$(./bpftool cgroup list /sys/fs/cgroup${cgroup_id} | grep 'cgroup_device' | awk '{print $1}')
+  attached_id=$(bpftool cgroup list /sys/fs/cgroup${cgroup_id} | grep 'cgroup_device' | awk '{print $1}')
   if [[ -n "${attached_id}" ]]; then
     bpftool cgroup detach \
       /sys/fs/cgroup${cgroup_id} \
