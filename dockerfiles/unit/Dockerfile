@@ -108,6 +108,6 @@ RUN go install github.com/onsi/ginkgo/v2/ginkgo@latest
 # Install bpftool for loading bpf programs for certain tests (i.e. unit-baggageclaim)
 # TODO: don't hardcode the version
 RUN curl -L "https://github.com/libbpf/bpftool/releases/download/v7.4.0/bpftool-v7.4.0-amd64.tar.gz" -o bpf.tar.gz && \
-  tar xzf bpf.tar.gz --directory /usr/bin/local && \
-  chmod +x /usr/bin/local/bpftool && \
+  tar xzf bpf.tar.gz --directory /usr/local/bin/&& \
+  chmod +x /usr/local/bin/bpftool && \
   rm bpf.tar.gz
