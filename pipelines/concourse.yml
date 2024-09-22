@@ -379,7 +379,7 @@ jobs:
   - across:
     - var: runtime
       values:
-      - guardian
+      # - guardian # guardian doesn't work on our fedora 40 workers because they only have cgroupv2
       - containerd
       max_in_flight: all
     - var: postgres-image
@@ -673,7 +673,7 @@ jobs:
   - across:
     - var: runtime
       values:
-      - guardian
+      # - guardian # guardian doesn't work on our fedora 40 workers because they only have cgroupv2
       - containerd
       max_in_flight: all
     - var: gcp-image
@@ -727,7 +727,7 @@ jobs:
   - across:
     - var: runtime
       values:
-      - guardian
+      # - guardian # guardian doesn't work on our fedora 40 workers because they only have cgroupv2
       - containerd
       max_in_flight: all
     - var: gcp-image
