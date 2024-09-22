@@ -2,18 +2,9 @@
 
 set -euo pipefail
 
-source ci/tasks/scripts/cgroup-helpers.sh
-
 function start_docker() {
   mkdir -p /var/log
   mkdir -p /var/run
-
-  sanitize_cgroups
-
-  # check for /proc/sys being mounted readonly, as systemd does
-  if grep '/proc/sys\s\+\w\+\s\+ro,' /proc/mounts >/dev/null; then
-    mount -o remount,rw /proc/sys
-  fi
 
   local mtu=$(cat /sys/class/net/$(ip route get 8.8.8.8|awk '{ print $5 }')/mtu)
   local server_args="--mtu ${mtu}"
