@@ -6,8 +6,6 @@
 #   ((concourse_smoke_deployment_name)) a unique name for the smoke bosh deployment
 #   ((latest_release))                  the latest concourse/concourse tag for upgrade testing.
 #                                       e.g. 6.6.x -> 6.5, 7.0.x -> 6.7
-#   ((slack_hook))                      the slack hook to use for sending the notification (one slack hook per channel)
-#                                       concourse-private hook for LTS versions, and concourse-interrupt hook for OSS-only ones
 #   ((resource_type_versions))          a YAML object containing the semver constraints for each of the base resource types. should default to "" for each type for a new release (i.e. no constraint).
 #
 # the following git branches need to be created:
@@ -38,20 +36,9 @@ resource_types:
   type: registry-image
   source: {repository: cloudfoundry/bosh-deployment-resource}
 
-- name: slack-notifier
-  type: registry-image
-  # Switch back to mockersf/concourse-slack-notifier once
-  # https://github.com/mockersf/concourse-slack-notifier/pull/86 is merged
-  source: {repository: aoldershaw/concourse-slack-notifier}
-
 - name: helm-chart
   type: registry-image
   source: {repository: concourse/helm-chart-resource}
-
-# TODO: get rid of this v1.6.4 is deployed in CI
-- name: github-release
-  type: registry-image
-  source: {repository: concourse/github-release-resource}
 
 - name: pull-request
   type: registry-image
@@ -164,12 +151,6 @@ jobs:
     - task: unit-baggageclaim-windows
       file: ci/tasks/unit-baggageclaim-windows.yml
       input_mapping: {concourse: built-concourse}
-  on_failure: &failed-concourse
-    put: notify
-    params:
-      mode: normal
-      alert_type: failed
-  on_error: *failed-concourse
 
 - name: resource-types-images
   public: true
@@ -270,8 +251,6 @@ jobs:
   - put: dev-image
     params: {image: image/image.tar}
     get_params: {format: oci}
-  on_failure: *failed-concourse
-  on_error: *failed-concourse
 
 - name: worker-runtime
   public: true
@@ -290,7 +269,6 @@ jobs:
     privileged: true
     timeout: 1h
     file: ci/tasks/containerd-integration.yml
-  on_failure: *failed-concourse
 
 - name: testflight
   public: true
@@ -322,8 +300,6 @@ jobs:
     params:
       RUNTIME: ((.:runtime))
     file: ci/tasks/docker-compose-testflight.yml
-  on_failure: *failed-concourse
-  on_error: *failed-concourse
 
 - name: watsjs
   public: true
@@ -347,8 +323,6 @@ jobs:
     privileged: true
     timeout: 1h
     file: ci/tasks/docker-compose-watsjs.yml
-  on_failure: *failed-concourse
-  on_error: *failed-concourse
 
 - name: integration
   public: true
@@ -376,8 +350,6 @@ jobs:
     file: ci/tasks/integration.yml
     input_mapping:
       concourse-image: latest-concourse-image
-  on_failure: *failed-concourse
-  on_error: *failed-concourse
 
 - name: k8s-check-helm-params
   public: true
@@ -405,8 +377,6 @@ jobs:
     image: unit-image
     input_mapping: {distribution: concourse-chart, linux-rc: linux-rc-ubuntu}
     params: {DISTRIBUTION: helm}
-  on_failure: *failed-concourse
-  on_error: *failed-concourse
 
 - name: k8s-smoke
   public: true
@@ -458,8 +428,6 @@ jobs:
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
       RELEASE_NAME: ((concourse_smoke_deployment_name))
       CONCOURSE_IMAGE: concourse/concourse-rc
-  on_failure: *failed-concourse
-  on_error: *failed-concourse
 
 - name: k8s-topgun
   public: true
@@ -501,8 +469,6 @@ jobs:
       IN_CLUSTER: "true"
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
       CONCOURSE_IMAGE_NAME: concourse/concourse-rc
-  on_failure: *failed-concourse
-  on_error: *failed-concourse
 
 - name: rc
   public: true
@@ -606,8 +572,6 @@ jobs:
     - put: darwin-rc
       params: {file: concourse-darwin/concourse-*.tgz}
       inputs: [concourse-darwin]
-  on_failure: *failed-concourse
-  on_error: *failed-concourse
 
 - name: build-rc-image
   public: true
@@ -640,8 +604,6 @@ jobs:
     params:
       image: image-ubuntu/image.tar
       additional_tags: version/version
-  on_failure: *failed-concourse
-  on_error: *failed-concourse
 
 - name: bump-prod-to-rc
   plan:
@@ -773,8 +735,6 @@ jobs:
         file: ci/tasks/smoke.yml
         input_mapping: {endpoint-info: outputs}
         params: {MAX_TICKS: 300}
-  on_failure: *failed-concourse
-  on_error: *failed-concourse
 
 - name: bosh-check-props
   public: true
@@ -799,8 +759,6 @@ jobs:
     image: unit-image
     input_mapping: {distribution: concourse-release-repo, linux-rc: linux-rc-ubuntu}
     params: {DISTRIBUTION: bosh}
-  on_failure: *failed-concourse
-  on_error: *failed-concourse
 
 - name: bosh-bump
   public: true
@@ -922,8 +880,6 @@ jobs:
     image: unit-image
     file: ci/tasks/smoke.yml
     timeout: 1h
-  on_failure: *failed-concourse
-  on_error: *failed-concourse
 
 - name: create-draft-release
   public: true
@@ -1275,8 +1231,6 @@ jobs:
       input_mapping: {image: image-ubuntu}
       params:
         IGNORE_POLICY_FILE: ci/trivy-ignore/((release_minor))-image.rego
-      on_failure: *failed-concourse
-      on_error: *failed-concourse
   - task: watsjs-smoke-ubuntu
     image: unit-image
     privileged: true
@@ -1295,8 +1249,6 @@ jobs:
       version: ((.:image_version))
       bump_aliases: true
       additional_tags: date-tag/tag
-    on_failure: *failed-concourse
-    on_error: *failed-concourse
 
 resources:
 - name: concourse
@@ -1348,16 +1300,6 @@ resources:
     uri: https://github.com/concourse/concourse-docker.git
     branch: master
     branch: release/((release_minor)).x
-
-- name: notify
-  type: slack-notifier
-  icon: slack
-  source:
-    url: ((slack_hooks.concourse-interrupt))
-    username: ((basic_auth.username))
-    password: ((basic_auth.password))
-    concourse_url: https://ci.concourse-ci.org
-
 
 - name: resource-types-image
   type: registry-image
