@@ -5,10 +5,7 @@ set -e -u
 export GOPATH=$PWD/gopath
 export PATH=$GOPATH/bin:$PATH
 
-source ci/tasks/scripts/cgroup-helpers.sh
-
 main() {
-  sanitize_cgroups
   run_test
 }
 
