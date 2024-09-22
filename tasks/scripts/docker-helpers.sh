@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e -u
+set -euo pipefail
 
 source ci/tasks/scripts/cgroup-helpers.sh
 
