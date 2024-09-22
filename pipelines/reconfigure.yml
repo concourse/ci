@@ -244,9 +244,10 @@ jobs:
     - set_pipeline: docs-prs
       team: contributor
       file: docs-ci/ci/prs-pipeline.yml
-    - set_pipeline: dutyfree
-      team: dutyfree
-      file: resource-types-website-ci/ci/pipeline.yml
+    # TODO: setup dutyfree
+    # - set_pipeline: dutyfree
+    #   team: dutyfree
+    #   file: resource-types-website-ci/ci/pipeline.yml
     - set_pipeline: update-dex
       file: dex-ci/ci/pipeline.yml
     - set_pipeline: release
@@ -259,7 +260,6 @@ jobs:
         release_minor: '6.8'
         latest_release: '6.7'
         concourse_smoke_deployment_name: concourse-smoke-6-8
-        slack_hook: ((slack_hooks.concourse-interrupt))
         stemcell_name: jammy
         ci_branch: ginkgo/v1
         resource_type_versions:
@@ -292,7 +292,6 @@ jobs:
         release_minor: '7.11'
         latest_release: '7.10'
         concourse_smoke_deployment_name: concourse-smoke-7-11
-        slack_hook: ((slack_hooks.concourse-private))
         stemcell_name: jammy
         ci_branch: main
         resource_type_versions:
@@ -316,8 +315,7 @@ jobs:
           containerd: ~1.7.13
     # TEMPLATE FOR NEXT RELEASE
     # to create a new release pipeline, copy (but don't delete!) this template,
-    # replacing MAJOR, MINOR, PREV_MAJOR, PREV_MINOR, and SLACK_CHANNEL
-    # accordingly.
+    # replacing MAJOR, MINOR, PREV_MAJOR, and PREV_MINOR accordingly.
     #
     # Note: you can leave the resource_type_versions as "" - these values will
     # be updated appropriately when the release is shipped
@@ -331,7 +329,6 @@ jobs:
     #     release_minor: "MAJOR.MINOR"
     #     latest_release: "PREV_MAJOR.PREV_MINOR"
     #     concourse_smoke_deployment_name: "concourse-smoke-MAJOR-MINOR"
-    #     slack_hook: ((slack_hooks.SLACK_CHANNEL))
     #     resource_type_versions:
     #       # These should be left blank, as they will be updated after the release has shipped!
     #       bosh-io-release: ""
