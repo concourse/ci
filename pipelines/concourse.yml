@@ -76,6 +76,7 @@ jobs:
       run: {path: build}
   - put: unit-image
     no_get: true
+    inputs: detect
     params:
       image: image/image.tar
 
@@ -105,6 +106,7 @@ jobs:
   - in_parallel:
     - put: golang-builder-image
       no_get: true
+      inputs: detect
       params:
         image: image/image
         version: ((.:golang_version))
@@ -113,6 +115,7 @@ jobs:
     # push to latest (+ bare semver tags) to make local dev a bit easier
     - put: golang-builder-image-latest
       no_get: true
+      inputs: detect
       params:
         image: image/image
         version: ((.:golang_version))
@@ -139,6 +142,7 @@ jobs:
   - in_parallel:
     - put: resource-types-builder-image-ubuntu
       no_get: true
+      inputs: detect
       params:
         image: image/image
         bump_aliases: true
@@ -162,6 +166,7 @@ jobs:
   - in_parallel:
     - put: resource-types-base-image-static
       no_get: true
+      inputs: detect
       params:
         image: image/image
         additional_tags: paketo-jammy-static-image/tag
@@ -244,6 +249,7 @@ jobs:
     file: ci/tasks/build-resource-types-image.yml
   - put: resource-types-ubuntu-image
     no_get: true
+    inputs: detect
     params:
       image: image_ubuntu/image.tar
 
@@ -323,6 +329,7 @@ jobs:
       resource-types-image: resource-types-ubuntu-image
   - put: dev-image
     no_get: true
+    inputs: detect
     params:
       image: image/image
 
@@ -615,17 +622,17 @@ jobs:
       no_get: true
       params:
         file: concourse-linux-ubuntu/concourse-*.tgz
-      inputs: [concourse-linux-ubuntu]
+      inputs: detect
     - put: windows-dev
       no_get: true
       params:
         file: concourse-windows/concourse-*.zip
-      inputs: [concourse-windows]
+      inputs: detect
     - put: darwin-dev
       no_get: true
       params:
         file: concourse-darwin/concourse-*.tgz
-      inputs: [concourse-darwin]
+      inputs: detect
 
 - name: build-image
   old_name: build-rc-image
@@ -652,7 +659,7 @@ jobs:
     privileged: true
   - put: concourse-dev-image
     no_get: true
-    inputs: [image-ubuntu]
+    inputs: detect
     params:
       image: image-ubuntu/image.tar
 
