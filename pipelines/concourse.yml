@@ -575,12 +575,26 @@ jobs:
       passed: [dev-image]
   - in_parallel:
     - task: fly-linux
-      file: ci/tasks/fly-build-linux.yml
       image: golang-builder-image
+      file: ci/tasks/fly-build/config.yml
+      output_mapping:
+        fly: fly-linux
+      params:
+        GOOS: linux
     - task: fly-windows
-      file: ci/tasks/fly-build-windows.yml
+      image: golang-builder-image
+      file: ci/tasks/fly-build/config.yml
+      output_mapping:
+        fly: fly-windows
+      params:
+        GOOS: windows
     - task: fly-darwin
-      file: ci/tasks/fly-build-darwin.yml
+      image: golang-builder-image
+      file: ci/tasks/fly-build/config.yml
+      output_mapping:
+        fly: fly-darwin
+      params:
+        GOOS: darwin
   - in_parallel:
       fail_fast: true
       steps:
