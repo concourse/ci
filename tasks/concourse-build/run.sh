@@ -1,7 +1,7 @@
 #!/bin/bash
 # vim: set ft=sh
 
-set -e -x
+set -euo pipefail
 
 export GOPATH=$PWD/gopath
 export PATH=$PWD/gopath/bin:$PATH
@@ -13,6 +13,7 @@ fi
 
 export GOOS="${PLATFORM:-$(go env GOOS)}"
 export GOARCH="amd64"
+echo "building ${GOOS}-${GOARCH}"
 
 version="$(cat version/version)"
 
