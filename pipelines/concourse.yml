@@ -2,10 +2,6 @@ display:
   background_image: https://storage.googleapis.com/concourse-media-assets/concourse-emi-background-clean.png
 
 resource_types:
-- name: gcs
-  type: registry-image
-  source: {repository: frodenas/gcs-resource}
-
 - name: helm-chart
   type: registry-image
   source: {repository: linkyard/helm-chart-resource, tag: 2.17.0}
@@ -1056,27 +1052,33 @@ resources:
     password: ((docker.public_read))
 
 - name: linux-dev-ubuntu
-  type: gcs
+  type: s3
   icon: linux
   source:
-    bucket: concourse-artifacts
-    json_key: ((concourse_artifacts_json_key))
+    bucket: ((s3.bucket_name))
+    access_key_id: ((s3.access_key))
+    secret_access_key: ((s3.secret_key))
+    endpoint: ((s3.endpoint_url))
     regexp: dev/concourse-(.*)\.linux-ubuntu\.amd64\.tgz
 
 - name: windows-dev
-  type: gcs
+  type: s3
   icon: microsoft-windows
   source:
-    bucket: concourse-artifacts
-    json_key: ((concourse_artifacts_json_key))
+    bucket: ((s3.bucket_name))
+    access_key_id: ((s3.access_key))
+    secret_access_key: ((s3.secret_key))
+    endpoint: ((s3.endpoint_url))
     regexp: dev/concourse-(.*)\.windows\.amd64\.zip
 
 - name: darwin-dev
-  type: gcs
+  type: s3
   icon: apple
   source:
-    bucket: concourse-artifacts
-    json_key: ((concourse_artifacts_json_key))
+    bucket: ((s3.bucket_name))
+    access_key_id: ((s3.access_key))
+    secret_access_key: ((s3.secret_key))
+    endpoint: ((s3.endpoint_url))
     regexp: dev/concourse-(.*)\.darwin\.amd64\.tgz
 
 - name: docs
