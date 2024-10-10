@@ -1,5 +1,5 @@
 ---
-platform: darwin
+platform: linux
 
 inputs:
 - name: concourse
@@ -7,18 +7,22 @@ inputs:
 - name: version
 - name: final-version
   optional: true
+- name: linux-dependencies
+  optional: true
+- name: resource-types
+  optional: true
 - name: fly-linux
 - name: fly-windows
 - name: fly-darwin
 
-outputs:
-- name: concourse-tarball
-
 caches:
 - path: gopath
 
+outputs:
+- name: concourse-tarball
+
 params:
-  PLATFORM: darwin
+  PLATFORM:
 
 run:
-  path: ci/tasks/scripts/concourse-build
+  path: ci/tasks/concourse-build/run.sh

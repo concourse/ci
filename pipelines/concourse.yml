@@ -616,17 +616,33 @@ jobs:
       steps:
       - task: concourse-linux-ubuntu
         image: golang-builder-image
-        params: {PLATFORM: linux, VARIANT: ubuntu}
-        file: ci/tasks/concourse-build-linux.yml
-        input_mapping: {concourse: built-concourse, resource-types: resource-types-ubuntu}
-        output_mapping: {concourse-tarball: concourse-linux-ubuntu}
+        params:
+          PLATFORM: linux
+          VARIANT: ubuntu
+        file: ci/tasks/concourse-build/config.yml
+        input_mapping:
+          concourse: built-concourse
+          resource-types: resource-types-ubuntu
+        output_mapping:
+          concourse-tarball: concourse-linux-ubuntu
       - task: concourse-windows
-        file: ci/tasks/concourse-build-windows.yml
-        input_mapping: {concourse: built-concourse}
+        image: golang-builder-image
+        params:
+          PLATFORM: windows
+        file: ci/tasks/concourse-build/config.yml
+        input_mapping:
+          concourse: built-concourse
+        output_mapping:
+          concourse-tarball: concourse-windows
       - task: concourse-darwin
-        file: ci/tasks/concourse-build-darwin.yml
-        input_mapping: {concourse: built-concourse}
-        output_mapping: {concourse-tarball: concourse-darwin}
+        image: golang-builder-image
+        params:
+          PLATFORM: darwin
+        file: ci/tasks/concourse-build/config.yml
+        input_mapping:
+          concourse: built-concourse
+        output_mapping:
+          concourse-tarball: concourse-darwin
   - in_parallel:
     - put: linux-dev-ubuntu
       no_get: true
