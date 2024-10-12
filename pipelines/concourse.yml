@@ -730,7 +730,7 @@ jobs:
       file: outputs/outputs.json
     - task: smoke
       image: unit-image
-      file: ci/tasks/smoke.yml
+      file: ci/tasks/watsjs-smoke/config.yml
       params:
         MAX_TICKS: 300
         ATC_URL: ((.:outputs.instance_url))
