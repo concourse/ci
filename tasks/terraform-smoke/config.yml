@@ -1,0 +1,27 @@
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: concourse/unit
+
+inputs:
+- name: concourse
+- name: ci
+- name: linux-rc
+  optional: true
+
+outputs:
+- name: outputs
+
+params:
+  cleanup: false
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
+  SSH_KEY:
+  WORKSPACE: default
+  TF_VAR_image: "ubuntu-22.04"
+  TF_VAR_runtime: "containerd"
+
+run:
+  path: ci/tasks/scripts/terraform-smoke
