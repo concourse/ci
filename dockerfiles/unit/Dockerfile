@@ -78,9 +78,14 @@ RUN curl -L https://releases.hashicorp.com/vault/0.7.3/vault_0.7.3_linux_amd64.z
       rm /tmp/vault.zip
 
 # install Terraform, ssh and jq for bin-smoke
-RUN curl -fsSL https://releases.hashicorp.com/terraform/1.2.8/terraform_1.2.8_linux_amd64.zip -o /tmp/terraform.zip && \
-      unzip /tmp/terraform.zip -d /usr/local/bin && \
-      rm /tmp/terraform.zip
+ARG TERRAFORM_VERSION=1.9.7
+RUN curl -L "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" \
+      --output "terraform.zip"; \
+      unzip -q terraform.zip; \
+      mv ./terraform /usr/local/bin/; \
+      rm terraform.zip; \
+      terraform --version
+
 RUN apt-get update && apt-get -y install jq openssh-client libnss3-tools
 
 # install Let's Encrypt staging cert for 'curl', setting it an env var just so
