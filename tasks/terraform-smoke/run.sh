@@ -14,9 +14,8 @@ fi
 
 cd $deployment_path
 
-echo "$SSH_KEY" > keys/private_key
-chmod 0600 keys/private_key
-ssh-keygen -y -f keys/private_key > keys/key.pub
+echo "$SSH_KEY" > "${script_dir}/deployment/keys/private_key"
+chmod 0600 "${script_dir}/deployment/keys/private_key"
 
 terraform init
 

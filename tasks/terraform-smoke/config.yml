@@ -24,4 +24,4 @@ params:
   TF_VAR_runtime: "containerd"
 
 run:
-  path: ci/tasks/scripts/terraform-smoke
+  path: ci/tasks/terraform-smoke/run.sh
