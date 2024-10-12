@@ -9,7 +9,7 @@ script_dir=${0%/*}
 deployment_path="${script_dir}/deployment"
 
 if [ -d linux-rc ]; then
-  cp linux-rc/concourse-*.tgz $deployment_path/concourse.tgz
+  cp linux-rc/concourse-*.tgz "${deployment_path}/concourse.tgz"
 fi
 
 cd $deployment_path

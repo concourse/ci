@@ -5,7 +5,7 @@ variable "image" {
 
 variable "concourse_tarball" {
   type    = string
-  default = "concourse.tgz"
+  default = "${path.module}/concourse.tgz"
 }
 
 variable "runtime" {
