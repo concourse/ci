@@ -14,7 +14,7 @@ fi
 
 cd $deployment_path
 
-echo "$SSH_KEY" > "${script_dir}/deployment/keys/private_key"
+echo "${SSH_KEY}" > "${script_dir}/deployment/keys/private_key"
 chmod 0600 "${script_dir}/deployment/keys/private_key"
 
 terraform init
