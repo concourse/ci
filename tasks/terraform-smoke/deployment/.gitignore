@@ -1,4 +1,4 @@
-keys/*
-!keys/
+keys/id_rsa*
+keys/*key*
 .terraform/
 concourse.tgz
