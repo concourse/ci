@@ -345,8 +345,6 @@ jobs:
     #       semver: ""
     #       time: ""
     #       tracker: ""
-    - set_pipeline: infrastructure-report
-      file: pipelines-and-tasks/pipelines/infrastructure-report.yml
 
 - name: reconfigure-example-pipelines
   plan:
