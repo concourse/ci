@@ -391,7 +391,7 @@ jobs:
     privileged: true
     params:
       RUNTIME: containerd
-    file: ci/tasks/docker-compose-testflight.yml
+    file: ci/tasks/testflight/config.yml
     input_mapping:
       postgres-image: ((.:postgres-image))
 
