@@ -469,22 +469,22 @@ jobs:
           - "1.31"
       max_in_flight: all
     do:
-    - task: k8s-cluster-deploy
-      file: ci/tasks/k8s-topgun/deploy.yml
-      image: unit-image
-      params:
-        AWS_ACCESS_KEY_ID: ((s3.access_key))
-        AWS_SECRET_ACCESS_KEY: ((s3.secret_key))
-        LINODE_TOKEN: ((ci-tests.linode_token))
-        WORKSPACE: main-((.:k8s_version))
-        TF_VAR_k8s_version: ((.:k8s_version))
-    - task: k8s-topgun
-      file: ci/tasks/k8s-topgun/config.yml
-      image: unit-image
-      input_mapping:
-        concourse-rc-image: concourse-dev-image
-      params:
-        CONCOURSE_IMAGE_NAME: concourse/concourse-dev
+      - task: k8s-cluster-deploy
+        file: ci/tasks/k8s-topgun/deploy.yml
+        image: unit-image
+        params:
+          AWS_ACCESS_KEY_ID: ((s3.access_key))
+          AWS_SECRET_ACCESS_KEY: ((s3.secret_key))
+          LINODE_TOKEN: ((ci-tests.linode_token))
+          WORKSPACE: main-((.:k8s_version))
+          TF_VAR_k8s_version: ((.:k8s_version))
+      - task: k8s-topgun
+        file: ci/tasks/k8s-topgun/config.yml
+        image: unit-image
+        input_mapping:
+          concourse-rc-image: concourse-dev-image
+        params:
+          CONCOURSE_IMAGE_NAME: concourse/concourse-dev
     ensure:
       task: k8s-cluster-cleanup
       file: ci/tasks/k8s-topgun/deploy.yml
