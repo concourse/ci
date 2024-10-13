@@ -26,6 +26,7 @@ terraform apply \
 
 terraform output -json \
   | jq -r '.kube_config.value' | base64 -d > "${output}/config"
+chmod go-r "${output}/config"
 
 echo "Waiting for all nodes in node pool to be ready"
 mkdir -p "${HOME}/.kube"
