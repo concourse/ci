@@ -442,7 +442,7 @@ jobs:
   - task: integration
     privileged: true
     image: unit-image
-    file: ci/tasks/integration.yml
+    file: ci/tasks/integration/config.yml
 
 - name: k8s-smoke
   public: true

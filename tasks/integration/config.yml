@@ -20,4 +20,4 @@ caches:
 - path: gopath
 
 run:
-  path: ci/tasks/scripts/integration
+  path: ci/tasks/integration/run.sh

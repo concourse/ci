@@ -6,7 +6,7 @@ set -e -u
 export GOPATH=$PWD/gopath
 export PATH=$GOPATH/bin:$PATH
 
-source ci/tasks/scripts/docker-helpers.sh
+source ci/tasks/helpers/docker-helpers.sh
 
 start_docker
 
