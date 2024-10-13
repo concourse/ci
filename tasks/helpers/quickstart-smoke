@@ -12,12 +12,9 @@ start_docker
 docker compose -f docs/docker-compose.yml -f ci/overrides/docker-compose.latest-rc.yml up -d
 
 # now run the watjs/smoke tests
-mkdir -p endpoint-info
-pushd endpoint-info
-  echo "http://localhost:8080" > instance_url
-  echo "test" > admin_username
-  echo "test" > admin_password
-popd
+export ATC_URL="http://localhost:8080"
+export ATC_ADMIN_USERNAME="test"
+export ATC_ADMIN_PASSWORD="test"
 
 ci/tasks/watsjs-smoke/run.sh
 
