@@ -3,7 +3,8 @@ platform: linux
 
 image_resource:
   type: registry-image
-  source: {repository: concourse/unit}
+  source:
+    repository: concourse/unit
 
 inputs:
 - name: concourse
@@ -20,5 +21,5 @@ params:
   RUNTIME: containerd
 
 run:
-  path: ci/tasks/scripts/with-docker-compose
-  args: [ci/tasks/scripts/watsjs]
+  path: ci/tasks/helpers/with-docker-compose
+  args: [ci/tasks/helpers/watsjs]

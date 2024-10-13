@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -euo pipefail
 
-source ci/tasks/scripts/docker-helpers.sh
+source ci/tasks/helpers/docker-helpers.sh
 
 start_docker
 
@@ -19,7 +19,7 @@ export CONCOURSE_KEYS=$PWD/keys
 
 DOCKER_COMPOSE_FLAGS="-f concourse/docker-compose.yml -f ci/overrides/docker-compose.ci-$RUNTIME.yml"
 
-ci/tasks/scripts/generate-keys
+ci/tasks/helpers/generate-keys
 
 docker compose \
   $DOCKER_COMPOSE_FLAGS \
