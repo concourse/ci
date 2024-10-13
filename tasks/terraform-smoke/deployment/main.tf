@@ -121,7 +121,10 @@ resource "hcloud_firewall" "main" {
   }
 }
 
-resource "random_pet" "smoke" {}
+resource "random_pet" "smoke" {
+  length    = 2
+  separator = "-"
+}
 
 resource "random_string" "admin_password" {
   keepers = {
