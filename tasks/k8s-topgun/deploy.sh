@@ -28,10 +28,15 @@ terraform output -json \
   | jq -r '.kube_config.value' | base64 -d > "${output}/config"
 chmod go-r "${output}/config"
 
-echo "Waiting for all nodes in node pool to be ready"
 mkdir -p "${HOME}/.kube"
 cp "${output}/config" "${HOME}/.kube/config"
 
+echo "changing default storage class"
+kubectl patch storageclass linode-block-storage-retain -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
+kubectl patch storageclass linode-block-storage -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+kubectl get storageclass
+
+echo "Waiting for all nodes in node pool to be ready"
 while true; do
   pods="$(kubectl get nodes --no-headers | wc -l)"
   # the ${// /} is to remove any spaces
