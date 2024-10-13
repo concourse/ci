@@ -379,11 +379,8 @@ jobs:
       params: {format: oci}
     - get: ci
   - across:
-    - var: runtime
-      values:
-      # - guardian # guardian doesn't work on our fedora 40 workers because they only have cgroupv2
-      - containerd
-      max_in_flight: all
+    # We use to test both runtimes, but guardian is too heavy of a burden
+    # for the OSS team to support at this time so we're only testing containerd
     - var: postgres-image
       values:
       - postgres-image
@@ -393,9 +390,10 @@ jobs:
     image: unit-image
     privileged: true
     params:
-      RUNTIME: ((.:runtime))
+      RUNTIME: containerd
     file: ci/tasks/docker-compose-testflight.yml
-    input_mapping: {postgres-image: ((.:postgres-image))}
+    input_mapping:
+      postgres-image: ((.:postgres-image))
 
 - name: watsjs
   public: true

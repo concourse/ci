@@ -19,5 +19,5 @@ params:
   DOWNLOAD_CLI: true
 
 run:
-  path: ci/tasks/scripts/with-docker-compose
-  args: [ci/tasks/scripts/testflight]
+  path: ci/tasks/helpers/with-docker-compose
+  args: [ci/tasks/testflight/run.sh]
