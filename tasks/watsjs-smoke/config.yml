@@ -17,9 +17,9 @@ caches:
 params:
   ATC_URL:
   ATC_ADMIN_USERNAME: admin
-  ATC_ADMIN_PASSWORD:
+  ATC_ADMIN_PASSWORD: admin
   ATC_GUEST_USERNAME: guest
-  ATC_GUEST_PASSWORD:
+  ATC_GUEST_PASSWORD: guest
 
 run:
   path: ci/tasks/watsjs-smoke/run.sh
