@@ -344,7 +344,7 @@ jobs:
     image: dev-image
     privileged: true
     timeout: 1h
-    file: ci/tasks/containerd-integration.yml
+    file: ci/tasks/containerd-integration/config.yml
 
 - name: check-docker-mounts
   public: true
