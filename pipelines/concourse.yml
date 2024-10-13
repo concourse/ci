@@ -767,7 +767,8 @@ jobs:
     privileged: true
     image: unit-image
     file: ci/tasks/quickstart-smoke.yml
-    input_mapping: {concourse-rc-image: concourse-dev-image}
+    input_mapping:
+      concourse-rc-image: concourse-dev-image
     params:
       RELEASE_NAME: concourse-smoke
 

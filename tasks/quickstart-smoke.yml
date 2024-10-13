@@ -19,4 +19,4 @@ caches:
 - path: concourse/web/wats/node_modules
 
 run:
-  path: ci/tasks/scripts/quickstart-smoke
+  path: ci/tasks/helpers/quickstart-smoke

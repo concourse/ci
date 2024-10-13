@@ -2,7 +2,7 @@
 
 set -ex -u
 
-source ci/tasks/scripts/docker-helpers.sh
+source ci/tasks/helpers/docker-helpers.sh
 
 start_docker
 
@@ -19,7 +19,7 @@ pushd endpoint-info
   echo "test" > admin_password
 popd
 
-ci/tasks/scripts/smoke
+ci/tasks/watsjs-smoke/run.sh
 
 pushd docs
   docker compose down
