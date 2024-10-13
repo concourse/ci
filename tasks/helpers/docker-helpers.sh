@@ -3,6 +3,7 @@
 set -euo pipefail
 
 function start_docker() {
+  echo "starting docker"
   mkdir -p /var/log
   mkdir -p /var/run
 
@@ -21,6 +22,7 @@ function start_docker() {
 }
 
 function stop_docker() {
+  echo "stopping docker"
   local pid=$(cat /tmp/docker.pid)
   if [ -z "$pid" ]; then
     return 0
