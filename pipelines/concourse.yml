@@ -467,6 +467,7 @@ jobs:
         values:
           - "1.30"
           - "1.31"
+      max_in_flight: all
     do:
     - task: k8s-cluster-deploy
       file: ci/tasks/k8s-topgun/deploy.yml
