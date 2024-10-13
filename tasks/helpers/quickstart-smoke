@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -ex -u
+set -euo pipefail
 
 source ci/tasks/helpers/docker-helpers.sh
 
@@ -9,7 +9,10 @@ start_docker
 # load in concourse/concourse-dev:latest
 [ -d concourse-rc-image ] && docker load -i concourse-rc-image/image.tar
 
-docker compose -f docs/docker-compose.yml -f ci/overrides/docker-compose.latest-rc.yml up -d
+docker compose \
+  -f docs/docker-compose.yml \
+  -f ci/overrides/docker-compose.latest-rc.yml \
+  up -d
 
 # now run the watjs/smoke tests
 export ATC_URL="http://localhost:8080"
