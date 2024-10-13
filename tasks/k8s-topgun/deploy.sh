@@ -26,3 +26,17 @@ terraform apply \
 
 terraform output -json \
   | jq -r '.kube_config.value' | base64 -d > "${output}/config"
+
+echo "Waiting for all nodes in node pool to be ready"
+mkdir -p "${HOME}/.kube"
+cp "${output}/config" "${HOME}/.kube/config"
+
+while true; do
+  pods="$(kubectl get nodes --no-headers | wc -l)"
+  # the ${// /} is to remove any spaces
+  if [[ "${pods// /}" == "8" ]]; then
+    echo "All pods connected to the control plane"
+    exit 0
+  fi
+  sleep 20s
+done

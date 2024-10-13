@@ -4,8 +4,8 @@ resource "linode_lke_cluster" "main" {
   k8s_version = var.k8s_version
 
   pool {
-    type  = "g6-standard-1" #Linode 2GB shared CPU
-    count = 2
+    type  = "g6-standard-6" #Linode 16GB shared CPU
+    count = 8
   }
 }
 
