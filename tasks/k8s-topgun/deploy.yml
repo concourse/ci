@@ -1,0 +1,21 @@
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: concourse/unit
+
+inputs:
+- name: ci
+
+outputs:
+- name: kubeconfig
+
+params:
+  cleanup: false
+  LINODE_TOKEN:
+  WORKSPACE: default
+  TF_VAR_k8s_version: "1.30"
+
+run:
+  path: ci/tasks/k8s-topgun/deploy.sh

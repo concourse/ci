@@ -442,90 +442,55 @@ jobs:
     image: unit-image
     file: ci/tasks/integration/config.yml
 
-- name: k8s-smoke
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed: [build-image]
-      trigger: true
-    - get: concourse-dev-image
-      passed: [build-image]
-      params: {format: oci}
-      trigger: true
-    - get: concourse-chart
-      trigger: true
-    - get: unit-image
-    - get: ci
-  - try:
-      task: try-delete
-      image: unit-image
-      file: ci/tasks/k8s-delete.yml
-      params:
-        SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
-        RELEASE_NAME: concourse-smoke
-        CONCOURSE_IMAGE: concourse/concourse-dev
-  - task: deploy
-    image: unit-image
-    input_mapping: {image-info: concourse-dev-image}
-    file: ci/tasks/k8s-deploy.yml
-    params:
-      SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
-      RELEASE_NAME: concourse-smoke
-      CONCOURSE_IMAGE: concourse/concourse-dev
-  - task: k8s-smoke
-    image: unit-image
-    file: ci/tasks/k8s-smoke.yml
-    params:
-      SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
-      RELEASE_NAME: concourse-smoke
-      MAX_TICKS: 300
-  - task: delete
-    image: unit-image
-    file: ci/tasks/k8s-delete.yml
-    params:
-      SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
-      RELEASE_NAME: concourse-smoke
-      CONCOURSE_IMAGE: concourse/concourse-dev
-
 - name: k8s-topgun
   public: true
   serial: true
   plan:
   - in_parallel:
     - get: concourse
-      passed: [k8s-smoke]
-      tags: [k8s-topgun]
       trigger: true
+      passed: [build-image]
     - get: concourse-dev-image
       params: {format: oci}
-      passed: [k8s-smoke]
-      tags: [k8s-topgun]
       trigger: true
+      passed: [build-image]
     - get: unit-image
-      tags: [k8s-topgun]
     - get: concourse-chart
-      passed: [k8s-smoke]
-      tags: [k8s-topgun]
       trigger: true
     - get: prometheus-chart
-      tags: [k8s-topgun]
       params: {untar: true}
     - get: postgresql-chart
-      tags: [k8s-topgun]
       params: {untar: true}
     - get: ci
-      tags: [k8s-topgun]
-  - task: k8s-topgun
-    file: ci/tasks/k8s-topgun.yml
-    tags: [k8s-topgun]
-    image: unit-image
-    input_mapping: {concourse-rc-image: concourse-dev-image}
-    params:
-      IN_CLUSTER: "true"
-      SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
-      CONCOURSE_IMAGE_NAME: concourse/concourse-dev
+  - across:
+      - var: k8s_version
+        values:
+          - "1.30"
+          - "1.31"
+    do:
+    - task: k8s-cluster-deploy
+      file: ci/tasks/k8s-topgun/deploy.yml
+      image: unit-image
+      params:
+        LINODE_TOKEN: ((ci-tests.linode_token))
+        WORKSPACE: main-((.:k8s_version))
+        TF_VAR_k8s_version: ((.:k8s_version))
+    - task: k8s-topgun
+      file: ci/tasks/k8s-topgun/config.yml
+      image: unit-image
+      input_mapping:
+        concourse-rc-image: concourse-dev-image
+      params:
+        CONCOURSE_IMAGE_NAME: concourse/concourse-dev
+      ensure:
+        task: k8s-cluster-cleanup
+        file: ci/tasks/k8s-topgun/deploy.yml
+        image: unit-image
+        params:
+          cleanup: true
+          LINODE_TOKEN: ((ci-tests.linode_token))
+          WORKSPACE: main-((.:k8s_version))
+          TF_VAR_k8s_version: ((.:k8s_version))
 
 - name: k8s-check-helm-params
   public: true

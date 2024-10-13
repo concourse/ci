@@ -1,0 +1,26 @@
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: concourse/unit
+
+inputs:
+- name: concourse
+- name: ci
+- name: kubeconfig
+- name: concourse-rc-image
+- name: concourse-chart
+- name: prometheus-chart
+- name: postgresql-chart
+
+caches:
+- path: gopath
+
+params:
+  IN_CLUSTER: "false" #specifies whether the test is being run inside the k8s cluster
+  K8S_ENGINE: "LKE"
+  CONCOURSE_IMAGE_NAME:
+
+run:
+  path: ci/tasks/k8s-topgun/run.sh
