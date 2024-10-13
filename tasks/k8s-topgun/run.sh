@@ -8,7 +8,9 @@ readonly SKIP="${SKIP:-}"
 
 export GOPATH="${BUILD_DIR}/gopath"
 export PATH=$GOPATH/bin:$PATH
-export KUBECONFIG="${BUILD_DIR}/kubeconfig/config"
+
+mkdir -p "~/.kube"
+cp "${BUILD_DIR}/kubeconfig/config" "~/.kube/config"
 
 mkdir -p helm-charts/stable
 cp -r prometheus-chart/prometheus helm-charts/stable
