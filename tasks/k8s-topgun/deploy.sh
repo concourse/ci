@@ -25,4 +25,4 @@ terraform apply \
   --replace 'linode_lke_cluster.main'
 
 terraform output -json \
-  | jq -r '.kube_config.value' | base64 -D > "${output}/config"
+  | jq -r '.kube_config.value' | base64 -d > "${output}/config"
