@@ -75,7 +75,7 @@ while true; do
   pods="$(kubectl get nodes --no-headers --ignore-not-found=true | wc -l)"
   # the ${// /} is to remove any spaces
   if [[ "${pods// /}" == "8" ]]; then
-    echo "All pods connected to the control plane"
+    echo "All nodes connected to the control plane"
     exit 0
   fi
   sleep 20
