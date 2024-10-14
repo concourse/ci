@@ -54,7 +54,7 @@ kubectl get storageclass
 
 echo "Waiting for all nodes in node pool to be ready"
 while true; do
-  pods="$(kubectl get nodes --no-headers | grep -v NotReady | wc -l)"
+  pods="$(kubectl get nodes --no-headers --ignore-not-found=true | grep -v NotReady | wc -l)"
   # the ${// /} is to remove any spaces
   if [[ "${pods// /}" == "8" ]]; then
     echo "All pods connected to the control plane"
