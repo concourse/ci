@@ -25,7 +25,7 @@ cd concourse
 
 go mod download
 
-ginkgo -nodes=8 \
+ginkgo -nodes=6 \
   -race \
   -keep-going \
   -poll-progress-after=900s \
