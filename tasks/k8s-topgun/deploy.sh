@@ -25,7 +25,7 @@ if [[ "${cleanup,,}" == "true" ]]; then
 
   kubectl get namespaces \
     --no-headers \
-    -output custom-columns=':metadata.name' \
+    --output custom-columns=':metadata.name' \
     | grep '^topgun' \
     | xargs -I % kubectl delete namespace % --wait=true \
     || true
