@@ -14,6 +14,22 @@ terraform workspace select "$WORKSPACE" || \
   terraform workspace new "$WORKSPACE"
 
 if [[ "${cleanup,,}" == "true" ]]; then
+  echo "removing any leftover topgun namespaces to ensure all volumes in Linode are deleted"
+
+  # Adding '|| true' to ignore any errors, except for the final 'terraform destroy'
+  terraform output -json \
+    | jq -r '.kube_config.value' \
+    | base64 -d > "${output}/config" \
+    || true
+  chmod go-r "${output}/config"
+
+  kubectl get namespaces \
+    --no-headers \
+    -output custom-columns=':metadata.name' \
+    | grep '^topgun' \
+    | xargs -I % kubectl delete namespace % --wait=true \
+    || true
+
   terraform destroy \
     --auto-approve
 
@@ -31,13 +47,7 @@ chmod go-r "${output}/config"
 mkdir -p "${HOME}/.kube"
 cp "${output}/config" "${HOME}/.kube/config"
 
-echo "changing default storage class"
-# For some reason the default stoarge class that linode sets results in
-# volumes being made but never attached to the nodes. Switching to the
-# non-default storage class fixes this for whatever reason. This is fine
-# anyways as we don't want volumes that we retain, we want them destroyed
-# after we're done using them which is what the non-default storage class
-# does
+echo "changing default storage class to ephemeral class"
 kubectl patch storageclass linode-block-storage-retain -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
 kubectl patch storageclass linode-block-storage -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 kubectl get storageclass
