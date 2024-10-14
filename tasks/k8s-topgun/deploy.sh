@@ -60,5 +60,5 @@ while true; do
     echo "All pods connected to the control plane"
     exit 0
   fi
-  sleep 20s
+  sleep 20
 done
