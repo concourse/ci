@@ -6,6 +6,8 @@ script_dir=${0%/*}
 deployment_path="${script_dir}/deployment"
 output="$(pwd)/kubeconfig"
 
+mkdir -p "${HOME}/.kube"
+
 cd "$deployment_path"
 
 terraform init
@@ -19,9 +21,9 @@ if [[ "${cleanup,,}" == "true" ]]; then
   # Adding '|| true' to ignore any errors, except for the final 'terraform destroy'
   terraform output -json \
     | jq -r '.kube_config.value' \
-    | base64 -d > "${output}/config" \
+    | base64 -d > "${HOME}/.kube/config" \
     || true
-  chmod go-r "${output}/config"
+  chmod go-r "${HOME}/.kube/config"
 
   kubectl get namespaces \
     --no-headers \
@@ -44,7 +46,6 @@ terraform output -json \
   | jq -r '.kube_config.value' | base64 -d > "${output}/config"
 chmod go-r "${output}/config"
 
-mkdir -p "${HOME}/.kube"
 cp "${output}/config" "${HOME}/.kube/config"
 
 echo "Waiting for k8s API server to come up"
