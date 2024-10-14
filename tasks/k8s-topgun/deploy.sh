@@ -47,6 +47,16 @@ chmod go-r "${output}/config"
 mkdir -p "${HOME}/.kube"
 cp "${output}/config" "${HOME}/.kube/config"
 
+echo "Waiting for k8s API server to come up"
+fivemins=$((EPOCHSECONDS + 300))
+while [[ $EPOCHSECONDS -lt ${fivemins} ]]; do
+  if kubectl version > /dev/null; then
+    echo "k8s API server is up"
+    break
+  fi
+  sleep 30
+done
+
 echo "changing default storage class to ephemeral class"
 kubectl patch storageclass linode-block-storage-retain -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
 kubectl patch storageclass linode-block-storage -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
