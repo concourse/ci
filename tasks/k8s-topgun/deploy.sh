@@ -6,7 +6,7 @@ script_dir=${0%/*}
 deployment_path="${script_dir}/deployment"
 output="$(pwd)/kubeconfig"
 
-cd $deployment_path
+cd "$deployment_path"
 
 terraform init
 
@@ -49,13 +49,20 @@ cp "${output}/config" "${HOME}/.kube/config"
 
 echo "Waiting for k8s API server to come up"
 fivemins=$((EPOCHSECONDS + 300))
+ready=false
 while [[ $EPOCHSECONDS -lt ${fivemins} ]]; do
   if kubectl version > /dev/null; then
     echo "k8s API server is up"
+    ready=true
     break
   fi
   sleep 30
 done
+
+if [[ ! $ready ]]; then
+  echo "k8s API server failed to come up"
+  exit 1
+fi
 
 echo "changing default storage class to ephemeral class"
 kubectl patch storageclass linode-block-storage-retain -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
