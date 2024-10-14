@@ -358,7 +358,7 @@ jobs:
     - task: docker-mounts
       image: unit-image
       privileged: true
-      file: ci/tasks/docker-mounts.yml
+      file: ci/tasks/docker-mounts/config.yml
 
 - name: testflight
   public: true

@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -euox pipefail
+set -euo pipefail
 
 cat > expected_docker_mounts <<EOF
 proc on /proc type proc (rw,nosuid,nodev,noexec,relatime)

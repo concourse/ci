@@ -9,5 +9,5 @@ inputs:
 - name: ci
 
 run:
-  path: ci/tasks/scripts/start-docker
-  args: [ci/tasks/scripts/docker-mounts]
+  path: ci/tasks/helpers/start-docker
+  args: [ci/tasks/docker-mounts/run.sh]
