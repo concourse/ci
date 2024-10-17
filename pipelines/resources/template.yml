@@ -227,6 +227,7 @@ plan:
     repo: resource-repo
 - load_var: version
   file: version/version
+  reveal: true
 - in_parallel:
   - put: resource-image
     params:
@@ -267,6 +268,7 @@ plan:
   - #@ template.replace(extra_get_steps())
 - load_var: version
   file: version/version
+  reveal: true
 - #@ build_task(resource_name, "linux/amd64")
 - #@ template.replace(extra_steps())
 - task: date-tag
