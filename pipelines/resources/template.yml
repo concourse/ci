@@ -430,7 +430,7 @@ resources:
   source:
     owner: clarafu
     repository: release-me
-    access_token: ((github/release_token))
+    access_token: ((github/public_access_token))
 
 - name: oci-build-task
   type: registry-image
