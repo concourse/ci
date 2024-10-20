@@ -1173,6 +1173,7 @@ resources:
   source:
     uri: https://github.com/concourse/concourse.git
     branch: release/((release_minor)).x
+    private_key: ((github/concourse/concourse.private_key))
     ignore_paths:
     - release-notes/
 
@@ -1182,7 +1183,7 @@ resources:
   source:
     uri: git@github.com:concourse/ci.git
     branch: ((ci_branch))
-    private_key: ((deploy_keys.ci-repo-push))
+    private_key: ((github/concourse/concourse.private_key))
 
 - name: ci-pr-pipeline
   type: git
@@ -1190,31 +1191,15 @@ resources:
   source:
     uri: https://github.com/concourse/ci
     branch: ((ci_branch))
+    private_key: ((github/concourse/concourse.private_key))
     paths:
     - pipelines/pr.yml
-
-- name: infrastructure
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:concourse/infrastructure.git
-    branch: master
-    private_key: ((greenpeace_private_key))
-
-- name: infrastructure-bump
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:concourse/infrastructure.git
-    branch: master
-    private_key: ((greenpeace_private_key))
 
 - name: concourse-docker
   type: git
   icon: *git-icon
   source:
     uri: https://github.com/concourse/concourse-docker.git
-    branch: master
     branch: release/((release_minor)).x
 
 - name: resource-types-image
