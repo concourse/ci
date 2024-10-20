@@ -1,3 +1,7 @@
+locals {
+  node_pool_size = 4
+}
+
 resource "linode_lke_cluster" "main" {
   label       = "topgun-${random_pet.topgun.id}"
   region      = "eu-central"
@@ -5,7 +9,7 @@ resource "linode_lke_cluster" "main" {
 
   pool {
     type  = "g6-standard-6" #Linode 16GB shared CPU
-    count = 4
+    count = local.node_pool_size
   }
 }
 

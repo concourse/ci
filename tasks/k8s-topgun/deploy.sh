@@ -42,8 +42,8 @@ terraform apply \
   --auto-approve \
   --replace 'linode_lke_cluster.main'
 
-terraform output -json \
-  | jq -r '.kube_config.value' | base64 -d > "${output}/config"
+module_output=$(terraform output -json)
+echo "${module_output}" | jq -r '.kube_config.value' | base64 -d > "${output}/config"
 chmod go-r "${output}/config"
 
 cp "${output}/config" "${HOME}/.kube/config"
@@ -71,10 +71,11 @@ kubectl patch storageclass linode-block-storage -p '{"metadata": {"annotations":
 kubectl get storageclass
 
 echo "Waiting for all nodes in node pool to be ready"
+node_pool_size=$(echo "${module_output}" | jq -r '.node_pool_size.value')
 while true; do
   pods="$(kubectl get nodes --no-headers --ignore-not-found=true | wc -l)"
   # the ${// /} is to remove any spaces
-  if [[ "${pods// /}" == "8" ]]; then
+  if [[ "${pods// /}" == "${node_pool_size}" ]]; then
     echo "All nodes connected to the control plane"
     exit 0
   fi
