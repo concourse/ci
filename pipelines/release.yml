@@ -24,6 +24,10 @@ meta:
   - &image-icon docker
 
 resource_types:
+- name: bosh-release
+  type: registry-image
+  source: {repository: dpb587/bosh-release-resource}
+
 - name: helm-chart
   type: registry-image
   source: {repository: concourse/helm-chart-resource}
@@ -48,7 +52,6 @@ groups:
   - build-rc-image
   - scan-rc-image
   - bin-smoke
-  - bump-prod-to-rc
 
 - name: k8s
   jobs:
@@ -399,32 +402,24 @@ jobs:
   plan:
   - in_parallel:
     - get: concourse
-      passed: [k8s-smoke]
+      passed: [build-rc-image]
       trigger: true
-      tags: [k8s-topgun]
     - get: version
-      passed: [k8s-smoke]
+      passed: [build-rc-image]
       trigger: true
-      tags: [k8s-topgun]
     - get: concourse-rc-image
-      passed: [k8s-smoke]
+      passed: [build-rc-image]
       trigger: true
       params: {format: oci}
-      tags: [k8s-topgun]
     - get: unit-image
-      tags: [k8s-topgun]
     - get: prometheus-chart
-      tags: [k8s-topgun]
       params: {untar: true}
     - get: postgresql-chart
-      tags: [k8s-topgun]
       params: {untar: true}
     - get: concourse-chart
       trigger: true
-      passed: [k8s-smoke]
-      tags: [k8s-topgun]
+      passed: [build-rc-image]
     - get: ci
-      tags: [k8s-topgun]
   - across:
       - var: k8s_version
         max_in_flight: all
@@ -1201,6 +1196,7 @@ resources:
   source:
     uri: https://github.com/concourse/concourse-docker.git
     branch: release/((release_minor)).x
+    private_key: ((github/concourse/concourse.private_key))
 
 - name: resource-types-image
   type: registry-image
@@ -1297,10 +1293,12 @@ resources:
     dev_releases: true
     private_config: &release_private_config
       blobstore:
-        provider: gcs
+        provider: s3
         options:
-          credentials_source: static
-          json_key: ((concourse_artifacts_json_key))
+          bucket_name: concourse-bosh
+          access_key_id: ((s3.access_key))
+          secret_access_key: ((s3.secret_key))
+          host: ((s3.endpoint_url))
 
 - name: concourse-release-final
   type: bosh-release
@@ -1309,7 +1307,7 @@ resources:
     uri: git@github.com:concourse/concourse-bosh-release
     branch: master
     private_config: *release_private_config
-    private_key: ((concourse_release_deploy_key))
+    private_key: ((github/legacy_release_key))
 
 - name: concourse-release-repo
   type: git
@@ -1317,18 +1315,7 @@ resources:
   source:
     uri: git@github.com:concourse/concourse-bosh-release
     branch: release/((release_minor)).x
-    private_key: ((concourse_release_deploy_key))
-
-- name: smoke-deployment
-  tags: [bosh]
-  type: bosh-deployment
-  icon: fire
-  source:
-    target: https://10.0.0.6:25555
-    client: ((testing_bosh_client.id))
-    client_secret: ((testing_bosh_client.secret))
-    ca_cert: ((testing_bosh_ca_cert))
-    deployment: ((concourse_smoke_deployment_name))
+    private_key: ((github/legacy_release_key))
 
 - name: concourse-chart
   type: git
@@ -1336,7 +1323,7 @@ resources:
   source:
     uri: git@github.com:concourse/concourse-chart.git
     branch: release/((release_minor)).x
-    private_key: ((concourse_chart_private_key))
+    private_key: ((github/concourse/concourse-chart.private_key))
 
 - name: prometheus-chart
   type: helm-chart
@@ -1363,7 +1350,7 @@ resources:
     drafts: true
     owner: concourse
     repository: concourse
-    access_token: ((concourse_bot_access_token))
+    access_token: ((github/concourse/release_token))
 
 - name: concourse-github-release
   type: github-release
@@ -1371,7 +1358,7 @@ resources:
   source:
     owner: concourse
     repository: concourse
-    access_token: ((concourse_bot_access_token))
+    access_token: ((github/concourse/release_token))
 
 - name: concourse-boshio
   type: bosh-io-release
@@ -1410,17 +1397,32 @@ resources:
   source:
     uri: git@github.com:concourse/concourse-bosh-deployment.git
     branch: release/((release_minor)).x
-    private_key: ((concourse_deployment_repo_private_key))
+    private_key: ((github/legacy_release_key))
 
 - name: postgres-image
   type: registry-image
   icon: *image-icon
-  source: {repository: postgres}
+  source:
+    repository: postgres
+    username: ((docker.username))
+    password: ((docker.public_read))
+
+- name: postgres-image-legacy
+  type: registry-image
+  icon: *image-icon
+  source:
+    repository: postgres
+    tag: 11
+    username: ((docker.username))
+    password: ((docker.public_read))
 
 - name: vault-image
   type: registry-image
   icon: *image-icon
-  source: {repository: vault}
+  source:
+    repository: hashicorp/vault
+    username: ((docker.username))
+    password: ((docker.public_read))
 
 - name: dumb-init
   type: github-release
@@ -1437,7 +1439,7 @@ resources:
     owner: cloudfoundry
     repository: garden-runc-release
     semver_constraint: ((dep_bin_versions.gdn))
-    access_token: ((concourse_github_dummy.access_token))
+    access_token: ((github/public_access_token))
 
 - name: containerd
   type: github-release
@@ -1446,7 +1448,7 @@ resources:
     owner: containerd
     repository: containerd
     semver_constraint: ((dep_bin_versions.containerd))
-    access_token: ((concourse_github_dummy.access_token))
+    access_token: ((github/public_access_token))
 
 - name: runc
   type: github-release
@@ -1455,7 +1457,7 @@ resources:
     owner: opencontainers
     repository: runc
     semver_constraint: ((dep_bin_versions.runc))
-    access_token: ((concourse_github_dummy.access_token))
+    access_token: ((github/public_access_token))
 
 - name: cni
   type: github-release
@@ -1464,12 +1466,13 @@ resources:
     owner: containernetworking
     repository: plugins
     semver_constraint: ((dep_bin_versions.cni))
-    access_token: ((concourse_github_dummy.access_token))
+    access_token: ((github/public_access_token))
 
 - name: postgres-release
   type: bosh-io-release
   icon: *release-icon
-  source: {repository: cloudfoundry/postgres-release}
+  source:
+    repository: cloudfoundry/postgres-release
 
 - name: bpm-release
   type: bosh-io-release
@@ -1477,21 +1480,17 @@ resources:
   source:
     repository: cloudfoundry/bpm-release
 
-- name: vault-release
-  type: bosh-io-release
-  icon: *release-icon
-  source:
-    repository: vito/vault-boshrelease
-
 - name: credhub-release
   type: bosh-io-release
   icon: *release-icon
-  source: {repository: pivotal-cf/credhub-release}
+  source:
+    repository: pivotal-cf/credhub-release
 
 - name: uaa-release
   type: bosh-io-release
   icon: *release-icon
-  source: {repository: cloudfoundry/uaa-release}
+  source:
+    repository: cloudfoundry/uaa-release
 
 - name: bbr-sdk-release
   type: bosh-io-release
