@@ -843,7 +843,7 @@ resources:
   source:
     owner: containerd
     repository: containerd
-    access_token: ((github/release_token))
+    access_token: ((github/public_access_token))
 
 - name: runc
   type: github-release
@@ -851,7 +851,7 @@ resources:
   source:
     owner: opencontainers
     repository: runc
-    access_token: ((github/release_token))
+    access_token: ((github/public_access_token))
 
 - name: dumb-init
   type: github-release
@@ -859,7 +859,7 @@ resources:
   source:
     owner: Yelp
     repository: dumb-init
-    access_token: ((github/release_token))
+    access_token: ((github/public_access_token))
 
 - name: gdn
   type: github-release
@@ -867,7 +867,7 @@ resources:
   source:
     owner: cloudfoundry
     repository: garden-runc-release
-    access_token: ((github/release_token))
+    access_token: ((github/public_access_token))
 
 - name: cni
   type: github-release
@@ -875,7 +875,7 @@ resources:
   source:
     owner: containernetworking
     repository: plugins
-    access_token: ((github/release_token))
+    access_token: ((github/public_access_token))
 
 - name: mock-resource
   type: registry-image
