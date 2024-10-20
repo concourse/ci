@@ -406,8 +406,8 @@ jobs:
     - get: unit-image
     - get: dev-image
       passed: [dev-image]
-      trigger: true
       params: {format: oci}
+      trigger: true
     - get: postgres-image
       params: {format: oci}
     - get: ci
@@ -477,7 +477,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ((s3.access_key))
           AWS_SECRET_ACCESS_KEY: ((s3.secret_key))
           LINODE_TOKEN: ((ci-tests.linode_token))
-          WORKSPACE: main-((.:k8s_version))
+          WORKSPACE: main
           TF_VAR_k8s_version: ((.:k8s_version))
       - task: k8s-topgun
         file: ci/tasks/k8s-topgun/config.yml
@@ -495,7 +495,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ((s3.access_key))
           AWS_SECRET_ACCESS_KEY: ((s3.secret_key))
           LINODE_TOKEN: ((ci-tests.linode_token))
-          WORKSPACE: main-((.:k8s_version))
+          WORKSPACE: main
           TF_VAR_k8s_version: ((.:k8s_version))
 
 - name: k8s-check-helm-params
@@ -523,7 +523,6 @@ jobs:
     params: {DISTRIBUTION: helm}
 
 - name: build-concourse
-  old_name: build-rc
   public: true
   serial: true
   plan:
@@ -614,22 +613,21 @@ jobs:
   - in_parallel:
     - put: linux-dev-ubuntu
       no_get: true
+      inputs: detect
       params:
         file: concourse-linux-ubuntu/concourse-*.tgz
-      inputs: detect
     - put: windows-dev
       no_get: true
+      inputs: detect
       params:
         file: concourse-windows/concourse-*.zip
-      inputs: detect
     - put: darwin-dev
       no_get: true
+      inputs: detect
       params:
         file: concourse-darwin/concourse-*.tgz
-      inputs: detect
 
 - name: build-image
-  old_name: build-rc-image
   public: true
   serial: true
   plan:
@@ -646,11 +644,13 @@ jobs:
     - get: oci-build-task
     - get: ci
   - task: build-ubuntu
-    file: concourse-docker/ci/build-image.yml
-    image: oci-build-task
-    input_mapping: {linux-rc: linux-dev-ubuntu}
-    output_mapping: {image: image-ubuntu}
     privileged: true
+    image: oci-build-task
+    file: concourse-docker/ci/build-image.yml
+    input_mapping:
+      linux-rc: linux-dev-ubuntu
+    output_mapping:
+      image: image-ubuntu
   - put: concourse-dev-image
     no_get: true
     inputs: detect
