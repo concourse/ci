@@ -7,16 +7,13 @@
 #@ def build_params(resource_name):
   #@ if resource_name == "registry-image":
 CONTEXT: #@ resource_name + "-resource"
-BUILD_ARG_DOCKER_PRIVATE_PASSWORD: ((registry_image_resource_docker.password))
-BUILD_ARG_DOCKER_PRIVATE_REPO: ((registry_image_resource_docker.private_repo))
-BUILD_ARG_DOCKER_PRIVATE_USERNAME: ((registry_image_resource_docker.username))
+BUILD_ARG_DOCKER_PRIVATE_USERNAME: ((docker.username))
+BUILD_ARG_DOCKER_PRIVATE_PASSWORD: ((docker.read_write))
+BUILD_ARG_DOCKER_PRIVATE_REPO: ((github/concourse/registry-image.test_private_repo))
 
-BUILD_ARG_DOCKER_PUSH_PASSWORD: ((registry_image_resource_docker.password))
-BUILD_ARG_DOCKER_PUSH_REPO: ((registry_image_resource_docker.push_repo))
-BUILD_ARG_DOCKER_PUSH_USERNAME: ((registry_image_resource_docker.username))
-
-BUILD_ARG_GCR_PUSH_SERVICE_ACCOUNT_KEY: ((registry_image_resource_gcr.service_account_key))
-BUILD_ARG_GCR_PUSH_REPO: ((registry_image_resource_gcr.repo))
+BUILD_ARG_DOCKER_PUSH_USERNAME: ((docker.username))
+BUILD_ARG_DOCKER_PUSH_PASSWORD: ((docker.read_write))
+BUILD_ARG_DOCKER_PUSH_REPO: ((github/concourse/registry-image.test_push_repo))
   #@ elif resource_name == "docker-image":
 CONTEXT: #@ resource_name + "-resource"
 UNPACK_ROOTFS: 'true'
