@@ -5,7 +5,7 @@ resource "linode_lke_cluster" "main" {
 
   pool {
     type  = "g6-standard-6" #Linode 16GB shared CPU
-    count = 8
+    count = 4
   }
 }
 
