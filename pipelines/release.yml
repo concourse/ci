@@ -782,13 +782,16 @@ jobs:
     - get: bpm-release
     - get: postgres-release
   - task: extract-resource-type-versions
+    image: unit-image
     file: ci/tasks/extract-resource-type-versions.yml
     input_mapping: {linux-rc: linux-rc-ubuntu}
   - in_parallel:
     - task: build-release-name
+      image: unit-image
       file: ci/tasks/build-release-name.yml
       input_mapping: {version: final-version}
     - task: build-release-notes
+      image: unit-image
       file: ci/tasks/build-release-notes.yml
       input_mapping:
         repo: concourse
