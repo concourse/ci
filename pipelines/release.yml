@@ -418,7 +418,6 @@ jobs:
       params: {untar: true}
     - get: concourse-chart
       trigger: true
-      passed: [build-rc-image]
     - get: ci
   - across:
       - var: k8s_version
@@ -799,12 +798,9 @@ jobs:
     - get: concourse-rc-image
       passed: [k8s-topgun, build-rc-image]
     - get: concourse-release
-      passed: [bosh-check-props]
       params: {tarball: false}
     - get: bpm-release
-      passed: [bosh-check-props]
     - get: postgres-release
-      passed: [bosh-check-props]
   - task: extract-resource-type-versions
     file: ci/tasks/extract-resource-type-versions.yml
     input_mapping: {linux-rc: linux-rc-ubuntu}
@@ -880,13 +876,9 @@ jobs:
         trigger: true
       - get: version
         passed: [shipit]
-      - get: gcp-ubuntu-stemcell
-        passed: [shipit]
     - in_parallel:
       - load_var: concourse-version
         file: version/version
-      - load_var: stemcell-version
-        file: gcp-ubuntu-stemcell/version
     - in_parallel:
       - task: discover-postgresql-version
         file: ci/tasks/discover-component-version.yml
@@ -900,11 +892,6 @@ jobs:
         params:
           COMPONENT_NAME: "helm"
           CONCOURSE_VERSION: ((.:concourse-version))
-      - task: discover-stemcell-version
-        file: ci/tasks/discover-stemcell-version.yml
-        params:
-          CONCOURSE_VERSION: ((.:concourse-version))
-          STEMCELL_VERSION: ((.:stemcell-version))
     - in_parallel:
       - put: resource-postgresql-version
         no_get: true
@@ -916,11 +903,6 @@ jobs:
         inputs: detect
         params:
           file: "helm-version/helm-version-*.txt"
-      - put: gcp-stemcell-version
-        no_get: true
-        inputs: detect
-        params:
-          file: "stemcell-version/stemcell-version-*.txt"
 
 - name: publish-binaries
   serial: true
@@ -1386,11 +1368,6 @@ resources:
   icon: *image-icon
   source: {repository: concourse/oci-build-task}
 
-- name: gcp-ubuntu-stemcell
-  type: bosh-io-stemcell
-  icon: *release-icon
-  source: {name: bosh-google-kvm-ubuntu-((stemcell_name))-go_agent}
-
 - name: cbd
   type: git
   icon: *git-icon
@@ -1648,16 +1625,6 @@ resources:
     secret_access_key: ((s3.secret_key))
     endpoint: ((s3.endpoint_url))
     regexp: "helm-version-(.*).txt"
-
-- name: gcp-stemcell-version
-  type: s3
-  icon: format-list-bulleted
-  source:
-    bucket: concourse-components-version
-    access_key_id: ((s3.access_key))
-    secret_access_key: ((s3.secret_key))
-    endpoint: ((s3.endpoint_url))
-    regexp: "stemcell-version-(.*).txt"
 
 - name: periodic-check
   icon: clock
