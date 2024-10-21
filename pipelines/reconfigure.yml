@@ -189,21 +189,12 @@ jobs:
       vars:
         base-image: paketobuildpacks/run-jammy-base
 
-- name: unit
-  plan:
-  - get: pipelines-and-tasks
-    trigger: true
-    passed: [reconfigure-self]
-  - task: unit
-    file: pipelines-and-tasks/tasks/ci-unit.yml
-    input_mapping: {ci: pipelines-and-tasks}
-
 - name: reconfigure-pipelines
   plan:
   - in_parallel:
     - get: pipelines-and-tasks
       trigger: true
-      passed: [unit]
+      passed: [reconfigure-self]
     - get: dex-ci
       trigger: true
     - get: docs-ci

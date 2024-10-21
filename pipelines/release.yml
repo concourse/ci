@@ -1663,6 +1663,8 @@ resources:
   type: registry-image
   source:
     repository: aquasec/trivy
+    username: ((docker.username))
+    password: ((docker.public_read))
 
 - name: concourse-prs
   type: pull-request
