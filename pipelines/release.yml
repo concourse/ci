@@ -1637,7 +1637,7 @@ resources:
   source:
     owner: clarafu
     repository: release-me
-    access_token: ((concourse_github_dummy.access_token))
+    access_token: ((github/public_access_token))
 
 - name: trivy
   type: registry-image
