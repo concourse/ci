@@ -694,7 +694,7 @@ jobs:
         AWS_ACCESS_KEY_ID: ((s3.access_key))
         AWS_SECRET_ACCESS_KEY: ((s3.secret_key))
         SSH_KEY: ((ci-tests.ssh_private_key))
-        WORKSPACE: bin-smoke-((.:os-image))
+        WORKSPACE: bin-smoke-main-((.:os-image))
         TF_VAR_image: ((.:os-image))
         TF_VAR_runtime: containerd
         TF_VAR_hcloud_token: ((ci-tests.hcloud_token))
@@ -717,7 +717,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ((s3.access_key))
           AWS_SECRET_ACCESS_KEY: ((s3.secret_key))
           SSH_KEY: ((ci-tests.ssh_private_key))
-          WORKSPACE: bin-smoke-((.:os-image))
+          WORKSPACE: bin-smoke-main-((.:os-image))
           TF_VAR_image: ((.:os-image))
           TF_VAR_runtime: containerd
           TF_VAR_hcloud_token: ((ci-tests.hcloud_token))

@@ -698,7 +698,7 @@ jobs:
         AWS_ACCESS_KEY_ID: ((s3.access_key))
         AWS_SECRET_ACCESS_KEY: ((s3.secret_key))
         SSH_KEY: ((ci-tests.ssh_private_key))
-        WORKSPACE: bin-smoke-((.:os-image))
+        WORKSPACE: bin-smoke-((release_minor))-((.:os-image))
         TF_VAR_image: ((.:os-image))
         TF_VAR_runtime: containerd
         TF_VAR_hcloud_token: ((ci-tests.hcloud_token))
@@ -721,34 +721,10 @@ jobs:
           AWS_ACCESS_KEY_ID: ((s3.access_key))
           AWS_SECRET_ACCESS_KEY: ((s3.secret_key))
           SSH_KEY: ((ci-tests.ssh_private_key))
-          WORKSPACE: bin-smoke-((.:os-image))
+          WORKSPACE: bin-smoke-((release_minor))-((.:os-image))
           TF_VAR_image: ((.:os-image))
           TF_VAR_runtime: containerd
           TF_VAR_hcloud_token: ((ci-tests.hcloud_token))
-  - across:
-    - var: runtime
-      values:
-      - guardian
-      - containerd
-      max_in_flight: 1
-    do:
-      - task: terraform-smoke
-        image: unit-image
-        file: ci/tasks/terraform-smoke.yml
-        input_mapping: {linux-rc: linux-rc-ubuntu}
-        params:
-          GCP_PROJECT: cf-concourse-production
-          GCP_KEY: ((concourse_smoke_gcp_key))
-          SSH_KEY: ((concourse_smoke_ssh_key))
-          WORKSPACE: release-((release_minor))
-          CONCOURSE_VERSION: ((.:concourse_version))
-          TF_VAR_GCP_IMAGE: ((gcp_image))
-          TF_VAR_RUNTIME: ((.:runtime))
-      - task: smoke
-        image: unit-image
-        file: ci/tasks/smoke.yml
-        input_mapping: {endpoint-info: outputs}
-        params: {MAX_TICKS: 300}
 
 - name: bosh-check-props
   public: true
