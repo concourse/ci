@@ -1407,7 +1407,7 @@ resources:
   source:
     owner: Yelp
     repository: dumb-init
-    access_token: ((concourse_github_dummy.access_token))
+    access_token: ((github/public_access_token))
 
 - name: gdn
   type: github-release
