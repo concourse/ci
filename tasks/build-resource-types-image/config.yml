@@ -30,4 +30,4 @@ outputs:
 - name: image
 
 run:
-  path: ci/tasks/build-resource-types-image/config.yml
+  path: ci/tasks/build-resource-types-image/run.sh
