@@ -438,7 +438,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ((s3.access_key))
           AWS_SECRET_ACCESS_KEY: ((s3.secret_key))
           LINODE_TOKEN: ((ci-tests.linode_token))
-          WORKSPACE: main
+          WORKSPACE: main-((release_minor))
           TF_VAR_k8s_version: ((.:k8s_version))
       - task: k8s-topgun
         file: ci/tasks/k8s-topgun/config.yml
@@ -454,7 +454,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ((s3.access_key))
           AWS_SECRET_ACCESS_KEY: ((s3.secret_key))
           LINODE_TOKEN: ((ci-tests.linode_token))
-          WORKSPACE: main
+          WORKSPACE: main-((release_minor))
           TF_VAR_k8s_version: "1.30"
 
 - name: rc
