@@ -19,8 +19,7 @@ chmod 0600 "keys/private_key"
 
 terraform init
 
-terraform workspace select "$WORKSPACE" || \
-  terraform workspace new "$WORKSPACE"
+terraform -or-create=true workspace select "$WORKSPACE"
 
 if [[ "${cleanup,,}" == "true" ]]; then
   terraform destroy \

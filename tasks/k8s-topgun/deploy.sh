@@ -12,8 +12,7 @@ cd "$deployment_path"
 
 terraform init
 
-terraform workspace select "$WORKSPACE" || \
-  terraform workspace new "$WORKSPACE"
+terraform -or-create=true workspace select "$WORKSPACE"
 
 if [[ "${cleanup,,}" == "true" ]]; then
   echo "removing any leftover topgun namespaces to ensure all volumes in Linode are deleted"
