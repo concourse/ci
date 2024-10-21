@@ -1187,7 +1187,7 @@ resources:
     repository: concourse/resource-types
     tag: release-((release_minor))
     username: ((docker.username))
-    password: ((docker.public_read))
+    password: ((docker.read_write))
 
 - name: dev-image
   type: registry-image
