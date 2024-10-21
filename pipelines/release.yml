@@ -1622,8 +1622,10 @@ resources:
   type: s3
   icon: format-list-bulleted
   source:
-    bucket: concourse-ubuntu-dpkg-list
-    json_key: ((concourse_dpkg_list_json_key))
+    bucket: concourse-components-version
+    access_key_id: ((s3.access_key))
+    secret_access_key: ((s3.secret_key))
+    endpoint: ((s3.endpoint_url))
     regexp: "concourse-dpkg-list-(.*).txt"
 
 - name: resource-postgresql-version
