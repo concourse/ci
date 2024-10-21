@@ -237,11 +237,15 @@ jobs:
       trigger: true
     - get: github-release-resource
       trigger: true
+    - get: busybox
+      params:
+        format: oci
   - task: build-ubuntu
-    output_mapping: {image: image_ubuntu}
     image: oci-build-task
     privileged: true
-    file: ci/tasks/build-resource-types-image.yml
+    file: ci/tasks/build-resource-types-image/config.yml
+    output_mapping:
+      image: image_ubuntu
   - put: resource-types-ubuntu-image
     no_get: true
     inputs: detect
@@ -991,6 +995,16 @@ resources:
   source:
     repository: concourse/tracker-resource
     tag: dev
+    username: ((docker.username))
+    password: ((docker.public_read))
+
+- name: busybox
+  type: registry-image
+  icon: *release-icon
+  check_every: 24h
+  source:
+    repository: busybox
+    tag: latest
     username: ((docker.username))
     password: ((docker.public_read))
 

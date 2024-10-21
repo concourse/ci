@@ -1,4 +1,5 @@
-FROM busybox
+ARG base_image=busybox
+FROM ${base_image}
 
   COPY bosh-io-release-resource/   /usr/local/concourse/resource-types/bosh-io-release/
   COPY bosh-io-stemcell-resource/  /usr/local/concourse/resource-types/bosh-io-stemcell/
