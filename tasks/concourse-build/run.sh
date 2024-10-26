@@ -35,7 +35,9 @@ pushd concourse
     extra_flags="-buildvcs=false"
   fi
 
+  set -x
   go build -o "$bin_name" -ldflags "$ldflags" $extra_flags ./cmd/concourse
+  set +x
 
   if [ -n "$final_version" ]; then
     if [ "$GOOS" = "linux" ]; then
