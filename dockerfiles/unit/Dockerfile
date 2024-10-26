@@ -63,19 +63,8 @@ RUN curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/st
 RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
 # install yq
-RUN wget https://github.com/mikefarah/yq/releases/download/3.4.0/yq_linux_amd64 -O /usr/bin/yq &&\
+RUN wget https://github.com/mikefarah/yq/releases/download/4.44.3/yq_linux_amd64 -O /usr/bin/yq &&\
     chmod +x /usr/bin/yq
-
-# TODO: tech-debt for maintaining 6.3.x version of the chart which uses Helm v2
-# Remove when 6.3.x no longer needs to be supported
-RUN curl https://get.helm.sh/helm-v2.16.12-linux-amd64.tar.gz -o helm-v2.tar.gz && \
-        tar xzf helm-v2.tar.gz && \
-        mv linux-amd64/helm /usr/local/bin/helm2
-
-# install Vault for bosh-topgun
-RUN curl -L https://releases.hashicorp.com/vault/0.7.3/vault_0.7.3_linux_amd64.zip -o /tmp/vault.zip && \
-      unzip /tmp/vault.zip -d /usr/local/bin && \
-      rm /tmp/vault.zip
 
 # install Terraform, ssh and jq for bin-smoke
 ARG TERRAFORM_VERSION=1.9.7
@@ -116,3 +105,8 @@ RUN curl -L "https://github.com/libbpf/bpftool/releases/download/v7.4.0/bpftool-
   tar xzf bpf.tar.gz --directory /usr/local/bin/&& \
   chmod +x /usr/local/bin/bpftool && \
   rm bpf.tar.gz
+
+# Add mc for interacting with Hetzner object storage
+RUN curl -OL "https://dl.min.io/client/mc/release/linux-amd64/mc" && \
+  chmod +x mc && \
+  mv mc /usr/local/bin/
