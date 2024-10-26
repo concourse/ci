@@ -750,6 +750,76 @@ jobs:
     input_mapping: {distribution: concourse-release-repo, linux-rc: linux-rc-ubuntu}
     params: {DISTRIBUTION: bosh}
 
+- name: bosh-bump
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    - get: concourse
+      passed: [build-rc]
+      trigger: true
+    - get: unit-image
+    - get: version
+      passed: [build-rc]
+      trigger: true
+    - get: linux-rc-ubuntu
+      passed: [build-rc]
+      trigger: true
+    - get: windows-rc
+      passed: [build-rc]
+      trigger: true
+    - get: concourse-release-repo
+    - get: ci
+  - task: bump-concourse-blobs
+    file: ci/tasks/bump-concourse-blobs/config.yml
+    image: unit-image
+    input_mapping:
+      linux-rc: linux-rc-ubuntu
+    params:
+      access_key_id: ((s3.access_key))
+      secret_access_key: ((s3.secret_key))
+  - put: concourse-release-repo
+    params:
+      repository: bumped-concourse-release-repo
+
+- name: bosh-upload-releases
+  public: true
+  serial: true
+  plan:
+  - in_parallel:
+    # these don't trigger, to ensure that the job gets triggered by
+    # concourse-release, which is unfortunately decoupled from the resource
+    # that we 'put' to.
+    - get: concourse
+      passed: [bosh-bump]
+    - get: unit-image
+      passed: [bosh-bump]
+    - get: version
+      passed: [bosh-bump]
+    - get: concourse-release
+      trigger: true
+    - get: postgres-release
+      trigger: true
+    - get: bpm-release
+      trigger: true
+    - get: vault-release
+      trigger: true
+    - get: credhub-release
+      trigger: true
+    - get: uaa-release
+      trigger: true
+    - get: ci
+  - task: upload-releases
+    tags: [bosh]
+    file: ci/tasks/upload-releases.yml
+    image: unit-image
+    params:
+      BOSH_ENVIRONMENT: https://10.0.0.6:25555
+      BOSH_CA_CERT: ((testing_bosh_ca_cert))
+      BOSH_CLIENT: ((testing_bosh_client.id))
+      BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
+
+
 - name: create-draft-release
   public: true
   plan:

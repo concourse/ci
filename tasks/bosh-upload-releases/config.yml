@@ -6,10 +6,10 @@ image_resource:
   source: {repository: concourse/unit}
 
 params:
-  BOSH_ENVIRONMENT:
-  BOSH_CA_CERT:
-  BOSH_CLIENT:
-  BOSH_CLIENT_SECRET:
+  bucket_name: ""
+  access_key_id: ""
+    secret_access_key: ""
+    custom_endpoint: ""
 
 inputs:
 - name: concourse-release
@@ -18,4 +18,4 @@ inputs:
 - name: ci
 
 run:
-  path: ci/tasks/scripts/upload-releases
+  path: ci/tasks/bosh-upload-releases/run.sh

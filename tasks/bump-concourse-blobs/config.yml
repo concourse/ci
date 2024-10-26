@@ -16,7 +16,8 @@ outputs:
 - name: bumped-concourse-release-repo
 
 params:
-  GCP_JSON_KEY:
+  access_key_id: ""
+  secret_access_key: ""
 
 run:
-  path: ci/tasks/scripts/bump-concourse-blobs
+  path: ci/tasks/bump-concourse-blobs/run.sh
