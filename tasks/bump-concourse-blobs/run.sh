@@ -14,7 +14,7 @@ pushd bumped-concourse-release-repo/
   git config --global user.name "Concourse Bot"
 
   # Update config/final.yml with S3 credentials
-  yq '.blobstore.options.access_key_id = strenv(access_key)' \
+  yq '.blobstore.options.access_key_id = strenv(access_key_id)' \
     -i config/final.yml
   yq '.blobstore.options.secret_access_key = strenv(secret_access_key)' \
     -i config/final.yml
