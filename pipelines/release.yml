@@ -802,8 +802,6 @@ jobs:
       trigger: true
     - get: bpm-release
       trigger: true
-    - get: vault-release
-      trigger: true
     - get: credhub-release
       trigger: true
     - get: uaa-release
