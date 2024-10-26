@@ -63,7 +63,7 @@ RUN curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/st
 RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
 # install yq
-RUN wget https://github.com/mikefarah/yq/releases/download/4.44.3/yq_linux_amd64 -O /usr/bin/yq &&\
+RUN curl -L "https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64" --output /usr/bin/yq &&\
     chmod +x /usr/bin/yq
 
 # install Terraform, ssh and jq for bin-smoke
