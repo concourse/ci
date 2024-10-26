@@ -50,7 +50,8 @@ ENV PUPPETEER_SKIP_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 # install BOSH CLI for bosh-smoke, bosh-topgun
-RUN curl -L "https://github.com/cloudfoundry/bosh-cli/releases/download/v6.3.0/bosh-cli-6.3.0-linux-amd64" \
+ARG BOSH_VERSION=7.8.1
+RUN curl -L "https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-amd64" \
       -o /usr/local/bin/bosh && \
       chmod +x /usr/local/bin/bosh
 

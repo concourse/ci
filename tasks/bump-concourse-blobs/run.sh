@@ -13,11 +13,18 @@ pushd bumped-concourse-release-repo/
   git config --global user.email "team@concourse-oss.org"
   git config --global user.name "Concourse Bot"
 
-  # Update config/final.yml with S3 credentials
+  # Create config/private.yml with S3 credentials
+  echo '
+blobstore:
+  provider: s3
+  options:
+    bucket_name: concourse-bosh
+  ' > config/private.yml
+
   yq '.blobstore.options.access_key_id = strenv(access_key_id)' \
-    -i config/final.yml
+    -i config/private.yml
   yq '.blobstore.options.secret_access_key = strenv(secret_access_key)' \
-    -i config/final.yml
+    -i config/private.yml
 
   for blob in $(bosh blobs --column="path"  | grep concourse/); do
     bosh -n remove-blob $blob
@@ -27,11 +34,8 @@ pushd bumped-concourse-release-repo/
     bosh -n add-blob $blob concourse/$(basename $blob)
   done
 
-  # Upload blobs to GCS bucket
+  # Upload blobs to S3 bucket
   bosh -n upload-blobs
-
-  # Clear out S3 credentials so they aren't committed
-  git restore config/final.yml
 
   git add -A
   git commit -m "bump concourse" --signoff
