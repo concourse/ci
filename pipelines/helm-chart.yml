@@ -174,7 +174,7 @@ resources:
   source:
     uri: git@github.com:concourse/concourse-chart.git
     branch: ((concourse-chart-branch))
-    private_key: ((concourse_chart_private_key))
+    private_key: ((github/concourse/concourse-chart.private_key))
 
 - name: chart-repo
   type: gcs
@@ -195,7 +195,8 @@ resources:
   icon: github
   source:
     uri: https://github.com/concourse/ci.git
-    branch: master
+    branch: main
+    private_key: ((github/concourse/ci.private_key))
 
 - name: concourse-release
   type: github-release
@@ -203,7 +204,7 @@ resources:
     owner: concourse
     repository: concourse
     semver_constraint: ~((version))
-    access_token: ((concourse_github_dummy.access_token))
+    access_token: ((github/concourse/release_token))
 
 - name: postgres-chart-release
   type: artifacthub
