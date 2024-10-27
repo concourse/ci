@@ -1020,7 +1020,7 @@ jobs:
       passed: [shipit]
       trigger: true
     - get: concourse-release
-      # passed: [shipit]
+      passed: [shipit]
   - put: concourse-release-final
     no_get: true
     inputs: detect
