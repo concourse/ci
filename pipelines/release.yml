@@ -1184,7 +1184,7 @@ resources:
   source:
     uri: git@github.com:concourse/ci.git
     branch: ((ci_branch))
-    private_key: ((github/concourse/concourse.private_key))
+    private_key: ((github/concourse/ci.private_key))
 
 - name: ci-pr-pipeline
   type: git
@@ -1192,7 +1192,7 @@ resources:
   source:
     uri: https://github.com/concourse/ci
     branch: ((ci_branch))
-    private_key: ((github/concourse/concourse.private_key))
+    private_key: ((github/concourse/ci.private_key))
     paths:
     - pipelines/pr.yml
 
@@ -1202,7 +1202,7 @@ resources:
   source:
     uri: https://github.com/concourse/concourse-docker.git
     branch: release/((release_minor)).x
-    private_key: ((github/concourse/concourse.private_key))
+    private_key: ((github/concourse/concourse-docker.private_key))
 
 - name: resource-types-image
   type: registry-image
