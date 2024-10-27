@@ -1440,7 +1440,7 @@ resources:
   source:
     uri: git@github.com:concourse/concourse-bosh-deployment.git
     branch: release/((release_minor)).x
-    private_key: ((github/legacy_release_key))
+    private_key: ((github/concourse/concourse-bosh-deployment.private_key))
 
 - name: postgres-image
   type: registry-image
