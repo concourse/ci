@@ -1022,6 +1022,11 @@ jobs:
       repository: bumped-repo
       merge: true
 
+# TODO: this job ended up making an empty commit. I _think_ it's supposed
+# to update the reconfigure.yml pipeline so the resource-type versions
+# are pinned to a specific version. Something is probably wrong with the
+# python script. I think it'd be easier to change this to a yq bash
+# script instead
 - name: pin-resource-type-versions
   serial: true
   plan:
