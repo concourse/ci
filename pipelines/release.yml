@@ -26,15 +26,24 @@ meta:
 resource_types:
 - name: bosh-release
   type: registry-image
-  source: {repository: dpb587/bosh-release-resource}
+  source:
+    repository: docker.io/taylorsilva/bosh-release-resource
+    username: ((docker.username))
+    password: ((docker.public_read))
 
 - name: helm-chart
   type: registry-image
-  source: {repository: concourse/helm-chart-resource}
+  source:
+    repository: concourse/helm-chart-resource
+    username: ((docker.username))
+    password: ((docker.public_read))
 
 - name: pull-request
   type: registry-image
-  source: {repository: aoldershaw/github-pr-resource}
+  source:
+    repository: aoldershaw/github-pr-resource
+    username: ((docker.username))
+    password: ((docker.public_read))
 
 groups:
 - name: develop
