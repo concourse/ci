@@ -279,7 +279,7 @@ jobs:
       instance_vars:
         version: 7
       vars:
-        concourse-chart-branch: release/7.11.x
+        concourse-chart-branch: release/7.12.x
     - set_pipeline: helm-prs
       file: pipelines-and-tasks/pipelines/helm-prs.yml
       instance_vars:
