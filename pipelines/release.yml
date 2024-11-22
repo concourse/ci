@@ -262,6 +262,7 @@ jobs:
         file: ci/tasks/fly-build-windows.yml
       - task: fly-darwin
         file: ci/tasks/fly-build-darwin.yml
+        image: golang-builder-image-rootfs
   - task: build
     image: builder
     privileged: true
@@ -556,6 +557,7 @@ jobs:
       file: ci/tasks/fly-build-windows.yml
     - task: fly-darwin
       file: ci/tasks/fly-build-darwin.yml
+      image: golang-builder-image
   - in_parallel:
       fail_fast: true
       steps:

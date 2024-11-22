@@ -203,17 +203,12 @@ jobs:
       image: unit-image
       file: ci/tasks/unit.yml
       input_mapping: {concourse: built-concourse}
-    - task: fly-darwin
-      file: ci/tasks/fly-darwin.yml
     - task: fly-windows
       file: ci/tasks/fly-windows.yml
     - task: unit-baggageclaim
       image: unit-image
       file: ci/tasks/unit-baggageclaim.yml
       privileged: true
-      input_mapping: {concourse: built-concourse}
-    - task: unit-baggageclaim-darwin
-      file: ci/tasks/unit-baggageclaim-darwin.yml
       input_mapping: {concourse: built-concourse}
     - task: unit-baggageclaim-windows
       file: ci/tasks/unit-baggageclaim-windows.yml
@@ -313,6 +308,7 @@ jobs:
         file: ci/tasks/fly-build-windows.yml
       - task: fly-darwin
         file: ci/tasks/fly-build-darwin.yml
+        image: golang-builder-image-rootfs
   - task: build
     image: oci-build-task
     privileged: true
@@ -582,6 +578,7 @@ jobs:
       file: ci/tasks/fly-build-windows.yml
     - task: fly-darwin
       file: ci/tasks/fly-build-darwin.yml
+      image: golang-builder-image
   - in_parallel:
       fail_fast: true
       steps:

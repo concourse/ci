@@ -1,5 +1,5 @@
 ---
-platform: darwin
+platform: linux
 
 inputs:
 - name: concourse
