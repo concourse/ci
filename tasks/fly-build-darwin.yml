@@ -1,5 +1,5 @@
 ---
-platform: darwin
+platform: linux
 
 inputs:
 - name: concourse
@@ -12,6 +12,9 @@ outputs:
 
 caches:
 - path: gopath
+
+params:
+  GOOS: darwin
 
 run:
   path: ci/tasks/scripts/fly-build
