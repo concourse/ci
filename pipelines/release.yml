@@ -149,17 +149,12 @@ jobs:
       image: unit-image
       file: ci/tasks/unit.yml
       input_mapping: {concourse: built-concourse}
-    - task: fly-darwin
-      file: ci/tasks/fly-darwin.yml
     - task: fly-windows
       file: ci/tasks/fly-windows.yml
     - task: unit-baggageclaim
       image: unit-image
       file: ci/tasks/unit-baggageclaim.yml
       privileged: true
-      input_mapping: {concourse: built-concourse}
-    - task: unit-baggageclaim-darwin
-      file: ci/tasks/unit-baggageclaim-darwin.yml
       input_mapping: {concourse: built-concourse}
     - task: unit-baggageclaim-windows
       file: ci/tasks/unit-baggageclaim-windows.yml
@@ -595,9 +590,6 @@ jobs:
       input_mapping: {concourse-tarball: concourse-linux-ubuntu}
     - task: validate-windows-rc
       file: ci/tasks/validate-windows-rc.yml
-    - task: validate-darwin-rc
-      file: ci/tasks/validate-darwin-rc.yml
-      input_mapping: {concourse-tarball: concourse-darwin}
   - in_parallel:
     - put: linux-rc-ubuntu
       params: {file: concourse-linux-ubuntu/concourse-*.tgz}
