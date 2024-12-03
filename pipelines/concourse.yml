@@ -1265,8 +1265,11 @@ jobs:
     - get: concourse-release
       passed: [bosh-upload-releases]
       trigger: true
-    - get: postgres-release
-      passed: [bosh-upload-releases]
+    #  disabled until backup and restore supports 16+ of postgres https://github.com/cloudfoundry/backup-and-restore-sdk-release/blob/main/docs/database-backup-restore.md#supported-database-adapters
+    # - get: postgres-release
+    #   passed: [bosh-upload-releases]
+    #   trigger: true
+    - get: postgres-bbr-compatible-release
       trigger: true
     - get: bpm-release
       passed: [bosh-upload-releases]
@@ -1296,6 +1299,7 @@ jobs:
     image: unit-image
     input_mapping:
       stemcell: gcp-jammy-stemcell
+      postgres-release: postgres-bbr-compatible-release
     params:
       BOSH_ENVIRONMENT: https://10.0.0.6:25555
       BOSH_CA_CERT: ((testing_bosh_ca_cert))
@@ -1636,6 +1640,13 @@ resources:
   icon: *release-icon
   source:
     repository: cloudfoundry/postgres-release
+
+- name: postgres-bbr-compatible-release
+  type: bosh-io-release
+  icon: *release-icon
+  source:
+    repository: cloudfoundry/postgres-release
+    regexp: v49*
 
 - name: bpm-release
   type: bosh-io-release
