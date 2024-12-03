@@ -582,6 +582,7 @@ jobs:
         file: ci/tasks/concourse-build-windows.yml
         input_mapping: {concourse: built-concourse}
       - task: concourse-darwin
+        image: golang-builder-image
         file: ci/tasks/concourse-build-darwin.yml
         output_mapping: {concourse-tarball: concourse-darwin}
   - in_parallel:
