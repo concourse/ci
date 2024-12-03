@@ -1646,7 +1646,7 @@ resources:
   icon: *release-icon
   source:
     repository: cloudfoundry/postgres-release
-    regexp: v49*
+    regexp: "49"
 
 - name: bpm-release
   type: bosh-io-release
