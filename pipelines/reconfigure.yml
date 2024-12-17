@@ -328,8 +328,8 @@ jobs:
         dep_bin_versions:
           gdn: ~1.57.0
           cni: ~1.6.0
-          runc: ~1.1.15
-          containerd: ~1.7.23
+          runc: ~1.2.3
+          containerd: ~2.0.1
     # TEMPLATE FOR NEXT RELEASE
     # to create a new release pipeline, copy (but don't delete!) this template,
     # replacing MAJOR, MINOR, PREV_MAJOR, PREV_MINOR, and SLACK_CHANNEL
