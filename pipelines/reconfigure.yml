@@ -194,7 +194,6 @@ jobs:
       - registry-image
       - bosh-io-release
       - bosh-io-stemcell
-      - tracker
       - hg
       - github-release
       - semver
@@ -225,7 +224,6 @@ jobs:
         - git
         - docker-image
         - registry-image
-        - tracker
         - hg
         - semver
         - s3
@@ -363,7 +361,6 @@ jobs:
     #       s3: ""
     #       semver: ""
     #       time: ""
-    #       tracker: ""
     - set_pipeline: infrastructure-report
       file: pipelines-and-tasks/pipelines/infrastructure-report.yml
     on_failure: *notify
