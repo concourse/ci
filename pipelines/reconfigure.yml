@@ -266,6 +266,8 @@ jobs:
   - in_parallel:
     - set_pipeline: concourse
       file: pipelines-and-tasks/pipelines/concourse.yml
+      vars:
+        postgresql-chart-version: 16.3.2
     - set_pipeline: helm-chart
       file: pipelines-and-tasks/pipelines/helm-chart.yml
       instance_vars:
@@ -280,6 +282,7 @@ jobs:
         concourse_base_branch: master
         concourse_image_name: concourse/concourse
         concourse_image_tag: latest
+        postgresql-chart-version: 16.3.2
     - set_pipeline: helm-prs
       file: pipelines-and-tasks/pipelines/helm-prs.yml
       instance_vars:
@@ -288,6 +291,7 @@ jobs:
         concourse_base_branch: master
         concourse_image_name: concourse/concourse-rc
         concourse_image_tag: latest
+        postgresql-chart-version: 16.3.2
     - set_pipeline: docs-prs
       team: contributor
       file: docs-ci/ci/prs-pipeline.yml
