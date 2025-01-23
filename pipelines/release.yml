@@ -1173,7 +1173,11 @@ jobs:
       RELEASE_MINOR: ((release_minor))
     output_mapping: {ci: bumped-ci}
   - put: ci
-    params: {repository: bumped-ci}
+    inputs: detect
+    no_get: true
+    params:
+      repository: bumped-ci
+      rebase: true
 
 - name: publish-image
   serial: true
