@@ -1014,6 +1014,8 @@ jobs:
     - get: gcp-ubuntu-stemcell
       passed: [bosh-smoke]
   - put: version
+    inputs: detect
+    no_get: true
     params: {file: final-version/version}
 
 - name: discover-component-version
