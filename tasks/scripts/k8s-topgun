@@ -15,7 +15,7 @@ gke_auth
 
 mkdir -p helm-charts/stable
 ls -l prometheus-chart/
-tar -xvzf prometheus-chart/prometheus-*.tar.gz -C ./
+tar -xvzf prometheus-chart/prometheus-*.tgz -C ./
 ls -l prometheus-chart/
 cp -r prometheus-chart/prometheus helm-charts/stable
 #cp -r postgresql-chart/postgresql helm-charts/stable
