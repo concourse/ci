@@ -4,6 +4,10 @@ resource_types:
   type: registry-image
   source: {repository: loggregatorbot/github-pr-resource}
 
+- name: helm-chart
+  type: registry-image
+  source: {repository: linkyard/helm-chart-resource, tag: 2.17.0}
+
 resources:
 - name: chart-pr
   type: pull-request
@@ -88,6 +92,7 @@ jobs:
       tags: [k8s-topgun]
     - get: unit-image
       tags: [k8s-topgun]
+    - get: prometheus-chart
   - put: chart-pr
     inputs: [chart-pr]
     params: {path: chart-pr, status: pending, context: k8s-topgun}
