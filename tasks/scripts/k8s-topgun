@@ -15,9 +15,9 @@ gke_auth
 
 mkdir -p helm-charts/stable
 ls -l prometheus-chart/
-tar -xvzf prometheus-chart/prometheus-*.tgz -C ./
-ls -l prometheus-chart/
-cp -r prometheus-chart/prometheus helm-charts/stable
+tar -xvzf prometheus-chart/prometheus-*.tgz -C ./prometheus-chart
+ls -l prometheus-chart/prometheus-chart
+cp -r prometheus-chart/prometheus-chart/prometheus helm-charts/stable
 #cp -r postgresql-chart/postgresql helm-charts/stable
 
 export CONCOURSE_IMAGE_DIGEST="$(cat concourse-rc-image/digest)"
