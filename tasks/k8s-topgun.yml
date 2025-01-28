@@ -19,8 +19,8 @@ caches:
 params:
   IN_CLUSTER: "false"
   K8S_ENGINE: "GKE"
-  CONCOURSE_IMAGE_NAME:
-  SERVICE_ACCOUNT_KEY:
+  CONCOURSE_IMAGE_NAME: "concourse/concourse"
+  SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
 
 run:
   path: ci/tasks/scripts/k8s-topgun
