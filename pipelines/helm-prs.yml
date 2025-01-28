@@ -94,7 +94,7 @@ jobs:
     params:
       IN_CLUSTER: "true"
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
-      CONCOURSE_IMAGE_NAME: ((concourse_image_name))
+      CONCOURSE_IMAGE_NAME: "concourse/concourse"
 
 - name: lint-and-install-test
   public: true
