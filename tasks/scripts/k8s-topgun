@@ -14,7 +14,7 @@ export PATH=$GOPATH/bin:$PATH
 gke_auth
 
 mkdir -p helm-charts/stable
-#cp -r prometheus-chart/prometheus helm-charts/stable
+cp -r prometheus-chart/prometheus helm-charts/stable
 #cp -r postgresql-chart/postgresql helm-charts/stable
 
 export CONCOURSE_IMAGE_DIGEST="$(cat concourse-rc-image/digest)"
