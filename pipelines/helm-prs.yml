@@ -51,6 +51,15 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
+- name: prometheus-chart
+  type: helm-chart
+  icon: &helm-icon ship-wheel
+  source:
+    chart: prometheus-community/prometheus
+    repos:
+      - name: prometheus-community
+        url: https://prometheus-community.github.io/helm-charts
+
 jobs:
 - name: k8s-topgun
   serial: true
@@ -131,3 +140,4 @@ jobs:
     input_mapping: {concourse: chart-pr}
     params:
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
+
