@@ -47,6 +47,15 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
+- name: concourse-dev-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: concourse/concourse-dev
+    tag: latest
+    username: ((docker.username))
+    password: ((docker.password))
+
 - name: unit-image
   type: registry-image
   icon: docker
@@ -63,6 +72,15 @@ resources:
     repos:
       - name: prometheus-community
         url: https://prometheus-community.github.io/helm-charts
+
+- name: postgresql-chart
+  type: helm-chart
+  icon: *helm-icon
+  source:
+    chart: bitnami/postgresql
+    repos:
+      - name: bitnami
+        url: https://charts.bitnami.com/bitnami
 
 jobs:
 - name: k8s-topgun
@@ -82,17 +100,18 @@ jobs:
   - in_parallel:
     - get: chart-pr
       tags: [k8s-topgun]
-    - get: helm-charts
-      tags: [k8s-topgun]
     - get: concourse
       tags: [k8s-topgun]
-    - get: concourse-image
+    - get: concourse-dev-image
       tags: [k8s-topgun]
     - get: ci
       tags: [k8s-topgun]
     - get: unit-image
       tags: [k8s-topgun]
     - get: prometheus-chart
+      tags: [k8s-topgun]
+    - get: postgresql-chart
+      tags: [ k8s-topgun ]
   - put: chart-pr
     inputs: [chart-pr]
     params: {path: chart-pr, status: pending, context: k8s-topgun}
@@ -103,12 +122,12 @@ jobs:
     file: ci/tasks/k8s-topgun.yml
     input_mapping:
       concourse-chart: chart-pr
-      concourse-rc-image: concourse-image
+      concourse-rc-image: concourse-dev-image
     image: unit-image
     params:
       IN_CLUSTER: "true"
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
-      CONCOURSE_IMAGE_NAME: "concourse/concourse"
+      CONCOURSE_IMAGE_NAME: "concourse/concourse-dev"
 
 - name: lint-and-install-test
   public: true
