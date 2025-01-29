@@ -11,6 +11,7 @@ inputs:
 - name: concourse-rc-image
 - name: concourse-chart
 - name: prometheus-chart
+- name: postgresql-chart
 
 caches:
 - path: gopath
@@ -18,7 +19,7 @@ caches:
 params:
   IN_CLUSTER: "false"
   K8S_ENGINE: "GKE"
-  CONCOURSE_IMAGE_NAME: "concourse/concourse"
+  CONCOURSE_IMAGE_NAME:
   SERVICE_ACCOUNT_KEY:
 
 run:

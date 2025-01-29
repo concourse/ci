@@ -325,7 +325,7 @@ jobs:
           tracker: ~1.1.0
         dep_bin_versions:
           gdn: ~1.57.0
-          cni: ~1.6.2
+          cni: ~1.5.0
           runc: ~1.2.3
           containerd: ~2.0.1
     # TEMPLATE FOR NEXT RELEASE
