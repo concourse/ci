@@ -17,13 +17,6 @@ resources:
     base_branch: master
     access_token: ((pr_access_token))
 
-- name: helm-charts
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/helm/charts.git
-    branch: master
-
 - name: concourse
   type: git
   icon: github
@@ -37,15 +30,6 @@ resources:
   source:
     uri: https://github.com/concourse/ci.git
     branch: testHelmPR
-
-- name: concourse-image
-  type: registry-image
-  icon: docker
-  source:
-    repository: concourse/concourse
-    tag: latest
-    username: ((docker.username))
-    password: ((docker.password))
 
 - name: concourse-dev-image
   type: registry-image
@@ -82,6 +66,12 @@ resources:
       - name: bitnami
         url: https://charts.bitnami.com/bitnami
 
+- name: postgres-chart-git
+  type: git
+  source:
+    uri: "https://github.com/bitnami/charts.git"
+    branch: postgresql/16.2.1
+
 jobs:
 - name: k8s-topgun
   serial: true
@@ -110,7 +100,8 @@ jobs:
       tags: [k8s-topgun]
     - get: prometheus-chart
       tags: [k8s-topgun]
-    - get: postgresql-chart
+      params: { untar: true }
+    - get: postgres-chart-git
       tags: [ k8s-topgun ]
   - put: chart-pr
     inputs: [chart-pr]

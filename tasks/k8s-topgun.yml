@@ -11,7 +11,7 @@ inputs:
 - name: concourse-rc-image
 - name: concourse-chart
 - name: prometheus-chart
-- name: postgresql-chart
+- name: postgresql-chart-git
 
 caches:
 - path: gopath
