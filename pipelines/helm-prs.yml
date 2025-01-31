@@ -61,7 +61,7 @@ resources:
   type: git
   source:
     uri: "https://github.com/bitnami/charts.git"
-    branch: postgresql/16.2.1
+    branch: postgresql/16.3.2
 
 jobs:
 - name: k8s-topgun
