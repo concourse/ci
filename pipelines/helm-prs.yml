@@ -53,6 +53,7 @@ resources:
   icon: &helm-icon ship-wheel
   source:
     chart: prometheus-community/prometheus
+    version: 26.1.0
     repos:
       - name: prometheus-community
         url: https://prometheus-community.github.io/helm-charts
