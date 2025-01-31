@@ -21,10 +21,6 @@ pushd helm-charts/stable/postgresql
 helm dependency build
 popd
 
-pushd helm-charts/stable/prometheus
-helm dependency build
-popd
-
 export CONCOURSE_IMAGE_DIGEST="$(cat concourse-rc-image/digest)"
 export CONCOURSE_IMAGE_TAG="$(cat concourse-rc-image/tag)"
 export HELM_CHARTS_DIR="$(realpath ./helm-charts)"
