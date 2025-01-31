@@ -58,7 +58,7 @@ resources:
   type: git
   source:
     uri: "https://github.com/prometheus-community/helm-charts.git"
-    branch: prometheus/26.1.0
+    branch: prometheus-26.1.0
 
 jobs:
 - name: k8s-topgun
