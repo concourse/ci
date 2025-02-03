@@ -14,6 +14,7 @@ export PATH=$GOPATH/bin:$PATH
 gke_auth
 
 mkdir -p helm-charts/stable
+ls -l prometheus-chart/
 cp -r prometheus-chart/prometheus helm-charts/stable
 cp -r postgresql-chart-git/bitnami/postgresql helm-charts/stable
 
