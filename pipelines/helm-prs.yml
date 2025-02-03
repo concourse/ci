@@ -91,6 +91,7 @@ jobs:
       tags: [k8s-topgun]
     - get: prometheus-chart
       tags: [k8s-topgun]
+      params: { untar: true }
     - get: postgresql-chart-git
       tags: [ k8s-topgun ]
   - put: chart-pr
