@@ -20,6 +20,7 @@ groups:
 
 - name: publish
   jobs:
+  - k8s-test
   - publish-chart-major
   - publish-chart-minor
   - publish-chart-patch
@@ -60,6 +61,24 @@ jobs:
       repository: concourse-chart-bumped
       merge: true
 
+- name: k8s-test
+  serial: true
+  public: true
+  plan:
+  - in_parallel:
+    - get: concourse-chart
+      tags: [k8s-topgun]
+    - get: ci
+      tags: [k8s-topgun]
+    - get: unit-image
+      tags: [k8s-topgun]
+  - task: k8s-test
+    file: ci/tasks/k8s-test.yml
+    tags: [ k8s-topgun ]
+    image: unit-image
+    params:
+      SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
+
 - name: publish-chart-major
   public: true
   serial: true
@@ -68,6 +87,7 @@ jobs:
     - get: version
       params: {bump: major}
     - get: concourse-chart
+      passed: [ k8s-test ]
     - get: chart-repo-index
     - get: ci
   - task: bump-chart-version
@@ -100,6 +120,7 @@ jobs:
     - get: version
       params: {bump: minor}
     - get: concourse-chart
+      passed: [ k8s-test ]
     - get: chart-repo-index
     - get: ci
   - task: bump-chart-version
@@ -134,6 +155,7 @@ jobs:
     - get: version
       params: {bump: patch}
     - get: concourse-chart
+      passed: [ k8s-test ]
     - get: chart-repo-index
     - get: ci
   - task: bump-chart-version
@@ -211,6 +233,14 @@ resources:
   source:
     repository_name: bitnami
     package_name: postgresql
+
+- name: unit-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: concourse/unit
+    username: ((docker.username))
+    password: ((docker.password))
 
 resource_types:
 - name: gcs

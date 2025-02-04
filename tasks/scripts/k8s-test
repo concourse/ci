@@ -1,0 +1,26 @@
+#!/bin/bash
+# vim: set ft=sh
+
+set -e -u
+
+source ci/tasks/scripts/k8s-helpers.sh
+gke_auth
+
+helm version && kubectl version
+
+kubectl create namespace concourse-chart-test || true
+
+pushd concourse-chart
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm dependency build
+popd
+
+helm upgrade --install concourse-chart-test concourse-chart/ \
+  --wait \
+  --recreate-pods \
+  --namespace concourse-chart-test \
+  --create-namespace
+
+kubectl \
+  rollout status deployment \
+  concourse-chart-test-web --namespace concourse-chart-test
