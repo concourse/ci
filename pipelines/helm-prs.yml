@@ -51,8 +51,8 @@ resources:
 - name: postgresql-chart-git
   type: git
   source:
-    uri: "https://github.com/bitnami/charts.git"
-    branch: postgresql/((postgresql-chart-version))
+    uri: https://github.com/bitnami/charts.git
+    tag_filter: postgresql/((postgresql-chart-version))
 
 - name: prometheus-chart
   type: helm-chart
