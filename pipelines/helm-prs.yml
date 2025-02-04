@@ -48,6 +48,7 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
+# Using the git instead of helm-chart resource because Bitnami charts are hosted on Docker Hub and we sometimes run into their rate limits
 - name: postgresql-chart-git
   type: git
   source:
