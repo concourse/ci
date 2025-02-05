@@ -478,7 +478,8 @@ jobs:
       SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
       RELEASE_NAME: concourse-smoke
       MAX_TICKS: 300
-  - task: delete
+  ensure:
+    task: delete
     image: unit-image
     file: ci/tasks/k8s-delete.yml
     params:
