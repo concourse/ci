@@ -20,10 +20,10 @@ groups:
 
 - name: publish
   jobs:
+  - k8s-smoke
   - publish-chart-major
   - publish-chart-minor
   - publish-chart-patch
-
 
 jobs:
 - name: concourse-app-bump
@@ -60,6 +60,48 @@ jobs:
       repository: concourse-chart-bumped
       merge: true
 
+- name: k8s-smoke
+  public: true
+  serial: true
+  plan:
+    - in_parallel:
+      - get: concourse
+      - get: concourse-image
+        params: {format: oci}
+        trigger: true
+      - get: concourse-chart
+        trigger: true
+      - get: unit-image
+      - get: ci
+    - try:
+        task: try-delete
+        image: unit-image
+        file: ci/tasks/k8s-delete.yml
+        params:
+          SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
+          RELEASE_NAME: concourse-chart-smoke
+    - task: deploy
+      image: unit-image
+      input_mapping: {image-info: concourse-image}
+      file: ci/tasks/k8s-deploy.yml
+      params:
+        SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
+        RELEASE_NAME: concourse-chart-smoke
+    - task: k8s-smoke
+      image: unit-image
+      file: ci/tasks/k8s-smoke.yml
+      params:
+        SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
+        RELEASE_NAME: concourse-chart-smoke
+        MAX_TICKS: 300
+  ensure:
+    task: delete
+    image: unit-image
+    file: ci/tasks/k8s-delete.yml
+    params:
+      SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
+      RELEASE_NAME: concourse-chart-smoke
+
 - name: publish-chart-major
   public: true
   serial: true
@@ -68,6 +110,7 @@ jobs:
     - get: version
       params: {bump: major}
     - get: concourse-chart
+      passed: [ k8s-smoke ]
     - get: chart-repo-index
     - get: ci
   - task: bump-chart-version
@@ -100,6 +143,7 @@ jobs:
     - get: version
       params: {bump: minor}
     - get: concourse-chart
+      passed: [ k8s-smoke ]
     - get: chart-repo-index
     - get: ci
   - task: bump-chart-version
@@ -134,6 +178,7 @@ jobs:
     - get: version
       params: {bump: patch}
     - get: concourse-chart
+      passed: [ k8s-smoke ]
     - get: chart-repo-index
     - get: ci
   - task: bump-chart-version
@@ -211,6 +256,30 @@ resources:
   source:
     repository_name: bitnami
     package_name: postgresql
+
+- name: unit-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: concourse/unit
+    username: ((docker.username))
+    password: ((docker.password))
+
+- name: concourse
+  type: git
+  icon: github
+  source:
+    uri: https://github.com/concourse/concourse.git
+    branch: ((concourse-chart-branch))
+
+- name: concourse-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: concourse/concourse
+    tag: latest
+    username: ((docker.username))
+    password: ((docker.password))
 
 resource_types:
 - name: gcs
