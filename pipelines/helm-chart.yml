@@ -68,9 +68,7 @@ jobs:
       - get: concourse
       - get: concourse-image
         params: {format: oci}
-        trigger: true
       - get: concourse-chart
-        trigger: true
       - get: unit-image
       - get: ci
     - try:
