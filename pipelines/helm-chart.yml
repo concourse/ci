@@ -67,7 +67,7 @@ jobs:
     - in_parallel:
       - get: concourse
         trigger: true
-      - get: concourse-dev-image
+      - get: concourse-image
         params: {format: oci}
         trigger: true
       - get: concourse-chart
@@ -83,7 +83,7 @@ jobs:
           RELEASE_NAME: concourse-chart-smoke
     - task: deploy
       image: unit-image
-      input_mapping: {image-info: concourse-dev-image}
+      input_mapping: {image-info: concourse-image}
       file: ci/tasks/k8s-deploy.yml
       params:
         SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
@@ -273,11 +273,11 @@ resources:
     uri: https://github.com/concourse/concourse.git
     branch: ((concourse-chart-branch))
 
-- name: concourse-dev-image
+- name: concourse-image
   type: registry-image
   icon: docker
   source:
-    repository: concourse/concourse-dev
+    repository: concourse/concourse
     tag: latest
     username: ((docker.username))
     password: ((docker.password))
