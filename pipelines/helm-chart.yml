@@ -66,7 +66,6 @@ jobs:
   plan:
     - in_parallel:
       - get: concourse
-        trigger: true
       - get: concourse-image
         params: {format: oci}
         trigger: true
