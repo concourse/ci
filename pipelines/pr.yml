@@ -12,7 +12,7 @@ pending_status_notification: &pending_status_notification
   resource: concourse-pr
   inputs: [concourse-pr]
   params: {path: concourse-pr, status: pending, context: $BUILD_JOB_NAME}
-  get_params: {skip_download: true}
+  no_get: true
   tags: [pr]
 
 status_notifications: &status_notifications
@@ -20,13 +20,13 @@ status_notifications: &status_notifications
     put: concourse-pr
     inputs: [concourse-pr]
     params: {path: concourse-pr, status: success, context: $BUILD_JOB_NAME}
-    get_params: {skip_download: true}
+    no_get: true
     tags: [pr]
   on_failure:
     put: concourse-pr
     inputs: [concourse-pr]
     params: {path: concourse-pr, status: failure, context: $BUILD_JOB_NAME}
-    get_params: {skip_download: true}
+    no_get: true
     tags: [pr]
 
 resource_types:
@@ -155,7 +155,7 @@ jobs:
     tags: [pr]
   - put: pr-image
     params: {image: image/image.tar}
-    get_params: {skip_download: true}
+    no_get: true
     tags: [pr]
 
 - name: unit
