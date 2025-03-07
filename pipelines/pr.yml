@@ -260,6 +260,7 @@ jobs:
   - across:
     - var: platform
       max_in_flight: 1
+      fail_fast: true
       values:
         - os: linux
           arch: amd64
