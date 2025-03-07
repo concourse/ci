@@ -4,6 +4,7 @@ set -euo pipefail
 
 export GOPATH=$PWD/gopath
 export PATH=$PWD/gopath/bin:$PATH
+export CGO_ENABLED=0
 
 if [ -z "${PLATFORM}" ]; then
   echo "usage: PLATFORM=<platform> $0" >&2
