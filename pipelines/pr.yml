@@ -245,6 +245,7 @@ jobs:
 - name: compile-check
   public: true
   serial: true
+  serial_groups: [heavy]
   <<: *status_notifications
   plan:
   - in_parallel:
