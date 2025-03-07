@@ -1,0 +1,20 @@
+platform: linux
+
+inputs:
+- name: concourse
+- name: ci
+- name: final-version
+  optional: true
+
+caches:
+- path: gopath
+
+outputs:
+- name: concourse-binary
+
+params:
+  PLATFORM:
+  ARCH:
+
+run:
+  path: ci/tasks/concourse-compile/run.sh

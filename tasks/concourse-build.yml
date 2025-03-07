@@ -23,6 +23,7 @@ outputs:
 
 params:
   PLATFORM:
+  ARCH:
 
 run:
   path: ci/tasks/scripts/concourse-build

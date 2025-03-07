@@ -12,7 +12,7 @@ if [ -z "${PLATFORM}" ]; then
 fi
 
 export GOOS="${PLATFORM:-$(go env GOOS)}"
-export GOARCH="amd64"
+export GOARCH="${ARCH:-amd64}"
 
 version="$(cat version/version)"
 

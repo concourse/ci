@@ -28,6 +28,18 @@ status_notifications: &status_notifications
     params: {path: concourse-pr, status: failure, context: $BUILD_JOB_NAME}
     no_get: true
     tags: [pr]
+  on_abort:
+    put: concourse-pr
+    inputs: [concourse-pr]
+    params: {path: concourse-pr, status: failure, context: $BUILD_JOB_NAME}
+    no_get: true
+    tags: [pr]
+  on_error:
+    put: concourse-pr
+    inputs: [concourse-pr]
+    params: {path: concourse-pr, status: failure, context: $BUILD_JOB_NAME}
+    no_get: true
+    tags: [pr]
 
 resource_types:
 - name: bosh-deployment
@@ -122,6 +134,7 @@ jobs:
 - name: pr-image
   public: true
   serial: true
+  serial_groups: [heavy]
   plan:
   - in_parallel:
     - get: concourse-pr
@@ -229,6 +242,38 @@ jobs:
     params:
       GITHUB_TOKEN: ((concourse_github_dummy.access_token))
 
+- name: compile-check
+  public: true
+  serial: true
+  <<: *status_notifications
+  plan:
+  - in_parallel:
+    - get: concourse
+      resource: concourse-pr
+      trigger: true
+      tags: [pr]
+    - get: ci
+      tags: [pr]
+    - get: unit-image
+      tags: [pr]
+  - *pending_status_notification
+  - across:
+    - var: platform
+      max_in_flight: 1
+      values:
+        - os: linux
+          arch: amd64
+        - os: darwin
+          arch: amd64
+        - os: windows
+          arch: amd64
+    task: concourse-compile
+    image: unit-image
+    file: ci/tasks/concourse-compile/config.yml
+    params:
+      PLATFORM: ((.:platform.os))
+      ARCH: ((.:platform.arch))
+
 - name: containerd-integration
   public: true
   serial: true
@@ -254,6 +299,7 @@ jobs:
 - name: testflight
   public: true
   serial: true
+  serial_groups: [heavy]
   <<: *status_notifications
   plan:
   - in_parallel:
