@@ -249,8 +249,7 @@ jobs:
   <<: *status_notifications
   plan:
   - in_parallel:
-    - get: concourse
-      resource: concourse-pr
+    - get: concourse-pr
       trigger: true
       tags: [pr]
     - get: ci
@@ -271,6 +270,8 @@ jobs:
     task: concourse-compile
     image: unit-image
     file: ci/tasks/concourse-compile/config.yml
+    input_mapping:
+      concourse: concourse-pr
     params:
       PLATFORM: ((.:platform.os))
       ARCH: ((.:platform.arch))
