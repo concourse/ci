@@ -260,7 +260,6 @@ jobs:
   - across:
     - var: platform
       max_in_flight: 1
-      fail_fast: true
       values:
         - os: linux
           arch: amd64
@@ -268,6 +267,7 @@ jobs:
           arch: amd64
         - os: windows
           arch: amd64
+    fail_fast: true
     task: concourse-compile
     image: unit-image
     file: ci/tasks/concourse-compile/config.yml
