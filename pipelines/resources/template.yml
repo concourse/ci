@@ -59,6 +59,8 @@ name: build
 serial_groups: [build]
 on_failure: &failed-ci
   put: notify
+  no_get: true
+  inputs: detect
   params:
     mode: normal
     alert_type: failed
@@ -80,9 +82,9 @@ plan:
 - #@ build_task(resource_name, "linux/amd64")
 - #@ template.replace(extra_steps())
 - put: resource-image-dev
+  no_get: true
+  inputs: detect
   params: {image: built-resource-image/image.tar}
-  get_params:
-    skip_download: true
 #@ end
 
 #@ def scan_image():
@@ -128,6 +130,8 @@ plan:
 
 #@ def determine_channel():
   put: notify
+  no_get: true
+  inputs: detect
   params:
     mode: normal
     alert_type: failed
@@ -151,6 +155,8 @@ plan:
   - #@ template.replace(extra_get_steps())
 - put: #@ resource_name + "-resource"
   resource: resource-pr
+  no_get: true
+  inputs: detect
   params:
     context: status
     path: resource-pr
@@ -160,12 +166,16 @@ plan:
   - #@ template.replace(extra_steps())
   on_failure:
     put: resource-pr
+    no_get: true
+    inputs: detect
     params:
       context: status
       path: resource-pr
       status: failure
   on_success:
     put: resource-pr
+    no_get: true
+    inputs: detect
     params:
       context: status
       path: resource-pr
@@ -249,13 +259,15 @@ plan:
   file: version/version
 - in_parallel:
   - put: resource-image
+    no_get: true
+    inputs: detect
     params:
       image: resource-image-dev/image.tar
       version: ((.:version))
       bump_aliases: true
-    get_params:
-      skip_download: true
   - put: resource-repo-release
+    no_get: true
+    inputs: detect
     params:
       commitish: resource-repo/.git/ref
       body: built-notes/notes.md
@@ -265,6 +277,8 @@ plan:
       tag: version/version
       tag_prefix: v
 - put: version
+  no_get: true
+  inputs: detect
   params:
     file: version/version
 #@ end
@@ -274,6 +288,8 @@ name: republish-images
 serial_groups: [build]
 on_failure: &failed-ci
   put: notify
+  no_get: true
+  inputs: detect
   params:
     mode: normal
     alert_type: failed
@@ -300,13 +316,13 @@ plan:
   params:
     VERSION: ((.:version))
 - put: resource-image
+  no_get: true
+  inputs: detect
   params:
     image: built-resource-image/image.tar
     version: ((.:version))
     bump_aliases: true
     additional_tags: date-tag/tag
-  get_params:
-    skip_download: true
 #@ end
 
 #@ def unique_version_history():
