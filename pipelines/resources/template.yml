@@ -155,7 +155,6 @@ plan:
   - #@ template.replace(extra_get_steps())
 - put: #@ resource_name + "-resource"
   resource: resource-pr
-  no_get: true
   inputs: detect
   params:
     context: status
