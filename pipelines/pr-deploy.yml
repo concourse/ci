@@ -647,7 +647,7 @@ resources:
     repository: concourse/golang-builder
     username: ((docker.username))
     password: ((docker.password))
-    variant: jammy
+    variant: noble
 
 - name: postgres-image
   type: registry-image

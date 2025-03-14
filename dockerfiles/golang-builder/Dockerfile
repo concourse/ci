@@ -25,9 +25,6 @@ RUN tar -C /usr/local -xf go.linux.tar && rm go.linux.tar
 ENV GOPATH /go
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
 
-# disable cgo; we don't want to depend on or statically link libc
-ENV CGO_ENABLED=0
-
 # strip file system paths from built executables
 ENV GOFLAGS=-trimpath
 

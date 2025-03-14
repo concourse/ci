@@ -4,7 +4,7 @@ image_resource:
   type: registry-image-resource
   source:
     repository: ubuntu
-    tag: jammy
+    tag: noble
 
 inputs:
 - name: version

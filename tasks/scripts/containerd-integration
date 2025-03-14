@@ -16,9 +16,7 @@ run_test() {
   cd concourse
 
   go mod download
-
-  # CGO is required for go test -race
-  CGO_ENABLED=1 go test -v -race ./worker/runtime/integration
+  go test -v -race ./worker/runtime/integration
 }
 
 main
