@@ -51,7 +51,7 @@ resources:
   icon: docker
   source:
     repository: ubuntu
-    tag: jammy
+    tag: noble
     username: ((docker.username))
     password: ((docker.password))
 
