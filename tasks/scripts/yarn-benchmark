@@ -7,5 +7,6 @@ set -e -u
 stty columns 80
 
 cd concourse
+corepack enable
 yarn install
 yarn benchmark

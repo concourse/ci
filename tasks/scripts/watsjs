@@ -13,6 +13,7 @@ fi
 cd web/wats
 
 stty columns 80 # for better yarn output
+corepack enable
 yarn install
 
 yarn test -v --color "$@"
