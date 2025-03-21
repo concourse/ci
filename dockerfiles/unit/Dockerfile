@@ -29,8 +29,8 @@ RUN add-apt-repository "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_relea
 RUN apt-get update && apt-get -y install postgresql-16
 ENV PATH $PATH:/usr/lib/postgresql/16/bin
 
-# install Node 16.x
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+# install Node 22.x
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
 RUN apt-get update && apt-get install -y nodejs
 
 # install Yarn for web UI tests
