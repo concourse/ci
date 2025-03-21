@@ -32,6 +32,8 @@ ENV PATH $PATH:/usr/lib/postgresql/16/bin
 # install Node 22.x
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
 RUN apt-get update && apt-get install -y nodejs
+RUN corepack enable
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 
 # install Yarn for web UI tests
 RUN curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
