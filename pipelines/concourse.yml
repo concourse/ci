@@ -92,9 +92,13 @@ jobs:
       caches: [{path: cache}]
       run: {path: build}
   - put: unit-image
+    no_get: true
+    inputs: detect
     params: {image: image/image.tar}
   on_failure: &failed-ci
     put: notify
+    no_get: true
+    inputs: detect
     params:
       mode: normal
       alert_type: failed
@@ -124,6 +128,8 @@ jobs:
       BUILD_ARG_golang_version: ((.:golang_version))
   - in_parallel:
     - put: golang-builder-image
+      no_get: true
+      inputs: detect
       params:
         image: image/image
         version: ((.:golang_version))
@@ -131,6 +137,8 @@ jobs:
 
     # push to latest (+ bare semver tags) to make local dev a bit easier
     - put: golang-builder-image-latest
+      no_get: true
+      inputs: detect
       params:
         image: image/image
         version: ((.:golang_version))
@@ -157,6 +165,8 @@ jobs:
       BUILD_ARG_base_image_tag: ((.:base_image_tag))
   - in_parallel:
     - put: resource-types-builder-image-ubuntu
+      no_get: true
+      inputs: detect
       params:
         image: image/image
         bump_aliases: true
@@ -180,6 +190,8 @@ jobs:
       IMAGE_ARG_base_image: paketo-jammy-static-image/image.tar
   - in_parallel:
     - put: resource-types-base-image-static
+      no_get: true
+      inputs: detect
       params:
         image: image/image
         additional_tags: paketo-jammy-static-image/tag
@@ -258,8 +270,9 @@ jobs:
     privileged: true
     file: ci/tasks/build-resource-types-image.yml
   - put: resource-types-ubuntu-image
+    no_get: true
+    inputs: detect
     params: {image: image_ubuntu/image.tar}
-    get_params: {format: oci}
 
 - name: dev-image
   public: true
@@ -315,8 +328,9 @@ jobs:
     input_mapping: {concourse: built-concourse, resource-types-image: resource-types-ubuntu-image}
     file: ci/tasks/build-dev-image-multi-arch.yml
   - put: dev-image
+    no_get: true
+    inputs: detect
     params: {image: image/image}
-    get_params: {format: oci}
   on_failure: *failed-concourse
 
 - name: worker-runtime
@@ -614,14 +628,17 @@ jobs:
         output_mapping: {concourse-tarball: concourse-darwin}
   - in_parallel:
     - put: linux-dev-ubuntu
+      no_get: true
+      inputs: detect
       params: {file: concourse-linux-ubuntu/concourse-*.tgz}
-      inputs: [concourse-linux-ubuntu]
     - put: windows-dev
+      no_get: true
+      inputs: detect
       params: {file: concourse-windows/concourse-*.zip}
-      inputs: [concourse-windows]
     - put: darwin-dev
+      no_get: true
+      inputs: detect
       params: {file: concourse-darwin/concourse-*.tgz}
-      inputs: [concourse-darwin]
   on_failure: *failed-concourse
 
 - name: build-image
@@ -648,7 +665,8 @@ jobs:
     output_mapping: {image: image-ubuntu}
     privileged: true
   - put: concourse-dev-image
-    inputs: [image-ubuntu]
+    no_get: true
+    inputs: detect
     params:
       image: image-ubuntu/image.tar
   on_failure: *failed-concourse
@@ -674,7 +692,8 @@ jobs:
         concourse_web_image_digest: ((.:concourse_image_digest))
       COMMIT: bump production web to concourse dev
   - put: infrastructure-bump
-    inputs: [infrastructure-bumped]
+    no_get: true
+    inputs: detect
     params:
       repository: infrastructure-bumped
       branch: master
@@ -725,7 +744,8 @@ jobs:
         concourse_darwin_bundle_url: ((.:concourse_darwin_bundle_url))
       COMMIT: bump production workers to concourse dev
   - put: infrastructure-bump
-    inputs: [infrastructure-bumped]
+    no_get: true
+    inputs: detect
     params:
       repository: infrastructure-bumped
       branch: master
@@ -910,6 +930,8 @@ jobs:
     input_mapping: { linux-rc: linux-dev-ubuntu, windows-rc: windows-dev }
     params: {GCP_JSON_KEY: ((concourse_artifacts_json_key))}
   - put: concourse-release-repo
+    no_get: true
+    inputs: detect
     params: {repository: bumped-concourse-release-repo}
 
 - name: bosh-upload-releases
