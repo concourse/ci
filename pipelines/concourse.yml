@@ -421,6 +421,7 @@ jobs:
       params: {format: oci}
     - get: ci
   - task: watsjs
+    attempts: 3
     image: unit-image
     privileged: true
     timeout: 1h
