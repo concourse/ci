@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 	"strconv"
 	"testing"
 
@@ -62,7 +62,7 @@ var _ = Describe("ValidateSemverVerions", func() {
 	JustBeforeEach(func() {
 		for i, version := range versions {
 			fileName := "file" + strconv.Itoa(i)
-			versionFile, err := ioutil.TempFile("", fileName)
+			versionFile, err := os.CreateTemp("", fileName)
 			Expect(err).NotTo(HaveOccurred())
 
 			_, err = versionFile.Write([]byte(version))
