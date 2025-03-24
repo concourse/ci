@@ -233,7 +233,7 @@ jobs:
       instance_vars: {type: ((.:type))}
       file: rendered_pipelines/((.:type)).yml
       vars:
-        base-image: paketobuildpacks/run-jammy-base
+        base-image: cgr.dev/chainguard/busybox
 
 - name: unit
   plan:
@@ -305,13 +305,13 @@ jobs:
       instance_vars:
         version: 7.12.x
       vars:
-        gcp_image: ubuntu-2204-lts-cgroups-v1
+        gcp_image: ubuntu-2404-lts-cgroups-v1
         release_major: '7'
         release_minor: '7.12'
         latest_release: '7.11'
         concourse_smoke_deployment_name: concourse-smoke-7-12
         slack_hook: ((slack_hooks.concourse-private))
-        stemcell_name: jammy
+        stemcell_name: noble
         ci_branch: master
         resource_type_versions:
           bosh-io-release: ~1.2.2

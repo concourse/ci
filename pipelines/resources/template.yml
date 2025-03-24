@@ -215,7 +215,7 @@ plan:
       type: registry-image
       source:
         repository: ubuntu
-        tag: jammy
+        tag: noble
     inputs:
     - name: version
     - name: resource-image-dev-rootfs
@@ -394,7 +394,7 @@ resources:
   icon: docker
   source:
     repository: concourse/golang-builder
-    variant: jammy
+    variant: noble
     username: ((docker.username))
     password: ((docker.password))
 

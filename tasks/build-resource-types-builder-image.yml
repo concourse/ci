@@ -5,7 +5,7 @@ params:
   REPOSITORY: concourse/resource-types-buidler
   DOCKERFILE: ci/dockerfiles/resource-types-builder/Dockerfile
   CONTEXT: .
-  BUILD_ARG_base_image_tag: jammy
+  BUILD_ARG_base_image_tag: noble
   IMAGE_PLATFORM: linux/arm64,linux/amd64
   OUTPUT_OCI: true
 

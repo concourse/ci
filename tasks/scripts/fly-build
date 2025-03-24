@@ -24,7 +24,6 @@ pushd concourse
   ldflags+=' -extldflags "-static"'
 
   if [[ "$platform" == "darwin" ]]; then
-    export CGO_ENABLED=1
     tags+=' osusergo'
     platform_flags+='-buildvcs=false'
   fi

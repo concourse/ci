@@ -179,7 +179,7 @@ jobs:
   - in_parallel:
     - get: ci
     - get: oci-build-task
-    - get: paketo-jammy-static-image
+    - get: resources-types-base-image
       trigger: true
       params: {format: oci}
   - task: build
@@ -187,14 +187,14 @@ jobs:
     privileged: true
     file: ci/tasks/build-resource-types-base-image-static.yml
     params:
-      IMAGE_ARG_base_image: paketo-jammy-static-image/image.tar
+      IMAGE_ARG_base_image: resources-types-base-image/image.tar
   - in_parallel:
     - put: resource-types-base-image-static
       no_get: true
       inputs: detect
       params:
         image: image/image
-        additional_tags: paketo-jammy-static-image/tag
+        additional_tags: resources-types-base-image/tag
   on_failure: *failed-ci
 
 - name: unit
@@ -774,7 +774,7 @@ jobs:
       max_in_flight: all
     - var: gcp-image
       values:
-      - ubuntu-2204-lts-cgroups-v1
+      - ubuntu-2404-lts-cgroups-v1
       max_in_flight: 1
     do:
     - task: terraform-smoke
@@ -952,7 +952,7 @@ jobs:
       trigger: true
     - get: bpm-release
       trigger: true
-    - get: gcp-jammy-stemcell
+    - get: gcp-noble-stemcell
       trigger: true
     - get: bbr-sdk-release
       trigger: true
@@ -996,7 +996,7 @@ jobs:
     - get: bpm-release
       passed: [bosh-upload-releases]
       trigger: true
-    - get: gcp-jammy-stemcell
+    - get: gcp-noble-stemcell
       passed: [bosh-upload-releases]
       trigger: true
     - get: ci
@@ -1012,10 +1012,10 @@ jobs:
       - postgres-release/*.tgz
       - bpm-release/*.tgz
       stemcells:
-      - gcp-jammy-stemcell/*.tgz
+      - gcp-noble-stemcell/*.tgz
       vars:
         deployment_name: concourse-smoke
-        stemcell_variant: jammy
+        stemcell_variant: noble
   - task: discover-bosh-endpoint-info
     tags: [bosh]
     file: ci/tasks/discover-bosh-endpoint-info.yml
@@ -1055,7 +1055,7 @@ jobs:
     - get: bpm-release
       passed: [bosh-upload-releases]
       trigger: true
-    - get: gcp-jammy-stemcell
+    - get: gcp-noble-stemcell
       passed: [bosh-upload-releases]
       trigger: true
     - get: ci
@@ -1071,10 +1071,10 @@ jobs:
       - postgres-release/*.tgz
       - bpm-release/*.tgz
       stemcells:
-      - gcp-jammy-stemcell/*.tgz
+      - gcp-noble-stemcell/*.tgz
       vars:
         deployment_name: concourse-smoke-guardian
-        stemcell_variant: jammy
+        stemcell_variant: noble
   - task: discover-bosh-endpoint-info
     tags: [bosh]
     file: ci/tasks/discover-bosh-endpoint-info.yml
@@ -1118,7 +1118,7 @@ jobs:
     - get: bbr-sdk-release
       passed: [bosh-upload-releases]
       trigger: true
-    - get: gcp-jammy-stemcell
+    - get: gcp-noble-stemcell
       passed: [bosh-upload-releases]
       trigger: true
     - get: vault-release
@@ -1139,7 +1139,7 @@ jobs:
     file: ci/tasks/topgun.yml
     image: unit-image
     input_mapping:
-      stemcell: gcp-jammy-stemcell
+      stemcell: gcp-noble-stemcell
     params:
       BOSH_ENVIRONMENT: https://10.0.0.6:25555
       BOSH_CA_CERT: ((testing_bosh_ca_cert))
@@ -1149,7 +1149,7 @@ jobs:
       # AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
       # AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
       SUITE: core
-      STEMCELL_VARIANT: jammy
+      STEMCELL_VARIANT: noble
   on_failure: *failed-concourse
 
 - name: bosh-topgun-runtime
@@ -1177,7 +1177,7 @@ jobs:
     - get: bbr-sdk-release
       passed: [bosh-upload-releases]
       trigger: true
-    - get: gcp-jammy-stemcell
+    - get: gcp-noble-stemcell
       passed: [bosh-upload-releases]
       trigger: true
     - get: vault-release
@@ -1198,7 +1198,7 @@ jobs:
     file: ci/tasks/topgun.yml
     image: unit-image
     input_mapping:
-      stemcell: gcp-jammy-stemcell
+      stemcell: gcp-noble-stemcell
     params:
       BOSH_ENVIRONMENT: https://10.0.0.6:25555
       BOSH_CA_CERT: ((testing_bosh_ca_cert))
@@ -1208,7 +1208,7 @@ jobs:
       # AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
       # AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
       SUITE: runtime
-      STEMCELL_VARIANT: jammy
+      STEMCELL_VARIANT: noble
   on_failure: *failed-concourse
 
 - name: bosh-topgun-both
@@ -1236,7 +1236,7 @@ jobs:
     - get: bbr-sdk-release
       passed: [bosh-upload-releases]
       trigger: true
-    - get: gcp-jammy-stemcell
+    - get: gcp-noble-stemcell
       passed: [bosh-upload-releases]
       trigger: true
     - get: vault-release
@@ -1257,7 +1257,7 @@ jobs:
     file: ci/tasks/topgun.yml
     image: unit-image
     input_mapping:
-      stemcell: gcp-jammy-stemcell
+      stemcell: gcp-noble-stemcell
     params:
       BOSH_ENVIRONMENT: https://10.0.0.6:25555
       BOSH_CA_CERT: ((testing_bosh_ca_cert))
@@ -1267,7 +1267,7 @@ jobs:
       # AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
       # AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
       SUITE: both
-      STEMCELL_VARIANT: jammy
+      STEMCELL_VARIANT: noble
   on_failure: *failed-concourse
 
 - name: bosh-topgun-pcf
@@ -1298,7 +1298,7 @@ jobs:
     - get: bbr-sdk-release
       passed: [bosh-upload-releases]
       trigger: true
-    - get: gcp-jammy-stemcell
+    - get: gcp-noble-stemcell
       passed: [bosh-upload-releases]
       trigger: true
     - get: vault-release
@@ -1319,7 +1319,7 @@ jobs:
     file: ci/tasks/topgun.yml
     image: unit-image
     input_mapping:
-      stemcell: gcp-jammy-stemcell
+      stemcell: gcp-noble-stemcell
       postgres-release: postgres-bbr-compatible-release
     params:
       BOSH_ENVIRONMENT: https://10.0.0.6:25555
@@ -1330,7 +1330,7 @@ jobs:
       # AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
       # AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
       SUITE: pcf
-      STEMCELL_VARIANT: jammy
+      STEMCELL_VARIANT: noble
   on_failure: *failed-concourse
 
 resources:
@@ -1416,7 +1416,7 @@ resources:
     repository: concourse/golang-builder
     username: ((docker.username))
     password: ((docker.password))
-    variant: jammy
+    variant: noble
 
 - name: golang-builder-image-latest
   type: registry-image
@@ -1730,11 +1730,11 @@ resources:
     ca_cert: ((testing_bosh_ca_cert))
     deployment: concourse-smoke-guardian
 
-- name: gcp-jammy-stemcell
+- name: gcp-noble-stemcell
   type: bosh-io-stemcell
   icon: *release-icon
   source:
-    name: bosh-google-kvm-ubuntu-jammy-go_agent
+    name: bosh-google-kvm-ubuntu-noble
 
 - name: concourse-docker
   type: git
@@ -1798,15 +1798,15 @@ resources:
   icon: *image-icon
   source:
     repository: ubuntu
-    tag: jammy
+    tag: noble
     username: ((docker.username))
     password: ((docker.password))
 
-- name: paketo-jammy-static-image
+- name: resources-types-base-image
   type: registry-image
   icon: *image-icon
   source:
-    repository: paketobuildpacks/run-jammy-static
+    repository: cgr.dev/chainguard/busybox
     username: ((docker.username))
     password: ((docker.password))
 
@@ -1815,7 +1815,7 @@ resources:
   icon: &image-icon docker
   source:
     repository: concourse/resource-types-builder
-    tag: jammy
+    tag: noble
     username: ((docker.username))
     password: ((docker.password))
 
