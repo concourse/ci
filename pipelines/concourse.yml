@@ -830,7 +830,7 @@ jobs:
     - var: gcp-image
       values:
       - ubuntu-2204-lts
-      - ubuntu-2404-lts
+      - ubuntu-2404-lts-amd64
       max_in_flight: 1
     do:
     - task: terraform-smoke
