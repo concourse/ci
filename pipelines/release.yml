@@ -161,6 +161,8 @@ jobs:
       input_mapping: {concourse: built-concourse}
   on_failure: &failed-concourse
     put: notify
+    no_get: true
+    inputs: detect
     params:
       mode: normal
       alert_type: failed
@@ -206,8 +208,9 @@ jobs:
     privileged: true
     file: ci/tasks/build-resource-types-image.yml
   - put: resource-types-image
+    no_get: true
+    inputs: detect
     params: {image: image_ubuntu/image.tar}
-    get_params: {format: oci}
 
 - name: dev-image
   public: true
@@ -262,8 +265,9 @@ jobs:
     input_mapping: {concourse: built-concourse}
     file: ci/tasks/build-dev-image.yml
   - put: dev-image
+    no_get: true
+    inputs: detect
     params: {image: image/image.tar}
-    get_params: {format: oci}
   on_failure: *failed-concourse
   on_error: *failed-concourse
 
@@ -516,6 +520,8 @@ jobs:
     - get: golang-builder-image
       passed: [dev-image]
   - put: version
+    no_get: true
+    inputs: detect
     params: {pre: rc}
 
 - name: build-rc
@@ -592,14 +598,17 @@ jobs:
       file: ci/tasks/validate-windows-rc.yml
   - in_parallel:
     - put: linux-rc-ubuntu
+      no_get: true
+      inputs: detect
       params: {file: concourse-linux-ubuntu/concourse-*.tgz}
-      inputs: [concourse-linux-ubuntu]
     - put: windows-rc
+      no_get: true
+      inputs: detect
       params: {file: concourse-windows/concourse-*.zip}
-      inputs: [concourse-windows]
     - put: darwin-rc
+      no_get: true
+      inputs: detect
       params: {file: concourse-darwin/concourse-*.tgz}
-      inputs: [concourse-darwin]
   on_failure: *failed-concourse
   on_error: *failed-concourse
 
@@ -630,7 +639,8 @@ jobs:
     output_mapping: {image: image-ubuntu}
     privileged: true
   - put: concourse-rc-image
-    inputs: [image-ubuntu, version]
+    no_get: true
+    inputs: detect
     params:
       image: image-ubuntu/image.tar
       additional_tags: version/version
@@ -684,7 +694,8 @@ jobs:
         concourse_darwin_bundle_url: ((.:concourse_darwin_bundle_url))
       COMMIT: bump production to ((release_minor)) rc
   - put: infrastructure-bump
-    inputs: [infrastructure-bumped]
+    no_get: true
+    inputs: detect
     params:
       repository: infrastructure-bumped
       branch: master
@@ -822,6 +833,8 @@ jobs:
     input_mapping: { linux-rc: linux-rc-ubuntu }
     params: {GCP_JSON_KEY: ((concourse_artifacts_json_key))}
   - put: concourse-release-repo
+    no_get: true
+    inputs: detect
     params: {repository: bumped-concourse-release-repo}
 
 - name: bosh-upload-releases
@@ -974,7 +987,8 @@ jobs:
         GITHUB_TOKEN: ((concourse_github_dummy.access_token))
         GITHUB_BRANCH: release/((release_minor)).x
   - put: concourse-draft-release
-    inputs: [concourse, final-version, release-name, built-notes]
+    no_get: true
+    inputs: detect
     params:
       commitish: concourse/.git/ref
       tag: final-version/version
@@ -1013,8 +1027,8 @@ jobs:
     - get: gcp-ubuntu-stemcell
       passed: [bosh-smoke]
   - put: version
-    inputs: detect
     no_get: true
+    inputs: detect
     params: {file: final-version/version}
 
 - name: discover-component-version
@@ -1058,13 +1072,16 @@ jobs:
           STEMCELL_VERSION: ((.:stemcell-version))
     - in_parallel:
       - put: resource-postgresql-version
-        inputs: [postgresql-version]
+        no_get: true
+        inputs: detect
         params: {file: "postgresql-version/postgresql-version-*.txt"}
       - put: resource-helm-version
-        inputs: [helm-version]
+        no_get: true
+        inputs: detect
         params: {file: "helm-version/helm-version-*.txt"}
       - put: gcp-stemcell-version
-        inputs: [stemcell-version]
+        no_get: true
+        inputs: detect
         params: {file: "stemcell-version/stemcell-version-*.txt"}
 
 - name: publish-binaries
@@ -1094,6 +1111,8 @@ jobs:
       file: ci/tasks/build-release-name.yml
       image: unit-image
   - put: concourse-github-release
+    no_get: true
+    inputs: detect
     params:
       commitish: concourse/.git/ref
       tag: version/version
@@ -1123,6 +1142,8 @@ jobs:
     - get: concourse-release
       passed: [shipit]
   - put: concourse-release-final
+    no_get: true
+    inputs: detect
     params:
       tarball: concourse-release/*.tgz
       version: version/version
@@ -1151,6 +1172,8 @@ jobs:
     input_mapping: {concourse-bosh-deployment: cbd}
     image: unit-image
   - put: cbd
+    no_get: true
+    inputs: detect
     params:
       repository: bumped-repo
       merge: true
@@ -1191,7 +1214,8 @@ jobs:
   - load_var: image_version
     file: version/version
   - put: concourse-image
-    inputs: [concourse-rc-image]
+    no_get: true
+    inputs: detect
     params:
       image: concourse-rc-image/image.tar
       version: ((.:image_version))
@@ -1213,6 +1237,8 @@ jobs:
     image: concourse-image
     params: {COMPONENT_NAME: "concourse"}
   - put: concourse-image-dpkg-list
+    no_get: true
+    inputs: detect
     params: {file: "dpkg-list/concourse-*.txt"}
 
 - name: patch
@@ -1226,6 +1252,8 @@ jobs:
       bump: patch
       pre: rc
   - put: version
+    no_get: true
+    inputs: detect
     params:
       file: version/version
 
@@ -1289,6 +1317,7 @@ jobs:
     params:
       VERSION: ((.:image_version))-ubuntu
   - put: concourse-image
+    no_get: true
     inputs: detect
     params:
       image: image-ubuntu/image.tar
