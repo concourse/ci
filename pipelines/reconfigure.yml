@@ -359,6 +359,11 @@ jobs:
           s3: ""
           semver: ""
           time: ""
+        dep_bin_versions:
+          gdn: ""
+          cni: ""
+          runc: ""
+          containerd: ""
     # TEMPLATE FOR NEXT RELEASE
     # to create a new release pipeline, copy (but don't delete!) this template,
     # replacing MAJOR, MINOR, PREV_MAJOR, PREV_MINOR, and SLACK_CHANNEL
@@ -394,6 +399,11 @@ jobs:
     #       s3: ""
     #       semver: ""
     #       time: ""
+    #     dep_bin_versions:
+    #       gdn: ""
+    #       cni: ""
+    #       runc: ""
+    #       containerd: ""
     - set_pipeline: infrastructure-report
       file: pipelines-and-tasks/pipelines/infrastructure-report.yml
     on_failure: *notify
