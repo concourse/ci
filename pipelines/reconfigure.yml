@@ -332,6 +332,31 @@ jobs:
           cni: ~1.5.0
           runc: ~1.2.3
           containerd: ~2.0.1
+    - set_pipeline: release
+      file: pipelines-and-tasks/pipelines/release.yml
+      instance_vars:
+        version: 7.13.x
+      vars:
+        release_major: "7"
+        release_minor: "7.13"
+        latest_release: "7.12"
+        concourse_smoke_deployment_name: "concourse-smoke-7-13"
+        slack_hook: ((slack_hooks.concourse-private))
+        resource_type_versions:
+          # These should be left blank, as they will be updated after the release has shipped!
+          bosh-io-release: ""
+          bosh-io-stemcell: ""
+          cf: ""
+          docker-image: ""
+          git: ""
+          github-release: ""
+          hg: ""
+          mock: ""
+          pool: ""
+          registry-image: ""
+          s3: ""
+          semver: ""
+          time: ""
     # TEMPLATE FOR NEXT RELEASE
     # to create a new release pipeline, copy (but don't delete!) this template,
     # replacing MAJOR, MINOR, PREV_MAJOR, PREV_MINOR, and SLACK_CHANNEL
