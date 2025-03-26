@@ -343,6 +343,7 @@ jobs:
         concourse_smoke_deployment_name: "concourse-smoke-7-13"
         slack_hook: ((slack_hooks.concourse-private))
         stemcell_name: jammy
+        gcp_image: ubuntu-2204-lts
         ci_branch: master
         resource_type_versions:
           # These should be left blank, as they will be updated after the release has shipped!
@@ -383,6 +384,7 @@ jobs:
     #     concourse_smoke_deployment_name: "concourse-smoke-MAJOR-MINOR"
     #     slack_hook: ((slack_hooks.SLACK_CHANNEL))
     #     stemcell_name: jammy
+    #     gcp_image: ubuntu-2204-lts
     #     ci_branch: master
     #     resource_type_versions:
     #       # These should be left blank, as they will be updated after the release has shipped!
