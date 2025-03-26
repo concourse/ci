@@ -244,8 +244,6 @@ jobs:
       trigger: true
     - get: git-resource
       trigger: true
-    - get: tracker-resource
-      trigger: true
     - get: hg-resource
       trigger: true
     - get: semver-resource
@@ -1593,15 +1591,6 @@ resources:
   icon: *release-icon
   source:
     repository: concourse/time-resource
-    tag: dev
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: tracker-resource
-  type: registry-image
-  icon: *release-icon
-  source:
-    repository: concourse/tracker-resource
     tag: dev
     username: ((docker.username))
     password: ((docker.password))

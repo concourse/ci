@@ -17,8 +17,7 @@ pool
 registry-image
 s3
 semver
-time
-tracker'
+time'
 
 for resource_type in $resource_types; do
   cat resource-types/$resource_type/resource_metadata.json

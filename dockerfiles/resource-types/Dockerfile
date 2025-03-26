@@ -12,4 +12,3 @@ FROM busybox
   COPY s3-resource/                /usr/local/concourse/resource-types/s3/
   COPY semver-resource/            /usr/local/concourse/resource-types/semver/
   COPY time-resource/              /usr/local/concourse/resource-types/time/
-  COPY tracker-resource/           /usr/local/concourse/resource-types/tracker/

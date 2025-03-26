@@ -22,7 +22,6 @@ inputs:
 - name: s3-resource
 - name: semver-resource
 - name: time-resource
-- name: tracker-resource
 
 outputs:
 - name: image
