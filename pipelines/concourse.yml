@@ -1754,7 +1754,7 @@ resources:
   type: git
   source:
     uri: "https://github.com/bitnami/charts.git"
-    tag_filter: postgresql/((postgresql-chart-version))
+    tag_filter: postgresql/((postgresql_major))*
 
 - name: golang-linux
   type: s3

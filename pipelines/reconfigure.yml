@@ -267,7 +267,7 @@ jobs:
     - set_pipeline: concourse
       file: pipelines-and-tasks/pipelines/concourse.yml
       vars:
-        postgresql-chart-version: 16.3.2
+        postgresql_major: "16"
     - set_pipeline: helm-chart
       file: pipelines-and-tasks/pipelines/helm-chart.yml
       instance_vars:
@@ -282,7 +282,7 @@ jobs:
         concourse_base_branch: master
         concourse_image_name: concourse/concourse
         concourse_image_tag: latest
-        postgresql-chart-version: 16.3.2
+        postgresql_major: "16"
     - set_pipeline: helm-prs
       file: pipelines-and-tasks/pipelines/helm-prs.yml
       instance_vars:
@@ -291,7 +291,7 @@ jobs:
         concourse_base_branch: master
         concourse_image_name: concourse/concourse-rc
         concourse_image_tag: latest
-        postgresql-chart-version: 16.3.2
+        postgresql_major: "16"
     - set_pipeline: docs-prs
       team: contributor
       file: docs-ci/ci/prs-pipeline.yml
@@ -313,6 +313,7 @@ jobs:
         slack_hook: ((slack_hooks.concourse-private))
         stemcell_name: jammy
         ci_branch: master
+        postgresql_major: "16"
         resource_type_versions:
           bosh-io-release: ~1.2.2
           bosh-io-stemcell: ~1.4.1
@@ -345,6 +346,7 @@ jobs:
         stemcell_name: jammy
         gcp_image: ubuntu-2204-lts
         ci_branch: master
+        postgresql_major: "16"
         resource_type_versions:
           # These should be left blank, as they will be updated after the release has shipped!
           bosh-io-release: ""
