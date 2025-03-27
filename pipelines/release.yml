@@ -1528,6 +1528,7 @@ resources:
 # Using the git instead of helm-chart resource because Bitnami charts are hosted on Docker Hub and we sometimes run into their rate limits
 - name: postgresql-chart-git
   type: git
+  check_every: 24h
   source:
     uri: "https://github.com/bitnami/charts.git"
     tag_filter: postgresql/((postgresql_major))*
