@@ -1,0 +1,5 @@
+vulnerabilities:
+  - id: CVE-2019-3792
+    paths:
+      - "usr/local/concourse/bin/concourse"
+    statement: "False-positive"

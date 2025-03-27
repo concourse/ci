@@ -21,4 +21,5 @@ trivy \
   --ignore-unfixed \
   --exit-code 1 \
   --input image/image.tar \
+  --ignorefile ./.trivyignore.yaml \
   $ignore_policy
