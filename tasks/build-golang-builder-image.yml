@@ -5,8 +5,6 @@ params:
   REPOSITORY: concourse/golang-builder
   DOCKERFILE: ci/dockerfiles/golang-builder/Dockerfile
   CONTEXT: .
-  BUILD_ARG_base_image_tag: jammy
-  BUILD_ARG_golang_version:
   IMAGE_PLATFORM: linux/arm64,linux/amd64
   OUTPUT_OCI: true
 
