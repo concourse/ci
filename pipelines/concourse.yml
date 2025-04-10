@@ -55,8 +55,6 @@ groups:
   - resource-types-images
   - unit-image
   - build-golang-builder-image
-  - build-resource-types-builder-image
-  - build-resource-types-base-image-static
 
 - name: all
   jobs:
@@ -106,91 +104,21 @@ jobs:
   - in_parallel:
     - get: ci
     - get: oci-build-task
-    - get: golang-linux
+    - get: wolfi-base
       trigger: true
-    - get: ubuntu-image
-      trigger: true
-      params: {skip_download: true}
-  - load_var: golang_version
-    file: golang-linux/version
-  - load_var: base_image_tag
-    file: ubuntu-image/tag
+      params:
+        skip_download: true
   - task: build
     image: oci-build-task
     privileged: true
     file: ci/tasks/build-golang-builder-image.yml
-    params:
-      BUILD_ARG_base_image_tag: ((.:base_image_tag))
-      BUILD_ARG_golang_version: ((.:golang_version))
   - in_parallel:
     - put: golang-builder-image
       no_get: true
       inputs: detect
       params:
         image: image/image
-        version: ((.:golang_version))
         bump_aliases: true
-
-    # push to latest (+ bare semver tags) to make local dev a bit easier
-    - put: golang-builder-image-latest
-      no_get: true
-      inputs: detect
-      params:
-        image: image/image
-        version: ((.:golang_version))
-        bump_aliases: true
-  on_failure: *failed-ci
-
-- name: build-resource-types-builder-image
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: ci
-    - get: oci-build-task
-    - get: ubuntu-image
-      trigger: true
-      params: {skip_download: true}
-  - load_var: base_image_tag
-    file: ubuntu-image/tag
-  - task: build
-    image: oci-build-task
-    privileged: true
-    file: ci/tasks/build-resource-types-builder-image.yml
-    params:
-      BUILD_ARG_base_image_tag: ((.:base_image_tag))
-  - in_parallel:
-    - put: resource-types-builder-image-ubuntu
-      no_get: true
-      inputs: detect
-      params:
-        image: image/image
-        bump_aliases: true
-  on_failure: *failed-ci
-
-- name: build-resource-types-base-image-static
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: ci
-    - get: oci-build-task
-    - get: paketo-jammy-static-image
-      trigger: true
-      params: {format: oci}
-  - task: build
-    image: oci-build-task
-    privileged: true
-    file: ci/tasks/build-resource-types-base-image-static.yml
-    params:
-      IMAGE_ARG_base_image: paketo-jammy-static-image/image.tar
-  - in_parallel:
-    - put: resource-types-base-image-static
-      no_get: true
-      inputs: detect
-      params:
-        image: image/image
-        additional_tags: paketo-jammy-static-image/tag
   on_failure: *failed-ci
 
 - name: unit
@@ -1408,15 +1336,7 @@ resources:
   icon: *image-icon
   source:
     repository: concourse/golang-builder
-    username: ((docker.username))
-    password: ((docker.password))
-    variant: jammy
-
-- name: golang-builder-image-latest
-  type: registry-image
-  icon: *image-icon
-  source:
-    repository: concourse/golang-builder
+    tag: latest
     username: ((docker.username))
     password: ((docker.password))
 
@@ -1753,14 +1673,6 @@ resources:
     uri: "https://github.com/bitnami/charts.git"
     tag_filter: postgresql/((postgresql_major))*
 
-- name: golang-linux
-  type: s3
-  icon: language-go
-  source:
-    endpoint: storage.googleapis.com
-    bucket: golang
-    regexp: 'go(\d+\.\d+(\.\d+)?)\.linux-amd64\.tar\.gz$'
-
 - name: resource-types-ubuntu-image
   type: registry-image
   icon: &image-icon docker
@@ -1779,37 +1691,9 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: ubuntu-image
+- name: wolfi-base
   type: registry-image
   icon: *image-icon
   source:
-    repository: ubuntu
-    tag: jammy
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: paketo-jammy-static-image
-  type: registry-image
-  icon: *image-icon
-  source:
-    repository: paketobuildpacks/run-jammy-static
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: resource-types-builder-image-ubuntu
-  type: registry-image
-  icon: &image-icon docker
-  source:
-    repository: concourse/resource-types-builder
-    tag: jammy
-    username: ((docker.username))
-    password: ((docker.password))
-
-- name: resource-types-base-image-static
-  type: registry-image
-  icon: &image-icon docker
-  source:
-    repository: concourse/resource-types-base-image-static
+    repository: cgr.dev/chainguard/wolfi-base
     tag: latest
-    username: ((docker.username))
-    password: ((docker.password))

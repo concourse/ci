@@ -1,29 +1,14 @@
-ARG base_image_tag
-FROM ubuntu:${base_image_tag}
+ARG base_image
+FROM ${base_image:-cgr.dev/chainguard/wolfi-base}
 
-RUN ln -s /usr/bin/dpkg-split /usr/sbin/dpkg-split
-RUN ln -s /usr/bin/dpkg-deb /usr/sbin/dpkg-deb
-RUN ln -s /bin/rm /usr/sbin/rm
-RUN ln -s /bin/tar /usr/sbin/tar
-
-# gcc for cgo
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    git \
+RUN apk --update-cache add \
     ca-certificates \
-    curl \
-    gzip \
-  && rm -rf /var/lib/apt/lists/*
-
-ARG golang_version
-ARG TARGETARCH
-RUN curl https://storage.googleapis.com/golang/go${golang_version}.linux-${TARGETARCH}.tar.gz -o go.linux.tar.gz
-
-RUN gzip -d go.linux.tar.gz
-RUN tar -C /usr/local -xf go.linux.tar && rm go.linux.tar
+    git \
+    go-1.24
+RUN apk cache purge
 
 ENV GOPATH /go
-ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
+ENV PATH $GOPATH/bin:/usr/lib/go/bin:$PATH
 
 # disable cgo; we don't want to depend on or statically link libc
 ENV CGO_ENABLED=0
