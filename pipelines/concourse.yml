@@ -119,7 +119,6 @@ jobs:
       inputs: detect
       params:
         image: image/image
-        bump_aliases: true
   on_failure: *failed-ci
 
 - name: unit
