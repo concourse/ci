@@ -1,99 +1,80 @@
 ARG base_image=concourse/golang-builder
 FROM ${base_image}
 
+# can be amd64 or arm64
+ARG TARGETARCH=amd64
+
 # enable CGO so we can go test with -race
 ENV CGO_ENABLED=1
 
-# basic setup for adding new apt sources and installing packages
-RUN apt-get update && apt-get -y install \
-      apt-transport-https \
-      ca-certificates \
-      curl \
-      iproute2 \
-      gnupg2 \
-      software-properties-common \
-      unzip \
-      file \
-      btrfs-progs
+# tools needed for running some tests and installing other dependencies
+RUN apk --update-cache add \
+    btrfs-progs \
+    ca-certificates \
+    # install Chrome for Puppeteer (watsjs/upgrade/downgrade/smoke)
+    chromium \
+    curl \
+    # for local integration tests
+    docker \
+    docker-compose \
+    file \
+    gnupg \
+    # for k8s-topgun tests
+    kubectl \
+    helm \
+    iproute2 \
+    jq \
+    nodejs-22 \
+    npm \
+    # used for /atc/db tests
+    postgresql \
+    postgresql-client \
+    # for bin-smoke test
+    terraform \
+    # used by gcloud
+    python3 \
+    unzip \
+    # for bosh-topgun tests
+    vault \
+    yq
+
+# enable `docker compose` command, otherwise we have to call `docker-compose` directly
+RUN ln -s /usr/sbin/docker-compose /usr/libexec/docker/cli-plugins/docker-compose
+
+# ensure that Puppeteer uses this Chrome instead of downloading on demand
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/sbin/chromium
 
 # install gcloud
-# RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
-RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
-echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
-apt-get update && apt-get install -y google-cloud-sdk google-cloud-sdk-gke-gcloud-auth-plugin
-
-# install PostgreSQL for DB tests
-ENV DEBIAN_FRONTEND noninteractive
-RUN curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
-RUN add-apt-repository "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main"
-RUN apt-get update && apt-get -y install postgresql-16
-ENV PATH $PATH:/usr/lib/postgresql/16/bin
-
-# install Node 22.x
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
-RUN apt-get update && apt-get install -y nodejs
-ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+# GCLOUD_ARCH can be 'x86_64' or 'arm': https://cloud.google.com/sdk/docs/install#linux
+ARG GCLOUD_ARCH=x86_64
+RUN curl -L https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-${GCLOUD_ARCH}.tar.gz -o gcloud-cli.tar.gz &&\
+    tar -xf gcloud-cli.tar.gz &&\
+    mv google-cloud-sdk /usr/local/ &&\
+    rm gcloud-cli.tar.gz
+ENV PATH=$PATH:/usr/local/google-cloud-sdk/bin
+RUN apk add \
+    gke-gcloud-auth-plugin
 
 # install Yarn for web UI tests
-RUN curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-RUN add-apt-repository "deb https://dl.yarnpkg.com/debian/ stable main"
-RUN apt-get update && apt-get -y install yarn
-
-# install Docker
-RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
-RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-RUN apt-get update && apt-get -y install docker-ce
-
-# install Chrome for Puppeteer (watsjs/upgrade/downgrade/smoke)
-RUN curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-RUN add-apt-repository "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main"
-RUN apt-get update && apt-get -y install google-chrome-stable xvfb --no-install-recommends
-# ensure that Puppeteer uses this Chrome instead of downloading on demand;
-# this makes us resilient to breaking changes to the APT dependencies
-ENV PUPPETEER_SKIP_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+RUN npm install -g corepack &&\
+    yarn set version stable
 
 # install BOSH CLI for bosh-smoke, bosh-topgun
-RUN curl -L "https://github.com/cloudfoundry/bosh-cli/releases/download/v6.3.0/bosh-cli-6.3.0-linux-amd64" \
-      -o /usr/local/bin/bosh && \
-      chmod +x /usr/local/bin/bosh
+ARG BOSH_VERSION=7.9.4
+RUN curl -L "https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-${TARGETARCH}" \
+      -o /usr/sbin/bosh && \
+      chmod +x /usr/sbin/bosh
 
-# install kubectl for k8s-related jobs
-RUN curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
-      -o /usr/local/bin/kubectl && \
-      chmod +x /usr/local/bin/kubectl
-
-# install helm for k8s-related jobs
-RUN curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
-
-# install yq
-RUN wget https://github.com/mikefarah/yq/releases/download/3.4.0/yq_linux_amd64 -O /usr/bin/yq &&\
-    chmod +x /usr/bin/yq
-
-# TODO: tech-debt for maintaining 6.3.x version of the chart which uses Helm v2
-# Remove when 6.3.x no longer needs to be supported
-RUN curl https://get.helm.sh/helm-v2.16.12-linux-amd64.tar.gz -o helm-v2.tar.gz && \
-        tar xzf helm-v2.tar.gz && \
-        mv linux-amd64/helm /usr/local/bin/helm2
-
-# install Vault for bosh-topgun
-RUN curl -L https://releases.hashicorp.com/vault/0.7.3/vault_0.7.3_linux_amd64.zip -o /tmp/vault.zip && \
-      unzip /tmp/vault.zip -d /usr/local/bin && \
-      rm /tmp/vault.zip
-
-# install Terraform, ssh and jq for bin-smoke
-RUN curl -fsSL https://releases.hashicorp.com/terraform/1.2.8/terraform_1.2.8_linux_amd64.zip -o /tmp/terraform.zip && \
-      unzip /tmp/terraform.zip -d /usr/local/bin && \
-      rm /tmp/terraform.zip
-RUN apt-get update && apt-get -y install jq openssh-client libnss3-tools
-
-# install Let's Encrypt staging cert for 'curl', setting it an env var just so
+# install Let's Encrypt staging cert for 'curl', setting an env var just so
 # it's easier to discover if/when this changes again
 ENV LETS_ENCRYPT_STAGING_CA_CERT=/usr/local/share/ca-certificates/letsencrypt-stg-root-x1.crt
 RUN curl https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x1.pem -o $LETS_ENCRYPT_STAGING_CA_CERT && \
       update-ca-certificates
 
 # install Let's Encrypt staging cert to nssdb for Chrome
+RUN apk add libnss-tools
 RUN mkdir -p /root/.pki/nssdb && \
   chmod 700 /root/.pki/nssdb && \
   certutil -N -d sql:/root/.pki/nssdb --empty-password && \
@@ -105,3 +86,7 @@ RUN mkdir -p /root/.pki/nssdb && \
 
 # install goimports CLI for formatting go files
 RUN go install golang.org/x/tools/cmd/goimports@latest
+
+# reduce final image size
+RUN apk cache purge && \
+    rm -rf /var/cache/apk/*
