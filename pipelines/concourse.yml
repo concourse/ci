@@ -52,6 +52,7 @@ groups:
 
 - name: images
   jobs:
+  - dev-image
   - resource-types-images
   - unit-image
   - build-golang-builder-image
