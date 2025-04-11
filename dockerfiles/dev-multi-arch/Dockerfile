@@ -11,14 +11,15 @@
 ARG base_image=concourse/golang-builder
 FROM ${base_image}
 
-RUN apt-get update && apt-get -y install \
-      iproute2 \
+RUN apk --update-cache add \
+      btrfs-progs \
       ca-certificates \
       curl \
+      dumb-init \
       file \
-      tree \
-      btrfs-progs \
-      dumb-init
+      iproute2 \
+      iptables \
+      tree
 
 ARG TARGETARCH
 
@@ -38,7 +39,6 @@ COPY gdn/gdn-linux-$TARGETARCH-[0-9]*.*.* /usr/local/concourse/bin/gdn
 COPY runc/runc.$TARGETARCH /usr/local/concourse/bin/runc
 
 ADD cni/cni-plugins-linux-$TARGETARCH-*.tgz /usr/local/concourse/bin
-RUN apt install -y iptables
 
 RUN chmod -R +x /usr/local/concourse/bin
 
@@ -57,8 +57,8 @@ COPY ./resource-types-image/rootfs/usr/local/concourse/resource-types/ /usr/loca
 # can cause build failures if e.g. files are removed locally)
 COPY concourse /src
 
-# If not link, gcc will fail by /go/bin/as not found error
-RUN ln -s /usr/bin/as /go/bin/as
+# If not link, gcc will fail with a "/go/bin/as not found" error
+RUN ln -s /usr/sbin/as /go/bin/as
 # build the init executable for containerd
 RUN gcc -O2 -static -o /usr/local/concourse/bin/init /src/cmd/init/init.c
 
@@ -77,5 +77,8 @@ ENV PATH /usr/local/concourse/bin:${PATH}
 
 # make `ctr` target the default concourse namespace
 ENV CONTAINERD_NAMESPACE=concourse
+
+RUN apk cache purge && \
+    rm -rf /var/cache/apk/*
 
 ENTRYPOINT ["dumb-init", "concourse"]
