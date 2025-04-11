@@ -5,7 +5,8 @@ RUN apk --update-cache add \
     ca-certificates \
     git \
     go-1.24
-RUN apk cache purge
+RUN apk cache purge && \
+    rm -rf /var/cache/apk/*
 
 ENV GOPATH /go
 ENV PATH $GOPATH/bin:/usr/lib/go/bin:$PATH
