@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -e -u
+set -euo pipefail
 
 source ci/tasks/scripts/docker-helpers.sh
 

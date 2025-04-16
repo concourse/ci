@@ -19,6 +19,7 @@ RUN apk --update-cache add \
     docker-compose \
     file \
     gnupg \
+    gnutar \
     # for k8s-topgun tests
     kubectl \
     helm \
@@ -26,6 +27,8 @@ RUN apk --update-cache add \
     jq \
     nodejs-22 \
     npm \
+    # for shasum cli
+    perl-utils \
     # used for /atc/db tests
     postgresql \
     postgresql-client \
@@ -36,7 +39,9 @@ RUN apk --update-cache add \
     unzip \
     # for bosh-topgun tests
     vault \
-    yq
+    yq \
+    # for Windows artifact packaging
+    zip
 
 # enable `docker compose` command, otherwise we have to call `docker-compose` directly
 RUN ln -s /usr/sbin/docker-compose /usr/libexec/docker/cli-plugins/docker-compose
@@ -64,21 +69,21 @@ RUN npm install -g corepack &&\
 # install BOSH CLI for bosh-smoke, bosh-topgun
 ARG BOSH_VERSION=7.9.4
 RUN curl -L "https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-${TARGETARCH}" \
-      -o /usr/sbin/bosh && \
-      chmod +x /usr/sbin/bosh
+    -o /usr/sbin/bosh && \
+    chmod +x /usr/sbin/bosh
 
 # install Let's Encrypt staging cert for 'curl', setting an env var just so
 # it's easier to discover if/when this changes again
 ENV LETS_ENCRYPT_STAGING_CA_CERT=/usr/local/share/ca-certificates/letsencrypt-stg-root-x1.crt
 RUN curl https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x1.pem -o $LETS_ENCRYPT_STAGING_CA_CERT && \
-      update-ca-certificates
+    update-ca-certificates
 
 # install Let's Encrypt staging cert to nssdb for Chrome
 RUN apk add libnss-tools
 RUN mkdir -p /root/.pki/nssdb && \
-  chmod 700 /root/.pki/nssdb && \
-  certutil -N -d sql:/root/.pki/nssdb --empty-password && \
-  certutil -A \
+    chmod 700 /root/.pki/nssdb && \
+    certutil -N -d sql:/root/.pki/nssdb --empty-password && \
+    certutil -A \
     -n "LetsEncrypt Staging Fake Root" \
     -t "TCu,Cu,Tu" \
     -i $LETS_ENCRYPT_STAGING_CA_CERT \
