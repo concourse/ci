@@ -1,0 +1,29 @@
+---
+platform: linux
+
+inputs:
+  - name: concourse
+  - name: ci
+  - name: version
+  - name: final-version
+    optional: true
+  - name: linux-dependencies
+    optional: true
+  - name: resource-types
+    optional: true
+  - name: fly-linux
+  - name: fly-windows
+  - name: fly-darwin
+
+caches:
+  - path: gopath
+
+outputs:
+  - name: concourse-tarball
+
+params:
+  PLATFORM:
+  ARCH:
+
+run:
+  path: ci/tasks/concourse-build/run.sh

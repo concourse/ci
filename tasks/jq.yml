@@ -3,7 +3,7 @@ platform: linux
 
 image_resource:
   type: registry-image
-  source: {repository: jetbrainsinfra/jq}
+  source: { repository: cgr.dev/chainguard/wolfi-base }
 
 params:
   # VAR_*
@@ -11,16 +11,17 @@ params:
   EXPR:
 
 outputs:
-- name: result
+  - name: result
 
 run:
   path: sh
   args:
-  - -c
-  - |
-    set -euo pipefail
-    env | \
-      jq --raw-input --slurp 'split("\n") | .[] | select(startswith("VAR_")) | sub("^VAR_"; "")' | \
-      jq '[capture( "(?<key>[^=]*)=(?<value>.*)" )] | from_entries | map_values(fromjson)' | \
-      jq --slurp add | \
-      jq "$EXPR" > result/result.json
+    - -c
+    - |
+      set -euo pipefail
+      apk add --no-progress jq
+      env | \
+        jq --raw-input --slurp 'split("\n") | .[] | select(startswith("VAR_")) | sub("^VAR_"; "")' | \
+        jq '[capture( "(?<key>[^=]*)=(?<value>.*)" )] | from_entries | map_values(fromjson)' | \
+        jq --slurp add | \
+        jq "$EXPR" > result/result.json

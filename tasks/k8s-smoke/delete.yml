@@ -1,0 +1,17 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: { repository: concourse/unit }
+
+params:
+  SERVICE_ACCOUNT_KEY:
+  RELEASE_NAME:
+
+inputs:
+  - name: concourse
+  - name: ci
+
+run:
+  path: ci/tasks/k8s-smoke/delete.sh

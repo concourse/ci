@@ -1,0 +1,20 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: { repository: concourse/unit }
+
+params:
+  CONCOURSE_IMAGE:
+  SERVICE_ACCOUNT_KEY:
+  RELEASE_NAME:
+
+inputs:
+  - name: concourse-chart
+  - name: concourse
+  - name: ci
+  - name: image-info
+
+run:
+  path: ci/tasks/k8s-smoke/deploy.sh

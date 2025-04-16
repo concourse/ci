@@ -18,4 +18,4 @@ caches:
   - path: gopath
 
 run:
-  path: ci/tasks/scripts/fly-build-cross-compile
+  path: ci/tasks/fly-build/run.sh

@@ -1,0 +1,30 @@
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: { repository: concourse/oci-build-task }
+
+params:
+  DOCKERFILE: ci/build-resource-types-image/Dockerfile
+  REPOSITORY: concourse/dev
+
+inputs:
+  - name: ci
+  - name: bosh-io-release-resource
+  - name: bosh-io-stemcell-resource
+  - name: docker-image-resource
+  - name: git-resource
+  - name: github-release-resource
+  - name: hg-resource
+  - name: mock-resource
+  - name: pool-resource
+  - name: registry-image-resource
+  - name: s3-resource
+  - name: semver-resource
+  - name: time-resource
+
+outputs:
+  - name: image
+
+run:
+  path: ci/tasks/build-resource-types-image/run.sh
