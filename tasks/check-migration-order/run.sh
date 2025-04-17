@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -euo pipefail
 
 migrations_path=atc/db/migration/migrations/
 base_dir=concourse-base/$migrations_path

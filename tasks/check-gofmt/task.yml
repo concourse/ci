@@ -6,8 +6,8 @@ image_resource:
     repository: concourse/unit
 
 inputs:
-- name: concourse
-- name: ci
+  - name: concourse
+  - name: ci
 
 run:
-  path: ci/tasks/scripts/check-gofmt.sh
+  path: ci/tasks/check-gofmt/run.sh

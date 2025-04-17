@@ -1,7 +1,6 @@
-#!/bin/bash
-# vim: set ft=sh
+#!/usr/bin/env bash
 
-set -e -u
+set -euo pipefail
 
 # for better yarn output
 stty columns 80
