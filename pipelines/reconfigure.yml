@@ -80,19 +80,6 @@ resources:
     branch: master
     paths: [ci]
 
-- name: ruby-alpine-image
-  type: registry-image
-  source:
-    repository: ruby
-    tag: rc-alpine
-
-- name: oxygen-mask
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/oxygen-mask
-    branch: master
-
 - name: examples
   type: git
   icon: github
@@ -357,36 +344,6 @@ jobs:
     #       containerd: ""
     - set_pipeline: infrastructure-report
       file: pipelines-and-tasks/pipelines/infrastructure-report.yml
-
-- name: reconfigure-monitoring-pipeline
-  plan:
-  - get: pipelines-and-tasks
-    passed: [reconfigure-self]
-  - get: oxygen-mask
-    trigger: true
-  - get: ruby-alpine-image
-  - task: generate-monitor-yml
-    image: ruby-alpine-image
-    config:
-      platform: linux
-      inputs:
-      - name: oxygen-mask
-      outputs:
-      - name: oxygen-mask
-      run:
-        dir: oxygen-mask
-        path: sh
-        args:
-        - -c
-        - |
-          erb metrics_store=wavefront monitor.yml > gen-monitor.yml
-  - set_pipeline: monitoring-stats
-    file: oxygen-mask/gen-monitor.yml
-    vars:
-      atc_url: https://hush-house.pivotal.io
-      interval: 30s
-      team_name: main
-      pipeline_name: monitoring
 
 - name: reconfigure-example-pipelines
   plan:
