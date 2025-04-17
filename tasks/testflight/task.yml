@@ -15,7 +15,7 @@ caches:
   - path: gopath
 
 params:
-  RUNTIME: guardian
+  RUNTIME: containerd
   DOWNLOAD_CLI: true
 
 run:
