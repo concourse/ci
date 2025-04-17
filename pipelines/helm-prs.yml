@@ -1,150 +1,153 @@
 ---
 resource_types:
-- name: pull-request
-  type: registry-image
-  source: {repository: loggregatorbot/github-pr-resource}
+  - name: pull-request
+    type: registry-image
+    source: { repository: loggregatorbot/github-pr-resource }
 
-- name: helm-chart
-  type: registry-image
-  source: {repository: linkyard/helm-chart-resource, tag: 2.17.0}
+  - name: helm-chart
+    type: registry-image
+    source: { repository: linkyard/helm-chart-resource, tag: 2.17.0 }
 
 resources:
-- name: chart-pr
-  type: pull-request
-  icon: source-pull
-  source:
-    repository: concourse/concourse-chart
-    base_branch: ((branch))
-    access_token: ((pr_access_token))
+  - name: chart-pr
+    type: pull-request
+    icon: source-pull
+    source:
+      repository: concourse/concourse-chart
+      base_branch: ((branch))
+      access_token: ((pr_access_token))
 
-- name: concourse
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/concourse.git
-    branch: ((concourse_base_branch))
+  - name: concourse
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/concourse/concourse.git
+      branch: ((concourse_base_branch))
 
-- name: ci
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/ci.git
-    branch: master
+  - name: ci
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/concourse/ci.git
+      branch: master
 
-- name: concourse-dev-image
-  type: registry-image
-  icon: docker
-  source:
-    repository: concourse/concourse-dev
-    tag: ((concourse_image_tag))
-    username: ((docker.username))
-    password: ((docker.password))
+  - name: concourse-dev-image
+    type: registry-image
+    icon: docker
+    source:
+      repository: concourse/concourse-dev
+      tag: ((concourse_image_tag))
+      username: ((docker.username))
+      password: ((docker.password))
 
-- name: unit-image
-  type: registry-image
-  icon: docker
-  source:
-    repository: concourse/unit
-    username: ((docker.username))
-    password: ((docker.password))
+  - name: unit-image
+    type: registry-image
+    icon: docker
+    source:
+      repository: concourse/unit
+      username: ((docker.username))
+      password: ((docker.password))
 
-# Using the git instead of helm-chart resource because Bitnami charts are hosted on Docker Hub and we sometimes run into their rate limits
-- name: postgresql-chart-git
-  type: git
-  check_every: 24h
-  source:
-    uri: https://github.com/bitnami/charts.git
-    tag_filter: postgresql/((postgresql_major))*
+  # Using the git instead of helm-chart resource because Bitnami charts are hosted on Docker Hub and we sometimes run into their rate limits
+  - name: postgresql-chart-git
+    type: git
+    check_every: 24h
+    source:
+      uri: https://github.com/bitnami/charts.git
+      tag_filter: postgresql/((postgresql_major))*
 
-- name: prometheus-chart
-  type: helm-chart
-  icon: ship-wheel
-  source:
-    chart: prometheus-community/prometheus
-    repos:
-      - name: prometheus-community
-        url: https://prometheus-community.github.io/helm-charts
+  - name: prometheus-chart
+    type: helm-chart
+    icon: ship-wheel
+    source:
+      chart: prometheus-community/prometheus
+      repos:
+        - name: prometheus-community
+          url: https://prometheus-community.github.io/helm-charts
 
 jobs:
-- name: k8s-topgun
-  serial: true
-  public: true
-  on_failure:
-    put: chart-pr
-    inputs: [chart-pr]
-    params: {path: chart-pr, status: failure, context: k8s-topgun}
-    tags: [k8s-topgun]
-  on_success:
-    put: chart-pr
-    inputs: [chart-pr]
-    params: {path: chart-pr, status: success, context: k8s-topgun}
-    tags: [k8s-topgun]
-  plan:
-  - in_parallel:
-    - get: chart-pr
+  - name: k8s-topgun
+    serial: true
+    public: true
+    on_failure:
+      put: chart-pr
+      inputs: [chart-pr]
+      params: { path: chart-pr, status: failure, context: k8s-topgun }
       tags: [k8s-topgun]
-    - get: concourse
+    on_success:
+      put: chart-pr
+      inputs: [chart-pr]
+      params: { path: chart-pr, status: success, context: k8s-topgun }
       tags: [k8s-topgun]
-    - get: concourse-dev-image
-      tags: [k8s-topgun]
-    - get: ci
-      tags: [k8s-topgun]
-    - get: unit-image
-      tags: [k8s-topgun]
-    - get: prometheus-chart
-      tags: [k8s-topgun]
-      params: { untar: true }
-    - get: postgresql-chart-git
-      tags: [ k8s-topgun ]
-  - put: chart-pr
-    inputs: [chart-pr]
-    params: {path: chart-pr, status: pending, context: k8s-topgun}
-    get_params: {list_changed_files: true}
-    tags: [k8s-topgun]
-  - task: k8s-topgun
-    tags: [k8s-topgun]
-    file: ci/tasks/k8s-topgun.yml
-    input_mapping:
-      concourse-chart: chart-pr
-      concourse-rc-image: concourse-dev-image
-    image: unit-image
-    params:
-      IN_CLUSTER: "true"
-      SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
-      CONCOURSE_IMAGE_NAME: ((concourse_image_name))
+    plan:
+      - in_parallel:
+          - get: chart-pr
+            tags: [k8s-topgun]
+          - get: concourse
+            tags: [k8s-topgun]
+          - get: concourse-dev-image
+            tags: [k8s-topgun]
+          - get: ci
+            tags: [k8s-topgun]
+          - get: unit-image
+            tags: [k8s-topgun]
+          - get: prometheus-chart
+            tags: [k8s-topgun]
+            params: { untar: true }
+          - get: postgresql-chart-git
+            tags: [k8s-topgun]
+      - put: chart-pr
+        inputs: [chart-pr]
+        params: { path: chart-pr, status: pending, context: k8s-topgun }
+        get_params: { list_changed_files: true }
+        tags: [k8s-topgun]
+      - task: k8s-topgun
+        tags: [k8s-topgun]
+        file: ci/tasks/k8s-topgun/task.yml
+        input_mapping:
+          concourse-chart: chart-pr
+          concourse-rc-image: concourse-dev-image
+        image: unit-image
+        params:
+          IN_CLUSTER: "true"
+          SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
+          CONCOURSE_IMAGE_NAME: ((concourse_image_name))
 
-- name: lint-and-install-test
-  public: true
-  on_failure:
-    put: chart-pr
-    inputs: [chart-pr]
-    params: {path: chart-pr, status: failure, context: lint-and-install-test}
-    tags: [k8s-topgun]
-  on_success:
-    put: chart-pr
-    inputs: [chart-pr]
-    params: {path: chart-pr, status: success, context: lint-and-install-test}
-    tags: [k8s-topgun]
-  plan:
-  - in_parallel:
-    - get: chart-pr
-      trigger: true
-      version: every
+  - name: lint-and-install-test
+    public: true
+    on_failure:
+      put: chart-pr
+      inputs: [chart-pr]
+      params:
+        { path: chart-pr, status: failure, context: lint-and-install-test }
       tags: [k8s-topgun]
-    - get: ci
+    on_success:
+      put: chart-pr
+      inputs: [chart-pr]
+      params:
+        { path: chart-pr, status: success, context: lint-and-install-test }
       tags: [k8s-topgun]
-    - get: unit-image
-      tags: [k8s-topgun]
-  - put: update-pr-status
-    resource: chart-pr
-    inputs: [chart-pr]
-    params: {path: chart-pr, status: pending, context: lint-and-install-test}
-    get_params: {list_changed_files: true}
-    tags: [k8s-topgun]
-  - task: lint-and-install-test
-    tags: [k8s-topgun]
-    file: ci/tasks/k8s-lint-and-install.yml
-    image: unit-image
-    input_mapping: {concourse: chart-pr}
-    params:
-      SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
+    plan:
+      - in_parallel:
+          - get: chart-pr
+            trigger: true
+            version: every
+            tags: [k8s-topgun]
+          - get: ci
+            tags: [k8s-topgun]
+          - get: unit-image
+            tags: [k8s-topgun]
+      - put: update-pr-status
+        resource: chart-pr
+        inputs: [chart-pr]
+        params:
+          { path: chart-pr, status: pending, context: lint-and-install-test }
+        get_params: { list_changed_files: true }
+        tags: [k8s-topgun]
+      - task: lint-and-install-test
+        tags: [k8s-topgun]
+        file: ci/tasks/k8s-lint-and-install/task.yml
+        image: unit-image
+        input_mapping: { concourse: chart-pr }
+        params:
+          SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
