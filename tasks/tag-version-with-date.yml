@@ -3,10 +3,10 @@ platform: linux
 
 image_resource:
   type: registry-image
-  source: {repository: busybox}
+  source: { repository: cgr.dev/chainguard/wolfi-base }
 
 outputs:
-- name: date-tag
+  - name: date-tag
 
 params:
   VERSION: ~

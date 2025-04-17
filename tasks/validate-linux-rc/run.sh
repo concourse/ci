@@ -1,6 +1,9 @@
 #!/bin/sh
 
-set -e
+set -euo
+
+# install ldd
+apk add --quiet --no-progress posix-libc-utils
 
 tar -xzf concourse-tarball/concourse-*.tgz
 cd concourse

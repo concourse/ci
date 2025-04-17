@@ -187,14 +187,14 @@ jobs:
           - get: github-release-resource
             trigger: true
       - task: build
-        output_mapping: { image: image_ubuntu }
         image: oci-build-task
         privileged: true
         file: ci/tasks/build-resource-types-image/task.yml
-      - put: resource-types-ubuntu-image
+      - put: resource-types-image
         no_get: true
         inputs: detect
-        params: { image: image_ubuntu/image.tar }
+        params:
+          image: image/image.tar
 
   - name: dev-image
     public: true
@@ -219,7 +219,7 @@ jobs:
               trigger: true
             - get: dumb-init
               trigger: true
-            - get: resource-types-ubuntu-image
+            - get: resource-types-image
               passed: [resource-types-images]
               trigger: true
             - get: unit-image
@@ -262,8 +262,7 @@ jobs:
         privileged: true
         input_mapping:
           concourse: built-concourse
-          resource-types-image: resource-types-ubuntu-image
-        file: ci/build-dev-image/tasks.yml
+        file: ci/tasks/build-dev-image/tasks.yml
       - put: dev-image
         no_get: true
         inputs: detect
@@ -513,14 +512,13 @@ jobs:
             passed: [dev-image, testflight, watsjs, integration, worker-runtime]
             trigger: true
           - get: unit-image
-            passed: [dev-image]
           - get: dev-image
             passed: [dev-image]
             trigger: true
           - get: golang-builder-image
             passed: [dev-image]
           - get: ci
-          - get: resource-types-ubuntu-image
+          - get: resource-types-image
             passed: [dev-image]
       - in_parallel:
           - task: fly-linux
@@ -552,7 +550,7 @@ jobs:
               image: dev-image
             - task: hoist-resource-types-ubuntu
               file: ci/tasks/hoist-linux-resource-types/task.yml
-              image: resource-types-ubuntu-image
+              image: resource-types-image
             - task: yarn-build
               file: ci/tasks/yarn-build/task.yml
               image: unit-image
@@ -951,7 +949,6 @@ jobs:
           - get: concourse
             passed: [bosh-upload-releases]
           - get: unit-image
-            passed: [bosh-upload-releases]
           - get: concourse-release
             passed: [bosh-upload-releases]
             trigger: true
@@ -1010,7 +1007,6 @@ jobs:
           - get: concourse
             passed: [bosh-upload-releases]
           - get: unit-image
-            passed: [bosh-upload-releases]
           - get: concourse-release
             passed: [bosh-upload-releases]
             trigger: true
@@ -1070,7 +1066,6 @@ jobs:
           - get: concourse
             passed: [bosh-upload-releases]
           - get: unit-image
-            passed: [bosh-upload-releases]
           - get: concourse-release
             passed: [bosh-upload-releases]
             trigger: true
@@ -1129,7 +1124,6 @@ jobs:
           - get: concourse
             passed: [bosh-upload-releases]
           - get: unit-image
-            passed: [bosh-upload-releases]
           - get: concourse-release
             passed: [bosh-upload-releases]
             trigger: true
@@ -1188,7 +1182,6 @@ jobs:
           - get: concourse
             passed: [bosh-upload-releases]
           - get: unit-image
-            passed: [bosh-upload-releases]
           - get: concourse-release
             passed: [bosh-upload-releases]
             trigger: true
@@ -1247,7 +1240,6 @@ jobs:
           - get: concourse
             passed: [bosh-upload-releases]
           - get: unit-image
-            passed: [bosh-upload-releases]
           - get: concourse-release
             passed: [bosh-upload-releases]
             trigger: true
@@ -1717,12 +1709,12 @@ resources:
       uri: "https://github.com/bitnami/charts.git"
       tag_filter: postgresql/((postgresql_major))*
 
-  - name: resource-types-ubuntu-image
+  - name: resource-types-image
     type: registry-image
     icon: &image-icon docker
     source:
       repository: concourse/resource-types
-      tag: ubuntu
+      tag: dev
       username: ((docker.username))
       password: ((docker.password))
 

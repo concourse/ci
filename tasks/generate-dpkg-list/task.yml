@@ -7,11 +7,11 @@ image_resource:
     tag: jammy
 
 inputs:
-- name: version
-  optional: true
+  - name: version
+    optional: true
 
 outputs:
-- name: dpkg-list
+  - name: dpkg-list
 
 params:
   COMPONENT_NAME: ~

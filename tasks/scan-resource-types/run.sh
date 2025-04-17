@@ -1,6 +1,8 @@
 #!/bin/sh
 
-set -e
+set -euo
+
+apk add --quiet --no-progress trivy
 
 echo "unpacking vulnerability db"
 cache_dir=`pwd`
@@ -18,9 +20,10 @@ if [ -f "$IGNORE_POLICY_FILE" ]; then
 fi
 
 for resource in *; do
-  echo -e "\nscanning ${resource}-resource:"
+  echo ""
+  echo "scanning ${resource}-resource:"
 
-  cd $resource
+  cd "$resource"
   tar -xzf rootfs.tgz
 
   trivy \
@@ -39,8 +42,7 @@ for resource in *; do
   cd ..
 done
 
-if [ $failed != "" ]; then
-  echo -e "the following resource-types failed the scan:$failed"
+if [ "$failed" != "" ]; then
+  echo "the following resource-types failed the scan: $failed"
   exit 1
 fi
-
