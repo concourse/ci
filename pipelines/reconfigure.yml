@@ -127,7 +127,7 @@ jobs:
   - get: teams
     trigger: true
   - task: reconfigure
-    file: pipelines-and-tasks/tasks/reconfigure-teams.yml
+    file: pipelines-and-tasks/tasks/reconfigure-teams/task.yml
     params:
       ADMIN_USERNAME: ((concourse.username))
       ADMIN_PASSWORD: ((concourse.password))
@@ -166,7 +166,7 @@ jobs:
     trigger: true
     passed: [reconfigure-self]
   - task: render-resource-templates
-    file: pipelines-and-tasks/tasks/render-resource-pipeline-templates.yml
+    file: pipelines-and-tasks/tasks/render-resource-pipeline-templates/tasks.yml
     params:
       RESOURCES: &resources
       - git

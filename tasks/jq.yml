@@ -19,7 +19,7 @@ run:
     - -c
     - |
       set -euo pipefail
-      apk add --no-progress jq
+      apk add --quiet --no-progress jq
       env | \
         jq --raw-input --slurp 'split("\n") | .[] | select(startswith("VAR_")) | sub("^VAR_"; "")' | \
         jq '[capture( "(?<key>[^=]*)=(?<value>.*)" )] | from_entries | map_values(fromjson)' | \
