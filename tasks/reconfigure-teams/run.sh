@@ -1,6 +1,8 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
-set -ex
+set -euo
+
+apk add --quiet --no-progress wget
 
 wget "${CONCOURSE_URL}/api/v1/cli?arch=amd64&platform=linux" -O /fly
 chmod +x /fly
@@ -16,4 +18,3 @@ cd teams/teams
 for team in *.yml; do
   /fly -t ci set-team --team-name "${team%.yml}" -c "$team" --non-interactive
 done
-
