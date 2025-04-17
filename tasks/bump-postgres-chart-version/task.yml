@@ -1,0 +1,17 @@
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: { repository: concourse/unit }
+
+inputs:
+  - name: concourse-chart
+  - name: postgres-chart-release
+  - name: ci
+
+outputs:
+  - name: concourse-chart-bumped
+    path: concourse-chart
+
+run:
+  path: ci/tasks/bump-postgres-chart-version/run.sh

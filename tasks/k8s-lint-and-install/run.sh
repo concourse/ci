@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -e -u
+set -euo pipefail
 
 readonly DIR=$(cd $(dirname $0) && pwd)
 
-source "$DIR/k8s-helpers.sh"
+source "ci/tasks/scripts/k8s-helpers.sh"
 
 releasename="pr-$(cat concourse/.git/resource/pr)-$(head -c 6 concourse/.git/resource/base_sha)"
 

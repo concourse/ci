@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -e -x
+set -euo -x pipefail
 
 chart_version=$(cat version/version)
 

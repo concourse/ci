@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -e -x
+set -euo -x pipefail
 
 postgres_version=$(cat postgres-chart-release/version)
 
