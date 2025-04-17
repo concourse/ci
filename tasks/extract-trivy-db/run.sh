@@ -1,6 +1,8 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
-set -e
+set -euo
+
+apk add --quiet --no-progress trivy
 
 echo "unpacking vulnerability db"
 

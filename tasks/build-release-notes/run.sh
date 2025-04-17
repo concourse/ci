@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 LAST_COMMIT_SHA=$(cat repo/.git/ref)
 RELEASE_VERSION=$(cat version/version)
