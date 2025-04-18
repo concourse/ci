@@ -1,6 +1,8 @@
 #!/bin/sh
 
-set -e
+set -euo
+
+apk add --quiet --no-progress trivy
 
 ignore_policy=""
 if [ -f "$IGNORE_POLICY_FILE" ]; then
