@@ -1,11 +1,10 @@
-ARG base_image
-FROM ${base_image:-cgr.dev/chainguard/wolfi-base}
+ARG base_image=cgr.dev/chainguard/wolfi-base:latest
+FROM ${base_image}
 
-RUN apk --update-cache add \
+RUN apk --no-cache add \
     ca-certificates \
     git \
-    go-1.24
-RUN apk cache purge && \
+    go-1.24 && \
     rm -rf /var/cache/apk/*
 
 ENV GOPATH /go
