@@ -99,11 +99,11 @@ plan:
     passed: [build]
     params: {format: oci}
     trigger: true
-  - get: trivy
+  - get: wolfi-base
     trigger: true
 - task: scan
-  image: trivy
-  file: ci/tasks/trivy-scan.yml
+  image: wolfi-base
+  file: ci/tasks/trivy-scan/task.yml
   input_mapping: {image: resource-image-dev}
   on_failure: #@ determine_channel()
   on_error: #@ determine_channel()
@@ -197,7 +197,6 @@ plan:
   - get: resource-repo
     passed: [scan-image]
   - get: ci
-  - get: release-me
   - get: resource-image-dev
     passed: [scan-image]
     params: {format: oci}
@@ -214,15 +213,15 @@ plan:
     image_resource:
       type: registry-image
       source:
-        repository: ubuntu
-        tag: jammy
+        repository: cgr.dev/chainguard/bash
+        tag: latest
     inputs:
     - name: version
     - name: resource-image-dev-rootfs
     outputs:
     - name: release
     run:
-      path: bash
+      path: /bin/bash
       args:
       - "-exc"
       #@yaml/text-templated-strings
@@ -245,15 +244,6 @@ plan:
           tar -czf ../release/(@= resource_name @)-resource-${version}.tgz rootfs.tgz resource_metadata.json
         popd
 
-- task: build-release-notes
-  file: ci/tasks/build-release-notes.yml
-  params:
-    GITHUB_OWNER: #@ github_owner()
-    GITHUB_REPO: #@ resource_name + "-resource"
-    GITHUB_TOKEN: ((concourse_github_dummy.access_token))
-    GITHUB_BRANCH: master
-  input_mapping:
-    repo: resource-repo
 - load_var: version
   file: version/version
 - in_parallel:
@@ -269,7 +259,7 @@ plan:
     inputs: detect
     params:
       commitish: resource-repo/.git/ref
-      body: built-notes/notes.md
+      generate_release_notes: true
       globs:
       - release/*.tgz
       name: release/name
@@ -310,7 +300,6 @@ plan:
 - #@ build_task(resource_name, "linux/amd64")
 - #@ template.replace(extra_steps())
 - task: date-tag
-  image: oci-build-task
   file: ci/tasks/tag-version-with-date.yml
   params:
     VERSION: ((.:version))
@@ -391,13 +380,11 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: trivy
+- name: wolfi-base
   type: registry-image
   icon: docker
   source:
-    repository: aquasec/trivy
-    username: ((docker.username))
-    password: ((docker.password))
+    repository: cgr.dev/chainguard/wolfi-base
 
 - name: resource-repo
   type: git
@@ -466,14 +453,6 @@ resources:
   source:
     uri: https://github.com/concourse/ci.git
     branch: master
-
-- name: release-me
-  type: github-release
-  icon: package-down
-  source:
-    owner: clarafu
-    repository: release-me
-    access_token: ((concourse_github_dummy.access_token))
 
 - name: oci-build-task
   type: registry-image
