@@ -22,10 +22,6 @@ resource_types:
   type: registry-image
   source: {repository: linkyard/helm-chart-resource, tag: 2.17.0}
 
-- name: registry-image
-  type: registry-image
-  source: {repository: concourse/registry-image-resource, tag: dev}
-
 groups:
 - name: develop
   jobs:
