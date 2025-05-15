@@ -11,7 +11,7 @@ ENV CGO_ENABLED=1
 RUN apk --update-cache add \
     btrfs-progs \
     ca-certificates \
-    # install Chrome for Puppeteer (watsjs/upgrade/downgrade/smoke)
+    # install Chrome for Puppeteer (watsjs /upgrade/downgrade/smoke tests)
     chromium \
     curl \
     # for local integration tests

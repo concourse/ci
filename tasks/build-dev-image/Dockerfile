@@ -9,17 +9,38 @@
 # * warming the build cache
 
 ARG base_image=concourse/golang-builder
-FROM ${base_image}
+ARG BUILDPLATFORM
+FROM --platform=$BUILDPLATFORM ${base_image} AS builder
 
-RUN apk --update-cache add \
-      btrfs-progs \
-      ca-certificates \
-      curl \
-      dumb-init \
-      file \
-      iproute2 \
-      iptables \
-      tree
+# build concourse, cross-compiling on host platform to avoid emulation slowness
+#
+# nuke /src after to ensure dev builds build from a clean slate (otherwise this
+# can cause build failures if e.g. files are removed locally)
+COPY concourse /src
+
+ARG TARGETOS
+ARG TARGETARCH
+ENV GOOS=$TARGETOS
+ENV GOARCH=$TARGETARCH
+
+RUN cd /src && \
+    go mod download && \
+    go build -gcflags=all="-N -l" -o /usr/local/concourse/bin/concourse \
+    ./cmd/concourse && \
+    rm -rf /src
+
+ARG TARGETPLATFORM
+FROM --platform=$TARGETPLATFORM ${base_image}
+
+RUN apk --no-cache add \
+    btrfs-progs \
+    ca-certificates \
+    curl \
+    dumb-init \
+    file \
+    iproute2 \
+    iptables \
+    tree
 
 ARG TARGETARCH
 
@@ -51,8 +72,9 @@ COPY fly-darwin/fly-*.tgz /usr/local/concourse/fly-assets
 # add resource types
 COPY ./resource-types-image/rootfs/usr/local/concourse/resource-types/ /usr/local/concourse/resource-types/
 
-# install concourse, leaving the module cache populated
-#
+# install concourse
+COPY --from=builder /usr/local/concourse/bin/concourse /usr/local/concourse/bin/concourse
+
 # nuke /src after to ensure dev builds build from a clean slate (otherwise this
 # can cause build failures if e.g. files are removed locally)
 COPY concourse /src
@@ -62,11 +84,10 @@ RUN ln -s /usr/sbin/as /go/bin/as
 # build the init executable for containerd
 RUN gcc -O2 -static -o /usr/local/concourse/bin/init /src/cmd/init/init.c
 
+# populate go module cache
 RUN cd /src && \
-      go mod download && \
-      go build -gcflags=all="-N -l" -o /usr/local/concourse/bin/concourse \
-        ./cmd/concourse && \
-      rm -rf /src
+    go mod download && \
+    rm -rf /src
 
 # volume for non-aufs/etc. mount for baggageclaim's driver
 VOLUME /worker-state
@@ -77,8 +98,5 @@ ENV PATH /usr/local/concourse/bin:${PATH}
 
 # make `ctr` target the default concourse namespace
 ENV CONTAINERD_NAMESPACE=concourse
-
-RUN apk cache purge && \
-    rm -rf /var/cache/apk/*
 
 ENTRYPOINT ["dumb-init", "concourse"]
