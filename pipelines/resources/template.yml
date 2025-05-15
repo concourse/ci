@@ -50,6 +50,7 @@ config:
     IMAGE_ARG_base_image: base-image/image.tar
     BUILD_ARG_builder_image: concourse/golang-builder
     IMAGE_PLATFORM: #@ platform
+    OUTPUT_OCI: true
     _: #@ template.replace(build_params(resource_name))
   run: {path: build}
 #@ end
@@ -79,12 +80,12 @@ plan:
     params: {skip_download: true}
   - get: oci-build-task
   - #@ template.replace(extra_get_steps())
-- #@ build_task(resource_name, "linux/amd64")
+- #@ build_task(resource_name, "linux/amd64,linux/arm64")
 - #@ template.replace(extra_steps())
 - put: resource-image-dev
   no_get: true
   inputs: detect
-  params: {image: built-resource-image/image.tar}
+  params: {image: built-resource-image/image}
 #@ end
 
 #@ def scan_image():
@@ -297,7 +298,7 @@ plan:
   - #@ template.replace(extra_get_steps())
 - load_var: version
   file: version/version
-- #@ build_task(resource_name, "linux/amd64")
+- #@ build_task(resource_name, "linux/amd64,linux/arm64")
 - #@ template.replace(extra_steps())
 - task: date-tag
   file: ci/tasks/tag-version-with-date.yml
@@ -307,7 +308,7 @@ plan:
   no_get: true
   inputs: detect
   params:
-    image: built-resource-image/image.tar
+    image: built-resource-image/image
     version: ((.:version))
     bump_aliases: true
     additional_tags: date-tag/tag
