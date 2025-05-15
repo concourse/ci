@@ -105,6 +105,8 @@ jobs:
       - in_parallel:
           - get: ci
           - get: oci-build-task
+          - get: golang-linux
+            trigger: true
           - get: wolfi-base
             trigger: true
             params:
@@ -1733,3 +1735,11 @@ resources:
     source:
       repository: cgr.dev/chainguard/wolfi-base
       tag: latest
+
+  - name: golang-linux
+    type: s3
+    icon: language-go
+    source:
+      endpoint: storage.googleapis.com
+      bucket: golang
+      regexp: 'go(\d+\.\d+(\.\d+)?)\.linux-amd64\.tar\.gz$'
