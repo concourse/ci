@@ -101,12 +101,6 @@ resources:
     branch: master
     paths: [pipelines]
 
-- name: notify
-  type: slack-notifier
-  icon: slack
-  source:
-    url: ((slack_hooks.concourse-private))
-
 - name: latest-concourse
   type: github-release
   source:
@@ -363,8 +357,6 @@ jobs:
     #       containerd: ""
     - set_pipeline: infrastructure-report
       file: pipelines-and-tasks/pipelines/infrastructure-report.yml
-    on_failure: *notify
-    on_error: *notify
 
 - name: reconfigure-monitoring-pipeline
   plan:
