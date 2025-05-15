@@ -221,6 +221,9 @@ jobs:
               resource: golang-builder-image
               trigger: true
               params: { format: rootfs }
+            - get: golang-builder-image
+              trigger: true
+              params: { format: oci }
             - get: containerd
               trigger: true
             - get: runc
@@ -236,9 +239,6 @@ jobs:
               trigger: true
             - get: unit-image
               trigger: true
-            - get: golang-builder-image
-              trigger: true
-              params: { format: oci }
             - get: oci-build-task
               trigger: true
             - get: ci
