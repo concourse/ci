@@ -146,6 +146,8 @@ jobs:
             inputs: detect
             params:
               image: oci-build-task-dev/oci-image*.tar
+              version: ((.:version))
+              bump_aliases: true
       - put: version
         no_get: true
         inputs: detect
