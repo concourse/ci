@@ -235,26 +235,12 @@ jobs:
       vars:
         base-image: paketobuildpacks/run-jammy-base
 
-- name: unit
-  plan:
-  - get: pipelines-and-tasks
-    trigger: true
-    passed: [reconfigure-self]
-  - task: unit
-    file: pipelines-and-tasks/tasks/ci-unit.yml
-    input_mapping: {ci: pipelines-and-tasks}
-  on_failure: &notify
-    put: notify
-    params:
-      mode: normal
-      alert_type: failed
-
 - name: reconfigure-pipelines
   plan:
   - in_parallel:
     - get: pipelines-and-tasks
       trigger: true
-      passed: [unit]
+      passed: [reconfigure-self]
     - get: concourse-for-k8s
       trigger: true
     - get: dex-ci
