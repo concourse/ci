@@ -1,5 +1,6 @@
 ARG base_image=cgr.dev/chainguard/wolfi-base:latest
-FROM ${base_image} AS go_downloader
+ARG BUILDPLATFORM
+FROM --platform=$BUILDPLATFORM ${base_image} AS go_downloader
 
 RUN apk --no-cache add \
     ca-certificates \
