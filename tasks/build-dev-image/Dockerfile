@@ -69,7 +69,7 @@ COPY fly-linux/fly-*.tgz /usr/local/concourse/fly-assets
 COPY fly-windows/fly-*.zip /usr/local/concourse/fly-assets
 COPY fly-darwin/fly-*.tgz /usr/local/concourse/fly-assets
 
-# add resource types
+# add resource types TODO: need to add correct platform version! amd64 or arm64
 COPY ./resource-types-image/rootfs/usr/local/concourse/resource-types/ /usr/local/concourse/resource-types/
 
 # install concourse
