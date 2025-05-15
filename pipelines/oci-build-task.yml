@@ -1,0 +1,203 @@
+resources:
+  - name: repo
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/concourse/oci-build-task.git
+      branch: master
+
+  - name: oci-build-task
+    type: registry-image
+    icon: docker
+    source:
+      repository: concourse/oci-build-task
+      tag: latest
+      username: ((docker.username))
+      password: ((docker.password))
+
+  - name: oci-build-task-dev
+    type: registry-image
+    icon: docker
+    source:
+      repository: concourse/oci-build-task
+      tag: dev
+      username: ((docker.username))
+      password: ((docker.password))
+
+  - name: golang-builder
+    type: registry-image
+    icon: docker
+    source:
+      repository: concourse/golang-builder
+      tag: latest
+
+  - name: version
+    type: semver
+    icon: tag
+    source:
+      uri: git@github.com:concourse/oci-build-task
+      private_key: ((concourse_bot_private_key))
+      branch: version
+      driver: git
+      file: version
+
+  - name: repo-release
+    type: github-release
+    icon: package-variant-closed
+    source:
+      owner: concourse
+      repository: oci-build-task
+      access_token: ((concourse_bot_access_token))
+
+  - name: wolfi
+    type: registry-image
+    icon: docker
+    source:
+      repository: cgr.dev/chainguard/wolfi-base
+
+jobs:
+  - name: build
+    plan:
+      - in_parallel:
+          - get: repo
+            trigger: true
+          - get: oci-build-task
+          - get: golang-builder
+
+      - task: tests
+        privileged: true
+        image: golang-builder
+        config:
+          platform: linux
+          inputs:
+            - name: repo
+          run:
+            path: repo/scripts/test
+
+      - task: build
+        privileged: true
+        image: oci-build-task
+        config:
+          platform: linux
+          inputs:
+            - name: repo
+          outputs:
+            - name: image
+          params:
+            CONTEXT: repo
+            OUTPUT_OCI: true
+          run:
+            path: build
+
+      - put: oci-build-task-dev
+        inputs: detect
+        no_get: true
+        params:
+          image: image/image
+
+  # - name: scan #TODO
+
+  - name: publish-major
+    plan:
+      - in_parallel:
+          - get: repo
+            passed: [build]
+          - get: version
+            params:
+              bump: major
+          - get: oci-build-task-dev
+            passed: [build]
+            params:
+              format: oci
+          - get: wolfi
+      - task: wrangle
+        image: wolfi
+        config: &version-name
+          platform: linux
+          inputs:
+            - name: version
+            - name: oci-build-task-dev
+          outputs:
+            - name: version
+            - name: oci-build-task-dev
+          run:
+            path: sh
+            args:
+              - -cex
+              - |
+                ver=$(cat version/version)
+                echo "v${ver}" > version/name
+                mv oci-build-task-dev/image.tar oci-build-task-dev/oci-image-v${ver}-amd64.tar
+      - load_var: version
+        file: version/version
+      - in_parallel: &upload-release
+          - put: repo-release
+            no_get: true
+            inputs: detect
+            params:
+              commitish: repo/.git/ref
+              generate_release_notes: true
+              globs: [oci-build-task-dev/*.tar]
+              name: version/name
+              tag: version/version
+              tag_prefix: v
+          - put: oci-build-task
+            no_get: true
+            inputs: detect
+            params:
+              image: oci-build-task-dev/oci-image*.tar
+      - put: version
+        no_get: true
+        inputs: detect
+        params:
+          file: version/version
+
+  - name: publish-minor
+    plan:
+      - in_parallel:
+          - get: repo
+            passed: [build]
+          - get: version
+            params:
+              bump: minor
+          - get: oci-build-task-dev
+            passed: [build]
+            params:
+              format: oci
+          - get: wolfi
+      - task: wrangle
+        image: wolfi
+        config: *version-name
+      - load_var: version
+        file: version/version
+      - in_parallel: *upload-release
+      - put: version
+        no_get: true
+        inputs: detect
+        params:
+          file: version/version
+
+  - name: publish-patch
+    plan:
+      - in_parallel:
+          - get: repo
+            passed: [build]
+          - get: version
+            params:
+              bump: patch
+          - get: oci-build-task-dev
+            passed: [build]
+            params:
+              format: oci
+          - get: wolfi
+      - task: wrangle
+        image: wolfi
+        config: *version-name
+      - load_var: version
+        file: version/version
+      - in_parallel: *upload-release
+      - put: version
+        no_get: true
+        inputs: detect
+        params:
+          file: version/version
