@@ -198,7 +198,7 @@ jobs:
             trigger: true
           - get: github-release-resource
             trigger: true
-      - task: build
+      - task: build #TODO: need to build multi-arch image
         image: oci-build-task
         privileged: true
         file: ci/tasks/build-resource-types-image/task.yml
