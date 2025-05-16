@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -e -u
+set -euo pipefail
 
 source ci/tasks/scripts/cgroup-helpers.sh
 
@@ -15,7 +15,7 @@ function start_docker() {
     mount -o remount,rw /proc/sys
   fi
 
-  local mtu=$(cat /sys/class/net/$(ip route get 8.8.8.8|awk '{ print $5 }')/mtu)
+  local mtu=$(cat /sys/class/net/"$(ip route get 8.8.8.8|awk '{ print $5 }')"/mtu)
   local server_args="--mtu ${mtu}"
 
   dockerd --data-root /scratch/docker ${server_args} >/tmp/docker.log 2>&1 &
@@ -37,7 +37,7 @@ function stop_docker() {
 
   # if the process has already exited, kill will error, in which case we
   # shouldn't try to wait for it
-  if kill -TERM $pid; then
-    wait $pid
+  if kill -TERM "$pid"; then
+    wait "$pid"
   fi
 }

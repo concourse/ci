@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -e -u
+set -euo pipefail
 
 # ensure that we have the all of the enabled cgroup controllers mounted under
 # `/sys/fs/cgroup` read-write.

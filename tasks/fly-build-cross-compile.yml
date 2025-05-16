@@ -2,20 +2,20 @@
 platform: linux
 
 inputs:
-- name: concourse
-- name: ci
-- name: final-version
-  optional: true
+  - name: concourse
+  - name: ci
+  - name: final-version
+    optional: true
 
 params:
   PLATFORM:
   ARCH:
 
 outputs:
-- name: fly
+  - name: fly
 
 caches:
-- path: gopath
+  - path: gopath
 
 run:
   path: ci/tasks/scripts/fly-build-cross-compile
