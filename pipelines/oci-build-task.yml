@@ -47,7 +47,7 @@ resources:
     source:
       owner: concourse
       repository: oci-build-task
-      access_token: ((concourse_github_dummy.access_token))
+      access_token: ((concourse_bot_access_token))
 
   - name: wolfi
     type: registry-image
