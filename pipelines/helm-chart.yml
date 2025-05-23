@@ -13,278 +13,278 @@
 #
 
 groups:
-- name: dependencies
-  jobs:
-  - concourse-app-bump
-  - postgres-chart-bump
+  - name: dependencies
+    jobs:
+      - concourse-app-bump
+      - postgres-chart-bump
 
-- name: publish
-  jobs:
-  - k8s-smoke
-  - publish-chart-major
-  - publish-chart-minor
-  - publish-chart-patch
+  - name: publish
+    jobs:
+      - k8s-smoke
+      - publish-chart-major
+      - publish-chart-minor
+      - publish-chart-patch
 
 jobs:
-- name: concourse-app-bump
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse-release
-      params:
-        globs: [none]
-    - get: concourse-chart
-    - get: ci
-  - task: bump-chart-app-version
-    file: ci/tasks/bump-chart-app-version.yml
-  - put: concourse-chart
-    inputs: [concourse-chart-bumped]
-    params:
-      repository: concourse-chart-bumped
-      merge: true
+  - name: concourse-app-bump
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - get: concourse-release
+            params:
+              globs: [none]
+          - get: concourse-chart
+          - get: ci
+      - task: bump-chart-app-version
+        file: ci/tasks/bump-chart-app-version/task.yml
+      - put: concourse-chart
+        inputs: [concourse-chart-bumped]
+        params:
+          repository: concourse-chart-bumped
+          merge: true
 
-- name: postgres-chart-bump
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: postgres-chart-release
-    - get: concourse-chart
-    - get: ci
-  - task: bump-postgres-chart-version
-    file: ci/tasks/bump-postgres-chart-version.yml
-  - put: concourse-chart
-    inputs: [concourse-chart-bumped]
-    params:
-      repository: concourse-chart-bumped
-      merge: true
+  - name: postgres-chart-bump
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - get: postgres-chart-release
+          - get: concourse-chart
+          - get: ci
+      - task: bump-postgres-chart-version
+        file: ci/tasks/bump-postgres-chart-version/task.yml
+      - put: concourse-chart
+        inputs: [concourse-chart-bumped]
+        params:
+          repository: concourse-chart-bumped
+          merge: true
 
-- name: k8s-smoke
-  public: true
-  serial: true
-  plan:
-    - in_parallel:
-      - get: concourse
-      - get: concourse-image
-        params: {format: oci}
-      - get: concourse-chart
-      - get: unit-image
-      - get: ci
-    - try:
-        task: try-delete
+  - name: k8s-smoke
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - get: concourse
+          - get: concourse-image
+            params: { format: oci }
+          - get: concourse-chart
+          - get: unit-image
+          - get: ci
+      - try:
+          task: try-delete
+          image: unit-image
+          file: ci/tasks/k8s-smoke/delete.yml
+          params:
+            SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
+            RELEASE_NAME: concourse-chart-smoke
+      - task: deploy
         image: unit-image
-        file: ci/tasks/k8s-delete.yml
+        input_mapping: { image-info: concourse-image }
+        file: ci/tasks/k8s-smoke/deploy.yml
         params:
           SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
           RELEASE_NAME: concourse-chart-smoke
-    - task: deploy
+      - task: k8s-smoke
+        image: unit-image
+        file: ci/tasks/k8s-smoke/tests.yml
+        params:
+          SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
+          RELEASE_NAME: concourse-chart-smoke
+          MAX_TICKS: 300
+    ensure:
+      task: delete
       image: unit-image
-      input_mapping: {image-info: concourse-image}
-      file: ci/tasks/k8s-deploy.yml
+      file: ci/tasks/k8s-smoke/delete.yml
       params:
         SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
         RELEASE_NAME: concourse-chart-smoke
-    - task: k8s-smoke
-      image: unit-image
-      file: ci/tasks/k8s-smoke.yml
-      params:
-        SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
-        RELEASE_NAME: concourse-chart-smoke
-        MAX_TICKS: 300
-  ensure:
-    task: delete
-    image: unit-image
-    file: ci/tasks/k8s-delete.yml
-    params:
-      SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
-      RELEASE_NAME: concourse-chart-smoke
 
-- name: publish-chart-major
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: version
-      params: {bump: major}
-    - get: concourse-chart
-      passed: [ k8s-smoke ]
-    - get: chart-repo-index
-    - get: ci
-  - task: bump-chart-version
-    file: ci/tasks/bump-chart-version.yml
-  - task: package-chart
-    file: ci/tasks/package-chart.yml
-  - in_parallel:
-    - put: version
-      params: {file: version/version}
-    - put: chart-repo-index
-      inputs: [packaged-chart]
-      params:
-        file: packaged-chart/index.yaml
-    - put: chart-repo
-      inputs: [packaged-chart]
-      params:
-        file: packaged-chart/concourse-*.tgz
-    - put: concourse-chart
-      params:
-        repository: concourse-chart
-        merge: true
-        tag: version/version
-        tag_prefix: v
+  - name: publish-chart-major
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - get: version
+            params: { bump: major }
+          - get: concourse-chart
+            passed: [k8s-smoke]
+          - get: chart-repo-index
+          - get: ci
+      - task: bump-chart-version
+        file: ci/tasks/bump-chart-version/task.yml
+      - task: package-chart
+        file: ci/tasks/package-chart/task.yml
+      - in_parallel:
+          - put: version
+            params: { file: version/version }
+          - put: chart-repo-index
+            inputs: [packaged-chart]
+            params:
+              file: packaged-chart/index.yaml
+          - put: chart-repo
+            inputs: [packaged-chart]
+            params:
+              file: packaged-chart/concourse-*.tgz
+          - put: concourse-chart
+            params:
+              repository: concourse-chart
+              merge: true
+              tag: version/version
+              tag_prefix: v
 
-- name: publish-chart-minor
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: version
-      params: {bump: minor}
-    - get: concourse-chart
-      passed: [ k8s-smoke ]
-    - get: chart-repo-index
-    - get: ci
-  - task: bump-chart-version
-    file: ci/tasks/bump-chart-version.yml
-  - task: package-chart
-    file: ci/tasks/package-chart.yml
-  - in_parallel:
-    - put: version
-      params: {file: version/version}
-    - put: chart-repo-index
-      inputs: [packaged-chart]
-      params:
-        file: packaged-chart/index.yaml
-    - put: chart-repo
-      inputs: [packaged-chart]
-      params:
-        file: packaged-chart/concourse-*.tgz
-    - put: concourse-chart
-      params:
-        repository: concourse-chart
-        merge: true
-        tag: version/version
-        tag_prefix: v
+  - name: publish-chart-minor
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - get: version
+            params: { bump: minor }
+          - get: concourse-chart
+            passed: [k8s-smoke]
+          - get: chart-repo-index
+          - get: ci
+      - task: bump-chart-version
+        file: ci/tasks/bump-chart-version/task.yml
+      - task: package-chart
+        file: ci/tasks/package-chart/task.yml
+      - in_parallel:
+          - put: version
+            params: { file: version/version }
+          - put: chart-repo-index
+            inputs: [packaged-chart]
+            params:
+              file: packaged-chart/index.yaml
+          - put: chart-repo
+            inputs: [packaged-chart]
+            params:
+              file: packaged-chart/concourse-*.tgz
+          - put: concourse-chart
+            params:
+              repository: concourse-chart
+              merge: true
+              tag: version/version
+              tag_prefix: v
 
-- name: publish-chart-patch
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: postgres-chart-release
-      passed: [postgres-chart-bump]
-    - get: version
-      params: {bump: patch}
-    - get: concourse-chart
-      passed: [ k8s-smoke ]
-    - get: chart-repo-index
-    - get: ci
-  - task: bump-chart-version
-    file: ci/tasks/bump-chart-version.yml
-  - task: package-chart
-    file: ci/tasks/package-chart.yml
-  - in_parallel:
-    - put: version
-      params: {file: version/version}
-    - put: chart-repo-index
-      inputs: [packaged-chart]
-      params:
-        file: packaged-chart/index.yaml
-    - put: chart-repo
-      inputs: [packaged-chart]
-      params:
-        file: packaged-chart/concourse-*.tgz
-    - put: concourse-chart
-      params:
-        repository: concourse-chart
-        merge: true
-        tag: version/version
-        tag_prefix: v
+  - name: publish-chart-patch
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - get: postgres-chart-release
+            passed: [postgres-chart-bump]
+          - get: version
+            params: { bump: patch }
+          - get: concourse-chart
+            passed: [k8s-smoke]
+          - get: chart-repo-index
+          - get: ci
+      - task: bump-chart-version
+        file: ci/tasks/bump-chart-version/task.yml
+      - task: package-chart
+        file: ci/tasks/package-chart/task.yml
+      - in_parallel:
+          - put: version
+            params: { file: version/version }
+          - put: chart-repo-index
+            inputs: [packaged-chart]
+            params:
+              file: packaged-chart/index.yaml
+          - put: chart-repo
+            inputs: [packaged-chart]
+            params:
+              file: packaged-chart/concourse-*.tgz
+          - put: concourse-chart
+            params:
+              repository: concourse-chart
+              merge: true
+              tag: version/version
+              tag_prefix: v
 
 resources:
-- name: version
-  type: semver
-  icon: tag
-  source:
-    driver: gcs
-    bucket: concourse-artifacts
-    json_key: ((concourse_artifacts_json_key))
-    key: helm/((version))-chart-version
+  - name: version
+    type: semver
+    icon: tag
+    source:
+      driver: gcs
+      bucket: concourse-artifacts
+      json_key: ((concourse_artifacts_json_key))
+      key: helm/((version))-chart-version
 
-- name: concourse-chart
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:concourse/concourse-chart.git
-    branch: ((concourse-chart-branch))
-    private_key: ((concourse_chart_private_key))
+  - name: concourse-chart
+    type: git
+    icon: github
+    source:
+      uri: git@github.com:concourse/concourse-chart.git
+      branch: ((concourse-chart-branch))
+      private_key: ((concourse_chart_private_key))
 
-- name: chart-repo
-  type: gcs
-  source:
-    bucket: concourse-charts
-    json_key: ((concourse_charts_json_key))
-    regexp: concourse-(.*)\.tgz
+  - name: chart-repo
+    type: gcs
+    source:
+      bucket: concourse-charts
+      json_key: ((concourse_charts_json_key))
+      regexp: concourse-(.*)\.tgz
 
-- name: chart-repo-index
-  type: gcs
-  source:
-    bucket: concourse-charts
-    json_key: ((concourse_charts_json_key))
-    versioned_file: index.yaml
+  - name: chart-repo-index
+    type: gcs
+    source:
+      bucket: concourse-charts
+      json_key: ((concourse_charts_json_key))
+      versioned_file: index.yaml
 
-- name: ci
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/ci.git
-    branch: master
+  - name: ci
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/concourse/ci.git
+      branch: master
 
-- name: concourse-release
-  type: github-release
-  source:
-    owner: concourse
-    repository: concourse
-    semver_constraint: ~((version))
-    access_token: ((concourse_github_dummy.access_token))
+  - name: concourse-release
+    type: github-release
+    source:
+      owner: concourse
+      repository: concourse
+      semver_constraint: ~((version))
+      access_token: ((concourse_github_dummy.access_token))
 
-- name: postgres-chart-release
-  type: artifacthub
-  check_every: 24h
-  source:
-    repository_name: bitnami
-    package_name: postgresql
+  - name: postgres-chart-release
+    type: artifacthub
+    check_every: 24h
+    source:
+      repository_name: bitnami
+      package_name: postgresql
 
-- name: unit-image
-  type: registry-image
-  icon: docker
-  source:
-    repository: concourse/unit
-    username: ((docker.username))
-    password: ((docker.password))
+  - name: unit-image
+    type: registry-image
+    icon: docker
+    source:
+      repository: concourse/unit
+      username: ((docker.username))
+      password: ((docker.password))
 
-- name: concourse
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/concourse.git
-    branch: ((concourse-chart-branch))
+  - name: concourse
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/concourse/concourse.git
+      branch: ((concourse-chart-branch))
 
-- name: concourse-image
-  type: registry-image
-  icon: docker
-  source:
-    repository: concourse/concourse
-    tag: latest
-    username: ((docker.username))
-    password: ((docker.password))
+  - name: concourse-image
+    type: registry-image
+    icon: docker
+    source:
+      repository: concourse/concourse
+      tag: latest
+      username: ((docker.username))
+      password: ((docker.password))
 
 resource_types:
-- name: gcs
-  type: registry-image
-  source: {repository: frodenas/gcs-resource}
+  - name: gcs
+    type: registry-image
+    source: { repository: frodenas/gcs-resource }
 
-- name: artifacthub
-  type: registry-image
-  source:
-    repository: ghcr.io/hdisysteme/artifacthub-resource
+  - name: artifacthub
+    type: registry-image
+    source:
+      repository: ghcr.io/hdisysteme/artifacthub-resource

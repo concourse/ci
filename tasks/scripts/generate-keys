@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -e -u
+set -euo pipefail
 
 docker run -v ${CONCOURSE_KEYS}:/keys ${CONCOURSE_DEV_IMAGE} generate-key -t rsa -b 1024 -f /keys/session_signing_key
 docker run -v ${CONCOURSE_KEYS}:/keys ${CONCOURSE_DEV_IMAGE} generate-key -t ssh -b 1024 -f /keys/tsa_host_key

@@ -1,0 +1,8 @@
+---
+platform: linux
+
+params:
+  EXPECTED_VERSION: ~
+
+run:
+  path: ci/tasks/validate-binary-version/run.sh

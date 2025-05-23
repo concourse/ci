@@ -1,0 +1,17 @@
+platform: linux
+image_resource:
+  type: registry-image
+  source:
+    repository: cgr.dev/chainguard/wolfi-base
+
+inputs:
+  - name: pipelines
+
+outputs:
+  - name: rendered_pipelines
+
+params:
+  RESOURCES:
+
+run:
+  path: pipelines/tasks/render-resource-pipeline-templates/run.sh

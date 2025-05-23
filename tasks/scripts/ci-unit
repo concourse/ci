@@ -1,5 +1,0 @@
-#!/bin/bash
-
-go install github.com/onsi/ginkgo/v2/ginkgo@latest
-
-ginkgo -flake-attempts 3 -r ci/tasks/scripts

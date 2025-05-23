@@ -1,0 +1,32 @@
+---
+platform: linux
+
+params:
+  REPOSITORY: concourse/dev
+  DOCKERFILE: ci/tasks/build-dev-image/Dockerfile
+  IMAGE_PLATFORM: linux/arm64,linux/amd64
+  OUTPUT_OCI: true
+
+inputs:
+  - name: ci
+  - name: concourse
+  - name: gdn
+  - name: containerd
+    optional: true
+  - name: runc
+    optional: true
+  - name: cni
+    optional: true
+  - name: resource-types-image
+  - name: fly-linux
+  - name: fly-windows
+  - name: fly-darwin
+
+outputs:
+  - name: image
+
+caches:
+  - path: cache
+
+run:
+  path: build
