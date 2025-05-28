@@ -104,12 +104,11 @@ jobs:
         image: oci-build-task
         privileged: true
         file: ci/tasks/build-golang-builder-image/task.yml
-      - in_parallel:
-          - put: golang-builder-image
-            no_get: true
-            inputs: detect
-            params:
-              image: image/image
+      - put: golang-builder-image
+        no_get: true
+        inputs: detect
+        params:
+          image: image/image
 
   - name: unit
     public: true
