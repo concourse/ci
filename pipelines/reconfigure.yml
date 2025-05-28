@@ -162,7 +162,7 @@ jobs:
         trigger: true
         passed: [reconfigure-self]
       - task: render-resource-templates
-        file: pipelines-and-tasks/tasks/render-resource-pipeline-templates/tasks.yml
+        file: pipelines-and-tasks/tasks/render-resource-pipeline-templates/task.yml
         params:
           RESOURCES: &resources
             - git
