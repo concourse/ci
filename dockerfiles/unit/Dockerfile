@@ -1,8 +1,7 @@
 ARG base_image=concourse/golang-builder
 FROM ${base_image}
 
-# can be amd64 or arm64
-ARG TARGETARCH=amd64
+ARG TARGETARCH
 
 # enable CGO so we can go test with -race
 ENV CGO_ENABLED=1
