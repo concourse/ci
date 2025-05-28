@@ -14,8 +14,8 @@ FROM --platform=$BUILDPLATFORM ${base_image} AS builder
 
 # build concourse, cross-compiling on host platform to avoid emulation slowness
 #
-# nuke /src after to ensure dev builds build from a clean slate (otherwise this
-# can cause build failures if e.g. files are removed locally)
+# nuke /src after to ensure dev builds build from a clean slate, otherwise this
+# can cause build failures if files are removed locally
 COPY concourse /src
 
 ARG TARGETOS
@@ -28,6 +28,10 @@ RUN cd /src && \
     go build -gcflags=all="-N -l" -o /usr/local/concourse/bin/concourse \
     ./cmd/concourse && \
     rm -rf /src
+
+# Clear out env vars to avoid any weird build behaviour
+ENV GOOS=""
+ENV GOARCH=""
 
 ARG TARGETPLATFORM
 FROM --platform=$TARGETPLATFORM ${base_image}

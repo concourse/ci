@@ -2,7 +2,6 @@
 platform: linux
 
 params:
-  REPOSITORY: concourse/dev
   DOCKERFILE: ci/tasks/build-dev-image/Dockerfile
   IMAGE_PLATFORM: linux/arm64,linux/amd64
   OUTPUT_OCI: true
@@ -21,6 +20,8 @@ inputs:
   - name: fly-linux
   - name: fly-windows
   - name: fly-darwin
+  - name: base-image
+    optional: true
 
 outputs:
   - name: image

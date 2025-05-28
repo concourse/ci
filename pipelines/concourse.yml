@@ -203,7 +203,8 @@ jobs:
               params: { format: rootfs }
             - get: golang-builder-image
               trigger: true
-              params: { format: oci }
+              params:
+                format: oci-layout
             - get: containerd
               trigger: true
             - get: runc
@@ -224,7 +225,7 @@ jobs:
             - get: ci
       - in_parallel:
           fail_fast: true
-          steps:
+          steps: #TODO: build linux/arm64 and darwin/arm64
             - task: yarn-build
               image: unit-image
               file: ci/tasks/yarn-build/task.yml
@@ -254,11 +255,15 @@ jobs:
         privileged: true
         input_mapping:
           concourse: built-concourse
+          base-image: golang-builder-image
         file: ci/tasks/build-dev-image/tasks.yml
+        params:
+          IMAGE_ARG_base_image: base-image/oci
       - put: dev-image
         no_get: true
         inputs: detect
-        params: { image: image/image }
+        params:
+          image: image/image
 
   - name: worker-runtime
     public: true
