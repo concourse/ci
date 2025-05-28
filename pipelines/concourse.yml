@@ -22,16 +22,6 @@ resource_types:
     type: registry-image
     source: { repository: linkyard/helm-chart-resource, tag: 2.17.0 }
 
-  # TODO: remove after upgrade that uses this version
-  - name: registry-image
-    type: registry-image
-    source: { repository: concourse/registry-image-resource, tag: 1.12.0 }
-
-  # TODO: remove after upgrade that uses this version
-  - name: s3
-    type: registry-image
-    source: { repository: concourse/s3-resource, tag: 2.2.0 }
-
 groups:
   - name: develop
     jobs:
