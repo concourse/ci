@@ -99,7 +99,7 @@ jobs:
           - get: wolfi-base
             trigger: true
             params:
-              skip_download: true
+              format: oci-layout
       - load_var: go_version
         file: golang-linux/version
         reveal: true
@@ -107,8 +107,11 @@ jobs:
         image: oci-build-task
         privileged: true
         file: ci/tasks/build-golang-builder-image/task.yml
+        input_mapping:
+          base-image: wolfi-base
         params:
           BUILD_ARG_golang_version: ((.:go_version))
+          IMAGE_ARG_base_image: base-image/oci
       - put: golang-builder-image
         no_get: true
         inputs: detect

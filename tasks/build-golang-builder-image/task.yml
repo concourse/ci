@@ -10,6 +10,8 @@ params:
 
 inputs:
   - name: ci
+  - name: base-image
+    optional: true
 
 outputs:
   - name: image
