@@ -50,6 +50,7 @@ config:
     IMAGE_ARG_base_image: base-image/image.tar
     BUILD_ARG_builder_image: concourse/golang-builder
     IMAGE_PLATFORM: #@ platform
+    OUTPUT_OCI: true
     _: #@ template.replace(build_params(resource_name))
   run: {path: build}
 #@ end
@@ -57,13 +58,6 @@ config:
 #@ def build_image():
 name: build
 serial_groups: [build]
-on_failure: &failed-ci
-  put: notify
-  no_get: true
-  inputs: detect
-  params:
-    mode: normal
-    alert_type: failed
 plan:
 - in_parallel:
   - get: daily-trigger
@@ -79,12 +73,12 @@ plan:
     params: {skip_download: true}
   - get: oci-build-task
   - #@ template.replace(extra_get_steps())
-- #@ build_task(resource_name, "linux/amd64")
+- #@ build_task(resource_name, "linux/amd64,linux/arm64")
 - #@ template.replace(extra_steps())
 - put: resource-image-dev
   no_get: true
   inputs: detect
-  params: {image: built-resource-image/image.tar}
+  params: {image: built-resource-image/image}
 #@ end
 
 #@ def scan_image():
@@ -99,14 +93,12 @@ plan:
     passed: [build]
     params: {format: oci}
     trigger: true
-  - get: trivy
+  - get: wolfi-base
     trigger: true
 - task: scan
-  image: trivy
-  file: ci/tasks/trivy-scan.yml
+  image: wolfi-base
+  file: ci/tasks/trivy-scan/task.yml
   input_mapping: {image: resource-image-dev}
-  on_failure: #@ determine_channel()
-  on_error: #@ determine_channel()
 #@ end
 
 #@ def extra_steps():
@@ -126,15 +118,6 @@ plan:
     run:
       path: /bin/true
   #@ else: return []
-#@ end
-
-#@ def determine_channel():
-  put: notify
-  no_get: true
-  inputs: detect
-  params:
-    mode: normal
-    alert_type: failed
 #@ end
 
 #@ def validate_pr():
@@ -197,7 +180,6 @@ plan:
   - get: resource-repo
     passed: [scan-image]
   - get: ci
-  - get: release-me
   - get: resource-image-dev
     passed: [scan-image]
     params: {format: oci}
@@ -214,15 +196,15 @@ plan:
     image_resource:
       type: registry-image
       source:
-        repository: ubuntu
-        tag: jammy
+        repository: cgr.dev/chainguard/bash
+        tag: latest
     inputs:
     - name: version
     - name: resource-image-dev-rootfs
     outputs:
     - name: release
     run:
-      path: bash
+      path: /bin/bash
       args:
       - "-exc"
       #@yaml/text-templated-strings
@@ -245,15 +227,6 @@ plan:
           tar -czf ../release/(@= resource_name @)-resource-${version}.tgz rootfs.tgz resource_metadata.json
         popd
 
-- task: build-release-notes
-  file: ci/tasks/build-release-notes.yml
-  params:
-    GITHUB_OWNER: #@ github_owner()
-    GITHUB_REPO: #@ resource_name + "-resource"
-    GITHUB_TOKEN: ((concourse_github_dummy.access_token))
-    GITHUB_BRANCH: master
-  input_mapping:
-    repo: resource-repo
 - load_var: version
   file: version/version
 - in_parallel:
@@ -269,7 +242,7 @@ plan:
     inputs: detect
     params:
       commitish: resource-repo/.git/ref
-      body: built-notes/notes.md
+      generate_release_notes: true
       globs:
       - release/*.tgz
       name: release/name
@@ -285,13 +258,6 @@ plan:
 #@ def rebuild_images():
 name: republish-images
 serial_groups: [build]
-on_failure: &failed-ci
-  put: notify
-  no_get: true
-  inputs: detect
-  params:
-    mode: normal
-    alert_type: failed
 plan:
 - in_parallel:
   - get: daily-trigger
@@ -307,10 +273,9 @@ plan:
   - #@ template.replace(extra_get_steps())
 - load_var: version
   file: version/version
-- #@ build_task(resource_name, "linux/amd64")
+- #@ build_task(resource_name, "linux/amd64,linux/arm64")
 - #@ template.replace(extra_steps())
 - task: date-tag
-  image: oci-build-task
   file: ci/tasks/tag-version-with-date.yml
   params:
     VERSION: ((.:version))
@@ -318,7 +283,7 @@ plan:
   no_get: true
   inputs: detect
   params:
-    image: built-resource-image/image.tar
+    image: built-resource-image/image
     version: ((.:version))
     bump_aliases: true
     additional_tags: date-tag/tag
@@ -365,12 +330,6 @@ resource_types:
   source:
     repository: frodenas/gcs-resource
 
-- name: slack-notifier
-  type: registry-image
-  #! Switch back to mockersf/concourse-slack-notifier once
-  #! https://github.com/mockersf/concourse-slack-notifier/pull/86 is merged
-  source: {repository: aoldershaw/concourse-slack-notifier}
-
 resources:
 - name: base-image
   type: registry-image
@@ -391,13 +350,11 @@ resources:
     username: ((docker.username))
     password: ((docker.password))
 
-- name: trivy
+- name: wolfi-base
   type: registry-image
   icon: docker
   source:
-    repository: aquasec/trivy
-    username: ((docker.username))
-    password: ((docker.password))
+    repository: cgr.dev/chainguard/wolfi-base
 
 - name: resource-repo
   type: git
@@ -467,28 +424,11 @@ resources:
     uri: https://github.com/concourse/ci.git
     branch: master
 
-- name: release-me
-  type: github-release
-  icon: package-down
-  source:
-    owner: clarafu
-    repository: release-me
-    access_token: ((concourse_github_dummy.access_token))
-
 - name: oci-build-task
   type: registry-image
   icon: docker
   source:
     repository: concourse/oci-build-task
-
-- name: notify
-  type: slack-notifier
-  icon: slack
-  source:
-    url: ((slack_hooks.concourse-interrupt))
-    username: ((basic_auth.username))
-    password: ((basic_auth.password))
-    concourse_url: https://ci.concourse-ci.org
 
 - name: daily-trigger
   type: time

@@ -1,6 +1,0 @@
-#!/bin/bash
-
-set -e -x
-
-message_file="$PWD/message/message"
-jq -r '.jobs[] | select(.status == "failed") | .url' $PWD/src/$NORSK_PIPELINE/status.json > $message_file

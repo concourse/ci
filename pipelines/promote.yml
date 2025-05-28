@@ -1,126 +1,107 @@
 ---
 jobs:
-- name: promote-concourse
-  serial: true
-  plan:
-  - get: concourse
-    trigger: true
-  - put: concourse-master
-    params:
-      repository: concourse
-      merge: true
-  on_failure: &notify
-    put: notify
-    params:
-      mode: normal
-      alert_type: failed
+  - name: promote-concourse
+    serial: true
+    plan:
+      - get: concourse
+        trigger: true
+      - put: concourse-master
+        params:
+          repository: concourse
+          merge: true
 
-- name: promote-cbd
-  serial: true
-  plan:
-  - get: cbd
-    trigger: true
-  - put: cbd-master
-    params:
-      repository: cbd
-      merge: true
-  on_failure: *notify
+  - name: promote-cbd
+    serial: true
+    plan:
+      - get: cbd
+        trigger: true
+      - put: cbd-master
+        params:
+          repository: cbd
+          merge: true
 
-- name: publish-docs
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse
-      trigger: true
-    - get: docs
-  - task: build-docs
-    file: docs/ci/build.yml
-    params:
-      ANALYTICS_ID: ((analytics_id))
-      GITHUB_TOKEN: ((concourse_github_dummy.access_token))
-  - put: docs-gh-pages
-    params: {repository: built-docs}
-  on_failure: *notify
+  - name: publish-docs
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - get: concourse
+            trigger: true
+          - get: docs
+      - task: build-docs
+        file: docs/ci/build.yml
+        params:
+          ANALYTICS_ID: ((analytics_id))
+          GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+      - put: docs-gh-pages
+        params: { repository: built-docs }
 
-- name: refresh-rfc-table
-  public: true
-  serial: true
-  plan:
-  - in_parallel:
-    - get: concourse
-      passed: [publish-docs]
-    - get: docs
-      passed: [publish-docs]
-    - get: daily
-      trigger: true
-  - task: build-docs
-    file: docs/ci/build.yml
-    params:
-      ANALYTICS_ID: ((analytics_id))
-      GITHUB_TOKEN: ((concourse_github_dummy.access_token))
-  - put: docs-gh-pages
-    params: {repository: built-docs}
-  on_failure: *notify
-
-resource_types:
-- name: slack-notifier
-  type: registry-image
-  source: {repository: mockersf/concourse-slack-notifier}
+  - name: refresh-rfc-table
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - get: concourse
+            passed: [publish-docs]
+          - get: docs
+            passed: [publish-docs]
+          - get: daily
+            trigger: true
+      - task: build-docs
+        file: docs/ci/build.yml
+        params:
+          ANALYTICS_ID: ((analytics_id))
+          GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+      - put: docs-gh-pages
+        params: { repository: built-docs }
 
 resources:
-- name: cbd
-  type: git
-  icon: &git-icon github
-  source:
-    uri: https://github.com/concourse/concourse-bosh-deployment
-    tag_filter: v((release_version))
+  - name: cbd
+    type: git
+    icon: &git-icon github
+    source:
+      uri: https://github.com/concourse/concourse-bosh-deployment
+      tag_filter: v((release_version))
 
-- name: cbd-master
-  type: git
-  icon: *git-icon
-  source:
-    uri: git@github.com:concourse/concourse-bosh-deployment.git
-    branch: master
-    private_key: ((concourse_deployment_repo_private_key))
+  - name: cbd-master
+    type: git
+    icon: *git-icon
+    source:
+      uri: git@github.com:concourse/concourse-bosh-deployment.git
+      branch: master
+      private_key: ((concourse_deployment_repo_private_key))
 
-- name: concourse
-  type: git
-  icon: *git-icon
-  source:
-    uri: https://github.com/concourse/concourse
-    tag_filter: v((release_version))
+  - name: concourse
+    type: git
+    icon: *git-icon
+    source:
+      uri: https://github.com/concourse/concourse
+      tag_filter: v((release_version))
 
-- name: concourse-master
-  type: git
-  icon: *git-icon
-  source:
-    uri: git@github.com:concourse/concourse.git
-    branch: master
-    private_key: ((concourse_repo_private_key))
+  - name: concourse-master
+    type: git
+    icon: *git-icon
+    source:
+      uri: git@github.com:concourse/concourse.git
+      branch: master
+      private_key: ((concourse_repo_private_key))
 
-- name: docs
-  type: git
-  icon: *git-icon
-  source:
-    uri: https://github.com/concourse/docs
-    branch: master
+  - name: docs
+    type: git
+    icon: *git-icon
+    source:
+      uri: https://github.com/concourse/docs
+      branch: master
 
-- name: docs-gh-pages
-  type: git
-  icon: *git-icon
-  source:
-    uri: git@github.com:concourse/docs
-    branch: gh-pages
-    private_key: ((docs_deploy_key))
+  - name: docs-gh-pages
+    type: git
+    icon: *git-icon
+    source:
+      uri: git@github.com:concourse/docs
+      branch: gh-pages
+      private_key: ((docs_deploy_key))
 
-- name: notify
-  type: slack-notifier
-  icon: slack
-  source:
-    url: ((slack_hooks.concourse-private))
-
-- name: daily
-  type: time
-  icon: clock
-  source: {} # daily is the effective default
+  - name: daily
+    type: time
+    icon: clock
+    source: {} # daily is the effective default

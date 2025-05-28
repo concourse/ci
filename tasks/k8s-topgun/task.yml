@@ -1,0 +1,26 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: { repository: concourse/unit }
+
+inputs:
+  - name: concourse
+  - name: ci
+  - name: concourse-rc-image
+  - name: concourse-chart
+  - name: prometheus-chart
+  - name: postgresql-chart-git
+
+caches:
+  - path: gopath
+
+params:
+  IN_CLUSTER: "false"
+  K8S_ENGINE: "GKE"
+  CONCOURSE_IMAGE_NAME:
+  SERVICE_ACCOUNT_KEY:
+
+run:
+  path: ci/tasks/k8s-topgun/run.sh

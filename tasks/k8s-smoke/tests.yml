@@ -1,0 +1,22 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: { repository: concourse/unit }
+
+params:
+  SERVICE_ACCOUNT_KEY:
+  RELEASE_NAME:
+  MAX_TICKS: 180
+
+inputs:
+  - name: concourse
+  - name: ci
+
+caches:
+  - path: gopath
+  - path: concourse/web/wats/node_modules
+
+run:
+  path: ci/tasks/k8s-smoke/tests.sh

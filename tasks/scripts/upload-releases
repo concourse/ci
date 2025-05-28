@@ -1,7 +1,0 @@
-#!/bin/bash
-
-set -ex -u
-
-bosh upload-release concourse-release/*.tgz
-bosh upload-release postgres-release/*.tgz
-bosh upload-release bpm-release/*.tgz

@@ -1,0 +1,15 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: { repository: cgr.dev/chainguard/wolfi-base }
+
+inputs:
+  - name: ci
+
+outputs:
+  - name: trivy-db
+
+run:
+  path: ci/tasks/extract-trivy-db/run.sh

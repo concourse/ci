@@ -1,0 +1,16 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: { repository: cgr.dev/chainguard/wolfi-base }
+
+inputs:
+  - name: image
+  - name: ci
+
+params:
+  TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db,public.ecr.aws/aquasecurity/trivy-db
+
+run:
+  path: ci/tasks/trivy-scan/run.sh

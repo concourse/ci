@@ -1,0 +1,17 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: { repository: cgr.dev/chainguard/wolfi-base }
+
+inputs:
+  - name: ci
+  - name: image
+  - name: trivy-db
+
+params:
+  IGNORE_POLICY_FILE:
+
+run:
+  path: ci/tasks/scan-resource-types/run.sh

@@ -1,0 +1,11 @@
+platform: linux
+
+inputs:
+  - name: ci
+  - name: concourse
+
+outputs:
+  - name: version
+
+run:
+  path: ci/tasks/get-dev-version/run.sh

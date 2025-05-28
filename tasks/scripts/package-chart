@@ -1,6 +1,0 @@
-#!/bin/bash
-
-set -e -x
-
-helm package -u -d ./packaged-chart ./concourse-chart
-helm repo index --merge chart-repo-index/index.yaml ./packaged-chart
