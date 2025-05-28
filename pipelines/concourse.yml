@@ -100,10 +100,15 @@ jobs:
             trigger: true
             params:
               skip_download: true
+      - load_var: go_version
+        file: golang-linux/version
+        reveal: true
       - task: build
         image: oci-build-task
         privileged: true
         file: ci/tasks/build-golang-builder-image/task.yml
+        params:
+          BUILD_ARG_golang_version: ((.:go_version))
       - put: golang-builder-image
         no_get: true
         inputs: detect
