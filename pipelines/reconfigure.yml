@@ -274,7 +274,6 @@ jobs:
               release_minor: "7.13"
               latest_release: "7.12"
               concourse_smoke_deployment_name: concourse-smoke-7-13
-              slack_hook: ((slack_hooks.concourse-private))
               stemcell_name: jammy
               gcp_image: ubuntu-2204-lts
               ci_branch: master
@@ -298,8 +297,8 @@ jobs:
                 runc: ""
                 containerd: ""
           # TEMPLATE FOR NEXT RELEASE
-          # to create a new release pipeline, copy (but don't delete!) this template,
-          # replacing MAJOR, MINOR, PREV_MAJOR, PREV_MINOR, and SLACK_CHANNEL
+          # to create a new release pipeline, copy (but don't delete!) this
+          # template, replacing MAJOR, MINOR, PREV_MAJOR, and PREV_MINOR
           # accordingly.
           #
           # Note: you can leave the resource_type_versions as "" - these values will
@@ -314,7 +313,6 @@ jobs:
           #     release_minor: "MAJOR.MINOR"
           #     latest_release: "PREV_MAJOR.PREV_MINOR"
           #     concourse_smoke_deployment_name: "concourse-smoke-MAJOR-MINOR"
-          #     slack_hook: ((slack_hooks.SLACK_CHANNEL))
           #     stemcell_name: jammy
           #     gcp_image: ubuntu-2204-lts
           #     ci_branch: master
@@ -338,8 +336,6 @@ jobs:
           #       cni: ""
           #       runc: ""
           #       containerd: ""
-          - set_pipeline: infrastructure-report
-            file: pipelines-and-tasks/pipelines/infrastructure-report.yml
 
   - name: reconfigure-example-pipelines
     plan:
