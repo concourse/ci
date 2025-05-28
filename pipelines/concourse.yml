@@ -14,10 +14,6 @@ resource_types:
     type: registry-image
     source: { repository: cloudfoundry/bosh-deployment-resource }
 
-  - name: slack-notifier
-    type: registry-image
-    source: { repository: mockersf/concourse-slack-notifier }
-
   - name: helm-chart
     type: registry-image
     source: { repository: linkyard/helm-chart-resource, tag: 2.17.0 }
@@ -90,13 +86,6 @@ jobs:
         no_get: true
         inputs: detect
         params: { image: image/image.tar }
-    on_failure: &failed-ci
-      put: notify
-      no_get: true
-      inputs: detect
-      params:
-        mode: normal
-        alert_type: failed
 
   - name: build-golang-builder-image
     public: true
@@ -121,7 +110,6 @@ jobs:
             inputs: detect
             params:
               image: image/image
-    on_failure: *failed-ci
 
   - name: unit
     public: true
@@ -151,11 +139,6 @@ jobs:
           - task: unit-baggageclaim-windows
             file: ci/tasks/unit-baggageclaim-windows/task.yml
             input_mapping: { concourse: built-concourse }
-    on_failure: &failed-concourse
-      put: notify
-      params:
-        mode: normal
-        alert_type: failed
 
   - name: resource-types-images
     public: true
@@ -269,7 +252,6 @@ jobs:
         no_get: true
         inputs: detect
         params: { image: image/image }
-    on_failure: *failed-concourse
 
   - name: worker-runtime
     public: true
@@ -288,7 +270,6 @@ jobs:
         privileged: true
         timeout: 1h
         file: ci/tasks/containerd-integration/task.yml
-    on_failure: *failed-concourse
 
   - name: check-docker-mounts
     public: true
@@ -340,7 +321,6 @@ jobs:
           RUNTIME: ((.:runtime))
         file: ci/tasks/testflight/task.yml
         input_mapping: { postgres-image: ((.:postgres-image)) }
-    on_failure: *failed-concourse
 
   - name: watsjs
     public: true
@@ -364,7 +344,6 @@ jobs:
         privileged: true
         timeout: 1h
         file: ci/tasks/watsjs/task.yml
-    on_failure: *failed-concourse
 
   - name: integration
     public: true
@@ -390,7 +369,6 @@ jobs:
         privileged: true
         image: unit-image
         file: ci/tasks/integration-tests/task.yml
-    on_failure: *failed-concourse
 
   - name: k8s-smoke
     public: true
@@ -439,7 +417,6 @@ jobs:
         SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
         RELEASE_NAME: concourse-smoke
         CONCOURSE_IMAGE: concourse/concourse-dev
-    on_failure: *failed-concourse
 
   - name: k8s-topgun
     public: true
@@ -477,7 +454,6 @@ jobs:
           IN_CLUSTER: "true"
           SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
           CONCOURSE_IMAGE_NAME: concourse/concourse-dev
-    on_failure: *failed-concourse
 
   - name: k8s-check-helm-params
     public: true
@@ -502,7 +478,6 @@ jobs:
         image: unit-image
         input_mapping: { distribution: concourse-chart, linux-rc: linux-dev }
         params: { DISTRIBUTION: helm }
-    on_failure: *failed-concourse
 
   - name: build-concourse
     old_name: build-rc
@@ -605,7 +580,6 @@ jobs:
             no_get: true
             inputs: detect
             params: { file: concourse-darwin/concourse-*.tgz }
-    on_failure: *failed-concourse
 
   - name: build-image
     old_name: build-rc-image
@@ -634,7 +608,6 @@ jobs:
         inputs: detect
         params:
           image: image/image.tar
-    on_failure: *failed-concourse
 
   - name: bump-prod-web
     public: true
@@ -662,7 +635,6 @@ jobs:
         params:
           repository: infrastructure-bumped
           branch: master
-    on_failure: *failed-concourse
 
   - name: bump-prod-workers
     public: true
@@ -714,7 +686,6 @@ jobs:
         params:
           repository: infrastructure-bumped
           branch: master
-    on_failure: *failed-concourse
 
   - name: bin-smoke
     public: true
@@ -769,7 +740,6 @@ jobs:
                 TF_VAR_GCP_IMAGE: ((.:gcp-image))
                 TF_VAR_RUNTIME: ((.:runtime))
         timeout: 20m
-    on_failure: *failed-concourse
 
   - name: bin-smoke-rapid
     public: true
@@ -825,7 +795,6 @@ jobs:
                 TF_VAR_GCP_IMAGE: ((.:gcp-image))
                 TF_VAR_RUNTIME: ((.:runtime))
         timeout: 20m
-    on_failure: *failed-concourse
 
   - name: quickstart-smoke
     public: true
@@ -848,7 +817,6 @@ jobs:
         input_mapping: { concourse-rc-image: concourse-dev-image }
         params:
           RELEASE_NAME: concourse-smoke
-    on_failure: *failed-concourse
 
   - name: bosh-check-props
     public: true
@@ -871,7 +839,6 @@ jobs:
         input_mapping:
           { distribution: concourse-release-repo, linux-rc: linux-dev }
         params: { DISTRIBUTION: bosh }
-    on_failure: *failed-concourse
 
   - name: bosh-bump
     public: true
@@ -996,7 +963,6 @@ jobs:
         image: unit-image
         file: ci/tasks/smoke/task.yml
         timeout: 1h
-    on_failure: *failed-concourse
 
   - name: bosh-smoke-guardian
     public: true
@@ -1054,7 +1020,6 @@ jobs:
         image: unit-image
         file: ci/tasks/smoke/task.yml
         timeout: 1h
-    on_failure: *failed-concourse
 
   - name: bosh-topgun-core
     public: true
@@ -1112,7 +1077,6 @@ jobs:
           # AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
           SUITE: core
           STEMCELL_VARIANT: jammy
-    on_failure: *failed-concourse
 
   - name: bosh-topgun-runtime
     public: true
@@ -1170,7 +1134,6 @@ jobs:
           # AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
           SUITE: runtime
           STEMCELL_VARIANT: jammy
-    on_failure: *failed-concourse
 
   - name: bosh-topgun-both
     public: true
@@ -1228,7 +1191,6 @@ jobs:
           # AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
           SUITE: both
           STEMCELL_VARIANT: jammy
-    on_failure: *failed-concourse
 
   - name: bosh-topgun-pcf
     public: true
@@ -1290,7 +1252,6 @@ jobs:
           # AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
           SUITE: pcf
           STEMCELL_VARIANT: jammy
-    on_failure: *failed-concourse
 
 resources:
   - name: concourse
@@ -1331,15 +1292,6 @@ resources:
       uri: git@github.com:concourse/infrastructure.git
       branch: master
       private_key: ((greenpeace_private_key))
-
-  - name: notify
-    type: slack-notifier
-    icon: slack
-    source:
-      url: ((slack_hooks.concourse-interrupt))
-      username: ((basic_auth.username))
-      password: ((basic_auth.password))
-      concourse_url: https://ci.concourse-ci.org
 
   - name: dev-image
     type: registry-image

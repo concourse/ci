@@ -1,408 +1,404 @@
 resource_types:
-- name: slack-notifier
-  type: registry-image
-  source: {repository: mockersf/concourse-slack-notifier}
-
-- name: pull-request
-  type: registry-image
-  source: {repository: aoldershaw/github-pr-resource}
+  - name: pull-request
+    type: registry-image
+    source: { repository: aoldershaw/github-pr-resource }
 
 resources:
-- name: pipelines-and-tasks
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/ci
-    branch: master
-    paths:
-    - pipelines
-    - tasks
+  - name: pipelines-and-tasks
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/concourse/ci
+      branch: master
+      paths:
+        - pipelines
+        - tasks
 
-- name: pr-pipeline
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/ci
-    branch: master
-    paths:
-    - pipelines/pr.yml
-    - pipelines/pr-deploy.yml
+  - name: pr-pipeline
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/concourse/ci
+      branch: master
+      paths:
+        - pipelines/pr.yml
+        - pipelines/pr-deploy.yml
 
-- name: teams
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/ci
-    branch: master
-    paths:
-    - teams
+  - name: teams
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/concourse/ci
+      branch: master
+      paths:
+        - teams
 
-- name: concourse-for-k8s
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:pivotal/concourse-for-k8s.git
-    branch: master
-    private_key: ((concourse_for_k8s_token))
-    paths:
-    - ci
+  - name: concourse-for-k8s
+    type: git
+    icon: github
+    source:
+      uri: git@github.com:pivotal/concourse-for-k8s.git
+      branch: master
+      private_key: ((concourse_for_k8s_token))
+      paths:
+        - ci
 
-- name: dex-ci
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/dex
-    branch: maintenance
-    paths: [ci]
+  - name: dex-ci
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/concourse/dex
+      branch: maintenance
+      paths: [ci]
 
-- name: docs-ci
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/docs
-    branch: master
-    paths: [ci]
+  - name: docs-ci
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/concourse/docs
+      branch: master
+      paths: [ci]
 
-- name: greenpeace
-  type: git
-  icon: github
-  source:
-    uri: git@github.com:concourse/greenpeace.git
-    branch: master
-    paths: [pipelines, tasks]
-    private_key: ((greenpeace_private_key))
+  - name: greenpeace
+    type: git
+    icon: github
+    source:
+      uri: git@github.com:concourse/greenpeace.git
+      branch: master
+      paths: [pipelines, tasks]
+      private_key: ((greenpeace_private_key))
 
-- name: resource-types-website-ci
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/resource-types-website
-    branch: master
-    paths: [ci]
+  - name: resource-types-website-ci
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/concourse/resource-types-website
+      branch: master
+      paths: [ci]
 
-- name: examples
-  type: git
-  icon: github
-  source:
-    uri: https://github.com/concourse/examples
-    branch: master
-    paths: [pipelines]
+  - name: examples
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/concourse/examples
+      branch: master
+      paths: [pipelines]
 
-- name: latest-concourse
-  type: github-release
-  source:
-    owner: concourse
-    repository: concourse
-    access_token: ((concourse_github_dummy.access_token))
+  - name: latest-concourse
+    type: github-release
+    source:
+      owner: concourse
+      repository: concourse
+      access_token: ((concourse_github_dummy.access_token))
 
-- name: concourse-prs
-  type: pull-request
-  check_every: 2m
-  source:
-    repository: concourse/concourse
-    access_token: ((pull_requests_access_token))
-    base_branch: master
+  - name: concourse-prs
+    type: pull-request
+    check_every: 2m
+    source:
+      repository: concourse/concourse
+      access_token: ((pull_requests_access_token))
+      base_branch: master
 
-- name: concourse-deploy-prs
-  type: pull-request
-  check_every: 2m
-  source:
-    repository: concourse/concourse
-    access_token: ((pull_requests_access_token))
-    base_branch: master
-    labels: [deploy]
+  - name: concourse-deploy-prs
+    type: pull-request
+    check_every: 2m
+    source:
+      repository: concourse/concourse
+      access_token: ((pull_requests_access_token))
+      base_branch: master
+      labels: [deploy]
 
 jobs:
-- name: reconfigure-self
-  plan:
-  - get: pipelines-and-tasks
-    trigger: true
-  - set_pipeline: self
-    file: pipelines-and-tasks/pipelines/reconfigure.yml
+  - name: reconfigure-self
+    plan:
+      - get: pipelines-and-tasks
+        trigger: true
+      - set_pipeline: self
+        file: pipelines-and-tasks/pipelines/reconfigure.yml
 
-- name: reconfigure-teams
-  plan:
-  - get: pipelines-and-tasks
-    passed: [reconfigure-self]
-  - get: teams
-    trigger: true
-  - task: reconfigure
-    file: pipelines-and-tasks/tasks/reconfigure-teams/task.yml
-    params:
-      ADMIN_USERNAME: ((concourse.username))
-      ADMIN_PASSWORD: ((concourse.password))
-      CONCOURSE_URL: ((concourse.url))
+  - name: reconfigure-teams
+    plan:
+      - get: pipelines-and-tasks
+        passed: [reconfigure-self]
+      - get: teams
+        trigger: true
+      - task: reconfigure
+        file: pipelines-and-tasks/tasks/reconfigure-teams/task.yml
+        params:
+          ADMIN_USERNAME: ((concourse.username))
+          ADMIN_PASSWORD: ((concourse.password))
+          CONCOURSE_URL: ((concourse.url))
 
-- name: reconfigure-greenpeace
-  plan:
-  - get: pipelines-and-tasks
-    passed: [reconfigure-self]
-  - get: greenpeace
-    trigger: true
-  - task: render-greenpeace-pipeline
-    file: greenpeace/tasks/render-ytt.yml
-    params:
-      ARGS: -v cluster=dispatcher -f greenpeace/pipelines/greenpeace.yml -f greenpeace/pipelines/data.yml
-  - set_pipeline: dispatcher-greenpeace
-    file: rendered/pipeline.yml
+  - name: reconfigure-greenpeace
+    plan:
+      - get: pipelines-and-tasks
+        passed: [reconfigure-self]
+      - get: greenpeace
+        trigger: true
+      - task: render-greenpeace-pipeline
+        file: greenpeace/tasks/render-ytt.yml
+        params:
+          ARGS: -v cluster=dispatcher -f greenpeace/pipelines/greenpeace.yml -f greenpeace/pipelines/data.yml
+      - set_pipeline: dispatcher-greenpeace
+        file: rendered/pipeline.yml
 
-- name: reconfigure-promote
-  plan:
-  - get: pipelines-and-tasks
-    trigger: true
-    passed: [reconfigure-self]
-  - get: latest-concourse
-    trigger: true
-  - load_var: release-version
-    file: latest-concourse/version
-  - set_pipeline: promote
-    file: pipelines-and-tasks/pipelines/promote.yml
-    vars:
-      release_version: ((.:release-version))
+  - name: reconfigure-promote
+    plan:
+      - get: pipelines-and-tasks
+        trigger: true
+        passed: [reconfigure-self]
+      - get: latest-concourse
+        trigger: true
+      - load_var: release-version
+        file: latest-concourse/version
+      - set_pipeline: promote
+        file: pipelines-and-tasks/pipelines/promote.yml
+        vars:
+          release_version: ((.:release-version))
 
-- name: reconfigure-resource-pipelines
-  plan:
-  - get: pipelines-and-tasks
-    trigger: true
-    passed: [reconfigure-self]
-  - task: render-resource-templates
-    file: pipelines-and-tasks/tasks/render-resource-pipeline-templates/tasks.yml
-    params:
-      RESOURCES: &resources
-      - git
-      - time
-      - docker-image
-      - registry-image
-      - bosh-io-release
-      - bosh-io-stemcell
-      - hg
-      - github-release
-      - semver
-      - s3
-      - pool
-      - datadog-event
-      - mock
-    input_mapping: {pipelines: pipelines-and-tasks}
-  - in_parallel:
-    - across:
-      - var: type
-        values:
-        - time
-        - bosh-io-release
-        - bosh-io-stemcell
-        - github-release
-        - datadog-event
-        - mock
-        max_in_flight: all
-      set_pipeline: resource
-      instance_vars: {type: ((.:type))}
-      file: rendered_pipelines/((.:type)).yml
-      vars:
-        base-image: concourse/resource-types-base-image-static
-    - across:
-      - var: type
-        values:
-        - git
-        - docker-image
-        - registry-image
-        - hg
-        - semver
-        - s3
-        - pool
-        max_in_flight: all
-      set_pipeline: resource
-      instance_vars: {type: ((.:type))}
-      file: rendered_pipelines/((.:type)).yml
-      vars:
-        base-image: paketobuildpacks/run-jammy-base
+  - name: reconfigure-resource-pipelines
+    plan:
+      - get: pipelines-and-tasks
+        trigger: true
+        passed: [reconfigure-self]
+      - task: render-resource-templates
+        file: pipelines-and-tasks/tasks/render-resource-pipeline-templates/tasks.yml
+        params:
+          RESOURCES: &resources
+            - git
+            - time
+            - docker-image
+            - registry-image
+            - bosh-io-release
+            - bosh-io-stemcell
+            - hg
+            - github-release
+            - semver
+            - s3
+            - pool
+            - datadog-event
+            - mock
+        input_mapping: { pipelines: pipelines-and-tasks }
+      - in_parallel:
+          - across:
+              - var: type
+                values:
+                  - time
+                  - bosh-io-release
+                  - bosh-io-stemcell
+                  - github-release
+                  - datadog-event
+                  - mock
+                max_in_flight: all
+            set_pipeline: resource
+            instance_vars: { type: ((.:type)) }
+            file: rendered_pipelines/((.:type)).yml
+            vars:
+              base-image: concourse/resource-types-base-image-static
+          - across:
+              - var: type
+                values:
+                  - git
+                  - docker-image
+                  - registry-image
+                  - hg
+                  - semver
+                  - s3
+                  - pool
+                max_in_flight: all
+            set_pipeline: resource
+            instance_vars: { type: ((.:type)) }
+            file: rendered_pipelines/((.:type)).yml
+            vars:
+              base-image: paketobuildpacks/run-jammy-base
 
-- name: reconfigure-pipelines
-  plan:
-  - in_parallel:
-    - get: pipelines-and-tasks
-      trigger: true
-      passed: [reconfigure-self]
-    - get: concourse-for-k8s
-      trigger: true
-    - get: dex-ci
-      trigger: true
-    - get: docs-ci
-      trigger: true
-    - get: resource-types-website-ci
-      trigger: true
-  - in_parallel:
-    - set_pipeline: concourse
-      file: pipelines-and-tasks/pipelines/concourse.yml
-      vars:
-        postgresql_major: "16"
-    - set_pipeline: helm-chart
-      file: pipelines-and-tasks/pipelines/helm-chart.yml
-      instance_vars:
-        version: 7
-      vars:
-        concourse-chart-branch: release/7.13.x
-    - set_pipeline: helm-prs
-      file: pipelines-and-tasks/pipelines/helm-prs.yml
-      instance_vars:
-        branch: master
-      vars:
-        concourse_base_branch: master
-        concourse_image_name: concourse/concourse
-        concourse_image_tag: latest
-        postgresql_major: "16"
-    - set_pipeline: helm-prs
-      file: pipelines-and-tasks/pipelines/helm-prs.yml
-      instance_vars:
-        branch: dev
-      vars:
-        concourse_base_branch: master
-        concourse_image_name: concourse/concourse-rc
-        concourse_image_tag: latest
-        postgresql_major: "16"
-    - set_pipeline: docs-prs
-      team: contributor
-      file: docs-ci/ci/prs-pipeline.yml
-    - set_pipeline: dutyfree
-      team: dutyfree
-      file: resource-types-website-ci/ci/pipeline.yml
-    - set_pipeline: update-dex
-      file: dex-ci/ci/pipeline.yml
-    - set_pipeline: oci-build-task
-      file: pipelines-and-tasks/pipelines/oci-build-task.yml
-    - set_pipeline: release
-      file: pipelines-and-tasks/pipelines/release.yml
-      instance_vars:
-        version: 7.13.x
-      vars:
-        release_major: '7'
-        release_minor: '7.13'
-        latest_release: '7.12'
-        concourse_smoke_deployment_name: concourse-smoke-7-13
-        slack_hook: ((slack_hooks.concourse-private))
-        stemcell_name: jammy
-        gcp_image: ubuntu-2204-lts
-        ci_branch: master
-        postgresql_major: '16'
-        resource_type_versions:
-          bosh-io-release: ~1.2.3
-          bosh-io-stemcell: ~1.4.2
-          docker-image: ~1.10.1
-          git: ~1.18.3
-          github-release: ~1.11.0
-          hg: ~1.3.2
-          mock: ~0.13.0
-          pool: ~1.4.1
-          registry-image: ~1.12.0
-          s3: ~2.2.0
-          semver: ~1.9.0
-          time: ~1.8.0
-        dep_bin_versions:
-          gdn: ''
-          cni: ''
-          runc: ''
-          containerd: ''
-    # TEMPLATE FOR NEXT RELEASE
-    # to create a new release pipeline, copy (but don't delete!) this template,
-    # replacing MAJOR, MINOR, PREV_MAJOR, PREV_MINOR, and SLACK_CHANNEL
-    # accordingly.
-    #
-    # Note: you can leave the resource_type_versions as "" - these values will
-    # be updated appropriately when the release is shipped
-    #
-    # - set_pipeline: release
-    #   file: pipelines-and-tasks/pipelines/release.yml
-    #   instance_vars:
-    #     version: MAJOR.MINOR.x
-    #   vars:
-    #     release_major: "MAJOR"
-    #     release_minor: "MAJOR.MINOR"
-    #     latest_release: "PREV_MAJOR.PREV_MINOR"
-    #     concourse_smoke_deployment_name: "concourse-smoke-MAJOR-MINOR"
-    #     slack_hook: ((slack_hooks.SLACK_CHANNEL))
-    #     stemcell_name: jammy
-    #     gcp_image: ubuntu-2204-lts
-    #     ci_branch: master
-    #     resource_type_versions:
-    #       # These should be left blank, as they will be updated after the release has shipped!
-    #       bosh-io-release: ""
-    #       bosh-io-stemcell: ""
-    #       cf: ""
-    #       docker-image: ""
-    #       git: ""
-    #       github-release: ""
-    #       hg: ""
-    #       mock: ""
-    #       pool: ""
-    #       registry-image: ""
-    #       s3: ""
-    #       semver: ""
-    #       time: ""
-    #     dep_bin_versions:
-    #       gdn: ""
-    #       cni: ""
-    #       runc: ""
-    #       containerd: ""
-    - set_pipeline: infrastructure-report
-      file: pipelines-and-tasks/pipelines/infrastructure-report.yml
+  - name: reconfigure-pipelines
+    plan:
+      - in_parallel:
+          - get: pipelines-and-tasks
+            trigger: true
+            passed: [reconfigure-self]
+          - get: concourse-for-k8s
+            trigger: true
+          - get: dex-ci
+            trigger: true
+          - get: docs-ci
+            trigger: true
+          - get: resource-types-website-ci
+            trigger: true
+      - in_parallel:
+          - set_pipeline: concourse
+            file: pipelines-and-tasks/pipelines/concourse.yml
+            vars:
+              postgresql_major: "16"
+          - set_pipeline: helm-chart
+            file: pipelines-and-tasks/pipelines/helm-chart.yml
+            instance_vars:
+              version: 7
+            vars:
+              concourse-chart-branch: release/7.13.x
+          - set_pipeline: helm-prs
+            file: pipelines-and-tasks/pipelines/helm-prs.yml
+            instance_vars:
+              branch: master
+            vars:
+              concourse_base_branch: master
+              concourse_image_name: concourse/concourse
+              concourse_image_tag: latest
+              postgresql_major: "16"
+          - set_pipeline: helm-prs
+            file: pipelines-and-tasks/pipelines/helm-prs.yml
+            instance_vars:
+              branch: dev
+            vars:
+              concourse_base_branch: master
+              concourse_image_name: concourse/concourse-rc
+              concourse_image_tag: latest
+              postgresql_major: "16"
+          - set_pipeline: docs-prs
+            team: contributor
+            file: docs-ci/ci/prs-pipeline.yml
+          - set_pipeline: dutyfree
+            team: dutyfree
+            file: resource-types-website-ci/ci/pipeline.yml
+          - set_pipeline: update-dex
+            file: dex-ci/ci/pipeline.yml
+          - set_pipeline: oci-build-task
+            file: pipelines-and-tasks/pipelines/oci-build-task.yml
+          - set_pipeline: release
+            file: pipelines-and-tasks/pipelines/release.yml
+            instance_vars:
+              version: 7.13.x
+            vars:
+              release_major: "7"
+              release_minor: "7.13"
+              latest_release: "7.12"
+              concourse_smoke_deployment_name: concourse-smoke-7-13
+              slack_hook: ((slack_hooks.concourse-private))
+              stemcell_name: jammy
+              gcp_image: ubuntu-2204-lts
+              ci_branch: master
+              postgresql_major: "16"
+              resource_type_versions:
+                bosh-io-release: ~1.2.3
+                bosh-io-stemcell: ~1.4.2
+                docker-image: ~1.10.1
+                git: ~1.18.3
+                github-release: ~1.11.0
+                hg: ~1.3.2
+                mock: ~0.13.0
+                pool: ~1.4.1
+                registry-image: ~1.12.0
+                s3: ~2.2.0
+                semver: ~1.9.0
+                time: ~1.8.0
+              dep_bin_versions:
+                gdn: ""
+                cni: ""
+                runc: ""
+                containerd: ""
+          # TEMPLATE FOR NEXT RELEASE
+          # to create a new release pipeline, copy (but don't delete!) this template,
+          # replacing MAJOR, MINOR, PREV_MAJOR, PREV_MINOR, and SLACK_CHANNEL
+          # accordingly.
+          #
+          # Note: you can leave the resource_type_versions as "" - these values will
+          # be updated appropriately when the release is shipped
+          #
+          # - set_pipeline: release
+          #   file: pipelines-and-tasks/pipelines/release.yml
+          #   instance_vars:
+          #     version: MAJOR.MINOR.x
+          #   vars:
+          #     release_major: "MAJOR"
+          #     release_minor: "MAJOR.MINOR"
+          #     latest_release: "PREV_MAJOR.PREV_MINOR"
+          #     concourse_smoke_deployment_name: "concourse-smoke-MAJOR-MINOR"
+          #     slack_hook: ((slack_hooks.SLACK_CHANNEL))
+          #     stemcell_name: jammy
+          #     gcp_image: ubuntu-2204-lts
+          #     ci_branch: master
+          #     resource_type_versions:
+          #       # These should be left blank, as they will be updated after the release has shipped!
+          #       bosh-io-release: ""
+          #       bosh-io-stemcell: ""
+          #       cf: ""
+          #       docker-image: ""
+          #       git: ""
+          #       github-release: ""
+          #       hg: ""
+          #       mock: ""
+          #       pool: ""
+          #       registry-image: ""
+          #       s3: ""
+          #       semver: ""
+          #       time: ""
+          #     dep_bin_versions:
+          #       gdn: ""
+          #       cni: ""
+          #       runc: ""
+          #       containerd: ""
+          - set_pipeline: infrastructure-report
+            file: pipelines-and-tasks/pipelines/infrastructure-report.yml
 
-- name: reconfigure-example-pipelines
-  plan:
-  - get: pipelines-and-tasks
-    passed: [reconfigure-self]
-  - get: examples
-    trigger: true
-  - set_pipeline: set-pipelines
-    team: examples
-    file: examples/pipelines/set-pipelines.yml
+  - name: reconfigure-example-pipelines
+    plan:
+      - get: pipelines-and-tasks
+        passed: [reconfigure-self]
+      - get: examples
+        trigger: true
+      - set_pipeline: set-pipelines
+        team: examples
+        file: examples/pipelines/set-pipelines.yml
 
-- name: reconfigure-prs
-  plan:
-  - in_parallel:
-    - get: ci
-      resource: pipelines-and-tasks
-      passed: [reconfigure-self]
-    - get: pr-pipeline
-      trigger: true
-    - get: concourse-prs
-      trigger: true
-    - get: concourse-deploy-prs
-      trigger: true
-  - load_var: all_prs
-    file: concourse-prs/prs.json
-  - load_var: deploy_prs
-    file: concourse-deploy-prs/prs.json
-  - task: non-deploy-prs
-    file: ci/tasks/jq.yml
-    params:
-      VAR_all_prs: ((.:all_prs))
-      VAR_deploy_prs: ((.:deploy_prs))
-      EXPR: .all_prs - .deploy_prs
-    output_mapping: {result: non-deploy-prs}
-  - load_var: non_deploy_prs
-    file: non-deploy-prs/result.json
-  - across:
-    - var: non_deploy_pr
-      values: ((.:non_deploy_prs))
-      max_in_flight: all
-    set_pipeline: pr
-    team: contributor
-    file: pr-pipeline/pipelines/pr.yml
-    instance_vars:
-      number: ((.:non_deploy_pr.number))
-    vars:
-      branch: master
-      dev_image_tag: latest
-      concourse_image_tag: latest
-  - across:
-    - var: deploy_pr
-      values: ((.:deploy_prs))
-      max_in_flight: all
-    set_pipeline: pr
-    team: contributor
-    file: pr-pipeline/pipelines/pr-deploy.yml
-    instance_vars:
-      number: ((.:deploy_pr.number))
-    vars:
-      branch: master
-      dev_image_tag: latest
-      concourse_image_tag: latest
+  - name: reconfigure-prs
+    plan:
+      - in_parallel:
+          - get: ci
+            resource: pipelines-and-tasks
+            passed: [reconfigure-self]
+          - get: pr-pipeline
+            trigger: true
+          - get: concourse-prs
+            trigger: true
+          - get: concourse-deploy-prs
+            trigger: true
+      - load_var: all_prs
+        file: concourse-prs/prs.json
+      - load_var: deploy_prs
+        file: concourse-deploy-prs/prs.json
+      - task: non-deploy-prs
+        file: ci/tasks/jq.yml
+        params:
+          VAR_all_prs: ((.:all_prs))
+          VAR_deploy_prs: ((.:deploy_prs))
+          EXPR: .all_prs - .deploy_prs
+        output_mapping: { result: non-deploy-prs }
+      - load_var: non_deploy_prs
+        file: non-deploy-prs/result.json
+      - across:
+          - var: non_deploy_pr
+            values: ((.:non_deploy_prs))
+            max_in_flight: all
+        set_pipeline: pr
+        team: contributor
+        file: pr-pipeline/pipelines/pr.yml
+        instance_vars:
+          number: ((.:non_deploy_pr.number))
+        vars:
+          branch: master
+          dev_image_tag: latest
+          concourse_image_tag: latest
+      - across:
+          - var: deploy_pr
+            values: ((.:deploy_prs))
+            max_in_flight: all
+        set_pipeline: pr
+        team: contributor
+        file: pr-pipeline/pipelines/pr-deploy.yml
+        instance_vars:
+          number: ((.:deploy_pr.number))
+        vars:
+          branch: master
+          dev_image_tag: latest
+          concourse_image_tag: latest

@@ -58,13 +58,6 @@ config:
 #@ def build_image():
 name: build
 serial_groups: [build]
-on_failure: &failed-ci
-  put: notify
-  no_get: true
-  inputs: detect
-  params:
-    mode: normal
-    alert_type: failed
 plan:
 - in_parallel:
   - get: daily-trigger
@@ -106,8 +99,6 @@ plan:
   image: wolfi-base
   file: ci/tasks/trivy-scan/task.yml
   input_mapping: {image: resource-image-dev}
-  on_failure: #@ determine_channel()
-  on_error: #@ determine_channel()
 #@ end
 
 #@ def extra_steps():
@@ -127,15 +118,6 @@ plan:
     run:
       path: /bin/true
   #@ else: return []
-#@ end
-
-#@ def determine_channel():
-  put: notify
-  no_get: true
-  inputs: detect
-  params:
-    mode: normal
-    alert_type: failed
 #@ end
 
 #@ def validate_pr():
@@ -276,13 +258,6 @@ plan:
 #@ def rebuild_images():
 name: republish-images
 serial_groups: [build]
-on_failure: &failed-ci
-  put: notify
-  no_get: true
-  inputs: detect
-  params:
-    mode: normal
-    alert_type: failed
 plan:
 - in_parallel:
   - get: daily-trigger
@@ -354,24 +329,6 @@ resource_types:
   type: registry-image
   source:
     repository: frodenas/gcs-resource
-
-- name: slack-notifier
-  type: registry-image
-  #! Switch back to mockersf/concourse-slack-notifier once
-  #! https://github.com/mockersf/concourse-slack-notifier/pull/86 is merged
-  source: {repository: aoldershaw/concourse-slack-notifier}
-
-# TODO: remove after upgrade that uses this version
-- name: registry-image
-  type: registry-image
-  source: { repository: concourse/registry-image-resource, tag: 1.12.0 }
-
-# TODO: remove after upgrade that uses this version
-#@ if resource_name == "cf":
-- name: s3
-  type: registry-image
-  source: { repository: concourse/s3-resource, tag: 2.2.0 }
-#@ end
 
 resources:
 - name: base-image
@@ -472,15 +429,6 @@ resources:
   icon: docker
   source:
     repository: concourse/oci-build-task
-
-- name: notify
-  type: slack-notifier
-  icon: slack
-  source:
-    url: ((slack_hooks.concourse-interrupt))
-    username: ((basic_auth.username))
-    password: ((basic_auth.password))
-    concourse_url: https://ci.concourse-ci.org
 
 - name: daily-trigger
   type: time
