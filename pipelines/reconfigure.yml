@@ -189,15 +189,6 @@ jobs:
                   - github-release
                   - datadog-event
                   - mock
-                max_in_flight: all
-            set_pipeline: resource
-            instance_vars: { type: ((.:type)) }
-            file: rendered_pipelines/((.:type)).yml
-            vars:
-              base-image: concourse/resource-types-base-image-static
-          - across:
-              - var: type
-                values:
                   - git
                   - docker-image
                   - registry-image
@@ -210,7 +201,7 @@ jobs:
             instance_vars: { type: ((.:type)) }
             file: rendered_pipelines/((.:type)).yml
             vars:
-              base-image: paketobuildpacks/run-jammy-base
+              base-image: cgr.dev/chainguard/wolfi-base
 
   - name: reconfigure-pipelines
     plan:

@@ -351,7 +351,6 @@ resources:
   type: registry-image
   icon: docker
   source:
-    #! we need to tweak original image for ARM build
     repository: ((base-image))
     tag: latest
     username: ((docker.username))
