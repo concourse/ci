@@ -41,14 +41,15 @@ config:
   inputs:
   - name: #@ resource_name + "-resource"
   - name: base-image
+  - name: builder-image
   outputs:
   - name: built-resource-image
     path: image
   params:
     DOCKERFILE: #@ resource_name + "-resource/Dockerfile"
     ADDITIONAL_TARGETS: tests
-    IMAGE_ARG_base_image: base-image/image.tar
-    BUILD_ARG_builder_image: concourse/golang-builder
+    IMAGE_ARG_base_image: base-image/image
+    IMAGE_ARG_builder_image: builder-image/image
     IMAGE_PLATFORM: #@ platform
     OUTPUT_OCI: true
     _: #@ template.replace(build_params(resource_name))
@@ -67,10 +68,13 @@ plan:
     trigger: true
   - get: base-image
     trigger: true
-    params: {format: oci}
-  - get: golang-builder
+    params:
+      format: oci-layout
+  - get: builder-image
+    resource: golang-builder
     trigger: true
-    params: {skip_download: true}
+    params:
+      format: oci-layout
   - get: oci-build-task
   - #@ template.replace(extra_get_steps())
 - #@ build_task(resource_name, "linux/amd64,linux/arm64")
@@ -133,7 +137,13 @@ plan:
     version: every
   - get: base-image
     trigger: true
-    params: {format: oci}
+    params:
+      format: oci-layout
+  - get: builder-image
+    resource: golang-builder
+    trigger: true
+    params:
+      format: oci-layout
   - get: oci-build-task
   - #@ template.replace(extra_get_steps())
 - put: #@ resource_name + "-resource"
@@ -266,7 +276,13 @@ plan:
     resource: resource-repo-tags
   - get: base-image
     trigger: true
-    params: {format: oci}
+    params:
+      format: oci-layout
+  - get: builder-image
+    resource: golang-builder
+    trigger: true
+    params:
+      format: oci-layout
   - get: oci-build-task
   - get: version
   - get: ci
