@@ -11,6 +11,7 @@ inputs:
 
 params:
   TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db,public.ecr.aws/aquasecurity/trivy-db
+  IGNORE_POLICY_FILE:
 
 run:
   path: ci/tasks/trivy-scan/run.sh
