@@ -48,8 +48,8 @@ config:
   params:
     DOCKERFILE: #@ resource_name + "-resource/Dockerfile"
     ADDITIONAL_TARGETS: tests
-    IMAGE_ARG_base_image: base-image/image
-    IMAGE_ARG_builder_image: builder-image/image
+    IMAGE_ARG_base_image: base-image/oci
+    IMAGE_ARG_builder_image: builder-image/oci
     IMAGE_PLATFORM: #@ platform
     OUTPUT_OCI: true
     _: #@ template.replace(build_params(resource_name))
