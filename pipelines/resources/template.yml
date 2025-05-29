@@ -354,8 +354,6 @@ resources:
   source:
     repository: ((base-image))
     tag: latest
-    username: ((docker.username))
-    password: ((docker.password))
 
 - name: golang-builder
   type: registry-image
