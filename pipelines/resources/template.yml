@@ -195,11 +195,22 @@ plan:
   - get: ci
   - get: resource-image-dev
     passed: [scan-image]
-    params: {format: oci}
-  - get: resource-image-dev-rootfs
+    params:
+      format: oci-layout
+  - get: rootfs-amd64
     resource: resource-image-dev
     passed: [scan-image]
-    params: {format: rootfs}
+    params:
+      format: rootfs
+      platform:
+        architecture: amd64
+  - get: rootfs-arm64
+    resource: resource-image-dev
+    passed: [scan-image]
+    params:
+      format: rootfs
+      platform:
+        architecture: arm64
   - get: version
     params:
       bump: #@ bump
@@ -213,7 +224,8 @@ plan:
         tag: latest
     inputs:
     - name: version
-    - name: resource-image-dev-rootfs
+    - name: rootfs-amd64
+    - name: rootfs-arm64
     outputs:
     - name: release
     run:
@@ -234,10 +246,16 @@ plan:
         version="$(cat version/number)"
         echo "v${version}" > release/name
 
-        pushd resource-image-dev-rootfs
+        pushd rootfs-amd64
           cp ../resource_metadata.json .
           tar -czf rootfs.tgz -C rootfs .
-          tar -czf ../release/(@= resource_name @)-resource-${version}.tgz rootfs.tgz resource_metadata.json
+          tar -czf ../release/(@= resource_name @)-resource-${version}-amd64.tgz rootfs.tgz resource_metadata.json
+        popd
+
+        pushd rootfs-arm64
+          cp ../resource_metadata.json .
+          tar -czf rootfs.tgz -C rootfs .
+          tar -czf ../release/(@= resource_name @)-resource-${version}-arm64.tgz rootfs.tgz resource_metadata.json
         popd
 
 - load_var: version
@@ -247,7 +265,7 @@ plan:
     no_get: true
     inputs: detect
     params:
-      image: resource-image-dev/image.tar
+      image: resource-image-dev/oci
       version: ((.:version))
       bump_aliases: true
   - put: resource-repo-release
@@ -273,8 +291,6 @@ name: republish-images
 serial_groups: [build]
 plan:
 - in_parallel:
-  - get: daily-trigger
-    trigger: true
   - get: #@ resource_name + "-resource"
     resource: resource-repo-tags
   - get: base-image
