@@ -360,7 +360,7 @@ resources:
   icon: docker
   source:
     repository: concourse/golang-builder
-    variant: jammy
+    tag: latest
     username: ((docker.username))
     password: ((docker.password))
 
