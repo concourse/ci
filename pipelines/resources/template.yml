@@ -350,6 +350,7 @@ resources:
 - name: base-image
   type: registry-image
   icon: docker
+  check_every: 6h
   source:
     repository: ((base-image))
     tag: latest
@@ -368,6 +369,7 @@ resources:
 - name: wolfi-base
   type: registry-image
   icon: docker
+  check_every: 6h
   source:
     repository: cgr.dev/chainguard/wolfi-base
 
