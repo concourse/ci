@@ -95,7 +95,8 @@ plan:
     - build
   - get: resource-image-dev
     passed: [build]
-    params: {format: oci}
+    params:
+      format: oci-layout
     trigger: true
   - get: wolfi-base
     trigger: true
@@ -103,6 +104,8 @@ plan:
   image: wolfi-base
   file: ci/tasks/trivy-scan/task.yml
   input_mapping: {image: resource-image-dev}
+  params:
+    IMAGE_PATH: image/oci
 #@ end
 
 #@ def extra_steps():

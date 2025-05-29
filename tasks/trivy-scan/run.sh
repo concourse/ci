@@ -15,5 +15,5 @@ trivy \
   --severity "HIGH,CRITICAL" \
   --ignore-unfixed \
   --exit-code 1 \
-  --input image/image.tar \
+  --input "${IMAGE_PATH}" \
   $ignore_policy

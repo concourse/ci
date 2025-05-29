@@ -10,6 +10,7 @@ inputs:
   - name: ci
 
 params:
+  IMAGE_PATH: image/image.tar
   TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db,public.ecr.aws/aquasecurity/trivy-db
   IGNORE_POLICY_FILE:
 
