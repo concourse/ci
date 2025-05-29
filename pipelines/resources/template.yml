@@ -349,6 +349,14 @@ resource_types:
   source:
     repository: frodenas/gcs-resource
 
+- name: registry-image
+  type: registry-image
+  source:
+    repository: concourse/registry-image-resource
+    tag: dev
+    username: ((docker.username))
+    password: ((docker.password))
+
 resources:
 - name: base-image
   type: registry-image
