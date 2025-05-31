@@ -78,11 +78,11 @@ plan:
   - get: oci-build-task
   - #@ template.replace(extra_get_steps())
 - #@ build_task(resource_name, "linux/amd64,linux/arm64")
-- #@ template.replace(extra_steps())
 - put: resource-image-dev
-  no_get: true
+  no_get: #@ resource_name != "docker-image"
   inputs: detect
   params: {image: built-resource-image/image}
+- #@ template.replace(extra_steps())
 #@ end
 
 #@ def scan_image():
@@ -111,7 +111,7 @@ plan:
 #@ def extra_steps():
   #@ if resource_name == "docker-image":
 - task: smoke-test
-  image: built-resource-image
+  image: resource-image-dev
   file: docker-image-resource/ci/smoke-test.yml
   privileged: true
   params:
@@ -158,7 +158,6 @@ plan:
     status: pending
 - do:
   - #@ build_task(resource_name, "linux/amd64")
-  - #@ template.replace(extra_steps())
   on_failure:
     put: resource-pr
     no_get: true
@@ -309,7 +308,6 @@ plan:
 - load_var: version
   file: version/version
 - #@ build_task(resource_name, "linux/amd64,linux/arm64")
-- #@ template.replace(extra_steps())
 - task: date-tag
   file: ci/tasks/tag-version-with-date.yml
   params:
