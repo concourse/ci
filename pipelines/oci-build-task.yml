@@ -96,7 +96,12 @@ jobs:
           inputs:
             - name: repo
           run:
-            path: repo/scripts/test
+            path: sh
+            args:
+              - -c
+              - |
+                apk --no-cache --no-progress bash curl
+                repo/scripts/test
 
       - task: build
         privileged: true
