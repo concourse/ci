@@ -6,22 +6,37 @@ image_resource:
 
 params:
   DOCKERFILE: ci/build-resource-types-image/Dockerfile
-  REPOSITORY: concourse/dev
+  IMAGE_PLATFORM: linux/amd64,linux/arm64
+  OUTPUT_OCI: true
 
 inputs:
   - name: ci
-  - name: bosh-io-release-resource
-  - name: bosh-io-stemcell-resource
-  - name: docker-image-resource
-  - name: git-resource
-  - name: github-release-resource
-  - name: hg-resource
-  - name: mock-resource
-  - name: pool-resource
-  - name: registry-image-resource
-  - name: s3-resource
-  - name: semver-resource
-  - name: time-resource
+  #amd64
+  - name: bosh-io-release-amd64
+  - name: bosh-io-stemcell-amd64
+  - name: docker-image-amd64
+  - name: git-amd64
+  - name: github-release-amd64
+  - name: hg-amd64
+  - name: mock-amd64
+  - name: pool-amd64
+  - name: registry-image-amd64
+  - name: s3-amd64
+  - name: semver-amd64
+  - name: time-amd64
+  #arm64
+  - name: bosh-io-release-arm64
+  - name: bosh-io-stemcell-arm64
+  - name: docker-image-arm64
+  - name: git-arm64
+  - name: github-release-arm64
+  - name: hg-arm64
+  - name: mock-arm64
+  - name: pool-arm64
+  - name: registry-image-arm64
+  - name: s3-arm64
+  - name: semver-arm64
+  - name: time-arm64
 
 outputs:
   - name: image

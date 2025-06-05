@@ -2,10 +2,11 @@
 
 set -euo pipefail
 
-for resource in ./*-resource; do
+for arch in amd64 arm64; do
+for resource in ./*-"${arch}"; do
     echo repacking "${resource}"
     pushd "${resource}"
-        resource=${resource%-resource}
+        resource=${resource%-"$arch"}
         tar czf rootfs.tgz --directory=rootfs/ .
         rm -rf ./rootfs/
 
@@ -28,6 +29,7 @@ for resource in ./*-resource; do
 
         rm metadata.json repository digest tag
     popd
+done;
 done;
 
 build

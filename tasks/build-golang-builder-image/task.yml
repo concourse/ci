@@ -2,7 +2,6 @@
 platform: linux
 
 params:
-  REPOSITORY: concourse/golang-builder
   DOCKERFILE: ci/tasks/build-golang-builder-image/Dockerfile
   CONTEXT: .
   IMAGE_PLATFORM: linux/arm64,linux/amd64
