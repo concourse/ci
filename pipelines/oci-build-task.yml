@@ -62,11 +62,18 @@ jobs:
           - get: repo
             trigger: true
           - get: oci-build-task
+          - get: golang-rootfs
+            resource: golang-builder
           - get: golang-builder
+            params:
+              format: oci-layout
+          - get: wolfi
+            params:
+              format: oci-layout
 
       - task: tests
         privileged: true
-        image: golang-builder
+        image: golang-rootfs
         config:
           platform: linux
           inputs:
@@ -81,11 +88,16 @@ jobs:
           platform: linux
           inputs:
             - name: repo
+            - name: wolfi
+            - name: golang-builder
           outputs:
             - name: image
           params:
             CONTEXT: repo
             OUTPUT_OCI: true
+            IMAGE_ARG_base_image: wolfi/oci
+            IMAGE_ARG_builder_image: golang-builder/oci
+            IMAGE_PLATFORM: linux/amd64,linux/arm64
           run:
             path: build
 
