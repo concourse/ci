@@ -244,17 +244,17 @@ plan:
         version="$(cat version/number)"
         echo "v${version}" > release/name
 
-        pushd rootfs-amd64
+        cd rootfs-amd64
           cp ../resource_metadata.json .
           tar -czf rootfs.tgz --directory rootfs .
           tar -czf ../release/(@= resource_name @)-resource-${version}-amd64.tgz rootfs.tgz resource_metadata.json
-        popd
+        cd -
 
-        pushd rootfs-arm64
+        cd rootfs-arm64
           cp ../resource_metadata.json .
           tar -czf rootfs.tgz --directory rootfs .
           tar -czf ../release/(@= resource_name @)-resource-${version}-arm64.tgz rootfs.tgz resource_metadata.json
-        popd
+        cd -
 
 - load_var: version
   file: version/version

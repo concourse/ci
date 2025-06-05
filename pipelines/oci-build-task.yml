@@ -193,16 +193,16 @@ jobs:
               - |
                 ver=$(cat version/version)
                 echo "v${ver}" > version/name
-                pushd rootfs-amd64
+                cd rootfs-amd64
                   tar -czf rootfs.tgz --directory=rootfs/ .
                   tar -czf rootfs-amd64.tgz rootfs.tgz metadata.json
                   rm rootfs.tgz
-                popd
-                pushd rootfs-arm64
+                cd -
+                cd rootfs-arm64
                   tar -czf rootfs.tgz --directory=rootfs/ .
                   tar -czf rootfs-arm64.tgz rootfs.tgz metadata.json
                   rm rootfs.tgz
-                popd
+                cd -
       - load_var: version
         file: version/version
       - in_parallel: &upload-release
