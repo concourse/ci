@@ -62,11 +62,18 @@ jobs:
           - get: repo
             trigger: true
           - get: oci-build-task
+          - get: golang-rootfs
+            resource: golang-builder
           - get: golang-builder
+            params:
+              format: oci-layout
+          - get: wolfi
+            params:
+              format: oci-layout
 
       - task: tests
         privileged: true
-        image: golang-builder
+        image: golang-rootfs
         config:
           platform: linux
           inputs:
@@ -81,11 +88,16 @@ jobs:
           platform: linux
           inputs:
             - name: repo
+            - name: wolfi
+            - name: golang-builder
           outputs:
             - name: image
           params:
             CONTEXT: repo
             OUTPUT_OCI: true
+            IMAGE_ARG_base_image: wolfi/oci
+            IMAGE_ARG_builder_image: golang-builder/oci
+            IMAGE_PLATFORM: linux/amd64,linux/arm64
           run:
             path: build
 
@@ -95,31 +107,63 @@ jobs:
         params:
           image: image/image
 
-  # - name: scan #TODO
+  - name: scan
+    plan:
+      - in_parallel:
+          - get: repo
+            trigger: true
+          - get: ci
+          - get: wolfi
+          - get: oci-build-task-dev
+            trigger: true
+            passed: [build]
+            params:
+              format: oci-layout
+      - task: scan
+        image: wolfi-base
+        file: ci/tasks/trivy-scan/task.yml
+        input_mapping: { image: oci-build-task-dev }
+        params:
+          IMAGE_PATH: image/oci
 
   - name: publish-major
     plan:
       - in_parallel:
           - get: repo
-            passed: [build]
+            passed: [scan]
           - get: version
             params:
               bump: major
-          - get: oci-build-task-dev
-            passed: [build]
-            params:
-              format: oci
-          - get: wolfi
+          - in_parallel: &image-fetching
+              - get: oci-build-task-dev
+                passed: [scan]
+                params:
+                  format: oci-layout
+              - get: rootfs-amd64
+                resource: oci-build-task-dev
+                passed: [scan]
+                params:
+                  platform:
+                    architecture: amd64
+              - get: rootfs-arm64
+                resource: oci-build-task-dev
+                passed: [scan]
+                params:
+                  platform:
+                    architecture: arm64
+              - get: wolfi
       - task: wrangle
         image: wolfi
         config: &version-name
           platform: linux
           inputs:
             - name: version
-            - name: oci-build-task-dev
+            - name: rootfs-amd64
+            - name: rootfs-arm64
           outputs:
             - name: version
-            - name: oci-build-task-dev
+            - name: rootfs-amd64
+            - name: rootfs-arm64
           run:
             path: sh
             args:
@@ -127,7 +171,8 @@ jobs:
               - |
                 ver=$(cat version/version)
                 echo "v${ver}" > version/name
-                mv oci-build-task-dev/image.tar oci-build-task-dev/oci-image-v${ver}-amd64.tar
+                mv rootfs-amd64/rootfs.tgz rootfs-amd64/rootfs-amd64.tgz
+                mv rootfs-arm64/rootfs.tgz rootfs-arm64/rootfs-arm64.tgz
       - load_var: version
         file: version/version
       - in_parallel: &upload-release
@@ -137,7 +182,9 @@ jobs:
             params:
               commitish: repo/.git/ref
               generate_release_notes: true
-              globs: [oci-build-task-dev/*.tar]
+              globs:
+                - rootfs-amd64/*.tgz
+                - rootfs-arm64/*.tgz
               name: version/name
               tag: version/version
               tag_prefix: v
@@ -145,7 +192,7 @@ jobs:
             no_get: true
             inputs: detect
             params:
-              image: oci-build-task-dev/oci-image*.tar
+              image: oci-build-task-dev/oci
               version: ((.:version))
               bump_aliases: true
       - put: version
@@ -158,15 +205,11 @@ jobs:
     plan:
       - in_parallel:
           - get: repo
-            passed: [build]
+            passed: [scan]
           - get: version
             params:
               bump: minor
-          - get: oci-build-task-dev
-            passed: [build]
-            params:
-              format: oci
-          - get: wolfi
+          - in_parallel: *image-fetching
       - task: wrangle
         image: wolfi
         config: *version-name
@@ -183,15 +226,11 @@ jobs:
     plan:
       - in_parallel:
           - get: repo
-            passed: [build]
+            passed: [scan]
           - get: version
             params:
               bump: patch
-          - get: oci-build-task-dev
-            passed: [build]
-            params:
-              format: oci
-          - get: wolfi
+          - in_parallel: *image-fetching
       - task: wrangle
         image: wolfi
         config: *version-name
