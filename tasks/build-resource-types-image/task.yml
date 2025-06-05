@@ -5,7 +5,7 @@ image_resource:
   source: { repository: concourse/oci-build-task }
 
 params:
-  DOCKERFILE: ci/build-resource-types-image/Dockerfile
+  DOCKERFILE: ci/tasks/build-resource-types-image/Dockerfile
   IMAGE_PLATFORM: linux/amd64,linux/arm64
   OUTPUT_OCI: true
 
