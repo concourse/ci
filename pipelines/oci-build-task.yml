@@ -142,7 +142,7 @@ jobs:
             params:
               format: oci-layout
       - task: scan
-        image: wolfi-base
+        image: wolfi
         file: ci/tasks/trivy-scan/task.yml
         input_mapping: { image: oci-build-task-dev }
         params:
