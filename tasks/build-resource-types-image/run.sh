@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-for resource in $(ls | grep resource); do
+for resource in ./*-resource; do
     echo repacking "${resource}"
     pushd "${resource}"
         resource=${resource%-resource}
