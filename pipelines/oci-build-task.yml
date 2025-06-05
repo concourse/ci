@@ -193,8 +193,16 @@ jobs:
               - |
                 ver=$(cat version/version)
                 echo "v${ver}" > version/name
-                mv rootfs-amd64/rootfs.tgz rootfs-amd64/rootfs-amd64.tgz
-                mv rootfs-arm64/rootfs.tgz rootfs-arm64/rootfs-arm64.tgz
+                pushd rootfs-amd64
+                  tar -czf rootfs.tgz --directory=rootfs/ .
+                  tar -czf rootfs-amd64.tgz rootfs.tgz metadata.json
+                  rm rootfs.tgz
+                popd
+                pushd rootfs-arm64
+                  tar -czf rootfs.tgz --directory=rootfs/ .
+                  tar -czf rootfs-arm64.tgz rootfs.tgz metadata.json
+                  rm rootfs.tgz
+                popd
       - load_var: version
         file: version/version
       - in_parallel: &upload-release
@@ -205,8 +213,8 @@ jobs:
               commitish: repo/.git/ref
               generate_release_notes: true
               globs:
-                - rootfs-amd64/*.tgz
-                - rootfs-arm64/*.tgz
+                - rootfs-amd64/rootfs-*.tgz
+                - rootfs-arm64/rootfs-*.tgz
               name: version/name
               tag: version/version
               tag_prefix: v

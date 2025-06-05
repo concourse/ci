@@ -4,7 +4,7 @@ set -euo pipefail
 
 for resource in $(ls | grep resource); do
     echo repacking "${resource}"
-    cd "${resource}"
+    pushd "${resource}"
         resource=${resource%-resource}
         tar czf rootfs.tgz --directory=rootfs/ .
         rm -rf ./rootfs/
@@ -27,7 +27,7 @@ for resource in $(ls | grep resource); do
           }' > resource_metadata.json
 
         rm metadata.json repository digest tag
-    cd -
+    popd
 done;
 
 build
