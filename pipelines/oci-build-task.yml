@@ -107,18 +107,35 @@ jobs:
         params:
           image: image/image
 
-  # - name: scan #TODO
+  - name: scan
+    plan:
+      - in_parallel:
+          - get: repo
+            trigger: true
+          - get: ci
+          - get: wolfi
+          - get: oci-build-task-dev
+            trigger: true
+            passed: [build]
+            params:
+              format: oci-layout
+      - task: scan
+        image: wolfi-base
+        file: ci/tasks/trivy-scan/task.yml
+        input_mapping: { image: oci-build-task-dev }
+        params:
+          IMAGE_PATH: image/oci
 
   - name: publish-major
     plan:
       - in_parallel:
           - get: repo
-            passed: [build]
+            passed: [scan]
           - get: version
             params:
               bump: major
           - get: oci-build-task-dev
-            passed: [build]
+            passed: [scan]
             params:
               format: oci
           - get: wolfi
@@ -170,12 +187,12 @@ jobs:
     plan:
       - in_parallel:
           - get: repo
-            passed: [build]
+            passed: [scan]
           - get: version
             params:
               bump: minor
           - get: oci-build-task-dev
-            passed: [build]
+            passed: [scan]
             params:
               format: oci
           - get: wolfi
@@ -195,12 +212,12 @@ jobs:
     plan:
       - in_parallel:
           - get: repo
-            passed: [build]
+            passed: [scan]
           - get: version
             params:
               bump: patch
           - get: oci-build-task-dev
-            passed: [build]
+            passed: [scan]
             params:
               format: oci
           - get: wolfi

@@ -99,7 +99,6 @@ plan:
       format: oci-layout
     trigger: true
   - get: wolfi-base
-    trigger: true
 - task: scan
   image: wolfi-base
   file: ci/tasks/trivy-scan/task.yml
