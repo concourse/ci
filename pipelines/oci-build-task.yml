@@ -16,6 +16,13 @@ resources:
       uri: https://github.com/concourse/oci-build-task.git
       branch: master
 
+  - name: ci
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/concourse/ci.git
+      branch: master
+
   - name: oci-build-task
     type: registry-image
     icon: docker
