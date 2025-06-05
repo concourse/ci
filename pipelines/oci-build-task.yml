@@ -1,3 +1,13 @@
+resource_types:
+#TODO: remove after next release. Needed for the get.params.platform feature
+- name: registry-image
+  type: registry-image
+  source:
+    repository: concourse/registry-image-resource
+    tag: 1.13.0
+    username: ((docker.username))
+    password: ((docker.password))
+
 resources:
   - name: repo
     type: git

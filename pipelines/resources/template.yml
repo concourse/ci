@@ -362,12 +362,12 @@ resource_types:
   source:
     repository: frodenas/gcs-resource
 
-#TODO: remove after next release. Needed for the get.params.platform feature
+#!TODO: remove after next release. Needed for the get.params.platform feature
 - name: registry-image
   type: registry-image
   source:
     repository: concourse/registry-image-resource
-    tag: dev
+    tag: 1.13.0
     username: ((docker.username))
     password: ((docker.password))
 
