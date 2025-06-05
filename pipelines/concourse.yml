@@ -317,7 +317,7 @@ jobs:
         no_get: true
         inputs: detect
         params:
-          image: image/image.tar
+          image: image/image
 
   - name: dev-image
     public: true
