@@ -16,7 +16,8 @@ RUN tar -C /usr/local -xf go.linux.tar && rm go.linux.tar
 FROM ${base_image}
 
 RUN apk --no-cache add \
-    ca-certificates
+    ca-certificates \
+    bash
 
 COPY --from=go_downloader /usr/local/go /usr/local/
 ENV GOPATH /go
