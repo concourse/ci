@@ -100,7 +100,7 @@ jobs:
             args:
               - -c
               - |
-                apk --no-cache --no-progress bash curl
+                apk --no-cache --no-progress add bash curl
                 repo/scripts/test
 
       - task: build
