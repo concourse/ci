@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# for packaging windows
+apk --no-cache --no-progress add zip
+
 export GOPATH=$PWD/gopath
 export PATH=$PWD/gopath/bin:$PATH
 
