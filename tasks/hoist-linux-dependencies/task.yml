@@ -1,12 +1,10 @@
 ---
 platform: linux
 
-image_resource:
-  type: registry-image
-  source: { repository: concourse/dev }
-
 inputs:
   - name: ci
+  - name: dev-amd64
+  - name: dev-arm64
 
 outputs:
   - name: linux-dependencies

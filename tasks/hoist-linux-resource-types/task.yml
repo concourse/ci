@@ -1,12 +1,10 @@
 ---
 platform: linux
 
-image_resource:
-  type: registry-image
-  source: { repository: concourse/resource-type-image }
-
 inputs:
   - name: ci
+  - name: resource-types-amd64
+  - name: resource-types-arm64
 
 outputs:
   - name: resource-types
