@@ -61,8 +61,6 @@ name: build
 serial_groups: [build]
 plan:
 - in_parallel:
-  - get: daily-trigger
-    trigger: true
   - get: #@ resource_name + "-resource"
     resource: resource-repo
     trigger: true
@@ -89,6 +87,8 @@ plan:
 name: scan-image
 plan:
 - in_parallel:
+  - get: daily-trigger
+    trigger: true
   - get: ci
   - get: resource-repo
     passed:
