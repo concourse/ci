@@ -20,8 +20,8 @@ RUN apk --no-cache add \
     bash
 
 COPY --from=go_downloader /usr/local/go /usr/local/
-ENV GOPATH /go
-ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
+ENV GOPATH=/go
+ENV PATH=$GOPATH/bin:/usr/local/go/bin:$PATH
 
 # disable cgo; we don't want to depend on or statically link libc
 ENV CGO_ENABLED=0
