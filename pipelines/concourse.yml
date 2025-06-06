@@ -380,7 +380,7 @@ jobs:
         input_mapping:
           concourse: built-concourse
           base-image: golang-builder-image
-        file: ci/tasks/build-dev-image/tasks.yml
+        file: ci/tasks/build-dev-image/task.yml
         params:
           IMAGE_ARG_base_image: base-image/oci
       - put: dev-image
