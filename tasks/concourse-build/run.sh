@@ -86,4 +86,6 @@ for platform in "${PLATFORMS[@]}"; do
 
         rm -r concourse
     popd
+
+    mv "$output/*" concourse-tarballs/
 done
