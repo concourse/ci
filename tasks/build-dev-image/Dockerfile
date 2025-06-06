@@ -29,24 +29,14 @@ RUN cd /src && \
     ./cmd/concourse && \
     rm -rf /src
 
-# Clear out env vars to avoid any weird build behaviour
-ENV GOOS=""
-ENV GOARCH=""
-
-ARG TARGETPLATFORM
-FROM --platform=$TARGETPLATFORM ${base_image}
+FROM ${base_image} AS dev
 
 RUN apk --no-cache add \
     btrfs-progs \
     ca-certificates \
-    curl \
     dumb-init \
-    file \
     iproute2 \
-    iptables \
-    tree
-
-ARG TARGETARCH
+    iptables
 
 # Add container runtime dependencies
 #
@@ -57,24 +47,22 @@ ARG TARGETARCH
 #   - iptables (needed by cni plugins)
 
 # Copies files from the bin directory of the tarball to /usr/local/concourse/bin
-ADD containerd/containerd-*-linux-$TARGETARCH.tar.gz /usr/local/concourse
+ADD containerd/containerd-*-linux-${TARGETARCH}.tar.gz /usr/local/concourse
 
-COPY gdn/gdn-linux-$TARGETARCH-[0-9]*.*.* /usr/local/concourse/bin/gdn
+COPY gdn/gdn-linux-${TARGETARCH}-[0-9]*.*.* /usr/local/concourse/bin/gdn
 
-COPY runc/runc.$TARGETARCH /usr/local/concourse/bin/runc
+COPY runc/runc.${TARGETARCH} /usr/local/concourse/bin/runc
 
-ADD cni/cni-plugins-linux-$TARGETARCH-*.tgz /usr/local/concourse/bin
+ADD cni/cni-plugins-linux-${TARGETARCH}-*.tgz /usr/local/concourse/bin
 
 RUN chmod -R +x /usr/local/concourse/bin
 
 # add fly executables
 RUN mkdir /usr/local/concourse/fly-assets
-COPY fly-linux/fly-*.tgz /usr/local/concourse/fly-assets
-COPY fly-windows/fly-*.zip /usr/local/concourse/fly-assets
-COPY fly-darwin/fly-*.tgz /usr/local/concourse/fly-assets
+COPY fly-builds/fly-*.tgz /usr/local/concourse/fly-assets
 
-# add resource types TODO: need to add correct platform version! amd64 or arm64
-COPY ./resource-types-image/rootfs/usr/local/concourse/resource-types/ /usr/local/concourse/resource-types/
+# add resource types
+COPY ./resource-types-${TARGETARCH}/rootfs/usr/local/concourse/resource-types/ /usr/local/concourse/resource-types/
 
 # install concourse
 COPY --from=builder /usr/local/concourse/bin/concourse /usr/local/concourse/bin/concourse
