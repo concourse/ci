@@ -491,9 +491,7 @@ jobs:
             passed: [rc]
             trigger: true
           - get: unit-image
-          - get: dev-image
-            passed: [rc]
-            trigger: true
+          - get: ci
           - get: golang-builder-image
             passed: [rc]
           - get: version
@@ -503,63 +501,53 @@ jobs:
             resource: version
             passed: [rc]
             params: { bump: final }
-          - get: ci
-          - get: resource-types-image
+          - get: dev-amd64
+            resource: dev-image
+            passed: [rc]
+            trigger: true
+            params:
+              platform:
+                architecture: amd64
+          - get: dev-arm64
+            resource: dev-image
+            passed: [rc]
+            trigger: true
+            params:
+              platform:
+                architecture: arm64
+          - get: resource-types-amd64
+            resource: resource-types-image
             passed: [dev-image]
+            params:
+              platform:
+                architecture: amd64
+          - get: resource-types-arm64
+            resource: resource-types-image
+            passed: [dev-image]
+            params:
+              platform:
+                architecture: amd64
       - in_parallel:
           fail_fast: true
           steps:
             - task: fly-build
-              image: golang-builder-image-rootfs
+              image: golang-builder-image
               file: ci/tasks/fly-build/task.yml
-            - task: hoist-linux-dependencies
-              file: ci/tasks/hoist-linux-dependencies/task.yml
-              image: dev-image
-            - task: hoist-resource-types-ubuntu
-              file: ci/tasks/hoist-linux-resource-types/task.yml
-              image: resource-types-image
             - task: yarn-build
               file: ci/tasks/yarn-build/task.yml
               image: unit-image
-      - task: get-rc-version
-        file: ci/tasks/get-rc-version.yml
+            - task: get-rc-version
+              file: ci/tasks/get-rc-version.yml
+              image: golang-builder-image
+      - task: concourse-build
         image: golang-builder-image
-      - in_parallel:
-          fail_fast: true
-          steps:
-            - task: concourse-linux
-              image: golang-builder-image
-              file: ci/tasks/concourse-build/task.yml
-              params:
-                PLATFORM: linux
-                ARCH: amd64
-              input_mapping:
-                concourse: built-concourse
-              output_mapping:
-                concourse-tarball: concourse-linux
-            - task: concourse-windows
-              file: ci/tasks/concourse-build/task.yml
-              params:
-                PLATFORM: windows
-                ARCH: amd64
-              input_mapping:
-                concourse: built-concourse
-              output_mapping:
-                concourse-tarball: concourse-windows
-            - task: concourse-darwin
-              image: golang-builder-image
-              file: ci/tasks/concourse-build/task.yml
-              params:
-                PLATFORM: darwin
-                ARCH: amd64
-              input_mapping:
-                concourse: built-concourse
-              output_mapping:
-                concourse-tarball: concourse-darwin
+        file: ci/tasks/concourse-build/task.yml
+        input_mapping:
+          concourse: built-concourse
       - in_parallel:
           - task: validate-linux-rc
+            image: unit-image
             file: ci/tasks/validate-linux-rc/task.yml
-            input_mapping: { concourse-tarball: concourse-linux }
           - task: validate-windows-rc
             file: ci/tasks/validate-windows-rc/task.yml
       - in_parallel:
