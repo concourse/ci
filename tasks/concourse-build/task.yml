@@ -7,23 +7,17 @@ inputs:
   - name: version
   - name: final-version
     optional: true
-  - name: linux-dependencies
-    optional: true
-  - name: resource-types
-    optional: true
-  - name: fly-linux
-  - name: fly-windows
-  - name: fly-darwin
+  - name: dev-amd64
+  - name: dev-arm64
+  - name: resource-types-amd64
+  - name: resource-types-arm64
+  - name: fly-builds
 
 caches:
   - path: gopath
 
 outputs:
-  - name: concourse-tarball
-
-params:
-  PLATFORM:
-  ARCH:
+  - name: concourse-tarballs
 
 run:
   path: ci/tasks/concourse-build/run.sh

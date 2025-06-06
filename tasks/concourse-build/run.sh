@@ -2,16 +2,10 @@
 
 set -euo pipefail
 
+apk --no-cache --no-progress add zip cmd:shasum
+
 export GOPATH=$PWD/gopath
 export PATH=$PWD/gopath/bin:$PATH
-
-if [ -z "${PLATFORM}" ]; then
-  echo "usage: PLATFORM=<platform> $0" >&2
-  exit 1
-fi
-
-export GOOS="${PLATFORM:-$(go env GOOS)}"
-export GOARCH="${ARCH:-$(go env GOARCH)}"
 
 version="$(cat version/version)"
 
@@ -22,61 +16,74 @@ if [ -e final-version/version ]; then
   ldflags="-X github.com/concourse/concourse.Version=$final_version"
 fi
 
-pushd concourse
-  bin_name="concourse"
-  extra_flags=""
-  if [ "$GOOS" = "windows" ]; then
-    bin_name+=".exe"
-  fi
+PLATFORMS=(
+  "linux/amd64"
+  "linux/arm64"
+  "windows/amd64"
+  "darwin/amd64"
+  "darwin/arm64"
+)
 
-  if [ "$GOOS" = "darwin" ]; then
-    extra_flags="-buildvcs=false"
-  fi
+for platform in "${PLATFORMS[@]}"; do
+    # Split the platform into OS and architecture
+    IFS="/" read -r GOOS GOARCH <<< "$platform"
 
-  go build -o "$bin_name" -ldflags "$ldflags" $extra_flags ./cmd/concourse
+    echo "==================================="
+    echo "Packaging for ${GOOS}-${GOARCH}"
+    echo "==================================="
 
-  if [[ -n "$final_version" ]]; then
-    # Right now all our workers are amd64 so we can only do version checks for that arch
-    if [[ "$GOOS" == "linux" && "$GOARCH" == "amd64" ]]; then
-      test "$(./concourse --version)" = "$final_version"
-    else
-      echo "skipping --version check for platform ${GOOS}/${GOARCH}"
+    pushd concourse
+        bin_name="concourse"
+        extra_flags=""
+        if [ "$GOOS" = "windows" ]; then
+            bin_name+=".exe"
+        fi
+
+        if [ "$GOOS" = "darwin" ]; then
+            extra_flags="-buildvcs=false"
+        fi
+
+        GOOS=$GOOS GOARCH=$GOARCH go build -o "$bin_name" -ldflags "$ldflags" $extra_flags ./cmd/concourse
+
+        if [[ -n "$final_version" ]]; then
+            # Right now all our workers are amd64 so we can only do version checks for that arch
+            if [[ "$GOOS" == "linux" && "$GOARCH" == "amd64" ]]; then
+                test "$(./concourse --version)" = "$final_version"
+            else
+                echo "skipping version check for platform ${GOOS}/${GOARCH}"
+            fi
+        fi
+    popd
+
+    output=concourse-tarballs/${GOOS}_${GOARCH}
+    mkdir -p "$output/concourse"
+
+    bin=$output/concourse/bin
+    mkdir -p "$bin"
+
+    mv concourse/$bin_name "$bin"
+
+    fly_assets=$output/concourse/fly-assets
+    mkdir -p "$fly_assets"
+    cp -a fly-builds/fly-*.{tgz,zip} "$fly_assets"
+
+    if [[ "$GOOS" == "linux" ]]; then
+        cp -a "dev-${GOARCH}/rootfs/usr/local/concourse/bin/*" "$bin"
+        cp -a "resource-types-${GOARCH}/rootfs/usr/local/concourse/resource-types" "$output/concourse"
     fi
-  fi
-popd
 
-output=concourse-tarball
+    pushd "$output"
+        if [ "$GOOS" = "windows" ]; then
+            archive=concourse-${version}.${GOOS}.${GOARCH}.zip
+            zip -r "$archive" concourse
+        else
+            archive=concourse-${version}.${GOOS}.${GOARCH}.tgz
+            tar -czf "$archive" concourse
+        fi
+        shasum "$archive" > "${archive}.sha1"
+        echo -n "${archive}:"
+        cat "${archive}.sha1"
 
-mkdir $output/concourse
-
-bin=$output/concourse/bin
-mkdir $bin
-
-if [[ "$GOOS" == "linux" ]]; then
-  cp -a linux-dependencies/* $bin
-fi
-
-mv concourse/$bin_name $bin
-
-[ "$GOOS" = "linux" ] && cp -a resource-types $output/concourse
-
-fly_assets=$output/concourse/fly-assets
-mkdir $fly_assets
-cp -a fly-linux/fly-*.tgz $fly_assets
-cp -a fly-windows/fly-*.zip $fly_assets
-cp -a fly-darwin/fly-*.tgz $fly_assets
-
-pushd $output
-  if [ "$GOOS" = "windows" ]; then
-    archive=concourse-${version}.${GOOS}.${GOARCH}.zip
-    zip -r "$archive" concourse
-  else
-    archive=concourse-${version}.${GOOS}.${GOARCH}.tgz
-    tar -czf "$archive" concourse
-  fi
-  shasum "$archive" > "${archive}.sha1"
-  echo -n "${archive}:"
-  cat "${archive}.sha1"
-
-  rm -r concourse
-popd
+        rm -r concourse
+    popd
+done

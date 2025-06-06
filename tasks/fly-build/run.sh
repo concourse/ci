@@ -2,8 +2,7 @@
 
 set -euo pipefail
 
-# for packaging windows
-apk --no-cache --no-progress add zip
+apk --no-cache --no-progress add zip cmd:shasum
 
 export GOPATH=$PWD/gopath
 export PATH=$PWD/gopath/bin:$PATH
