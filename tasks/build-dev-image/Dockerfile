@@ -1,15 +1,8 @@
-# used for building concourse/dev multi-arch.
-#
-# * compile gdn binary
-# * baking in the containerd binaries (+ runc, cni plugins, iptables)
-# * baking in fly binaries
-# * baking in resource types
-# * build init executable for containerd
-# * warming the module cache
-# * warming the build cache
-
 ARG base_image=concourse/golang-builder
 ARG BUILDPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+
 FROM --platform=$BUILDPLATFORM ${base_image} AS builder
 
 # build concourse, cross-compiling on host platform to avoid emulation slowness
@@ -18,8 +11,6 @@ FROM --platform=$BUILDPLATFORM ${base_image} AS builder
 # can cause build failures if files are removed locally
 COPY concourse /src
 
-ARG TARGETOS
-ARG TARGETARCH
 ENV GOOS=$TARGETOS
 ENV GOARCH=$TARGETARCH
 
