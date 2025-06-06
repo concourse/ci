@@ -7,12 +7,8 @@ inputs:
   - name: final-version
     optional: true
 
-params:
-  PLATFORM:
-  ARCH:
-
 outputs:
-  - name: fly
+  - name: fly-builds
 
 caches:
   - path: gopath
