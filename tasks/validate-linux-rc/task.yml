@@ -1,13 +1,9 @@
 ---
 platform: linux
 
-image_resource:
-  type: registry-image
-  source: { repository: cgr.dev/chainguard/wolfi-base }
-
 inputs:
   - name: ci
-  - name: concourse-tarball
+  - name: concourse-tarballs
 
 run:
   path: ci/tasks/validate-linux-rc/run.sh
