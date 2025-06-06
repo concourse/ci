@@ -346,9 +346,20 @@ jobs:
               trigger: true
             - get: dumb-init
               trigger: true
-            - get: resource-types-image
+            - get: resource-types-amd64
+              resource: resource-types-image
               passed: [resource-types-images]
               trigger: true
+              params:
+                platform:
+                  architecture: amd64
+            - get: resource-types-arm64
+              resource: resource-types-image
+              passed: [resource-types-images]
+              trigger: true
+              params:
+                platform:
+                  architecture: arm64
             - get: unit-image
               trigger: true
             - get: oci-build-task
@@ -356,31 +367,13 @@ jobs:
             - get: ci
       - in_parallel:
           fail_fast: true
-          steps: #TODO: build linux/arm64 and darwin/arm64
+          steps:
             - task: yarn-build
               image: unit-image
               file: ci/tasks/yarn-build/task.yml
-            - task: fly-linux
+            - task: fly-build
               image: golang-builder-image-rootfs
               file: ci/tasks/fly-build/task.yml
-              output_mapping: { fly: fly-linux }
-              params:
-                PLATFORM: linux
-                ARCH: amd64
-            - task: fly-windows
-              image: golang-builder-image-rootfs
-              file: ci/tasks/fly-build/task.yml
-              output_mapping: { fly: fly-windows }
-              params:
-                PLATFORM: windows
-                ARCH: amd64
-            - task: fly-darwin
-              image: golang-builder-image-rootfs
-              file: ci/tasks/fly-build/task.yml
-              output_mapping: { fly: fly-darwin }
-              params:
-                PLATFORM: darwin
-                ARCH: amd64
       - task: build
         image: oci-build-task
         privileged: true
@@ -641,30 +634,11 @@ jobs:
           - get: resource-types-image
             passed: [dev-image]
       - in_parallel:
-          - task: fly-linux
-            image: golang-builder-image
-            file: ci/tasks/fly-build/task.yml
-            output_mapping: { fly: fly-linux }
-            params:
-              PLATFORM: linux
-              ARCH: amd64
-          - task: fly-windows
-            image: golang-builder-image
-            file: ci/tasks/fly-build/task.yml
-            output_mapping: { fly: fly-windows }
-            params:
-              PLATFORM: windows
-              ARCH: amd64
-          - task: fly-darwin
-            image: golang-builder-image
-            file: ci/tasks/fly-build/task.yml
-            output_mapping: { fly: fly-darwin }
-            params:
-              PLATFORM: darwin
-              ARCH: amd64
-      - in_parallel:
           fail_fast: true
           steps:
+            - task: fly-build
+              image: golang-builder-image
+              file: ci/tasks/fly-build/task.yml
             - task: hoist-linux-dependencies
               file: ci/tasks/hoist-linux-dependencies/task.yml
               image: dev-image

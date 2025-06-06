@@ -304,24 +304,11 @@ jobs:
     - get: golang-builder-image
     - get: ci
   - in_parallel:
-    - task: fly-linux
-      file: ci/tasks/fly-build-cross-compile.yml
-      image: golang-builder-image
-      params: {GOOS: linux}
-      output_mapping: {fly: fly-linux}
-    - task: fly-windows
-      file: ci/tasks/fly-build-cross-compile.yml
-      image: golang-builder-image
-      params: {GOOS: windows}
-      output_mapping: {fly: fly-windows}
-    - task: fly-darwin
-      file: ci/tasks/fly-build-cross-compile.yml
-      image: golang-builder-image
-      params: {GOOS: darwin}
-      output_mapping: {fly: fly-darwin}
-  - in_parallel:
       fail_fast: true
       steps:
+        - task: fly-build
+          image: golang-builder-image
+          file: ci/tasks/fly-build/task.yml
         - task: hoist-linux-dependencies
           file: ci/tasks/hoist-linux-dependencies.yml
           image: pr-image
