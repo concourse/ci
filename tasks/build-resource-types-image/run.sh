@@ -3,7 +3,7 @@
 set -euo pipefail
 
 for arch in amd64 arm64; do
-for resource in ./*-"${arch}"; do
+for resource in *-"${arch}"; do
     echo repacking "${resource}"
     pushd "${resource}"
         resource=${resource%-"$arch"}
