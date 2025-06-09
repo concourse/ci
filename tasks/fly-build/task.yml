@@ -13,5 +13,8 @@ outputs:
 caches:
   - path: gopath
 
+params:
+  PLATFORMS:
+
 run:
   path: ci/tasks/fly-build/run.sh

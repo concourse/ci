@@ -51,7 +51,9 @@ RUN chmod -R +x /usr/local/concourse/bin
 
 # add fly executables
 RUN mkdir /usr/local/concourse/fly-assets
-COPY fly-builds/fly-*.tgz /usr/local/concourse/fly-assets
+COPY fly-linux/fly-*.tgz /usr/local/concourse/fly-assets
+COPY fly-darwin/fly-*.tgz /usr/local/concourse/fly-assets
+COPY fly-windows/fly-*.zip /usr/local/concourse/fly-assets
 
 # add resource types
 COPY ./resource-types-${TARGETARCH}/rootfs/usr/local/concourse/resource-types/ /usr/local/concourse/resource-types/

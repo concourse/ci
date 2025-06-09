@@ -371,9 +371,27 @@ jobs:
             - task: yarn-build
               image: unit-image
               file: ci/tasks/yarn-build/task.yml
-            - task: fly-build
+            - task: fly-linux
               image: golang-builder-image-rootfs
               file: ci/tasks/fly-build/task.yml
+              output_mapping:
+                fly-builds: fly-linux
+              params:
+                PLATFORMS: linux/amd64,linux/arm64
+            - task: fly-darwin
+              image: golang-builder-image-rootfs
+              file: ci/tasks/fly-build/task.yml
+              output_mapping:
+                fly-builds: fly-darwin
+              params:
+                PLATFORMS: darwin/amd64,darwin/arm64
+            - task: fly-windows
+              image: golang-builder-image-rootfs
+              file: ci/tasks/fly-build/task.yml
+              output_mapping:
+                fly-builds: fly-windows
+              params:
+                PLATFORMS: windows/amd64
       - task: build
         image: oci-build-task
         privileged: true
@@ -656,15 +674,27 @@ jobs:
       - in_parallel:
           fail_fast: true
           steps:
-            - task: fly-build
+            - task: fly-linux
               image: golang-builder-image
               file: ci/tasks/fly-build/task.yml
-            - task: hoist-linux-dependencies
-              file: ci/tasks/hoist-linux-dependencies/task.yml
-              image: unit-image
-            - task: hoist-resource-types
-              file: ci/tasks/hoist-linux-resource-types/task.yml
-              image: unit-image
+              output_mapping:
+                fly-builds: fly-linux
+              params:
+                PLATFORMS: linux/amd64,linux/arm64
+            - task: fly-darwin
+              image: golang-builder-image
+              file: ci/tasks/fly-build/task.yml
+              output_mapping:
+                fly-builds: fly-darwin
+              params:
+                PLATFORMS: darwin/amd64,darwin/arm64
+            - task: fly-windows
+              image: golang-builder-image
+              file: ci/tasks/fly-build/task.yml
+              output_mapping:
+                fly-builds: fly-windows
+              params:
+                PLATFORMS: windows/amd64
             - task: yarn-build
               file: ci/tasks/yarn-build/task.yml
               image: unit-image

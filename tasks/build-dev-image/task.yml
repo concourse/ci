@@ -18,7 +18,9 @@ inputs:
     optional: true
   - name: resource-types-amd64
   - name: resource-types-arm64
-  - name: fly-builds
+  - name: fly-linux
+  - name: fly-darwin
+  - name: fly-windows
   - name: base-image
     optional: true
 

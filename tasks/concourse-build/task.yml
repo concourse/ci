@@ -11,7 +11,9 @@ inputs:
   - name: dev-arm64
   - name: resource-types-amd64
   - name: resource-types-arm64
-  - name: fly-builds
+  - name: fly-linux
+  - name: fly-darwin
+  - name: fly-windows
 
 caches:
   - path: gopath

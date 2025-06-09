@@ -65,7 +65,8 @@ for platform in "${PLATFORMS[@]}"; do
 
     fly_assets=$output/concourse/fly-assets
     mkdir -p "$fly_assets"
-    cp -a fly-builds/fly-*.{tgz,zip} "$fly_assets"
+    cp -a fly-{linux,darwin}/fly-*.tgz "$fly_assets"
+    cp -a fly-windows/fly-*.zip "$fly_assets"
 
     if [[ "$GOOS" == "linux" ]]; then
         cp -a "dev-${GOARCH}/rootfs/usr/local/concourse/bin/*" "$bin"
