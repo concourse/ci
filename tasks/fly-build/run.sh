@@ -25,8 +25,7 @@ PLATFORMS=(
   "darwin/arm64"
 )
 
-build_platform() {
-    local platform=$1
+for platform in "${PLATFORMS[@]}"; do
     # Split the platform into OS and architecture
     IFS="/" read -r GOOS GOARCH <<< "$platform"
 
@@ -35,22 +34,21 @@ build_platform() {
     echo "==================================="
 
     # Set platform-specific flags
-    local tags=""
-    local platform_flags=""
-    local cgo_enabled=0
-    local local_ldflags="$ldflags"
+    tags=""
+    platform_flags=""
+    export CGO_ENABLED=0
 
     # Set platform-specific flags
     if [ "$GOOS" = "linux" ] || [ "$GOOS" = "darwin" ]; then
-        local_ldflags+=' -extldflags "-static"'
+    ldflags+=' -extldflags "-static"'
     fi
 
     if [ "$GOOS" = "darwin" ]; then
-        # This is to ensure on darwin we use the cgo DNS resolver. If we don't then
-        # users have DNS resolution errors when using fly
-        cgo_enabled=1
-        tags="osusergo"
-        platform_flags="-buildvcs=false"
+    # This is to ensure on darwin we use the cgo DNS resolver. If we don't then
+    # users have DNS resolution errors when using fly
+    export CGO_ENABLED=1
+    tags="osusergo"
+    platform_flags="-buildvcs=false"
     fi
 
     platform_dir="$builds/${GOOS}_${GOARCH}"
@@ -58,35 +56,26 @@ build_platform() {
 
     bin="$platform_dir/fly"
     if [ "$GOOS" = "windows" ]; then
-        bin+=".exe"
+    bin+=".exe"
     fi
 
-    # Use a subshell to avoid issues with pushd/popd across parallel processes
-    (
-        cd concourse
-        CGO_ENABLED=$cgo_enabled GOOS=$GOOS GOARCH=$GOARCH go build -a -tags "$tags" $platform_flags -ldflags "$local_ldflags" -o "$bin" ./fly
-    )
+    pushd concourse
+    GOOS=$GOOS GOARCH=$GOARCH go build -a -tags "$tags" $platform_flags -ldflags "$ldflags" -o "$bin" ./fly
+    popd
 
-    (
-        cd "$platform_dir"
-        if [ "$GOOS" = "windows" ]; then
-            archive=fly-$GOOS-$GOARCH.zip
-            zip "$archive" fly.exe
-        else
-            archive=fly-$GOOS-$GOARCH.tgz
-            tar -czf "$archive" fly
-        fi
+    pushd "$platform_dir"
+    if [ "$GOOS" = "windows" ]; then
+        archive=fly-$GOOS-$GOARCH.zip
+        zip "$archive" fly.exe
+    else
+        archive=fly-$GOOS-$GOARCH.tgz
+        tar -czf "$archive" fly
+    fi
 
-        shasum "$archive" > "${archive}.sha1"
-        echo -n "${archive}: "
-        cat "${archive}.sha1"
+    shasum "$archive" > "${archive}.sha1"
+    echo -n "${archive}: "
+    cat "${archive}.sha1"
 
-        mv "$archive" "$archive".sha1 "$output/"
-    )
-}
-
-for platform in "${PLATFORMS[@]}"; do
-    build_platform "$platform" &
+    mv "$archive" "$archive".sha1 "$output/"
+    popd
 done
-
-wait
