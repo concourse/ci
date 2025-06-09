@@ -1,8 +1,6 @@
 ARG base_image=concourse/golang-builder
-ARG BUILDPLATFORM
-ARG TARGETOS
-ARG TARGETARCH
 
+ARG BUILDPLATFORM
 FROM --platform=$BUILDPLATFORM ${base_image} AS builder
 
 # build concourse, cross-compiling on host platform to avoid emulation slowness
@@ -11,6 +9,8 @@ FROM --platform=$BUILDPLATFORM ${base_image} AS builder
 # can cause build failures if files are removed locally
 COPY concourse /src
 
+ARG TARGETOS
+ARG TARGETARCH
 ENV GOOS=$TARGETOS
 ENV GOARCH=$TARGETARCH
 
@@ -21,6 +21,7 @@ RUN cd /src && \
     rm -rf /src
 
 FROM ${base_image} AS dev
+ARG TARGETARCH
 
 RUN apk --no-cache add \
     btrfs-progs \
