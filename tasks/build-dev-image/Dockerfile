@@ -27,6 +27,7 @@ RUN apk --no-cache add \
     btrfs-progs \
     ca-certificates \
     dumb-init \
+    cmd:gcc \
     iproute2 \
     iptables
 
