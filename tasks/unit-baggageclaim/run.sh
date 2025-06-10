@@ -41,14 +41,14 @@ function permit_device_control() {
 }
 
 function setup_loop_devices() {
-  for i in $(seq 4 7); do
+  for i in $(seq 0 3); do
     mknod -m 0660 /scratch/loop$i b 7 $i
     ln -s /scratch/loop$i /dev/loop$i
   done
 }
 
 function salt_earth() {
-  for i in $(seq 4 7); do
+  for i in $(seq 0 3); do
     losetup -d /dev/loop$i > /dev/null 2>&1 || true
   done
 }
@@ -63,7 +63,6 @@ cd concourse/worker/baggageclaim
 # whatever / is), so point $TMPDIR to /scratch which we can trust to be
 # non-overlay for the overlay driver tests
 export TMPDIR=/scratch
-mkdir -p "$TMPDIR"
 
 go mod download
 go install github.com/onsi/ginkgo/v2/ginkgo
