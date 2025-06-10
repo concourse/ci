@@ -37,6 +37,8 @@ RUN apk --update-cache add \
     # used for /atc/db tests
     postgresql-17 \
     postgresql-17-client \
+    postgresql-17-dev \
+    postgresql-17-contrib \
     # for bin-smoke test
     terraform \
     # used by gcloud
