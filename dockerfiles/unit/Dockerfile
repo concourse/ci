@@ -17,6 +17,8 @@ RUN apk --update-cache add \
     docker \
     docker-compose \
     file \
+    # for CGO enabled tests
+    gcc \
     gnupg \
     gnutar \
     # for k8s-topgun tests
