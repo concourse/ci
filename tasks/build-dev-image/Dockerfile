@@ -27,9 +27,10 @@ RUN apk --no-cache add \
     btrfs-progs \
     ca-certificates \
     dumb-init \
-    cmd:gcc \
+    gcc \
     iproute2 \
-    iptables
+    iptables \
+    ip6tables
 
 # Add container runtime dependencies
 #
