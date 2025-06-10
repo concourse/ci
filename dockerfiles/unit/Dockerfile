@@ -27,6 +27,7 @@ RUN apk --update-cache add \
     iproute2 \
     jq \
     # for baggageclaim tests
+    losetup \
     mount \
     umount \
     nodejs-22 \
