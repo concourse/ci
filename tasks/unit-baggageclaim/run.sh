@@ -6,7 +6,7 @@ export GOPATH=$PWD/gopath
 export PATH=$GOPATH/bin:$PATH
 
 function permit_device_control() {
-  local devices_mount_info=$(cat /proc/self/cgroup | grep devices)
+  local devices_mount_info=$(grep devices < /proc/self/cgroup)
 
   if [ -z "$devices_mount_info" ]; then
     # cgroups not set up; must not be in a container
@@ -65,7 +65,6 @@ cd concourse/worker/baggageclaim
 export TMPDIR=/scratch
 
 go mod download
+go install github.com/onsi/ginkgo/v2/ginkgo
 
-go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo
-
-ginkgo -r -race -nodes 4 --failOnPending -flake-attempts=3 --randomizeAllSpecs --keep-going -skip=":skip" "$@"
+ginkgo -r -race -nodes 4 --fail-on-pending -flake-attempts=3 --randomize-all --keep-going -skip=":skip" "$@"
