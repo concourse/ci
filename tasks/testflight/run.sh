@@ -9,7 +9,7 @@ cd concourse
 
 go mod download
 
-go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo
+go install github.com/onsi/ginkgo/v2/ginkgo
 
 ginkgo -r -nodes=4 --race --keep-going --poll-progress-after=15s --flake-attempts=3 ./testflight "$@"
 

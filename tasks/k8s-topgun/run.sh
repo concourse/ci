@@ -29,6 +29,6 @@ cd concourse
 
 go mod download
 
-go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo
+go install github.com/onsi/ginkgo/v2/ginkgo
 
 ginkgo -nodes=8 -race -keep-going -poll-progress-after=900s -flake-attempts=3 -skip="$SKIP" ./topgun/k8s/ "$@"

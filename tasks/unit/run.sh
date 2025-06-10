@@ -20,6 +20,6 @@ cd concourse
 
 go mod download
 
-go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo
+go install github.com/onsi/ginkgo/v2/ginkgo
 
 ginkgo -r -p -flake-attempts=3 -race -skip-package ./integration,testflight,topgun,./worker/runtime/integration,./worker/baggageclaim "$@"

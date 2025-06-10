@@ -5,6 +5,6 @@ cd .\concourse\worker\baggageclaim
 
 go mod download
 
-go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo
+go install github.com/onsi/ginkgo/v2/ginkgo
 
 ginkgo -r -p
