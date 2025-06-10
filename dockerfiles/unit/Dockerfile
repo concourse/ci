@@ -35,8 +35,8 @@ RUN apk --update-cache add \
     # for shasum cli
     perl-utils \
     # used for /atc/db tests
-    postgresql \
-    postgresql-client \
+    postgresql-17 \
+    postgresql-17-client \
     # for bin-smoke test
     terraform \
     # used by gcloud
