@@ -361,9 +361,7 @@ jobs:
                 platform:
                   architecture: arm64
             - get: unit-image
-              trigger: true
             - get: oci-build-task
-              trigger: true
             - get: ci
       - in_parallel:
           fail_fast: true
