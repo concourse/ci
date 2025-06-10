@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo -x pipefail
+set -euo pipefail -x
 
 export GOPATH=$PWD/gopath
 export PATH=$GOPATH/bin:$PATH
