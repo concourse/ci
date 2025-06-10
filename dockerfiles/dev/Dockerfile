@@ -12,12 +12,12 @@ ARG base_image=concourse/golang-builder
 FROM ${base_image}
 
 RUN apt-get update && apt-get -y install \
-      iproute2 \
-      ca-certificates \
-      curl \
-      file \
-      tree \
-      btrfs-progs
+    iproute2 \
+    ca-certificates \
+    curl \
+    file \
+    tree \
+    btrfs-progs
 
 COPY dumb-init/dumb-init_*_x86_64 /usr/local/bin/dumb-init
 RUN chmod +x /usr/local/bin/dumb-init
@@ -32,6 +32,8 @@ RUN chmod +x /usr/local/bin/dumb-init
 #   - cni plugins
 #   - iptables (needed by cni plugins)
 COPY gdn/gdn-linux-amd64-[0-9]*.*.* /usr/local/concourse/bin/gdn
+# wolfi does not have /var/run setup, which guardian depends on existing already
+RUN ln -sf /run /var/run
 
 # Copies files from the bin directory of the tarball to /usr/local/concourse/bin
 ADD containerd/containerd-*-linux-amd64.tar.gz /usr/local/concourse
@@ -62,10 +64,10 @@ COPY concourse /src
 RUN gcc -O2 -static -o /usr/local/concourse/bin/init /src/cmd/init/init.c
 
 RUN cd /src && \
-      go mod download && \
-      go build -gcflags=all="-N -l" -o /usr/local/concourse/bin/concourse \
-        ./cmd/concourse && \
-      rm -rf /src
+    go mod download && \
+    go build -gcflags=all="-N -l" -o /usr/local/concourse/bin/concourse \
+    ./cmd/concourse && \
+    rm -rf /src
 
 # volume for non-aufs/etc. mount for baggageclaim's driver
 VOLUME /worker-state
