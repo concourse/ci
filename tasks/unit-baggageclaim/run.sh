@@ -63,6 +63,7 @@ cd concourse/worker/baggageclaim
 # whatever / is), so point $TMPDIR to /scratch which we can trust to be
 # non-overlay for the overlay driver tests
 export TMPDIR=/scratch
+mkdir -p "$TMPDIR"
 
 go mod download
 go install github.com/onsi/ginkgo/v2/ginkgo
