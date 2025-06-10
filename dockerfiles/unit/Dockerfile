@@ -26,6 +26,9 @@ RUN apk --update-cache add \
     helm \
     iproute2 \
     jq \
+    # for baggageclaim tests
+    mount \
+    umount \
     nodejs-22 \
     npm \
     # for shasum cli
