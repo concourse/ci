@@ -1531,6 +1531,7 @@ resources:
   - name: mock-resource
     type: registry-image
     icon: *release-icon
+    check_every: 4h
     source:
       repository: concourse/mock-resource
       tag: dev
@@ -1540,6 +1541,7 @@ resources:
   - name: bosh-io-release-resource
     type: registry-image
     icon: *release-icon
+    check_every: 4h
     source:
       repository: concourse/bosh-io-release-resource
       tag: dev
@@ -1549,6 +1551,7 @@ resources:
   - name: bosh-io-stemcell-resource
     type: registry-image
     icon: *release-icon
+    check_every: 4h
     source:
       repository: concourse/bosh-io-stemcell-resource
       tag: dev
@@ -1558,6 +1561,7 @@ resources:
   - name: docker-image-resource
     type: registry-image
     icon: *release-icon
+    check_every: 4h
     source:
       repository: concourse/docker-image-resource
       tag: dev
@@ -1567,6 +1571,7 @@ resources:
   - name: git-resource
     type: registry-image
     icon: *release-icon
+    check_every: 4h
     source:
       repository: concourse/git-resource
       tag: dev
@@ -1576,6 +1581,7 @@ resources:
   - name: github-release-resource
     type: registry-image
     icon: *release-icon
+    check_every: 4h
     source:
       repository: concourse/github-release-resource
       tag: dev
@@ -1585,6 +1591,7 @@ resources:
   - name: hg-resource
     type: registry-image
     icon: *release-icon
+    check_every: 4h
     source:
       repository: concourse/hg-resource
       tag: dev
@@ -1594,6 +1601,7 @@ resources:
   - name: pool-resource
     type: registry-image
     icon: *release-icon
+    check_every: 4h
     source:
       repository: concourse/pool-resource
       tag: dev
@@ -1603,6 +1611,7 @@ resources:
   - name: registry-image-resource
     type: registry-image
     icon: *release-icon
+    check_every: 4h
     source:
       repository: concourse/registry-image-resource
       tag: dev
@@ -1612,6 +1621,7 @@ resources:
   - name: s3-resource
     type: registry-image
     icon: *release-icon
+    check_every: 4h
     source:
       repository: concourse/s3-resource
       tag: dev
@@ -1621,6 +1631,7 @@ resources:
   - name: semver-resource
     type: registry-image
     icon: *release-icon
+    check_every: 4h
     source:
       repository: concourse/semver-resource
       tag: dev
@@ -1630,6 +1641,7 @@ resources:
   - name: time-resource
     type: registry-image
     icon: *release-icon
+    check_every: 4h
     source:
       repository: concourse/time-resource
       tag: dev
