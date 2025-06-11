@@ -17,7 +17,8 @@ FROM ${base_image}
 
 RUN apk --no-cache add \
     ca-certificates \
-    bash
+    bash \
+    openssl
 
 COPY --from=go_downloader /usr/local/go /usr/local/
 ENV GOPATH=/go
