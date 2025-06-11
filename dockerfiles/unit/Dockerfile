@@ -37,7 +37,6 @@ RUN apk --update-cache add \
     # used for /atc/db tests
     postgresql-17 \
     postgresql-17-client \
-    postgresql-17-dev \
     postgresql-17-contrib \
     # for bin-smoke test
     terraform \
@@ -49,6 +48,10 @@ RUN apk --update-cache add \
     yq \
     # for Windows artifact packaging
     zip
+
+# Wolfi's postgres packages don't create a postgres user which the atc/db tests
+# expect to be present when running as UID=0
+RUN adduser -D postgres
 
 # enable `docker compose` command, otherwise we have to call `docker-compose` directly
 RUN ln -s /usr/sbin/docker-compose /usr/libexec/docker/cli-plugins/docker-compose
