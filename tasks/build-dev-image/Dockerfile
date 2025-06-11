@@ -44,6 +44,8 @@ RUN apk --no-cache add \
 ADD containerd/containerd-*-linux-${TARGETARCH}.tar.gz /usr/local/concourse
 
 COPY gdn/gdn-linux-${TARGETARCH}-[0-9]*.*.* /usr/local/concourse/bin/gdn
+# wolfi does not have /var/run setup, which guardian depends on existing already
+RUN ln -sf /run /var/run
 
 COPY runc/runc.${TARGETARCH} /usr/local/concourse/bin/runc
 
