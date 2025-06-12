@@ -17,6 +17,7 @@ RUN apk --update-cache add \
     docker \
     docker-compose \
     file \
+    git \
     # for CGO enabled tests
     gcc \
     gnupg \
