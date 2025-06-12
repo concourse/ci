@@ -30,7 +30,10 @@ RUN apk --no-cache add \
     gcc \
     iproute2 \
     iptables \
-    ip6tables
+    ip6tables \
+    # guardian runtime runs some script on startup to create iptable rules and
+    # requires the real xargs, not busybox's impl (https://github.com/cloudfoundry/guardian/blob/main/kawasaki/iptables/global_chains.go)
+    cmd:xargs
 
 # Add container runtime dependencies
 #
