@@ -26,6 +26,7 @@ ARG TARGETARCH
 RUN apk --no-cache add \
     btrfs-progs \
     ca-certificates \
+    curl \
     dumb-init \
     gcc \
     iproute2 \
