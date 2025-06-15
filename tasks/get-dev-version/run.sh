@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo -x pipefail
+set -euo pipefail -x
 
 apk --no-cache --no-progress add git
 

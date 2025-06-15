@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo -x pipefail
+set -euo pipefail -x
 
 concourse_version=$(cat concourse-release/version)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo -x pipefail
+set -euo pipefail -x
 
 mkdir -p linux-dependencies/amd64
 mkdir -p linux-dependencies/arm64

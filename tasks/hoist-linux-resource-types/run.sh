@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo -x pipefail
+set -euo pipefail -x
 
 mkdir -p resource-types/amd64
 mkdir -p resource-types/arm64
