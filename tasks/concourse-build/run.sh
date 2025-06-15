@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+apk --no-progress add cmd:shasum
+
 export GOPATH=$PWD/gopath
 export PATH=$PWD/gopath/bin:$PATH
 
@@ -72,7 +74,7 @@ for platform in "${platforms[@]}"; do
 
     pushd "$output"
         if [ "$GOOS" = "windows" ]; then
-            apk --no-cache --no-progress add zip cmd:shasum
+            apk --no-progress add zip
             archive=concourse-${version}.${GOOS}.${GOARCH}.zip
             zip -r "$archive" concourse
         else
