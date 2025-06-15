@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-apk --no-cache --no-progress add zip cmd:shasum
-
 export GOPATH=$PWD/gopath
 export PATH=$PWD/gopath/bin:$PATH
 
@@ -16,15 +14,14 @@ if [ -e final-version/version ]; then
   ldflags="-X github.com/concourse/concourse.Version=$final_version"
 fi
 
-PLATFORMS=(
-  "linux/amd64"
-  "linux/arm64"
-  "windows/amd64"
-  "darwin/amd64"
-  "darwin/arm64"
-)
+if [[ -z "${PLATFORMS}" ]]; then
+    echo "PLATFORMS must be specified"
+    exit 1
+fi
 
-for platform in "${PLATFORMS[@]}"; do
+IFS=',' read -ra platforms <<< "$PLATFORMS"
+
+for platform in "${platforms[@]}"; do
     # Split the platform into OS and architecture
     IFS="/" read -r GOOS GOARCH <<< "$platform"
 
@@ -75,6 +72,7 @@ for platform in "${PLATFORMS[@]}"; do
 
     pushd "$output"
         if [ "$GOOS" = "windows" ]; then
+            apk --no-cache --no-progress add zip cmd:shasum
             archive=concourse-${version}.${GOOS}.${GOARCH}.zip
             zip -r "$archive" concourse
         else

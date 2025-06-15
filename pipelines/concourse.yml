@@ -699,24 +699,47 @@ jobs:
             - task: get-dev-version
               file: ci/tasks/get-dev-version/task.yml
               image: golang-builder-image
-      - task: concourse-build
-        image: golang-builder-image
-        file: ci/tasks/concourse-build/task.yml
-        input_mapping:
-          concourse: built-concourse
+      - in_parallel:
+          - task: concourse-linux
+            image: golang-builder-image
+            file: ci/tasks/concourse-build/task.yml
+            input_mapping:
+              concourse: built-concourse
+            output_mapping:
+              concourse-tarballs: concourse-linux
+            params:
+              PLATFORMS: linux/amd64,linux/arm64
+          - task: concourse-darwin
+            image: golang-builder-image
+            file: ci/tasks/concourse-build/task.yml
+            input_mapping:
+              concourse: built-concourse
+            output_mapping:
+              concourse-tarballs: concourse-darwin
+            params:
+              PLATFORMS: darwin/amd64,darwin/arm64
+          - task: concourse-windows
+            image: golang-builder-image
+            file: ci/tasks/concourse-build/task.yml
+            input_mapping:
+              concourse: built-concourse
+            output_mapping:
+              concourse-tarballs: concourse-windows
+            params:
+              PLATFORMS: windows/amd64
       - in_parallel:
           - put: linux-dev
             no_get: true
             inputs: detect
             params: { file: concourse-linux/concourse-*.tgz }
-          - put: windows-dev
-            no_get: true
-            inputs: detect
-            params: { file: concourse-windows/concourse-*.zip }
           - put: darwin-dev
             no_get: true
             inputs: detect
             params: { file: concourse-darwin/concourse-*.tgz }
+          - put: windows-dev
+            no_get: true
+            inputs: detect
+            params: { file: concourse-windows/concourse-*.zip }
 
   - name: build-image
     public: true
