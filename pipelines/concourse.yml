@@ -700,33 +700,35 @@ jobs:
               file: ci/tasks/get-dev-version/task.yml
               image: golang-builder-image
       - in_parallel:
-          - task: concourse-linux
-            image: golang-builder-image
-            file: ci/tasks/concourse-build/task.yml
-            input_mapping:
-              concourse: built-concourse
-            output_mapping:
-              concourse-tarballs: concourse-linux
-            params:
-              PLATFORMS: linux/amd64,linux/arm64
-          - task: concourse-darwin
-            image: golang-builder-image
-            file: ci/tasks/concourse-build/task.yml
-            input_mapping:
-              concourse: built-concourse
-            output_mapping:
-              concourse-tarballs: concourse-darwin
-            params:
-              PLATFORMS: darwin/amd64,darwin/arm64
-          - task: concourse-windows
-            image: golang-builder-image
-            file: ci/tasks/concourse-build/task.yml
-            input_mapping:
-              concourse: built-concourse
-            output_mapping:
-              concourse-tarballs: concourse-windows
-            params:
-              PLATFORMS: windows/amd64
+          fail_fast: true
+          steps:
+            - task: concourse-linux
+              image: golang-builder-image
+              file: ci/tasks/concourse-build/task.yml
+              input_mapping:
+                concourse: built-concourse
+              output_mapping:
+                concourse-tarballs: concourse-linux
+              params:
+                PLATFORMS: linux/amd64,linux/arm64
+            - task: concourse-darwin
+              image: golang-builder-image
+              file: ci/tasks/concourse-build/task.yml
+              input_mapping:
+                concourse: built-concourse
+              output_mapping:
+                concourse-tarballs: concourse-darwin
+              params:
+                PLATFORMS: darwin/amd64,darwin/arm64
+            - task: concourse-windows
+              image: golang-builder-image
+              file: ci/tasks/concourse-build/task.yml
+              input_mapping:
+                concourse: built-concourse
+              output_mapping:
+                concourse-tarballs: concourse-windows
+              params:
+                PLATFORMS: windows/amd64
       - in_parallel:
           - put: linux-dev
             no_get: true
