@@ -2,6 +2,8 @@
 
 set -euo -x pipefail
 
+apk --no-cache --no-progress add git
+
 current_ref="$(git -C concourse rev-parse --short HEAD)"
 
 latest_tag="$(git -C concourse describe --tags --abbrev=0 HEAD)"
