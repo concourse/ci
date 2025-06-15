@@ -68,7 +68,7 @@ for platform in "${platforms[@]}"; do
     cp -a fly-windows/fly-*.zip "$fly_assets"
 
     if [[ "$GOOS" == "linux" ]]; then
-        cp -a "dev-${GOARCH}/rootfs/usr/local/concourse/bin/*" "$bin"
+        cp -a "dev-${GOARCH}/rootfs/usr/local/concourse/bin/"* "$bin"
         cp -a "resource-types-${GOARCH}/rootfs/usr/local/concourse/resource-types" "$output/concourse"
     fi
 
@@ -88,5 +88,5 @@ for platform in "${platforms[@]}"; do
         rm -r concourse
     popd
 
-    mv "$output/*" concourse-tarballs/
+    mv "$output"/* concourse-tarballs/
 done
