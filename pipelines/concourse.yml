@@ -668,7 +668,7 @@ jobs:
             passed: [dev-image]
             params:
               platform:
-                architecture: amd64
+                architecture: arm64
       - in_parallel:
           fail_fast: true
           steps:
