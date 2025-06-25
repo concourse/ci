@@ -617,7 +617,7 @@ jobs:
           - get: concourse-dev-image
             passed: [build-image]
             trigger: true
-          - get: linux-dev
+          - get: linux-amd64
             passed: [build-image]
             trigger: true
           - get: unit-image
@@ -627,7 +627,7 @@ jobs:
       - task: check-params
         file: ci/tasks/check-distribution-env/task.yml
         image: unit-image
-        input_mapping: { distribution: concourse-chart, linux-rc: linux-dev }
+        input_mapping: { distribution: concourse-chart, linux-rc: linux-amd64 }
         params: { DISTRIBUTION: helm }
 
   - name: build-concourse
@@ -729,18 +729,26 @@ jobs:
               params:
                 PLATFORMS: windows/amd64
       - in_parallel:
-          - put: linux-dev
+          - put: linux-amd64
             no_get: true
             inputs: detect
-            params: { file: concourse-linux/concourse-*.tgz }
-          - put: darwin-dev
+            params: { file: concourse-linux/concourse-*.amd64.tgz }
+          - put: linux-arm64
             no_get: true
             inputs: detect
-            params: { file: concourse-darwin/concourse-*.tgz }
-          - put: windows-dev
+            params: { file: concourse-linux/concourse-*.arm64.tgz }
+          - put: darwin-amd64
             no_get: true
             inputs: detect
-            params: { file: concourse-windows/concourse-*.zip }
+            params: { file: concourse-darwin/concourse-*.amd64.tgz }
+          - put: darwin-arm64
+            no_get: true
+            inputs: detect
+            params: { file: concourse-darwin/concourse-*.arm64.tgz }
+          - put: windows-amd64
+            no_get: true
+            inputs: detect
+            params: { file: concourse-windows/concourse-*.amd64.zip }
 
   - name: build-image
     public: true
@@ -751,7 +759,10 @@ jobs:
             passed: [build-concourse]
             trigger: true
           - get: unit-image
-          - get: linux-dev
+          - get: linux-amd64
+            trigger: true
+            passed: [build-concourse]
+          - get: linux-arm64
             trigger: true
             passed: [build-concourse]
           - get: concourse-docker
@@ -759,15 +770,14 @@ jobs:
           - get: oci-build-task
           - get: ci
       - task: build
+        privileged: true
         file: concourse-docker/ci/build-image.yml
         image: oci-build-task
-        input_mapping: { linux-rc: linux-dev }
-        privileged: true
       - put: concourse-dev-image
         no_get: true
         inputs: detect
         params:
-          image: image/image.tar
+          image: image/image
 
   - name: bump-prod-web
     public: true
@@ -806,10 +816,10 @@ jobs:
             resource: concourse-dev-image
             passed: [build-image]
             params: { skip_download: true }
-          - get: windows-dev
+          - get: windows-amd64
             passed: [build-concourse]
             params: { skip_download: "true" }
-          - get: darwin-dev
+          - get: darwin-amd64
             passed: [build-concourse]
             params: { skip_download: "true" }
       - load_var: concourse_image_repo
@@ -818,11 +828,11 @@ jobs:
         file: concourse-image/digest
       - task: convert-windows-url
         file: infrastructure/tasks/convert-gs-url.yml
-        input_mapping: { input: windows-dev }
+        input_mapping: { input: windows-amd64 }
         output_mapping: { output: windows }
       - task: convert-darwin-url
         file: infrastructure/tasks/convert-gs-url.yml
-        input_mapping: { input: darwin-dev }
+        input_mapping: { input: darwin-amd64 }
         output_mapping: { output: darwin }
       - load_var: concourse_windows_bundle_url
         file: windows/url
@@ -856,7 +866,10 @@ jobs:
           - get: concourse
             passed: [build-concourse]
             trigger: true
-          - get: linux-dev
+          - get: linux-amd64
+            passed: [build-concourse]
+            trigger: true
+          - get: linux-arm64
             passed: [build-concourse]
             trigger: true
           - get: unit-image
@@ -881,7 +894,7 @@ jobs:
           - task: terraform-apply
             image: unit-image
             file: ci/tasks/terraform-smoke/task.yml
-            input_mapping: { linux-rc: linux-dev }
+            input_mapping: { linux-rc: linux-((.:runtime.arch)) }
             params:
               GCP_PROJECT: cf-concourse-production
               GCP_KEY: ((concourse_smoke_gcp_key))
@@ -939,7 +952,7 @@ jobs:
             passed: [bin-smoke]
             trigger: true
           - get: unit-image
-          - get: linux-dev
+          - get: linux-amd64
             passed: [bin-smoke]
             trigger: true
           - get: concourse-release-repo
@@ -949,7 +962,7 @@ jobs:
         file: ci/tasks/check-distribution-env/task.yml
         image: unit-image
         input_mapping:
-          { distribution: concourse-release-repo, linux-rc: linux-dev }
+          { distribution: concourse-release-repo, linux-rc: linux-amd64 }
         params: { DISTRIBUTION: bosh }
 
   - name: bosh-bump
@@ -961,10 +974,10 @@ jobs:
             passed: [build-concourse]
             trigger: true
           - get: unit-image
-          - get: linux-dev
+          - get: linux-amd64
             passed: [build-concourse]
             trigger: true
-          - get: windows-dev
+          - get: windows-amd64
             passed: [build-concourse]
             trigger: true
           - get: concourse-release-repo
@@ -972,7 +985,7 @@ jobs:
       - task: bump-concourse-blobs
         file: ci/tasks/bump-concourse-blobs/task.yml
         image: unit-image
-        input_mapping: { linux-rc: linux-dev, windows-rc: windows-dev }
+        input_mapping: { linux-rc: linux-amd64, windows-rc: windows-amd64 }
         params: { GCP_JSON_KEY: ((concourse_artifacts_json_key)) }
       - put: concourse-release-repo
         no_get: true
@@ -1629,7 +1642,7 @@ resources:
     icon: *image-icon
     source: { repository: concourse/oci-build-task }
 
-  - name: linux-dev
+  - name: linux-amd64
     type: gcs
     icon: linux
     source:
@@ -1637,7 +1650,15 @@ resources:
       json_key: ((concourse_artifacts_json_key))
       regexp: dev/concourse-(.*)\.linux\.amd64\.tgz
 
-  - name: windows-dev
+  - name: linux-arm64
+    type: gcs
+    icon: linux
+    source:
+      bucket: concourse-artifacts
+      json_key: ((concourse_artifacts_json_key))
+      regexp: dev/concourse-(.*)\.linux\.arm64\.tgz
+
+  - name: windows-amd64
     type: gcs
     icon: microsoft-windows
     source:
@@ -1645,13 +1666,21 @@ resources:
       json_key: ((concourse_artifacts_json_key))
       regexp: dev/concourse-(.*)\.windows\.amd64\.zip
 
-  - name: darwin-dev
+  - name: darwin-amd64
     type: gcs
     icon: apple
     source:
       bucket: concourse-artifacts
       json_key: ((concourse_artifacts_json_key))
       regexp: dev/concourse-(.*)\.darwin\.amd64\.tgz
+
+  - name: darwin-arm64
+    type: gcs
+    icon: apple
+    source:
+      bucket: concourse-artifacts
+      json_key: ((concourse_artifacts_json_key))
+      regexp: dev/concourse-(.*)\.darwin\.arm64\.tgz
 
   - name: docs
     type: git
