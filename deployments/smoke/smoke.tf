@@ -13,11 +13,24 @@ variable "region" {
 }
 
 variable "GCP_IMAGE" {
-  type = string
+  type        = string
+  description = "Used to search for the related GCP image by the image's family name. Example: ubuntu-2404-lts"
 }
 
 variable "RUNTIME" {
   type = string
+  validation {
+    condition     = var.RUNTIME == "containerd" || var.RUNTIME == "guardian"
+    error_message = "ARCH must be amd64 or arm64"
+  }
+}
+
+variable "ARCH" {
+  type = string
+  validation {
+    condition     = var.ARCH == "amd64" || var.ARCH == "arm64"
+    error_message = "ARCH must be amd64 or arm64"
+  }
 }
 
 provider "google" {
@@ -49,15 +62,21 @@ resource "google_compute_firewall" "smoke" {
   source_tags = ["smoke"]
 }
 
+data "google_compute_image" "ubuntu" {
+  filter      = "family = ${var.GCP_IMAGE}-${var.ARCH}"
+  project     = "ubuntu-os-cloud"
+  most_recent = true
+}
+
 resource "google_compute_instance" "smoke" {
   name         = "smoke-${random_pet.smoke.id}"
-  machine_type = "e2-custom-4-6144"
+  machine_type = var.ARCH == "amd64" ? "e2-standard-2" : "t2a-standard-2"
   zone         = data.google_compute_zones.available.names[0]
   tags         = ["smoke"]
 
   boot_disk {
     initialize_params {
-      image = var.GCP_IMAGE
+      image = data.google_compute_image.ubuntu.id
       size  = "30"
     }
   }
@@ -85,8 +104,9 @@ resource "google_compute_instance" "smoke" {
     inline = [
       "set -e -x",
       "[ -e /var/lib/cloud ] && until [ -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done",
-      # On Debian, apt-get update will fail in the event of a new major release, but --allow-releaseinfo-change prevents that
-      length(regexall(".*debian.*", var.GCP_IMAGE)) > 0 ? "apt-get --allow-releaseinfo-change update" : "apt-get update",
+      # On Debian, apt-get update will fail in the event of a new major release,
+      # but --allow-releaseinfo-change prevents that
+      strcontains(var.GCP_IMAGE, "debian") ? "apt-get --allow-releaseinfo-change update" : "apt-get update",
       "apt-get -y install postgresql",
       "sudo -i -u postgres createuser concourse",
       "sudo -i -u postgres createdb --owner=concourse concourse",

@@ -39,7 +39,6 @@ groups:
       - build-concourse
       - build-image
       - bin-smoke
-      - bin-smoke-rapid
       - check-docker-mounts
       - bump-prod-*
 
@@ -849,9 +848,9 @@ jobs:
           branch: master
 
   - name: bin-smoke
+    old_name: bin-smoke-rapid
     public: true
     serial: true
-    serial_groups: [bin-smoke]
     plan:
       - in_parallel:
           - get: concourse
@@ -865,15 +864,21 @@ jobs:
       - across:
           - var: runtime
             values:
-              - guardian
-              - containerd
+              - runtime: guardian
+                arch: amd64
+              - runtime: containerd
+                arch: amd64
+              - runtime: containerd
+                arch: arm64
             max_in_flight: all
           - var: gcp-image
             values:
               - ubuntu-2204-lts
+              - ubuntu-2404-lts
             max_in_flight: 1
+        timeout: 40m
         do:
-          - task: terraform-smoke
+          - task: terraform-apply
             image: unit-image
             file: ci/tasks/terraform-smoke/task.yml
             input_mapping: { linux-rc: linux-dev }
@@ -881,81 +886,27 @@ jobs:
               GCP_PROJECT: cf-concourse-production
               GCP_KEY: ((concourse_smoke_gcp_key))
               SSH_KEY: ((concourse_smoke_ssh_key))
-              WORKSPACE: bin-smoke-((.:runtime))
+              WORKSPACE: bin-smoke-((.:runtime.runtime))-((.:runtime.arch))
               TF_VAR_GCP_IMAGE: ((.:gcp-image))
-              TF_VAR_RUNTIME: ((.:runtime))
-          - task: smoke
+              TF_VAR_RUNTIME: ((.:runtime.runtime))
+              TF_VAR_ARCH: ((.:runtime.arch))
+          - task: smoke-test
             image: unit-image
             file: ci/tasks/smoke-test/task.yml
             input_mapping: { endpoint-info: outputs }
             params: { MAX_TICKS: 300 }
-            ensure:
-              task: terraform-cleanup
-              image: unit-image
-              file: ci/tasks/terraform-smoke/cleanup.yml
-              params:
-                GCP_PROJECT: cf-concourse-production
-                GCP_KEY: ((concourse_smoke_gcp_key))
-                SSH_KEY: ((concourse_smoke_ssh_key))
-                WORKSPACE: bin-smoke-((.:runtime))
-                TF_VAR_GCP_IMAGE: ((.:gcp-image))
-                TF_VAR_RUNTIME: ((.:runtime))
-        timeout: 20m
-
-  - name: bin-smoke-rapid
-    public: true
-    serial: true
-    serial_groups: [bin-smoke]
-    plan:
-      - in_parallel:
-          - get: concourse
-            passed: [build-concourse]
-            trigger: true
-          - get: linux-dev
-            passed: [build-concourse]
-            trigger: true
-          - get: unit-image
-          - get: ci
-      - across:
-          - var: runtime
-            values:
-              - guardian
-              - containerd
-            max_in_flight: all
-          - var: gcp-image
-            values:
-              - ubuntu-2204-lts
-              - ubuntu-2404-lts-amd64
-            max_in_flight: 1
-        do:
-          - task: terraform-smoke
-            image: unit-image
-            file: ci/tasks/terraform-smoke/task.yml
-            input_mapping: { linux-rc: linux-dev }
-            params:
-              GCP_PROJECT: cf-concourse-production
-              GCP_KEY: ((concourse_smoke_gcp_key))
-              SSH_KEY: ((concourse_smoke_ssh_key))
-              WORKSPACE: bin-smoke-((.:runtime))
-              TF_VAR_GCP_IMAGE: ((.:gcp-image))
-              TF_VAR_RUNTIME: ((.:runtime))
-          - task: smoke
-            image: unit-image
-            file: ci/tasks/smoke-test/task.yml
-            input_mapping: { endpoint-info: outputs }
-            params: { MAX_TICKS: 300 }
-            ensure:
-              task: terraform-cleanup
-              image: unit-image
-              file: ci/tasks/terraform-smoke/cleanup.yml
-              params:
-                GCP_PROJECT: cf-concourse-production
-                GCP_KEY: ((concourse_smoke_gcp_key))
-                SSH_KEY: ((concourse_smoke_ssh_key))
-                WORKSPACE: bin-smoke-((.:runtime))
-                TF_VAR_GCP_IMAGE: ((.:gcp-image))
-                TF_VAR_RUNTIME: ((.:runtime))
-        timeout: 20m
+        ensure:
+          task: terraform-cleanup
+          image: unit-image
+          file: ci/tasks/terraform-smoke/cleanup.yml
+          params:
+            GCP_PROJECT: cf-concourse-production
+            GCP_KEY: ((concourse_smoke_gcp_key))
+            SSH_KEY: ((concourse_smoke_ssh_key))
+            WORKSPACE: bin-smoke-((.:runtime.runtime))-((.:runtime.arch))
+            TF_VAR_GCP_IMAGE: ((.:gcp-image))
+            TF_VAR_RUNTIME: ((.:runtime.runtime))
+            TF_VAR_ARCH: ((.:runtime.arch))
 
   - name: quickstart-smoke
     public: true
