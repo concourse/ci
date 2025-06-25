@@ -41,6 +41,7 @@ RUN apk --update-cache add \
     postgresql-17-contrib \
     # for bin-smoke test
     terraform \
+    cmd:ssh-keygen \
     # used by gcloud
     python3 \
     unzip \

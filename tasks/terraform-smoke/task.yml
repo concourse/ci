@@ -14,6 +14,7 @@ params:
   # variables consumed by terraform and their default values
   TF_VAR_GCP_IMAGE: "ubuntu-2204-lts"
   TF_VAR_RUNTIME: "containerd"
+  TF_VAR_ARCH: "amd64"
 
 inputs:
   - name: concourse
