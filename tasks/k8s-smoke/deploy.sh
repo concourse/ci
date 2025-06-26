@@ -56,7 +56,7 @@ run_helm_deploy() {
   echo "Removing any pre-existing pods in namespace ${RELEASE_NAME}"
   kubectl \
     --namespace "$RELEASE_NAME" \
-    delete namespace --all \
+    delete namespace \
     --now=true --wait=true \
     --ignore-not-found=true
 
