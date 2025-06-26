@@ -18,7 +18,8 @@ main() {
 delete_release() {
   helm version
   helm delete "$RELEASE_NAME" --namespace "$RELEASE_NAME"
-  kubectl delete "pvc/data-$RELEASE_NAME-postgresql-0" -n "$RELEASE_NAME" || true
+  kubectl delete "pvc/data-$RELEASE_NAME-postgresql-0" -n "$RELEASE_NAME" --ignore-not-found
+  kubectl delete namespace -n "$RELEASE_NAME" --ignore-not-found --now=true
 }
 
 main "$@"

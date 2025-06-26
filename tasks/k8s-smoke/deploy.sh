@@ -28,7 +28,6 @@ run_helm_deploy() {
   # Construct Helm command dynamically based on CONCOURSE_IMAGE presence
   helm_args=(
     --install
-    --recreate-pods
     --wait
     --namespace "$RELEASE_NAME"
     --create-namespace
@@ -52,6 +51,15 @@ run_helm_deploy() {
     helm_args+=(--set "image=$CONCOURSE_IMAGE")
     helm_args+=(--set "imageDigest=$CONCOURSE_DIGEST")
   fi
+
+  # Helm's --recreate-pods flag is deprecated and removed in helm v3. Using
+  # kubectl to delete any pre-existing pods
+  echo "Removing any pre-existing pods in namespace ${RELEASE_NAME}"
+  kubectl \
+    --namespace "$RELEASE_NAME" \
+    delete namespace --all \
+    --now=true --wait=true \
+    --ignore-not-found=true
 
   # Run Helm upgrade with dynamically built arguments
   helm upgrade "${helm_args[@]}"
