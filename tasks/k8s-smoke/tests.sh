@@ -3,7 +3,6 @@
 set -euo pipefail
 
 readonly RELEASE_NAME="$RELEASE_NAME"
-readonly DIR=$(cd $(dirname $0) && pwd)
 
 source "ci/tasks/scripts/k8s-helpers.sh"
 
@@ -23,7 +22,7 @@ forward_atc_port () {
 }
 
 run_test () {
-  ATC_URL="http://127.0.0.1:8080" "${DIR}/smoke"
+  ATC_URL="http://127.0.0.1:8080" "ci/tasks/smoke-test/run.sh"
 }
 
 main

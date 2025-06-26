@@ -6,7 +6,6 @@ set -euo pipefail
 
 # name of the release to be deleted and purged.
 readonly RELEASE_NAME="${RELEASE_NAME:-concourse-smoke}"
-readonly DIR=$(cd $(dirname $0) && pwd)
 
 source "ci/tasks/scripts/k8s-helpers.sh"
 

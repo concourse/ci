@@ -10,7 +10,6 @@ set -euo pipefail
 # executing `k8s-deploy` or the default values.
 readonly RELEASE_NAME="${RELEASE_NAME:-concourse-smoke}"
 readonly CONCOURSE_DIGEST="${CONCOURSE_DIGEST:-$(cat ./image-info/digest)}"
-readonly DIR=$(cd $(dirname $0) && pwd)
 
 source "ci/tasks/scripts/k8s-helpers.sh"
 
