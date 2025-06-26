@@ -62,8 +62,12 @@ resource "google_compute_firewall" "smoke" {
   source_tags = ["smoke"]
 }
 
+locals {
+  arch = var.ARCH == "amd64" ? "X86_64" : var.ARCH
+}
+
 data "google_compute_image" "ubuntu" {
-  filter      = "family = ${var.GCP_IMAGE}-${var.ARCH}"
+  filter      = "(family = ${var.GCP_IMAGE}*) AND (architecture = ${local.arch})"
   project     = "ubuntu-os-cloud"
   most_recent = true
 }
