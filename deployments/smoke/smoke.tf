@@ -231,7 +231,7 @@ resource "null_resource" "rerun" {
 }
 
 output "instance_url" {
-  value = "https://${google_compute_address.smoke.address}.nip.io"
+  value = "https://${google_compute_address.smoke.address}.sslip.io"
 }
 
 output "admin_password" {
