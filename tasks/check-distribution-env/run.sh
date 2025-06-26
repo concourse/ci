@@ -44,11 +44,11 @@ main() {
 }
 
 get_distribution_variables() {
-  "$distro_scripts/list-actual" "$distro_dir" | filter_list ignored-in-distribution
+  "${distro_scripts}/list-actual" "$distro_dir" | filter_list ignored-in-distribution
 }
 
 get_concourse_variables() {
-  tar -zxf "$linux_rc/concourse-*.tgz" -C "$linux_rc"
+    tar -zxf "${linux_rc}"/concourse-*.tgz -C "$linux_rc"
 
   for subcommand in web worker; do
     "${linux_rc}/concourse/bin/concourse" $subcommand --help 2>&1 |
