@@ -15,4 +15,4 @@ caches:
   - path: concourse/web/wats/node_modules
 
 run:
-  path: ci/tasks/smoke/run.sh
+  path: ci/tasks/smoke-test/run.sh
