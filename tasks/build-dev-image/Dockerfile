@@ -23,19 +23,30 @@ RUN cd /src && \
 FROM ${base_image} AS dev
 ARG TARGETARCH
 
+# For some reason, trying to install a lot of packages at once results in a
+# flaky SSL error, but only when the container layer is being run on an
+# emulated host, like building linux/arm64 on a linux/amd64 host. It doesn't
+# always happen either, but right now it's happening more often than it's not.
+# The error: error:0A000126:SSL routines::unexpected eof while reading:ssl/record/rec_layer_s3.c:691
+RUN apk --no-cache add curl # for tests; installs 20 packages
+RUN apk --no-cache add gcc # for cgo; installs 19 packages
+
 RUN apk --no-cache add \
     btrfs-progs \
     ca-certificates \
-    curl \
-    dumb-init \
-    gcc \
+    dumb-init
+
+# Networking tools for container runtimes
+RUN apk --no-cache add \
     iproute2 \
     iptables \
     ip6tables \
     # guardian runtime runs some script on startup to create iptable rules and
     # requires the real xargs, not busybox's impl (https://github.com/cloudfoundry/guardian/blob/main/kawasaki/iptables/global_chains.go)
-    cmd:xargs \
-    # for worker/runtime/integration tests
+    cmd:xargs
+
+# for worker/runtime/integration tests
+RUN apk --no-cache add \
     mount \
     umount
 
