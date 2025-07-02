@@ -1717,7 +1717,7 @@ resources:
     icon: *image-icon
     source:
       repository: concourse/golang-builder
-      variant: ((stemcell_name))
+      tag: latest
       username: ((docker.username))
       password: ((docker.password))
 
