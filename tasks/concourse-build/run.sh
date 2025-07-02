@@ -11,7 +11,7 @@ version="$(cat version/version)"
 
 final_version=""
 ldflags=""
-if [ -e final-version/version ]; then
+if [[ -e final-version/version ]]; then
   final_version="$(cat final-version/version)"
   ldflags="-X github.com/concourse/concourse.Version=$final_version"
 fi
@@ -47,6 +47,7 @@ for platform in "${platforms[@]}"; do
         if [[ -n "$final_version" ]]; then
             # Right now all our workers are amd64 so we can only do version checks for that arch
             if [[ "$GOOS" == "linux" && "$GOARCH" == "amd64" ]]; then
+                echo  "performing version check"
                 test "$(./concourse --version)" = "$final_version"
             else
                 echo "skipping version check for platform ${GOOS}/${GOARCH}"

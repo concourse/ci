@@ -4,6 +4,8 @@ platform: linux
 inputs:
   - name: ci
   - name: concourse-linux
+  - name: final-version
+    optional: true
 
 run:
   path: ci/tasks/validate-linux-rc/run.sh

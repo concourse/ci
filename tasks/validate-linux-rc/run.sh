@@ -5,6 +5,10 @@ set -euo pipefail
 # install ldd
 apk add --quiet --no-progress posix-libc-utils
 
+if [[ -e final-version/version ]]; then
+  final_version="$(cat final-version/version)"
+fi
+
 for arch in amd64 arm64; do
     tar -xzf concourse-linux/concourse-*linux.${arch}.tgz
     pushd concourse
@@ -36,14 +40,20 @@ for arch in amd64 arm64; do
             echo "concourse binary is not static; aborting"
             exit 1
         fi
-        ./bin/concourse --version
+        if [[ -n "$final_version" ]]; then
+            echo "validating concourse --version should equal $final_version"
+            test "$(./bin/concourse --version)" = "$final_version"
+        fi
 
         tar -xzf fly-assets/fly-linux-amd64.tgz
         if ldd fly; then
             echo "fly binary is not static; aborting"
             exit 1
         fi
-        ./fly --version
+        if [[ -n "$final_version" ]]; then
+            echo "validating fly --version should equal $final_version"
+            test "$(./fly --version)" = "$final_version"
+        fi
     fi
 
     # sanity check for concourse dependencies
