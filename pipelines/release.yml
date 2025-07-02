@@ -288,28 +288,34 @@ jobs:
           steps:
             - get: concourse
               trigger: true
-            - get: unit-image
-              trigger: true
-            - get: golang-builder-image
-              trigger: true
-              params: { format: oci }
             - get: golang-builder-image-rootfs
               resource: golang-builder-image
               trigger: true
               params: { format: rootfs }
-            - get: gdn
+            - get: golang-builder-image
               trigger: true
+              params: { format: oci-layout }
             - get: containerd
               trigger: true
             - get: runc
+              trigger: true
+            - get: gdn
               trigger: true
             - get: cni
               trigger: true
             - get: dumb-init
               trigger: true
-            - get: resource-types-image
+            - get: resource-types-amd64
+              resource: resource-types-image
               passed: [resource-types-images]
               trigger: true
+              params: *amd64
+            - get: resource-types-arm64
+              resource: resource-types-image
+              passed: [resource-types-images]
+              trigger: true
+              params: *arm64
+            - get: unit-image
             - get: oci-build-task
             - get: ci
       - in_parallel:
@@ -319,21 +325,21 @@ jobs:
               image: unit-image
               file: ci/tasks/yarn-build/task.yml
             - task: fly-linux
-              image: golang-builder-image
+              image: golang-builder-image-rootfs
               file: ci/tasks/fly-build/task.yml
               output_mapping:
                 fly-builds: fly-linux
               params:
                 PLATFORMS: linux/amd64,linux/arm64
             - task: fly-darwin
-              image: golang-builder-image
+              image: golang-builder-image-rootfs
               file: ci/tasks/fly-build/task.yml
               output_mapping:
                 fly-builds: fly-darwin
               params:
                 PLATFORMS: darwin/amd64,darwin/arm64
             - task: fly-windows
-              image: golang-builder-image
+              image: golang-builder-image-rootfs
               file: ci/tasks/fly-build/task.yml
               output_mapping:
                 fly-builds: fly-windows
@@ -351,7 +357,8 @@ jobs:
       - put: dev-image
         no_get: true
         inputs: detect
-        params: { image: image/image }
+        params:
+          image: image/image
 
   - name: worker-runtime
     public: true

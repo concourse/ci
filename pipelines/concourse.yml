@@ -291,8 +291,7 @@ jobs:
               params: { format: rootfs }
             - get: golang-builder-image
               trigger: true
-              params:
-                format: oci-layout
+              params: { format: oci-layout }
             - get: containerd
               trigger: true
             - get: runc
@@ -307,16 +306,12 @@ jobs:
               resource: resource-types-image
               passed: [resource-types-images]
               trigger: true
-              params:
-                platform:
-                  architecture: amd64
+              params: *amd64
             - get: resource-types-arm64
               resource: resource-types-image
               passed: [resource-types-images]
               trigger: true
-              params:
-                platform:
-                  architecture: arm64
+              params: *arm64
             - get: unit-image
             - get: oci-build-task
             - get: ci
