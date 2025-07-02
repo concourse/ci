@@ -565,7 +565,8 @@ jobs:
           - get: unit-image
           - get: concourse-chart
             trigger: true
-          - get: linux-amd64
+          - get: linux-rc
+            resource: linux-amd64-rc
             passed: [bin-smoke]
             trigger: true
           - get: ci
@@ -767,7 +768,7 @@ jobs:
             passed: [build-rc-image]
             params: { skip_download: true }
           - get: concourse-windows
-            resource: windows-rc
+            resource: windows-amd64-rc
             passed: [build-rc]
             params: { skip_download: "true" }
           - get: concourse-darwin
@@ -928,6 +929,7 @@ jobs:
             passed: [bin-smoke]
             trigger: true
           - get: linux-rc
+            resource: linux-amd64-rc
             passed: [bin-smoke]
             trigger: true
           - get: concourse-release-repo
@@ -953,9 +955,11 @@ jobs:
             passed: [build-rc]
             trigger: true
           - get: linux-rc
+            resource: linux-amd64-rc
             passed: [build-rc]
             trigger: true
           - get: windows-rc
+            resource: windows-amd64-rc
             passed: [build-rc]
             trigger: true
           - get: concourse-release-repo
@@ -1079,11 +1083,15 @@ jobs:
               - bosh-smoke
               - bosh-check-props
           - get: unit-image
-          - get: linux-rc
+          - get: linux-amd64-rc
             passed: [build-rc, build-rc-image, bosh-check-props]
-          - get: windows-rc
+          - get: linux-arm64-rc
+            passed: [build-rc, build-rc-image]
+          - get: windows-amd64-rc
             passed: [build-rc]
-          - get: darwin-rc
+          - get: darwin-amd64-rc
+            passed: [build-rc]
+          - get: darwin-arm64-rc
             passed: [build-rc]
           - get: concourse-rc-image
             passed: [k8s-topgun, build-rc-image]
@@ -1135,11 +1143,15 @@ jobs:
             resource: version
             params: { bump: final }
             passed: [create-draft-release]
-          - get: linux-rc
+          - get: linux-amd64-rc
             passed: [create-draft-release]
-          - get: windows-rc
+          - get: linux-arm64-rc
             passed: [create-draft-release]
-          - get: darwin-rc
+          - get: windows-amd64-rc
+            passed: [create-draft-release]
+          - get: darwin-amd64-rc
+            passed: [create-draft-release]
+          - get: darwin-arm64-rc
             passed: [create-draft-release]
           - get: concourse-rc-image
             passed: [create-draft-release]
@@ -1221,11 +1233,15 @@ jobs:
           - get: concourse
             passed: [shipit]
           - get: unit-image
-          - get: linux-rc
+          - get: linux-amd64-rc
             passed: [shipit]
-          - get: windows-rc
+          - get: linux-arm64-rc
             passed: [shipit]
-          - get: darwin-rc
+          - get: windows-amd64-rc
+            passed: [shipit]
+          - get: darwin-amd64-rc
+            passed: [shipit]
+          - get: darwin-arm64-rc
             passed: [shipit]
           - get: ci
       - in_parallel:
