@@ -391,13 +391,12 @@ jobs:
 
   - name: testflight
     public: true
-    max_in_flight: 2
+    max_in_flight: 1
     plan:
       - in_parallel:
           - get: concourse
             passed: [unit, dev-image]
             trigger: true
-          - get: unit-image
           - get: dev-image
             passed: [dev-image]
             trigger: true
@@ -406,6 +405,7 @@ jobs:
             params: { format: oci }
           - get: postgres-image-legacy
             params: { format: oci }
+          - get: unit-image
           - get: ci
       - across:
           - var: runtime
@@ -428,19 +428,19 @@ jobs:
 
   - name: watsjs
     public: true
-    max_in_flight: 2
+    max_in_flight: 1
     plan:
       - in_parallel:
           - get: concourse
             passed: [unit, dev-image]
             trigger: true
-          - get: unit-image
           - get: dev-image
             passed: [dev-image]
             trigger: true
             params: { format: oci }
           - get: postgres-image
             params: { format: oci }
+          - get: unit-image
           - get: ci
       - task: watsjs
         attempts: 3
@@ -461,13 +461,13 @@ jobs:
             passed: [dev-image]
             params: { format: oci }
             trigger: true
-          - get: unit-image
           - get: concourse-image
             params: { format: oci }
           - get: postgres-image
             params: { format: oci }
           - get: vault-image
             params: { format: oci }
+          - get: unit-image
           - get: ci
       - task: integration
         privileged: true
