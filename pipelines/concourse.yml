@@ -18,7 +18,7 @@ resource_types:
     type: registry-image
     source: { repository: linkyard/helm-chart-resource, tag: 2.17.0 }
 
-  #TODO: remove after next release. Needed for the get.params.platform feature
+  #TODO: remove after 7.14 upgrade. Needed for the get.params.platform feature
   - name: registry-image
     type: registry-image
     source:

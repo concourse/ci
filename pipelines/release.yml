@@ -44,6 +44,15 @@ resource_types:
     type: registry-image
     source: { repository: aoldershaw/github-pr-resource }
 
+  #TODO: remove after 7.14 upgrade. Needed for the get.params.platform feature
+  - name: registry-image
+    type: registry-image
+    source:
+      repository: concourse/registry-image-resource
+      tag: 1.13.0
+      username: ((docker.username))
+      password: ((docker.password))
+
 groups:
   - name: develop
     jobs:
@@ -152,7 +161,7 @@ jobs:
     serial: true
     plan:
       - in_parallel:
-          - get: builder
+          - get: oci-build-task
             trigger: true
           - get: periodic-check
             trigger: true
@@ -182,7 +191,7 @@ jobs:
           - get: time-resource
             trigger: true
       - task: build-ubuntu
-        image: builder
+        image: oci-build-task
         privileged: true
         file: ci/tasks/build-resource-types-image/task.yml
       - put: resource-types-image
@@ -222,7 +231,7 @@ jobs:
             - get: resource-types-image
               passed: [resource-types-images]
               trigger: true
-            - get: builder
+            - get: oci-build-task
             - get: ci
       - in_parallel:
           fail_fast: true
@@ -252,7 +261,7 @@ jobs:
               params:
                 PLATFORMS: windows/amd64
       - task: build
-        image: builder
+        image: oci-build-task
         privileged: true
         input_mapping:
           concourse: built-concourse
@@ -617,11 +626,11 @@ jobs:
             passed: [build-rc]
           - get: concourse-docker
             trigger: true
-          - get: builder
+          - get: oci-build-task
           - get: ci
       - task: build-ubuntu
         file: concourse-docker/ci/build-image.yml
-        image: builder
+        image: oci-build-task
         privileged: true
       - put: concourse-rc-image
         no_get: true
@@ -1254,7 +1263,7 @@ jobs:
           - get: linux-rc
             passed: [shipit]
           - get: concourse-docker
-          - get: builder
+          - get: oci-build-task
           - get: ci
           - get: wolfi-base
           - get: postgres-image
@@ -1263,7 +1272,7 @@ jobs:
         file: version/version
       - task: build
         file: concourse-docker/ci/build-image.yml
-        image: builder
+        image: oci-build-task
         privileged: true
         params:
           UNPACK_ROOTFS: true
@@ -1541,7 +1550,7 @@ resources:
       username: ((docker.username))
       password: ((docker.password))
 
-  - name: builder
+  - name: oci-build-task
     type: registry-image
     icon: *image-icon
     source: { repository: concourse/oci-build-task }
