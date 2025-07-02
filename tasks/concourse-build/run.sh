@@ -12,8 +12,10 @@ version="$(cat version/version)"
 final_version=""
 ldflags=""
 if [[ -e final-version/version ]]; then
-  final_version="$(cat final-version/version)"
-  ldflags="-X github.com/concourse/concourse.Version=$final_version"
+    echo -n "final version detected: "
+    final_version="$(cat final-version/version)"
+    ldflags="-X github.com/concourse/concourse.Version=$final_version"
+    echo "$final_version"
 fi
 
 if [[ -z "${PLATFORMS}" ]]; then
