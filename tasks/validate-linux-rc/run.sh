@@ -6,7 +6,7 @@ set -euo pipefail
 apk add --quiet --no-progress posix-libc-utils
 
 for arch in amd64 arm64; do
-    tar -xzf concourse-tarballs/concourse-*linux.${arch}.tgz
+    tar -xzf concourse-linux/concourse-*linux.${arch}.tgz
     pushd concourse
 
     # ensure all resource types are bundled

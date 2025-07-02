@@ -1,0 +1,12 @@
+platform: linux
+
+inputs:
+  - name: concourse
+  - name: ci
+  - name: version
+
+outputs:
+  - name: version
+
+run:
+  path: ci/tasks/get-rc-version/run.sh

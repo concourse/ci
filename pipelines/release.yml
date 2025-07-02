@@ -458,35 +458,6 @@ jobs:
         input_mapping:
           concourse-image: latest-concourse-image
 
-  - name: k8s-check-helm-params
-    public: true
-    max_in_flight: 1
-    plan:
-      - in_parallel:
-          - get: concourse
-            passed: [build-rc-image]
-            trigger: true
-          - get: concourse-rc-image
-            passed: [build-rc-image]
-            trigger: true
-          - get: version
-            passed: [build-rc-image]
-            trigger: true
-          - get: unit-image
-          - get: concourse-chart
-            trigger: true
-          - get: linux-rc
-            passed: [bin-smoke]
-            trigger: true
-          - get: ci
-      - task: check-params
-        file: ci/tasks/check-distribution-env/task.yml
-        image: unit-image
-        input_mapping:
-          distribution: concourse-chart
-        params:
-          DISTRIBUTION: helm
-
   - name: k8s-smoke
     public: true
     serial: true
@@ -529,13 +500,14 @@ jobs:
           SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
           RELEASE_NAME: ((concourse_smoke_deployment_name))
           MAX_TICKS: 300
-      - task: delete
-        image: unit-image
-        file: ci/tasks/k8s-smoke/delete.yml
-        params:
-          SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
-          RELEASE_NAME: ((concourse_smoke_deployment_name))
-          CONCOURSE_IMAGE: concourse/concourse-rc
+    ensure:
+      task: delete
+      image: unit-image
+      file: ci/tasks/k8s-smoke/delete.yml
+      params:
+        SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
+        RELEASE_NAME: ((concourse_smoke_deployment_name))
+        CONCOURSE_IMAGE: concourse/concourse-rc
 
   - name: k8s-topgun
     public: true
@@ -543,18 +515,18 @@ jobs:
     plan:
       - in_parallel:
           - get: concourse
+            tags: [k8s-topgun]
             passed: [k8s-smoke]
             trigger: true
-            tags: [k8s-topgun]
           - get: version
+            tags: [k8s-topgun]
             passed: [k8s-smoke]
             trigger: true
-            tags: [k8s-topgun]
           - get: concourse-rc-image
+            tags: [k8s-topgun]
             passed: [k8s-smoke]
             trigger: true
             params: { format: oci }
-            tags: [k8s-topgun]
           - get: unit-image
           - get: prometheus-chart
             tags: [k8s-topgun]
@@ -575,6 +547,35 @@ jobs:
           IN_CLUSTER: "true"
           SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
           CONCOURSE_IMAGE_NAME: concourse/concourse-rc
+
+  - name: k8s-check-helm-params
+    public: true
+    max_in_flight: 1
+    plan:
+      - in_parallel:
+          - get: concourse
+            passed: [build-rc-image]
+            trigger: true
+          - get: concourse-rc-image
+            passed: [build-rc-image]
+            trigger: true
+          - get: version
+            passed: [build-rc-image]
+            trigger: true
+          - get: unit-image
+          - get: concourse-chart
+            trigger: true
+          - get: linux-amd64
+            passed: [bin-smoke]
+            trigger: true
+          - get: ci
+      - task: check-params
+        file: ci/tasks/check-distribution-env/task.yml
+        image: unit-image
+        input_mapping:
+          distribution: concourse-chart
+        params:
+          DISTRIBUTION: helm
 
   - name: rc
     public: true
@@ -618,28 +619,22 @@ jobs:
             resource: dev-image
             passed: [rc]
             trigger: true
-            params:
-              platform:
-                architecture: amd64
+            params: *amd64
           - get: dev-arm64
             resource: dev-image
             passed: [rc]
             trigger: true
-            params:
-              platform:
-                architecture: arm64
+            params: *arm64
           - get: resource-types-amd64
             resource: resource-types-image
             passed: [dev-image]
-            params:
-              platform:
-                architecture: amd64
+            trigger: true
+            params: *amd64
           - get: resource-types-arm64
             resource: resource-types-image
             passed: [dev-image]
-            params:
-              platform:
-                architecture: amd64
+            trigger: true
+            params: *arm64
       - in_parallel:
           fail_fast: true
           steps:
@@ -668,13 +663,38 @@ jobs:
               file: ci/tasks/yarn-build/task.yml
               image: unit-image
             - task: get-rc-version
-              file: ci/tasks/get-rc-version.yml
+              file: ci/tasks/get-rc-version/task.yml
               image: golang-builder-image
-      - task: concourse-build
-        image: golang-builder-image
-        file: ci/tasks/concourse-build/task.yml
-        input_mapping:
-          concourse: built-concourse
+      - in_parallel:
+          fail_fast: true
+          steps:
+            - task: concourse-linux
+              image: golang-builder-image
+              file: ci/tasks/concourse-build/task.yml
+              input_mapping:
+                concourse: built-concourse
+              output_mapping:
+                concourse-tarballs: concourse-linux
+              params:
+                PLATFORMS: linux/amd64,linux/arm64
+            - task: concourse-darwin
+              image: golang-builder-image
+              file: ci/tasks/concourse-build/task.yml
+              input_mapping:
+                concourse: built-concourse
+              output_mapping:
+                concourse-tarballs: concourse-darwin
+              params:
+                PLATFORMS: darwin/amd64,darwin/arm64
+            - task: concourse-windows
+              image: golang-builder-image
+              file: ci/tasks/concourse-build/task.yml
+              input_mapping:
+                concourse: built-concourse
+              output_mapping:
+                concourse-tarballs: concourse-windows
+              params:
+                PLATFORMS: windows/amd64
       - in_parallel:
           - task: validate-linux-rc
             image: unit-image
@@ -682,18 +702,26 @@ jobs:
           - task: validate-windows-rc
             file: ci/tasks/validate-windows-rc/task.yml
       - in_parallel:
-          - put: linux-rc
+          - put: linux-amd64-rc
             no_get: true
             inputs: detect
-            params: { file: concourse-linux/concourse-*.tgz }
-          - put: windows-rc
+            params: { file: concourse-linux/concourse-*.amd64.tgz }
+          - put: linux-arm64-rc
             no_get: true
             inputs: detect
-            params: { file: concourse-windows/concourse-*.zip }
-          - put: darwin-rc
+            params: { file: concourse-linux/concourse-*.arm64.tgz }
+          - put: darwin-amd64-rc
             no_get: true
             inputs: detect
-            params: { file: concourse-darwin/concourse-*.tgz }
+            params: { file: concourse-darwin/concourse-*.amd64.tgz }
+          - put: darwin-arm64-rc
+            no_get: true
+            inputs: detect
+            params: { file: concourse-darwin/concourse-*.arm64.tgz }
+          - put: windows-amd64-rc
+            no_get: true
+            inputs: detect
+            params: { file: concourse-windows/concourse-*.amd64.zip }
 
   - name: build-rc-image
     public: true
@@ -1502,7 +1530,7 @@ resources:
       key: version-((release_minor))
       initial_version: ((release_minor)).0-rc.0
 
-  - name: linux-rc
+  - name: linux-amd64-rc
     type: gcs
     icon: linux
     source:
@@ -1510,7 +1538,15 @@ resources:
       json_key: ((concourse_artifacts_json_key))
       regexp: rcs/concourse-(.*)\.linux\.amd64\.tgz
 
-  - name: windows-rc
+  - name: linux-arm64-rc
+    type: gcs
+    icon: linux
+    source:
+      bucket: concourse-artifacts
+      json_key: ((concourse_artifacts_json_key))
+      regexp: rcs/concourse-(.*)\.linux\.arm64\.tgz
+
+  - name: windows-amd64-rc
     type: gcs
     icon: microsoft-windows
     source:
@@ -1518,13 +1554,21 @@ resources:
       json_key: ((concourse_artifacts_json_key))
       regexp: rcs/concourse-(.*)\.windows\.amd64\.zip
 
-  - name: darwin-rc
+  - name: darwin-amd64-rc
     type: gcs
     icon: apple
     source:
       bucket: concourse-artifacts
       json_key: ((concourse_artifacts_json_key))
       regexp: rcs/concourse-(.*)\.darwin\.amd64\.tgz
+
+  - name: darwin-arm64-rc
+    type: gcs
+    icon: apple
+    source:
+      bucket: concourse-artifacts
+      json_key: ((concourse_artifacts_json_key))
+      regexp: rcs/concourse-(.*)\.darwin\.arm64\.tgz
 
   - name: concourse-release
     type: bosh-release

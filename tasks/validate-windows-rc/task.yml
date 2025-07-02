@@ -3,7 +3,7 @@ platform: windows
 
 inputs:
   - name: ci
-  - name: concourse-tarballs
+  - name: concourse-windows
 
 run:
   path: powershell
