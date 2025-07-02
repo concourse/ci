@@ -362,7 +362,7 @@ jobs:
 
   - name: worker-runtime
     public: true
-    max_in_flight: 1
+    serial: true
     plan:
       - in_parallel:
           - get: concourse
@@ -380,7 +380,7 @@ jobs:
 
   - name: testflight
     public: true
-    max_in_flight: 1
+    serial: true
     plan:
       - in_parallel:
           - get: concourse
@@ -410,7 +410,7 @@ jobs:
 
   - name: watsjs
     public: true
-    max_in_flight: 1
+    serial: true
     plan:
       - in_parallel:
           - get: concourse
@@ -550,7 +550,7 @@ jobs:
 
   - name: k8s-check-helm-params
     public: true
-    max_in_flight: 1
+    serial: true
     plan:
       - in_parallel:
           - get: concourse
@@ -917,7 +917,7 @@ jobs:
 
   - name: bosh-check-props
     public: true
-    max_in_flight: 1
+    serial: true
     plan:
       - in_parallel:
           - get: concourse
