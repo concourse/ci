@@ -831,7 +831,7 @@ jobs:
         image: wolfi-base
         file: ci/tasks/extract-trivy-db/task.yml
       - in_parallel:
-          - task: scan-ubuntu
+          - task: scan-concourse
             file: ci/tasks/scan-image/task.yml
             image: wolfi-base
             input_mapping: { image: concourse-rc-image }
@@ -855,7 +855,10 @@ jobs:
           - get: version
             passed: [build-rc]
             trigger: true
-          - get: linux-rc
+          - get: linux-amd64-rc
+            passed: [build-rc]
+            trigger: true
+          - get: linux-arm64-rc
             passed: [build-rc]
             trigger: true
           - get: unit-image
@@ -865,26 +868,39 @@ jobs:
       - across:
           - var: runtime
             values:
-              - guardian
-              - containerd
+              - runtime: guardian
+                arch: amd64
+              - runtime: containerd
+                arch: amd64
+              - runtime: containerd
+                arch: arm64
+            max_in_flight: all
+          - var: gcp-image
+            values:
+              - ubuntu-2204-lts
+              - ubuntu-2404-lts
             max_in_flight: 1
+        timeout: 40m
         do:
-          - task: terraform-smoke
-            image: unit-image
-            file: ci/tasks/terraform-smoke/task.yml
-            params:
-              GCP_PROJECT: cf-concourse-production
-              GCP_KEY: ((concourse_smoke_gcp_key))
-              SSH_KEY: ((concourse_smoke_ssh_key))
-              WORKSPACE: release-((release_minor))
-              CONCOURSE_VERSION: ((.:concourse_version))
-              TF_VAR_GCP_IMAGE: ((gcp_image))
-              TF_VAR_RUNTIME: ((.:runtime))
-          - task: smoke
-            image: unit-image
-            file: ci/tasks/smoke-test/task.yml
-            input_mapping: { endpoint-info: outputs }
-            params: { MAX_TICKS: 300 }
+          - do:
+              - task: terraform-apply
+                image: unit-image
+                file: ci/tasks/terraform-smoke/task.yml
+                input_mapping: { linux-rc: linux-((.:runtime.arch))-rc }
+                params:
+                  GCP_PROJECT: cf-concourse-production
+                  GCP_KEY: ((concourse_smoke_gcp_key))
+                  SSH_KEY: ((concourse_smoke_ssh_key))
+                  WORKSPACE: release-((release_minor))-((.:runtime.runtime))-((.:runtime.arch))
+                  CONCOURSE_VERSION: ((.:concourse_version))
+                  TF_VAR_GCP_IMAGE: ((.:gcp-image))
+                  TF_VAR_RUNTIME: ((.:runtime.runtime))
+                  TF_VAR_ARCH: ((.:runtime.arch))
+              - task: smoke-test
+                image: unit-image
+                file: ci/tasks/smoke-test/task.yml
+                input_mapping: { endpoint-info: outputs }
+                params: { MAX_TICKS: 300 }
             ensure:
               task: terraform-cleanup
               image: unit-image
@@ -893,10 +909,11 @@ jobs:
                 GCP_PROJECT: cf-concourse-production
                 GCP_KEY: ((concourse_smoke_gcp_key))
                 SSH_KEY: ((concourse_smoke_ssh_key))
-                WORKSPACE: release-((release_minor))
+                WORKSPACE: release-((release_minor))-((.:runtime.runtime))-((.:runtime.arch))
                 CONCOURSE_VERSION: ((.:concourse_version))
-                TF_VAR_GCP_IMAGE: ((gcp_image))
-                TF_VAR_RUNTIME: ((.:runtime))
+                TF_VAR_GCP_IMAGE: ((.:gcp-image))
+                TF_VAR_RUNTIME: ((.:runtime.runtime))
+                TF_VAR_ARCH: ((.:runtime.arch))
 
   - name: bosh-check-props
     public: true
