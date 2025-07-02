@@ -608,10 +608,12 @@ jobs:
           - get: resource-types-amd64
             resource: resource-types-image
             passed: [dev-image]
+            trigger: true
             params: *amd64
           - get: resource-types-arm64
             resource: resource-types-image
             passed: [dev-image]
+            trigger: true
             params: *arm64
       - in_parallel:
           fail_fast: true
