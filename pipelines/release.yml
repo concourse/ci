@@ -161,113 +161,115 @@ jobs:
     serial: true
     plan:
       - in_parallel:
-          - get: periodic-check
-            trigger: true
-          - get: oci-build-task
-          - get: ci
-          #amd64
-          - get: registry-image-amd64
-            resource: registry-image-resource
-            trigger: true
-            params: &amd64
-              platform:
-                architecture: amd64
-          - get: docker-image-amd64
-            resource: docker-image-resource
-            trigger: true
-            params: *amd64
-          - get: git-amd64
-            resource: git-resource
-            trigger: true
-            params: *amd64
-          - get: hg-amd64
-            resource: hg-resource
-            trigger: true
-            params: *amd64
-          - get: semver-amd64
-            resource: semver-resource
-            trigger: true
-            params: *amd64
-          - get: s3-amd64
-            resource: s3-resource
-            trigger: true
-            params: *amd64
-          - get: pool-amd64
-            resource: pool-resource
-            trigger: true
-            params: *amd64
-          - get: mock-amd64
-            resource: mock-resource
-            trigger: true
-            params: *amd64
-          - get: bosh-io-release-amd64
-            resource: bosh-io-release-resource
-            trigger: true
-            params: *amd64
-          - get: time-amd64
-            resource: time-resource
-            trigger: true
-            params: *amd64
-          - get: bosh-io-stemcell-amd64
-            resource: bosh-io-stemcell-resource
-            trigger: true
-            params: *amd64
-          - get: github-release-amd64
-            resource: github-release-resource
-            trigger: true
-            params: *amd64
-          # arm64
-          - get: registry-image-arm64
-            resource: registry-image-resource
-            trigger: true
-            params: &arm64
-              platform:
-                architecture: arm64
-          - get: docker-image-arm64
-            resource: docker-image-resource
-            trigger: true
-            params: *arm64
-          - get: git-arm64
-            resource: git-resource
-            trigger: true
-            params: *arm64
-          - get: hg-arm64
-            resource: hg-resource
-            trigger: true
-            params: *arm64
-          - get: semver-arm64
-            resource: semver-resource
-            trigger: true
-            params: *arm64
-          - get: s3-arm64
-            resource: s3-resource
-            trigger: true
-            params: *arm64
-          - get: pool-arm64
-            resource: pool-resource
-            trigger: true
-            params: *arm64
-          - get: mock-arm64
-            resource: mock-resource
-            trigger: true
-            params: *arm64
-          - get: bosh-io-release-arm64
-            resource: bosh-io-release-resource
-            trigger: true
-            params: *arm64
-          - get: time-arm64
-            resource: time-resource
-            trigger: true
-            params: *arm64
-          - get: bosh-io-stemcell-arm64
-            resource: bosh-io-stemcell-resource
-            trigger: true
-            params: *arm64
-          - get: github-release-arm64
-            resource: github-release-resource
-            trigger: true
-            params: *arm64
-      - task: build-ubuntu
+          fail_fast: true
+          steps:
+            - get: periodic-check
+              trigger: true
+            - get: oci-build-task
+            - get: ci
+            #amd64
+            - get: registry-image-amd64
+              resource: registry-image-resource
+              trigger: true
+              params: &amd64
+                platform:
+                  architecture: amd64
+            - get: docker-image-amd64
+              resource: docker-image-resource
+              trigger: true
+              params: *amd64
+            - get: git-amd64
+              resource: git-resource
+              trigger: true
+              params: *amd64
+            - get: hg-amd64
+              resource: hg-resource
+              trigger: true
+              params: *amd64
+            - get: semver-amd64
+              resource: semver-resource
+              trigger: true
+              params: *amd64
+            - get: s3-amd64
+              resource: s3-resource
+              trigger: true
+              params: *amd64
+            - get: pool-amd64
+              resource: pool-resource
+              trigger: true
+              params: *amd64
+            - get: mock-amd64
+              resource: mock-resource
+              trigger: true
+              params: *amd64
+            - get: bosh-io-release-amd64
+              resource: bosh-io-release-resource
+              trigger: true
+              params: *amd64
+            - get: time-amd64
+              resource: time-resource
+              trigger: true
+              params: *amd64
+            - get: bosh-io-stemcell-amd64
+              resource: bosh-io-stemcell-resource
+              trigger: true
+              params: *amd64
+            - get: github-release-amd64
+              resource: github-release-resource
+              trigger: true
+              params: *amd64
+            # arm64
+            - get: registry-image-arm64
+              resource: registry-image-resource
+              trigger: true
+              params: &arm64
+                platform:
+                  architecture: arm64
+            - get: docker-image-arm64
+              resource: docker-image-resource
+              trigger: true
+              params: *arm64
+            - get: git-arm64
+              resource: git-resource
+              trigger: true
+              params: *arm64
+            - get: hg-arm64
+              resource: hg-resource
+              trigger: true
+              params: *arm64
+            - get: semver-arm64
+              resource: semver-resource
+              trigger: true
+              params: *arm64
+            - get: s3-arm64
+              resource: s3-resource
+              trigger: true
+              params: *arm64
+            - get: pool-arm64
+              resource: pool-resource
+              trigger: true
+              params: *arm64
+            - get: mock-arm64
+              resource: mock-resource
+              trigger: true
+              params: *arm64
+            - get: bosh-io-release-arm64
+              resource: bosh-io-release-resource
+              trigger: true
+              params: *arm64
+            - get: time-arm64
+              resource: time-resource
+              trigger: true
+              params: *arm64
+            - get: bosh-io-stemcell-arm64
+              resource: bosh-io-stemcell-resource
+              trigger: true
+              params: *arm64
+            - get: github-release-arm64
+              resource: github-release-resource
+              trigger: true
+              params: *arm64
+      - task: build
         image: oci-build-task
         privileged: true
         file: ci/tasks/build-resource-types-image/task.yml
@@ -275,7 +277,7 @@ jobs:
         no_get: true
         inputs: detect
         params:
-          image: image/image.tar
+          image: image/image
 
   - name: dev-image
     public: true
