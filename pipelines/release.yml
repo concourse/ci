@@ -772,7 +772,7 @@ jobs:
             passed: [build-rc]
             params: { skip_download: "true" }
           - get: concourse-darwin
-            resource: darwin-rc
+            resource: darwin-amd64-rc
             passed: [build-rc]
             params: { skip_download: "true" }
       - load_var: concourse_image_repo
@@ -1323,6 +1323,7 @@ jobs:
     plan:
       - in_parallel:
           - get: linux-rc
+            resource: linux-amd64-rc
             passed: [shipit]
             trigger: true
           - get: ci
@@ -1412,7 +1413,9 @@ jobs:
             passed: [shipit]
           - get: version
             passed: [shipit]
-          - get: linux-rc
+          - get: linux-amd64-rc
+            passed: [shipit]
+          - get: linux-arm64-rc
             passed: [shipit]
           - get: concourse-docker
           - get: oci-build-task
