@@ -39,15 +39,15 @@ for platform in "${platforms[@]}"; do
 
     # Set platform-specific flags
     if [ "$GOOS" = "linux" ] || [ "$GOOS" = "darwin" ]; then
-    ldflags+=' -extldflags "-static"'
+        ldflags+=' -extldflags "-static"'
     fi
 
     if [ "$GOOS" = "darwin" ]; then
-    # This is to ensure on darwin we use the cgo DNS resolver. If we don't then
-    # users have DNS resolution errors when using fly
-    export CGO_ENABLED=1
-    tags="osusergo"
-    platform_flags="-buildvcs=false"
+        # This is to ensure on darwin we use the cgo DNS resolver. If we don't then
+        # users have DNS resolution errors when using fly
+        export CGO_ENABLED=1
+        tags="osusergo"
+        platform_flags="-buildvcs=false"
     fi
 
     platform_dir="$builds/${GOOS}_${GOARCH}"
@@ -55,11 +55,11 @@ for platform in "${platforms[@]}"; do
 
     bin="$platform_dir/fly"
     if [ "$GOOS" = "windows" ]; then
-    bin+=".exe"
+        bin+=".exe"
     fi
 
     pushd concourse
-    GOOS=$GOOS GOARCH=$GOARCH go build -a -tags "$tags" $platform_flags -ldflags "$ldflags" -o "$bin" ./fly
+        GOOS=$GOOS GOARCH=$GOARCH go build -a -tags "$tags" $platform_flags -ldflags "$ldflags" -o "$bin" ./fly
     popd
 
     pushd "$platform_dir"

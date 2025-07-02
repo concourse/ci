@@ -14,7 +14,7 @@ ldflags=""
 if [[ -e final-version/version ]]; then
     echo -n "final version detected: "
     final_version="$(cat final-version/version)"
-    ldflags="-X github.com/concourse/concourse.Version=$final_version"
+    ldflags="-X github.com/concourse/concourse.Version=${final_version}"
     echo "$final_version"
 fi
 
