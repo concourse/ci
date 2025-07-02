@@ -735,14 +735,19 @@ jobs:
           - get: version
             passed: [build-rc]
             trigger: true
-          - get: linux-rc
+          - get: linux-amd64
+            resource: linux-amd64-rc
+            trigger: true
+            passed: [build-rc]
+          - get: linux-arm64
+            resource: linux-arm64-rc
             trigger: true
             passed: [build-rc]
           - get: concourse-docker
             trigger: true
           - get: oci-build-task
           - get: ci
-      - task: build-ubuntu
+      - task: build
         file: concourse-docker/ci/build-image.yml
         image: oci-build-task
         privileged: true
@@ -750,7 +755,7 @@ jobs:
         no_get: true
         inputs: detect
         params:
-          image: image/image.tar
+          image: image/image
           additional_tags: version/version
 
   - name: bump-prod-to-rc
