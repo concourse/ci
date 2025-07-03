@@ -7,9 +7,11 @@ image_resource:
 
 inputs:
   - name: version
-  - name: linux-rc
-  - name: windows-rc
-  - name: darwin-rc
+  - name: linux-amd64-rc
+  - name: linux-arm64-rc
+  - name: windows-amd64-rc
+  - name: darwin-amd64-rc
+  - name: darwin-arm64-rc
   - name: ci
 
 outputs:
