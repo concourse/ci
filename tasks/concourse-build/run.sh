@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+shopt -s extglob
 
 apk --no-progress add cmd:shasum
 
@@ -12,10 +13,9 @@ version="$(cat version/version)"
 final_version=""
 ldflags=""
 if [[ -e final-version/version ]]; then
-    echo -n "final version detected: "
     final_version="$(cat final-version/version)"
     ldflags="-X github.com/concourse/concourse.Version=${final_version}"
-    echo "$final_version"
+    echo -n "final version detected: $final_version"
 fi
 
 if [[ -z "${PLATFORMS}" ]]; then
@@ -71,7 +71,6 @@ for platform in "${platforms[@]}"; do
     cp -a fly-windows/fly-*.zip "$fly_assets"
 
     if [[ "$GOOS" == "linux" ]]; then
-        shopt -s extglob # enables the !() feature used next
         cp -a "dev-${GOARCH}/rootfs/usr/local/concourse/bin/"!(concourse) "${bin}/"
         cp -a "resource-types-${GOARCH}/rootfs/usr/local/concourse/resource-types" "$output/concourse"
     fi
