@@ -1068,7 +1068,6 @@ jobs:
     public: true
     plan:
       - in_parallel:
-          - get: release-me
           - get: ci
           - get: concourse
             passed:
@@ -1102,25 +1101,20 @@ jobs:
             passed: [bosh-smoke]
           - get: postgres-release
             passed: [bosh-smoke]
-      - task: extract-resource-type-versions
-        image: unit-image
-        file: ci/tasks/extract-resource-type-versions/task.yml
       - in_parallel:
           - task: build-release-name
             image: unit-image
             file: ci/tasks/build-release-name/task.yml
             input_mapping: { version: final-version }
-          - task: build-release-notes
-            image: unit-image
-            file: ci/tasks/build-release-notes/task.yml
-            input_mapping:
-              repo: concourse
-              version: final-version
-            params:
-              GITHUB_OWNER: concourse
-              GITHUB_REPO: concourse
-              GITHUB_TOKEN: ((concourse_github_dummy.access_token))
-              GITHUB_BRANCH: release/((release_minor)).x
+          - do:
+              - task: extract-resource-type-versions
+                image: unit-image
+                file: ci/tasks/extract-resource-type-versions/task.yml
+                input_mapping:
+                  linux-rc: linux-amd64-rc
+              - task: build-release-notes
+                image: unit-image
+                file: ci/tasks/build-release-notes/task.yml
       - put: concourse-draft-release
         no_get: true
         inputs: detect
@@ -1130,6 +1124,7 @@ jobs:
           tag_prefix: v
           name: release-name/release-name
           body: built-notes/notes.md
+          generate_release_notes: true
 
   - name: shipit
     public: true
@@ -1977,13 +1972,6 @@ resources:
     type: time
     source:
       interval: 24h
-
-  - name: release-me
-    type: github-release
-    source:
-      owner: clarafu
-      repository: release-me
-      access_token: ((concourse_github_dummy.access_token))
 
   - name: concourse-prs
     type: pull-request

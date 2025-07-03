@@ -1,25 +1,12 @@
 #!/usr/bin/env bash
 
-LAST_COMMIT_SHA=$(cat repo/.git/ref)
-RELEASE_VERSION=$(cat version/version)
+set -euo pipefail
 
 FILE=built-notes/notes.md
 
-chmod +x release-me/releaseme
-./release-me/releaseme generate \
-  --github-token=$GITHUB_TOKEN \
-  --github-owner=$GITHUB_OWNER \
-  --github-repo=$GITHUB_REPO \
-  --github-branch=$GITHUB_BRANCH \
-  --last-commit-SHA=$LAST_COMMIT_SHA \
-  --release-version=$RELEASE_VERSION \
-  --ignore-authors=dependabot \
-  > $FILE
+cat > $FILE <<EOF
 
-if [ -f resource-type-versions/versions.yml ]; then
-  cat >> $FILE <<EOF
-
-## 📦 Bundled resource types
+## 📦 Bundled Resource Types
 
 <details>
 
@@ -31,4 +18,3 @@ $(
 )
 </details>
 EOF
-fi
