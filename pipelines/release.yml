@@ -85,12 +85,10 @@ groups:
       - shipit
       - publish-binaries
       - publish-image
-      - generate-dpkg-list
       - publish-bosh-release
       - bump-cbd-versions
       - patch
       - discover-component-version
-      - rebuild-images
       - pin-resource-type-versions
 
   - name: all
