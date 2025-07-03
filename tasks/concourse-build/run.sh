@@ -63,7 +63,7 @@ for platform in "${platforms[@]}"; do
     bin=$output/concourse/bin
     mkdir -p "$bin"
 
-    mv concourse/$bin_name "$bin"
+    mv concourse/$bin_name "${bin}/"
 
     fly_assets=$output/concourse/fly-assets
     mkdir -p "$fly_assets"
@@ -71,7 +71,8 @@ for platform in "${platforms[@]}"; do
     cp -a fly-windows/fly-*.zip "$fly_assets"
 
     if [[ "$GOOS" == "linux" ]]; then
-        cp -a "dev-${GOARCH}/rootfs/usr/local/concourse/bin/"* "$bin"
+        shopt -s extglob # enables the !() feature used next
+        cp -a "dev-${GOARCH}/rootfs/usr/local/concourse/bin/"!(concourse) "${bin}/"
         cp -a "resource-types-${GOARCH}/rootfs/usr/local/concourse/resource-types" "$output/concourse"
     fi
 
