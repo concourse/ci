@@ -1348,37 +1348,16 @@ jobs:
             trigger: true
           - get: concourse-rc-image
             passed: [shipit]
-            params: { format: oci }
+            params: { format: oci-layout }
       - load_var: image_version
         file: version/version
       - put: concourse-image
         no_get: true
         inputs: detect
         params:
-          image: concourse-rc-image/image.tar
+          image: concourse-rc-image/image
           version: ((.:image_version))
           bump_aliases: true
-
-  # TODO: OSS project probably doesn't need this job. This was a vmware/Broadcom requirement
-  - name: generate-dpkg-list
-    plan:
-      - in_parallel:
-          - get: concourse-image
-            passed: [publish-image]
-            params: { format: rootfs }
-            trigger: true
-          - get: version
-            passed: [publish-image]
-            trigger: true
-          - get: ci
-      - task: generate-dpkg-list
-        file: ci/tasks/generate-dpkg-list/task.yml
-        image: concourse-image
-        params: { COMPONENT_NAME: "concourse" }
-      - put: concourse-image-dpkg-list
-        no_get: true
-        inputs: detect
-        params: { file: "dpkg-list/concourse-*.txt" }
 
   - name: patch
     public: true
@@ -1395,71 +1374,6 @@ jobs:
         inputs: detect
         params:
           file: version/version
-
-  - name: rebuild-images
-    public: true
-    serial: true
-    plan:
-      - in_parallel:
-          - get: periodic-check
-            trigger: true
-          - get: unit-image
-          - get: concourse
-            passed: [shipit]
-          - get: version
-            passed: [shipit]
-          - get: linux-amd64-rc
-            passed: [shipit]
-          - get: linux-arm64-rc
-            passed: [shipit]
-          - get: concourse-docker
-          - get: oci-build-task
-          - get: ci
-          - get: wolfi-base
-          - get: postgres-image
-            params: { format: oci }
-      - load_var: image_version
-        file: version/version
-      - task: build
-        file: concourse-docker/ci/build-image.yml
-        image: oci-build-task
-        privileged: true
-        params:
-          UNPACK_ROOTFS: true
-      - in_parallel: # sanity checks
-          - task: validate-binary-version-ubuntu
-            image: image
-            file: ci/tasks/validate-binary-version/task.yml
-            params:
-              EXPECTED_VERSION: ((.:image_version))
-          - task: extract-trivy-db
-            file: ci/tasks/extract-trivy-db/task.yml
-            image: wolfi-base
-      - try:
-          task: scan-image
-          file: ci/tasks/scan-image/task.yml
-          image: wolfi-base
-          params:
-            IGNORE_POLICY_FILE: ci/trivy-ignore/((release_minor))-image.rego
-      - task: watsjs-smoke
-        image: unit-image
-        privileged: true
-        timeout: 1h
-        file: ci/tasks/watsjs/smoke-only.yml
-        input_mapping: { dev-image: image }
-      - task: date-tag
-        image: unit-image
-        file: ci/tasks/tag-version-with-date.yml
-        params:
-          VERSION: ((.:image_version))
-      - put: concourse-image
-        no_get: true
-        inputs: detect
-        params:
-          image: image-ubuntu/image.tar
-          version: ((.:image_version))
-          bump_aliases: true
-          additional_tags: date-tag/tag
 
 resources:
   - name: concourse
