@@ -1847,14 +1847,6 @@ resources:
       username: ((docker.username))
       password: ((docker.password))
 
-  - name: concourse-image-dpkg-list
-    type: gcs
-    icon: format-list-bulleted
-    source:
-      bucket: concourse-ubuntu-dpkg-list
-      json_key: ((concourse_dpkg_list_json_key))
-      regexp: "concourse-dpkg-list-(.*).txt"
-
   - name: resource-postgresql-version
     type: gcs
     icon: format-list-bulleted
