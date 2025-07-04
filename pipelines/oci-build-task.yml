@@ -134,6 +134,7 @@ jobs:
       - in_parallel:
           - get: repo
             trigger: true
+            passed: [build]
           - get: ci
           - get: wolfi
           - get: oci-build-task-dev
