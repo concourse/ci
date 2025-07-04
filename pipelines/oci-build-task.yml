@@ -153,24 +153,24 @@ jobs:
     plan:
       - in_parallel:
           - get: repo
-            passed: [scan]
+            passed: [build]
           - get: version
             params:
               bump: major
           - in_parallel: &image-fetching
               - get: oci-build-task-dev
-                passed: [scan]
+                passed: [build]
                 params:
                   format: oci-layout
               - get: rootfs-amd64
                 resource: oci-build-task-dev
-                passed: [scan]
+                passed: [build]
                 params:
                   platform:
                     architecture: amd64
               - get: rootfs-arm64
                 resource: oci-build-task-dev
-                passed: [scan]
+                passed: [build]
                 params:
                   platform:
                     architecture: arm64
@@ -236,7 +236,7 @@ jobs:
     plan:
       - in_parallel:
           - get: repo
-            passed: [scan]
+            passed: [build]
           - get: version
             params:
               bump: minor
@@ -257,7 +257,7 @@ jobs:
     plan:
       - in_parallel:
           - get: repo
-            passed: [scan]
+            passed: [build]
           - get: version
             params:
               bump: patch
