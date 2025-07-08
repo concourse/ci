@@ -138,12 +138,10 @@ plan:
     trigger: true
     version: every
   - get: base-image
-    trigger: true
     params:
       format: oci-layout
   - get: builder-image
     resource: golang-builder
-    trigger: true
     params:
       format: oci-layout
   - get: oci-build-task
