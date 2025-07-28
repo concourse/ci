@@ -346,6 +346,7 @@ jobs:
               params:
                 PLATFORMS: windows/amd64
       - task: build
+        attempts: 3
         image: oci-build-task
         privileged: true
         input_mapping:
