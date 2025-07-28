@@ -88,7 +88,6 @@ groups:
       - publish-bosh-release
       - bump-cbd-versions
       - patch
-      - discover-component-version
       - pin-resource-type-versions
 
   - name: all
@@ -1162,60 +1161,6 @@ jobs:
         inputs: detect
         params: { file: final-version/version }
 
-  - name: discover-component-version
-    public: true
-    serial: true
-    plan:
-      - in_parallel:
-          - get: ci
-          - get: concourse
-            passed: [shipit]
-            trigger: true
-          - get: unit-image
-          - get: version
-            passed: [shipit]
-          - get: gcp-ubuntu-stemcell
-            passed: [shipit]
-      - in_parallel:
-          - load_var: concourse-version
-            file: version/version
-          - load_var: stemcell-version
-            file: gcp-ubuntu-stemcell/version
-      - in_parallel:
-          - task: discover-postgresql-version
-            image: unit-image
-            file: ci/tasks/discover-component-version/task.yml
-            output_mapping: { component-version: postgresql-version }
-            params:
-              COMPONENT_NAME: "postgresql"
-              CONCOURSE_VERSION: ((.:concourse-version))
-          - task: discover-helm-version
-            image: unit-image
-            file: ci/tasks/discover-component-version/task.yml
-            output_mapping: { component-version: helm-version }
-            params:
-              COMPONENT_NAME: "helm"
-              CONCOURSE_VERSION: ((.:concourse-version))
-          - task: discover-stemcell-version
-            image: unit-image
-            file: ci/tasks/discover-stemcell-version/task.yml
-            params:
-              CONCOURSE_VERSION: ((.:concourse-version))
-              STEMCELL_VERSION: ((.:stemcell-version))
-      - in_parallel:
-          - put: resource-postgresql-version
-            no_get: true
-            inputs: detect
-            params: { file: "postgresql-version/postgresql-version-*.txt" }
-          - put: resource-helm-version
-            no_get: true
-            inputs: detect
-            params: { file: "helm-version/helm-version-*.txt" }
-          - put: gcp-stemcell-version
-            no_get: true
-            inputs: detect
-            params: { file: "stemcell-version/stemcell-version-*.txt" }
-
   - name: publish-binaries
     serial: true
     plan:
@@ -1846,30 +1791,6 @@ resources:
       semver_constraint: ((resource_type_versions.time))
       username: ((docker.username))
       password: ((docker.password))
-
-  - name: resource-postgresql-version
-    type: gcs
-    icon: format-list-bulleted
-    source:
-      bucket: concourse-components-version
-      json_key: ((concourse_components_json_key))
-      regexp: "postgresql-version-(.*).txt"
-
-  - name: resource-helm-version
-    type: gcs
-    icon: format-list-bulleted
-    source:
-      bucket: concourse-components-version
-      json_key: ((concourse_components_json_key))
-      regexp: "helm-version-(.*).txt"
-
-  - name: gcp-stemcell-version
-    type: gcs
-    icon: format-list-bulleted
-    source:
-      bucket: concourse-components-version
-      json_key: ((concourse_components_json_key))
-      regexp: "stemcell-version-(.*).txt"
 
   - name: periodic-check
     icon: clock
