@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-set -euo
+set -euo pipefail
 
 apk add --quiet --no-progress jq ytt
 
