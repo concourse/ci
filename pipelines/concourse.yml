@@ -148,11 +148,13 @@ jobs:
           - task: fly-windows
             file: ci/tasks/fly-windows/task.yml
           - task: unit-baggageclaim
+            attempts: 3
+            privileged: true
             image: unit-image
             file: ci/tasks/unit-baggageclaim/task.yml
-            privileged: true
             input_mapping: { concourse: built-concourse }
           - task: unit-baggageclaim-windows
+            attempts: 3
             file: ci/tasks/unit-baggageclaim-windows/task.yml
             input_mapping: { concourse: built-concourse }
 
