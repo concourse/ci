@@ -1038,7 +1038,7 @@ jobs:
       - task: smoke
         tags: [bosh]
         image: unit-image
-        file: ci/tasks/smoke/task.yml
+        file: ci/tasks/smoke-test/task.yml
         timeout: 1h
 
   - name: bosh-smoke-guardian
@@ -1095,7 +1095,7 @@ jobs:
       - task: smoke
         tags: [bosh]
         image: unit-image
-        file: ci/tasks/smoke/task.yml
+        file: ci/tasks/smoke-test/task.yml
         timeout: 1h
 
   - name: bosh-topgun-core
