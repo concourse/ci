@@ -21,8 +21,8 @@ function upload_release() {
   release="$release_dir/*.tgz"
   if [[ -n "$RELEASE_NAME_SUFFIX" ]]; then
     mkdir -p release-unzipped
-    tar -C release-unzipped -xzf "$release"
-    rm "$release"
+    tar -C release-unzipped -xzf $release
+    rm $release
     sed -i "s/^name: concourse$/name: concourse-$RELEASE_NAME_SUFFIX/" release-unzipped/release.MF
     pushd release-unzipped
       tar -czf "$release_dir/release.tgz" *
@@ -50,4 +50,4 @@ go mod download
 
 go install github.com/onsi/ginkgo/v2/ginkgo
 
-ginkgo -nodes=4 -race -keep-going -poll-progress-after=300s -timeout=24h -flake-attempts=6 -skip="$SKIP" --show-node-events -r --skip-package="$SKIP_PACKAGES" "$@" ./topgun/$SUITE
+ginkgo -nodes=4 -race -keep-going -poll-progress-after=300s -timeout=24h -flake-attempts=6 -skip="$SKIP" --show-node-events -r --skip-package="$SKIP_PACKAGES" "$@" "./topgun/$SUITE"
