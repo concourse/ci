@@ -29,7 +29,7 @@ function upload_release() {
     popd
     rm -rf release-unzipped
   fi
-  bosh upload-release "$release"
+  bosh upload-release $release
 }
 
 upload_release concourse-release
