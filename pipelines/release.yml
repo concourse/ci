@@ -58,6 +58,7 @@ groups:
     jobs:
       - reconfigure-prs
       - unit
+      - unit-*
       - integration
       - resource-types-images
       - dev-image
@@ -133,25 +134,50 @@ jobs:
           - get: periodic-check
             trigger: true
           - get: ci
-      - task: yarn-test
-        image: unit-image
-        file: ci/tasks/yarn-test/task.yml
       - timeout: 1h
         in_parallel:
+          - task: yarn-test
+            image: unit-image
+            file: ci/tasks/yarn-test/task.yml
           - task: unit
             image: unit-image
             file: ci/tasks/unit/task.yml
-            input_mapping: { concourse: built-concourse }
-          - task: fly-windows
-            file: ci/tasks/fly-windows/task.yml
+
+  - name: unit-baggageclaim
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - get: concourse
+            trigger: true
+          - get: unit-image
+            trigger: true
+          - get: periodic-check
+            trigger: true
+          - get: ci
+      - timeout: 1h
+        in_parallel:
           - task: unit-baggageclaim
             image: unit-image
             file: ci/tasks/unit-baggageclaim/task.yml
             privileged: true
-            input_mapping: { concourse: built-concourse }
           - task: unit-baggageclaim-windows
             file: ci/tasks/unit-baggageclaim-windows/task.yml
-            input_mapping: { concourse: built-concourse }
+
+  - name: unit-fly-windows
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - get: concourse
+            trigger: true
+          - get: unit-image
+            trigger: true
+          - get: periodic-check
+            trigger: true
+          - get: ci
+      - task: fly-windows
+        file: ci/tasks/fly-windows/task.yml
 
   - name: resource-types-images
     public: true
@@ -364,7 +390,7 @@ jobs:
     plan:
       - in_parallel:
           - get: concourse
-            passed: [unit, dev-image]
+            passed: [unit, unit-baggageclaim, unit-fly-windows, dev-image]
             trigger: true
           - get: dev-image
             passed: [dev-image]
@@ -382,7 +408,7 @@ jobs:
     plan:
       - in_parallel:
           - get: concourse
-            passed: [unit, dev-image]
+            passed: [unit, unit-baggageclaim, unit-fly-windows, dev-image]
             trigger: true
           - get: dev-image
             passed: [dev-image]
@@ -412,7 +438,7 @@ jobs:
     plan:
       - in_parallel:
           - get: concourse
-            passed: [unit, dev-image]
+            passed: [unit, unit-baggageclaim, unit-fly-windows, dev-image]
             trigger: true
           - get: dev-image
             passed: [dev-image]
@@ -435,7 +461,7 @@ jobs:
     plan:
       - in_parallel:
           - get: concourse
-            passed: [unit, dev-image]
+            passed: [unit, unit-baggageclaim, unit-fly-windows, dev-image]
             trigger: true
           - get: dev-image
             passed: [dev-image]
