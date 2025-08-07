@@ -345,6 +345,7 @@ jobs:
       - task: build
         image: oci-build-task
         privileged: true
+        attempts: 3
         input_mapping:
           concourse: built-concourse
           base-image: golang-builder-image
