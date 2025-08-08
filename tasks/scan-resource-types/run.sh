@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -euo
+set -euo pipefail
 
 apk add --quiet --no-progress trivy
 

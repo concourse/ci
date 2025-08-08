@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -euo
+set -euo pipefail
 
 BINARY_VERSION=$(/usr/local/concourse/bin/concourse --version)
 echo "expecting: $EXPECTED_VERSION"
