@@ -159,9 +159,11 @@ jobs:
             file: ci/tasks/yarn-test/task.yml
           - task: yarn-analyse
             attempts: 3
+            image: unit-image
             file: ci/tasks/yarn-analyse/task.yml
           - task: yarn-benchmark
             attempts: 3
+            image: unit-image
             file: ci/tasks/yarn-benchmark/task.yml
 
   - name: unit-baggageclaim
