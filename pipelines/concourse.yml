@@ -18,16 +18,6 @@ resource_types:
     type: registry-image
     source: { repository: linkyard/helm-chart-resource, tag: 2.17.0 }
 
-  #TODO: remove after 7.14 upgrade. Needed for the get.params.platform feature
-  - name: registry-image
-    type: registry-image
-    check_every: 12h
-    source:
-      repository: concourse/registry-image-resource
-      tag: 1.13.0
-      username: ((docker.username))
-      password: ((docker.password))
-
 groups:
   - name: develop
     jobs:

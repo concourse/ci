@@ -44,15 +44,6 @@ resource_types:
     type: registry-image
     source: { repository: aoldershaw/github-pr-resource }
 
-  #TODO: remove after 7.14 upgrade. Needed for the get.params.platform feature
-  - name: registry-image
-    type: registry-image
-    source:
-      repository: concourse/registry-image-resource
-      tag: 1.13.0
-      username: ((docker.username))
-      password: ((docker.password))
-
 groups:
   - name: develop
     jobs:
