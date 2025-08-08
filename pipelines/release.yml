@@ -643,9 +643,12 @@ jobs:
           - get: dev-image
             trigger: true
             passed: [testflight, watsjs, integration, worker-runtime]
-          - get: unit-image
+            params:
+              skip_download: true
           - get: golang-builder-image
             passed: [dev-image]
+            params:
+              skip_download: true
       - put: version
         no_get: true
         inputs: detect
