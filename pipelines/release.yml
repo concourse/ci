@@ -642,7 +642,7 @@ jobs:
             trigger: true
           - get: dev-image
             trigger: true
-            passed: [dev-image]
+            passed: [testflight, watsjs, integration, worker-runtime]
           - get: unit-image
           - get: golang-builder-image
             passed: [dev-image]
