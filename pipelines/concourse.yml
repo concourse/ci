@@ -32,6 +32,7 @@ groups:
   - name: develop
     jobs:
       - unit
+      - unit-*
       - dev-image
       - integration
       - testflight
@@ -137,26 +138,67 @@ jobs:
           - get: unit-image
             trigger: true
           - get: ci
-      - task: yarn-test
+      - task: unit
+        timeout: 1h
         image: unit-image
-        file: ci/tasks/yarn-test/task.yml
+        file: ci/tasks/unit/task.yml
+
+  - name: unit-yarn
+    public: true
+    serial: true
+    plan:
       - in_parallel:
-          - task: unit
+          - get: concourse
+            trigger: true
+          - get: unit-image
+            trigger: true
+          - get: ci
+      - timeout: 1h
+        in_parallel:
+          - task: yarn-test
+            attempts: 3
             image: unit-image
-            file: ci/tasks/unit/task.yml
-            input_mapping: { concourse: built-concourse }
-          - task: fly-windows
-            file: ci/tasks/fly-windows/task.yml
+            file: ci/tasks/yarn-test/task.yml
+          - task: yarn-analyse
+            attempts: 3
+            file: ci/tasks/yarn-analyse/task.yml
+          - task: yarn-benchmark
+            attempts: 3
+            file: ci/tasks/yarn-benchmark/task.yml
+
+  - name: unit-baggageclaim
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - get: concourse
+            trigger: true
+          - get: unit-image
+            trigger: true
+          - get: ci
+      - in_parallel:
           - task: unit-baggageclaim
             attempts: 3
             privileged: true
             image: unit-image
             file: ci/tasks/unit-baggageclaim/task.yml
-            input_mapping: { concourse: built-concourse }
           - task: unit-baggageclaim-windows
             attempts: 3
             file: ci/tasks/unit-baggageclaim-windows/task.yml
-            input_mapping: { concourse: built-concourse }
+
+  - name: unit-fly-windows
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - get: concourse
+            trigger: true
+          - get: unit-image
+            trigger: true
+          - get: ci
+      - task: fly-windows
+        attempts: 3
+        file: ci/tasks/fly-windows/task.yml
 
   - name: resource-types-images
     public: true
@@ -367,7 +409,8 @@ jobs:
     plan:
       - in_parallel:
           - get: concourse
-            passed: [unit, dev-image]
+            passed:
+              [unit, unit-yarn, unit-baggageclaim, unit-fly-windows, dev-image]
             trigger: true
           - get: dev-image
             passed: [dev-image]
@@ -384,7 +427,8 @@ jobs:
     max_in_flight: 1
     plan:
       - get: concourse
-        passed: [unit, dev-image]
+        passed:
+          [unit, unit-yarn, unit-baggageclaim, unit-fly-windows, dev-image]
         trigger: true
       - get: unit-image
       - get: ci
@@ -399,7 +443,8 @@ jobs:
     plan:
       - in_parallel:
           - get: concourse
-            passed: [unit, dev-image]
+            passed:
+              [unit, unit-yarn, unit-baggageclaim, unit-fly-windows, dev-image]
             trigger: true
           - get: dev-image
             passed: [dev-image]
@@ -436,7 +481,8 @@ jobs:
     plan:
       - in_parallel:
           - get: concourse
-            passed: [unit, dev-image]
+            passed:
+              [unit, unit-yarn, unit-baggageclaim, unit-fly-windows, dev-image]
             trigger: true
           - get: dev-image
             passed: [dev-image]
@@ -459,7 +505,8 @@ jobs:
     plan:
       - in_parallel:
           - get: concourse
-            passed: [unit, dev-image]
+            passed:
+              [unit, unit-yarn, unit-baggageclaim, unit-fly-windows, dev-image]
             trigger: true
           - get: dev-image
             passed: [dev-image]
