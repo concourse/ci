@@ -189,20 +189,24 @@ jobs:
       - *pending_status_notification
       - task: check-migration-order
         timeout: 5m
+        image: unit-image
         file: ci/tasks/check-migration-order/task.yml
         tags: [pr]
       - task: yarn-analyse
         attempts: 3
+        image: unit-image
         file: ci/tasks/yarn-analyse/task.yml
         input_mapping: { concourse: concourse-pr }
         tags: [pr]
       - task: yarn-test
         attempts: 3
+        image: unit-image
         file: ci/tasks/yarn-test/task.yml
         input_mapping: { concourse: concourse-pr }
         tags: [pr]
       - task: yarn-benchmark
         attempts: 3
+        image: unit-image
         file: ci/tasks/yarn-benchmark/task.yml
         input_mapping: { concourse: concourse-pr }
         tags: [pr]
