@@ -640,12 +640,12 @@ jobs:
             passed: [dev-image]
           - get: dev-amd64
             resource: dev-image
-            passed: [dev-image]
+            passed: [testflight, watsjs, integration, worker-runtime]
             trigger: true
             params: *amd64
           - get: dev-arm64
             resource: dev-image
-            passed: [dev-image]
+            passed: [testflight, watsjs, integration, worker-runtime]
             trigger: true
             params: *arm64
           - get: resource-types-amd64
