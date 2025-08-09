@@ -632,7 +632,7 @@ jobs:
     plan:
       - in_parallel:
           - get: concourse
-            passed: [dev-image, testflight, watsjs, integration, worker-runtime]
+            passed: [testflight, watsjs, integration, worker-runtime]
             trigger: true
           - get: unit-image
           - get: ci
