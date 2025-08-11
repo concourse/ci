@@ -13,4 +13,4 @@ outputs:
   - name: built-notes
 
 run:
-  path: ci/tasks/build-release-note/run.sh
+  path: ci/tasks/build-release-notes/run.sh
