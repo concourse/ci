@@ -361,15 +361,6 @@ resources:
     private_key: ((concourse_bot_private_key))
     uri: #@ "git@github.com:concourse/" + resource_name + "-resource"
 
-- name: resource-repo-tags
-  type: git
-  icon: github
-  source:
-    branch: master
-    private_key: ((concourse_bot_private_key))
-    uri: #@ "git@github.com:concourse/" + resource_name + "-resource"
-    tag_filter: "v*"
-
 - name: resource-repo-release
   type: github-release
   icon: package-variant-closed
