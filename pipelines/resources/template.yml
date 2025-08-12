@@ -282,43 +282,6 @@ plan:
     file: version/version
 #@ end
 
-#@ def rebuild_images():
-name: republish-images
-serial_groups: [build]
-plan:
-- in_parallel:
-  - get: #@ resource_name + "-resource"
-    resource: resource-repo-tags
-  - get: base-image
-    trigger: true
-    params:
-      format: oci-layout
-  - get: builder-image
-    resource: golang-builder
-    trigger: true
-    params:
-      format: oci-layout
-  - get: oci-build-task
-  - get: version
-  - get: ci
-  - #@ template.replace(extra_get_steps())
-- load_var: version
-  file: version/version
-- #@ build_task(resource_name, "linux/amd64,linux/arm64")
-- task: date-tag
-  file: ci/tasks/tag-version-with-date.yml
-  params:
-    VERSION: ((.:version))
-- put: resource-image
-  no_get: true
-  inputs: detect
-  params:
-    image: built-resource-image/image
-    version: ((.:version))
-    bump_aliases: true
-    additional_tags: date-tag/tag
-#@ end
-
 #@ def unique_version_history():
 #@ return resource_name == "time"
 #@ end
@@ -335,9 +298,6 @@ groups:
   - build
   - scan-*
   - publish-*
-- name: republish
-  jobs:
-  - republish-*
 
 jobs:
 - #@ build_image()
@@ -346,7 +306,6 @@ jobs:
 - #@ publish_job("major")
 - #@ publish_job("minor")
 - #@ publish_job("patch")
-- #@ rebuild_images()
 
 resource_types:
 - name: pull-request
