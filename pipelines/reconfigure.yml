@@ -291,32 +291,31 @@ jobs:
             instance_vars:
               version: 7.14.x
             vars:
-              release_major: "7"
-              release_minor: "7.14"
-              latest_release: "7.13"
+              release_major: '7'
+              release_minor: '7.14'
+              latest_release: '7.13'
               concourse_smoke_deployment_name: concourse-smoke-7-14
               stemcell_name: jammy
               ci_branch: master
-              postgresql_major: "16"
+              postgresql_major: '16'
               resource_type_versions:
-                bosh-io-release: ""
-                bosh-io-stemcell: ""
-                cf: ""
-                docker-image: ""
-                git: ""
-                github-release: ""
-                hg: ""
-                mock: ""
-                pool: ""
-                registry-image: ""
-                s3: ""
-                semver: ""
-                time: ""
+                bosh-io-release: ~1.3.1
+                bosh-io-stemcell: ~1.5.1
+                docker-image: ~1.11.2
+                git: ~1.20.0
+                github-release: ~1.12.1
+                hg: ~1.4.1
+                mock: ~0.14.1
+                pool: ~1.6.0
+                registry-image: ~1.13.2
+                s3: ~2.4.0
+                semver: ~1.10.1
+                time: ~1.10.0
               dep_bin_versions:
-                gdn: ""
-                cni: ""
-                runc: ""
-                containerd: ""
+                gdn: ''
+                cni: ''
+                runc: ''
+                containerd: ''
           # TEMPLATE FOR NEXT RELEASE
           # to create a new release pipeline, copy (but don't delete!) this
           # template, replacing MAJOR, MINOR, PREV_MAJOR, and PREV_MINOR
