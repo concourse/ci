@@ -319,7 +319,7 @@ resource_types:
   source:
     repository: frodenas/gcs-resource
 
-# TODO: remove after upgrading to >=7.14.1
+#!TODO: remove after upgrading to >=7.14.1
 - name: semver
   type: registry-image
   source:
