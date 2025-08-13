@@ -323,7 +323,7 @@ resource_types:
   type: registry-image
   source:
     repository: concourse/semver-resource
-    tag: "1.10.0"
+    tag: "1.9.0"
 
 #!TODO: remove after next release. Needed for the get.params.platform feature
 - name: registry-image
