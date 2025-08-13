@@ -319,6 +319,12 @@ resource_types:
   source:
     repository: frodenas/gcs-resource
 
+- name: semver
+  type: registry-image
+  source:
+    repository: concourse/semver-resource
+    tag: "1.10.0"
+
 #!TODO: remove after next release. Needed for the get.params.platform feature
 - name: registry-image
   type: registry-image
