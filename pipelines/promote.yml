@@ -6,6 +6,7 @@ jobs:
       - get: concourse
         trigger: true
       - put: concourse-master
+        no_get: true
         params:
           repository: concourse
           merge: true
@@ -16,6 +17,7 @@ jobs:
       - get: cbd
         trigger: true
       - put: cbd-master
+        no_get: true
         params:
           repository: cbd
           merge: true
@@ -34,7 +36,9 @@ jobs:
           ANALYTICS_ID: ((analytics_id))
           GITHUB_TOKEN: ((concourse_github_dummy.access_token))
       - put: docs-gh-pages
-        params: { repository: built-docs }
+        no_get: true
+        params:
+          repository: built-docs
 
   - name: refresh-rfc-table
     public: true
@@ -53,6 +57,7 @@ jobs:
           ANALYTICS_ID: ((analytics_id))
           GITHUB_TOKEN: ((concourse_github_dummy.access_token))
       - put: docs-gh-pages
+        no_get: true
         params: { repository: built-docs }
 
 resources:
