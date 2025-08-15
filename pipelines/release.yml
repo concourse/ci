@@ -54,6 +54,7 @@ groups:
       - resource-types-images
       - dev-image
       - testflight
+      - testflight-rc
       - worker-runtime
       - watsjs
       - rc
@@ -502,6 +503,38 @@ jobs:
         file: ci/tasks/integration-tests/task.yml
         input_mapping:
           concourse-image: latest-concourse-image
+
+  - name: testflight-rc
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - get: concourse
+            passed: [build-rc-image]
+            trigger: true
+          - get: concourse-rc-image
+            passed: [build-rc-image]
+            trigger: true
+            params: { format: oci }
+          - get: postgres-image
+            params: { format: oci }
+          - get: unit-image
+          - get: ci
+      - across:
+          - var: runtime
+            values:
+              - guardian
+              - containerd
+            max_in_flight: all
+        task: testflight
+        image: unit-image
+        privileged: true
+        timeout: 1h
+        input_mapping:
+          dev-image: concourse-rc-image
+        params:
+          RUNTIME: ((.:runtime))
+        file: ci/tasks/testflight/task.yml
 
   - name: k8s-smoke
     public: true
@@ -1141,7 +1174,7 @@ jobs:
           - get: darwin-arm64-rc
             passed: [build-rc]
           - get: concourse-rc-image
-            passed: [k8s-topgun, build-rc-image]
+            passed: [k8s-topgun, testflight-rc]
           - get: concourse-release
             passed: [bosh-smoke]
             params: { tarball: false }
