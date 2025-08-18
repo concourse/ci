@@ -1117,6 +1117,7 @@ jobs:
           - get: ci
       - put: smoke-deployment
         tags: [bosh]
+        inputs: detect
         params:
           manifest: ci/deployments/bosh-smoke.yml
           releases:
@@ -1147,6 +1148,7 @@ jobs:
     on_success:
       put: smoke-deployment
       no_get: true
+      inputs: detect
       tags: [bosh]
       params:
         delete:
