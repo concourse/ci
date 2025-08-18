@@ -1146,6 +1146,7 @@ jobs:
         timeout: 1h
     on_success:
       put: smoke-deployment
+      no_get: true
       tags: [bosh]
       params:
         delete:
