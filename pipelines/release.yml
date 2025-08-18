@@ -1144,6 +1144,13 @@ jobs:
         image: unit-image
         file: ci/tasks/smoke-test/task.yml
         timeout: 1h
+    on_success:
+      put: smoke-deployment
+      tags: [bosh]
+      params:
+        delete:
+          enabled: true
+          force: true
 
   - name: create-draft-release
     public: true
