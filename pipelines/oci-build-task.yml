@@ -72,12 +72,24 @@ resources:
     source:
       repository: cgr.dev/chainguard/wolfi-base
 
+  - name: buildkit
+    type: github-release
+    icon: package-variant
+    check_every: 12h
+    source:
+      owner: moby
+      repository: buildkit
+
 jobs:
   - name: build
     plan:
       - in_parallel:
           - get: repo
             trigger: true
+          - get: buildkit
+            trigger: true
+            params:
+              globs: [none]
           - get: oci-build-task
           - get: golang-rootfs
             resource: golang-builder
@@ -87,7 +99,8 @@ jobs:
           - get: wolfi
             params:
               format: oci-layout
-
+      - load_var: buildkit-version
+        file: buildkit/version
       - task: tests
         privileged: true
         image: golang-rootfs
@@ -95,6 +108,8 @@ jobs:
           platform: linux
           inputs:
             - name: repo
+          params:
+            BUILDKIT_VERSION: ((.:buildkit-version))
           run:
             path: sh
             args:
@@ -117,6 +132,7 @@ jobs:
           params:
             CONTEXT: repo
             OUTPUT_OCI: true
+            BUILD_ARG_BUILDKIT_VERSION: ((.:buildkit-version))
             IMAGE_ARG_base_image: wolfi/oci
             IMAGE_ARG_builder_image: golang-builder/oci
             IMAGE_PLATFORM: linux/amd64,linux/arm64
@@ -237,6 +253,11 @@ jobs:
       - in_parallel:
           - get: repo
             passed: [build]
+          - get: buildkit
+            passed: [build]
+            trigger: true
+            params:
+              globs: [none]
           - get: version
             params:
               bump: minor
