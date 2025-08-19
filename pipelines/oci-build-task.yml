@@ -253,11 +253,6 @@ jobs:
       - in_parallel:
           - get: repo
             passed: [build]
-          - get: buildkit
-            passed: [build]
-            trigger: true
-            params:
-              globs: [none]
           - get: version
             params:
               bump: minor
@@ -279,6 +274,11 @@ jobs:
       - in_parallel:
           - get: repo
             passed: [build]
+          - get: buildkit
+            passed: [build]
+            trigger: true
+            params:
+              globs: [none]
           - get: version
             params:
               bump: patch
