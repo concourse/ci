@@ -291,14 +291,6 @@ plan:
 #@ end
 
 ---
-groups:
-- name: main
-  jobs:
-  - prs
-  - build
-  - scan-*
-  - publish-*
-
 jobs:
 - #@ build_image()
 - #@ scan_image()
