@@ -111,22 +111,27 @@ jobs:
             passed: [k8s-smoke]
           - get: chart-repo-index
           - get: ci
+          - get: unit-image
       - task: bump-chart-version
+        image: unit-image
         file: ci/tasks/bump-chart-version/task.yml
       - task: package-chart
+        image: unit-image
         file: ci/tasks/package-chart/task.yml
       - in_parallel:
           - put: version
+            inputs: detect
             params: { file: version/version }
           - put: chart-repo-index
-            inputs: [packaged-chart]
+            inputs: detect
             params:
               file: packaged-chart/index.yaml
           - put: chart-repo
-            inputs: [packaged-chart]
+            inputs: detect
             params:
               file: packaged-chart/concourse-*.tgz
           - put: concourse-chart
+            inputs: detect
             params:
               repository: concourse-chart
               merge: true
@@ -144,22 +149,27 @@ jobs:
             passed: [k8s-smoke]
           - get: chart-repo-index
           - get: ci
+          - get: unit-image
       - task: bump-chart-version
+        image: unit-image
         file: ci/tasks/bump-chart-version/task.yml
       - task: package-chart
+        image: unit-image
         file: ci/tasks/package-chart/task.yml
       - in_parallel:
           - put: version
+            inputs: detect
             params: { file: version/version }
           - put: chart-repo-index
-            inputs: [packaged-chart]
+            inputs: detect
             params:
               file: packaged-chart/index.yaml
           - put: chart-repo
-            inputs: [packaged-chart]
+            inputs: detect
             params:
               file: packaged-chart/concourse-*.tgz
           - put: concourse-chart
+            inputs: detect
             params:
               repository: concourse-chart
               merge: true
@@ -179,22 +189,27 @@ jobs:
             passed: [k8s-smoke]
           - get: chart-repo-index
           - get: ci
+          - get: unit-image
       - task: bump-chart-version
+        image: unit-image
         file: ci/tasks/bump-chart-version/task.yml
       - task: package-chart
+        image: unit-image
         file: ci/tasks/package-chart/task.yml
       - in_parallel:
           - put: version
+            inputs: detect
             params: { file: version/version }
           - put: chart-repo-index
-            inputs: [packaged-chart]
+            inputs: detect
             params:
               file: packaged-chart/index.yaml
           - put: chart-repo
-            inputs: [packaged-chart]
+            inputs: detect
             params:
               file: packaged-chart/concourse-*.tgz
           - put: concourse-chart
+            inputs: detect
             params:
               repository: concourse-chart
               merge: true
