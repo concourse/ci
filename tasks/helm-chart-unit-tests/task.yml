@@ -1,0 +1,8 @@
+platform: linux
+
+inputs:
+  - name: ci
+  - name: chart
+
+run:
+  path: ci/tasks/helm-chart-unit-tests/run.sh

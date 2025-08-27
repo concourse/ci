@@ -151,3 +151,37 @@ jobs:
         input_mapping: { concourse: chart-pr }
         params:
           SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
+
+  - name: unit-tests
+    public: true
+    on_failure:
+      put: chart-pr
+      inputs: [chart-pr]
+      params: { path: chart-pr, status: failure, context: unit-tests }
+      tags: [k8s-topgun]
+    on_success:
+      put: chart-pr
+      inputs: [chart-pr]
+      params: { path: chart-pr, status: success, context: unit-tests }
+      tags: [k8s-topgun]
+    plan:
+      - in_parallel:
+          - get: chart-pr
+            trigger: true
+            version: every
+            tags: [k8s-topgun]
+          - get: ci
+            tags: [k8s-topgun]
+          - get: unit-image
+            tags: [k8s-topgun]
+      - put: update-pr-status
+        resource: chart-pr
+        inputs: [chart-pr]
+        params: { path: chart-pr, status: pending, context: unit-tests }
+        get_params: { list_changed_files: true }
+        tags: [k8s-topgun]
+      - task: unit-tests
+        tags: [k8s-topgun]
+        file: ci/tasks/helm-chart-unit-tests/task.yml
+        image: unit-image
+        input_mapping: { chart: chart-pr }
