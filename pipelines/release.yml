@@ -609,8 +609,6 @@ jobs:
           - get: prometheus-chart
             tags: [k8s-topgun]
             params: { untar: true }
-          - get: postgresql-chart-git
-            tags: [k8s-topgun]
           - get: concourse-chart
             trigger: true
             passed: [k8s-smoke]
@@ -1615,15 +1613,6 @@ resources:
       repos:
         - name: prometheus-community
           url: https://prometheus-community.github.io/helm-charts
-
-  # Using the git instead of helm-chart resource because Bitnami charts are
-  # hosted on Docker Hub and we sometimes run into their rate limits
-  - name: postgresql-chart-git
-    type: git
-    check_every: 24h
-    source:
-      uri: "https://github.com/bitnami/charts.git"
-      tag_filter: postgresql/((postgresql_major))*
 
   - name: concourse-draft-release
     type: github-release
