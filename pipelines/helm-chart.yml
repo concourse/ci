@@ -16,7 +16,6 @@ groups:
   - name: dependencies
     jobs:
       - concourse-app-bump
-      - postgres-chart-bump
 
   - name: publish
     jobs:
@@ -38,22 +37,6 @@ jobs:
           - get: ci
       - task: bump-chart-app-version
         file: ci/tasks/bump-chart-app-version/task.yml
-      - put: concourse-chart
-        inputs: [concourse-chart-bumped]
-        params:
-          repository: concourse-chart-bumped
-          merge: true
-
-  - name: postgres-chart-bump
-    public: true
-    serial: true
-    plan:
-      - in_parallel:
-          - get: postgres-chart-release
-          - get: concourse-chart
-          - get: ci
-      - task: bump-postgres-chart-version
-        file: ci/tasks/bump-postgres-chart-version/task.yml
       - put: concourse-chart
         inputs: [concourse-chart-bumped]
         params:
@@ -181,8 +164,6 @@ jobs:
     serial: true
     plan:
       - in_parallel:
-          - get: postgres-chart-release
-            passed: [postgres-chart-bump]
           - get: version
             params: { bump: patch }
           - get: concourse-chart
@@ -263,13 +244,6 @@ resources:
       semver_constraint: ~((version))
       access_token: ((concourse_github_dummy.access_token))
 
-  - name: postgres-chart-release
-    type: artifacthub
-    check_every: 24h
-    source:
-      repository_name: bitnami
-      package_name: postgresql
-
   - name: unit-image
     type: registry-image
     icon: docker
@@ -298,8 +272,3 @@ resource_types:
   - name: gcs
     type: registry-image
     source: { repository: frodenas/gcs-resource }
-
-  - name: artifacthub
-    type: registry-image
-    source:
-      repository: ghcr.io/hdisysteme/artifacthub-resource
