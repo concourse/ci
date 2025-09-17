@@ -5,39 +5,67 @@ set -euo pipefail -x
 export GOPATH=$PWD/gopath
 export PATH=$GOPATH/bin:$PATH
 
-function permit_device_control() {
-  local devices_mount_info=$(grep devices < /proc/self/cgroup)
+function permit_device_control_cgroupv1() {
+    local devices_mount_info=$(grep devices < /proc/self/cgroup)
 
-  if [ -z "$devices_mount_info" ]; then
-    # cgroups not set up; must not be in a container
-    return
-  fi
-
-  local devices_subsytems=$(echo $devices_mount_info | cut -d: -f2)
-  local devices_subdir=$(echo $devices_mount_info | cut -d: -f3)
-
-  if [ "$devices_subdir" = "/" ]; then
-    # we're in the root devices cgroup; must not be in a container
-    return
-  fi
-
-  cgroup_dir=/tmp/devices-cgroup
-
-  if [ ! -e ${cgroup_dir} ]; then
-    # mount our container's devices subsystem somewhere
-    mkdir ${cgroup_dir}
-  fi
-
-  if ! mountpoint -q ${cgroup_dir}; then
-    if ! mount -t cgroup -o $devices_subsytems none ${cgroup_dir}; then
-      return 1
+    if [ -z "$devices_mount_info" ]; then
+        # cgroups not set up; must not be in a container
+        return
     fi
-  fi
 
-  # permit our cgroup to do everything with all devices
-  # ignore failure in case something has already done this; echo appears to
-  # return EINVAL, possibly because devices this affects are already in use
-  echo a > ${cgroup_dir}${devices_subdir}/devices.allow || true
+    local devices_subsytems=$(echo $devices_mount_info | cut -d: -f2)
+    local devices_subdir=$(echo $devices_mount_info | cut -d: -f3)
+
+    if [ "$devices_subdir" = "/" ]; then
+        # we're in the root devices cgroup; must not be in a container
+        return
+    fi
+
+    cgroup_dir=/tmp/devices-cgroup
+
+    if [ ! -e ${cgroup_dir} ]; then
+        # mount our container's devices subsystem somewhere
+        mkdir ${cgroup_dir}
+    fi
+
+    if ! mountpoint -q ${cgroup_dir}; then
+        if ! mount -t cgroup -o $devices_subsytems none ${cgroup_dir}; then
+        return 1
+        fi
+    fi
+
+    # permit our cgroup to do everything with all devices
+    # ignore failure in case something has already done this; echo appears to
+    # return EINVAL, possibly because devices this affects are already in use
+    echo a > ${cgroup_dir}${devices_subdir}/devices.allow || true
+}
+
+function permit_device_control_cgroupv2() {
+    cgroup_id=$(grep -oP '(?<=^0::).*' /proc/self/cgroup)
+
+    if [[ -z "$cgroup_id" ]]; then
+        echo "cgroups not set up; must not be in a container"
+        return
+    fi
+
+    dir=${0%/*}
+    clang -O2 -target bpf -c "${dir}/allow_device_control.c" -o allow_device_control.o
+
+    # remove any currently attached cgroup_device programs
+    attached_id=$(bpftool cgroup list "/sys/fs/cgroup${cgroup_id}" | grep 'cgroup_device' | awk '{print $1}')
+    if [[ -n "${attached_id}" ]]; then
+    bpftool cgroup detach \
+        "/sys/fs/cgroup${cgroup_id}" \
+        cgroup_device id "${attached_id}"
+    fi
+
+    bpftool prog load \
+        allow_device_control.o \
+        /sys/fs/bpf/allow_device_control
+
+    bpftool cgroup attach \
+        "/sys/fs/cgroup${cgroup_id}" \
+        cgroup_device pinned /sys/fs/bpf/allow_device_control
 }
 
 function setup_loop_devices() {
@@ -53,7 +81,12 @@ function salt_earth() {
   done
 }
 
-permit_device_control
+if [[ -f '/sys/fs/cgroup/cgroup.controllers' ]]; then
+    permit_device_control_cgroupv2
+else
+    permit_device_control_cgroupv1
+fi
+
 setup_loop_devices
 trap salt_earth EXIT
 

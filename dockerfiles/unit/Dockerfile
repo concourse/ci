@@ -31,6 +31,9 @@ RUN apk --update-cache add \
     losetup \
     mount \
     umount \
+    # baggageclaim tests, to allow us
+    clang \
+    libbpf-dev \
     nodejs-22 \
     npm \
     # for shasum cli
