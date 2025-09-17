@@ -152,6 +152,7 @@ jobs:
         input_mapping: { concourse: concourse-pr }
         tags: [pr]
       - task: build
+        tags: [pr]
         image: oci-build-task
         privileged: true
         config:
@@ -164,7 +165,6 @@ jobs:
           outputs: [{ name: image }]
           caches: [{ path: cache }]
           run: { path: build }
-        tags: [pr]
       - put: pr-image
         params: { image: image/image.tar }
         no_get: true
