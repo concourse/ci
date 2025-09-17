@@ -8,7 +8,9 @@ export PATH=$GOPATH/bin:$PATH
 source ci/tasks/scripts/cgroup-helpers.sh
 
 main() {
+  set -x
   sanitize_cgroups
+  set +x
   run_test
 }
 
