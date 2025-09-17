@@ -22,6 +22,7 @@ RUN apk --update-cache add \
     gcc \
     gnupg \
     gnutar \
+    grep \
     # for k8s-topgun tests
     kubectl \
     helm \
