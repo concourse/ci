@@ -33,6 +33,7 @@ RUN apk --update-cache add \
     mount \
     umount \
     # baggageclaim tests, to allow us
+    bpftool \
     clang \
     libbpf-dev \
     nodejs-22 \
