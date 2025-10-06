@@ -588,6 +588,8 @@ jobs:
           - get: prometheus-chart
             tags: [k8s-topgun]
             params: { untar: true }
+          - get: postgresql-chart-git
+            tags: [k8s-topgun]
           - get: ci
             tags: [k8s-topgun]
       - task: k8s-topgun
@@ -1815,6 +1817,13 @@ resources:
       repos:
         - name: prometheus-community
           url: https://prometheus-community.github.io/helm-charts
+
+  - name: postgresql-chart-git
+    type: git
+    check_every: 24h
+    source:
+      uri: "https://github.com/bitnami/charts.git"
+      tag_filter: postgresql/((postgresql_major))*
 
   - name: resource-types-image
     type: registry-image

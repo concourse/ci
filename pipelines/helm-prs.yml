@@ -57,6 +57,13 @@ resources:
         - name: prometheus-community
           url: https://prometheus-community.github.io/helm-charts
 
+  - name: postgresql-chart-git
+    type: git
+    check_every: 24h
+    source:
+      uri: "https://github.com/bitnami/charts.git"
+      tag_filter: postgresql/((postgresql_major))*
+
 jobs:
   - name: k8s-topgun
     serial: true
@@ -86,6 +93,8 @@ jobs:
           - get: prometheus-chart
             tags: [k8s-topgun]
             params: { untar: true }
+          - get: postgresql-chart-git
+            tags: [k8s-topgun]
       - put: chart-pr
         inputs: [chart-pr]
         params: { path: chart-pr, status: pending, context: k8s-topgun }

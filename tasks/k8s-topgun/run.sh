@@ -14,6 +14,11 @@ gke_auth
 
 mkdir -p helm-charts/stable
 cp -r prometheus-chart/prometheus helm-charts/stable
+cp -r postgresql-chart-git/bitnami/postgresql helm-charts/stable
+
+pushd helm-charts/stable/postgresql
+    helm dependency build
+popd
 
 export CONCOURSE_IMAGE_DIGEST="$(cat concourse-rc-image/digest)"
 export CONCOURSE_IMAGE_TAG="$(cat concourse-rc-image/tag)"
