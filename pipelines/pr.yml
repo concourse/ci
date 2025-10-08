@@ -321,6 +321,8 @@ jobs:
           - get: postgres-image
             params: { format: oci }
             tags: [pr]
+          - get: unit-image
+            tags: [pr]
           - get: ci
             tags: [pr]
       - *pending_status_notification
@@ -331,6 +333,8 @@ jobs:
               - containerd
             max_in_flight: all
         task: testflight
+        tags: [pr]
+        image: unit-image
         timeout: 1h
         privileged: true
         file: ci/tasks/testflight/task.yml
@@ -338,7 +342,6 @@ jobs:
         params:
           RUNTIME: ((.:runtime))
           DOWNLOAD_CLI: false
-        tags: [pr]
 
   - name: watsjs
     public: true
