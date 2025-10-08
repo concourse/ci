@@ -177,16 +177,17 @@ jobs:
     <<: *status_notifications
     plan:
       - in_parallel:
-          - get: concourse-pr
-            trigger: true
-            tags: [pr]
+          - do:
+            - get: concourse-pr
+              trigger: true
+              tags: [pr]
+            - *pending_status_notification
           - get: concourse-base
             tags: [pr]
           - get: unit-image
             tags: [pr]
           - get: ci
             tags: [pr]
-      - *pending_status_notification
       - task: check-migration-order
         timeout: 5m
         image: unit-image
@@ -231,14 +232,15 @@ jobs:
     <<: *status_notifications
     plan:
       - in_parallel:
-          - get: concourse-pr
-            trigger: true
-            tags: [pr]
+          - do:
+            - get: concourse-pr
+              trigger: true
+              tags: [pr]
+            - *pending_status_notification
           - get: ci
             tags: [pr]
           - get: validator
             tags: [pr]
-      - *pending_status_notification
       - task: validate-pr
         timeout: 5m
         file: ci/tasks/validate-pr/task.yml
@@ -253,14 +255,15 @@ jobs:
     <<: *status_notifications
     plan:
       - in_parallel:
-          - get: concourse-pr
-            trigger: true
-            tags: [pr]
+          - do:
+            - get: concourse-pr
+              trigger: true
+              tags: [pr]
+            - *pending_status_notification
           - get: ci
             tags: [pr]
           - get: unit-image
             tags: [pr]
-      - *pending_status_notification
       - across:
           - var: platform
             max_in_flight: 1
@@ -287,14 +290,15 @@ jobs:
     <<: *status_notifications
     plan:
       - in_parallel:
-          - get: concourse-pr
-            trigger: true
-            tags: [pr]
+          - do:
+            - get: concourse-pr
+              trigger: true
+              tags: [pr]
+            - *pending_status_notification
           - get: dev-image
             tags: [pr]
           - get: ci
             tags: [pr]
-      - *pending_status_notification
       - task: integration
         image: dev-image
         privileged: true
@@ -310,10 +314,12 @@ jobs:
     <<: *status_notifications
     plan:
       - in_parallel:
-          - get: concourse-pr
-            passed: [pr-image]
-            trigger: true
-            tags: [pr]
+          - do:
+            - get: concourse-pr
+              passed: [pr-image]
+              trigger: true
+              tags: [pr]
+            - *pending_status_notification
           - get: pr-image
             passed: [pr-image]
             params: { format: oci }
@@ -325,7 +331,6 @@ jobs:
             tags: [pr]
           - get: ci
             tags: [pr]
-      - *pending_status_notification
       - across:
           - var: runtime
             values:
@@ -350,10 +355,12 @@ jobs:
     <<: *status_notifications
     plan:
       - in_parallel:
-          - get: concourse-pr
-            passed: [pr-image]
-            trigger: true
-            tags: [pr]
+          - do:
+            - get: concourse-pr
+              passed: [pr-image]
+              trigger: true
+              tags: [pr]
+            - *pending_status_notification
           - get: pr-image
             passed: [pr-image]
             params: { format: oci }
@@ -363,7 +370,6 @@ jobs:
             tags: [pr]
           - get: ci
             tags: [pr]
-      - *pending_status_notification
       - task: yarn-build
         attempts: 3
         file: ci/tasks/yarn-build/task.yml
@@ -384,10 +390,12 @@ jobs:
     <<: *status_notifications
     plan:
       - in_parallel:
-          - get: concourse-pr
-            passed: [pr-image]
-            trigger: true
-            tags: [pr]
+          - do:
+            - get: concourse-pr
+              passed: [pr-image]
+              trigger: true
+              tags: [pr]
+            - *pending_status_notification
           - get: concourse-image
             params: { format: oci }
             tags: [pr]
@@ -403,7 +411,6 @@ jobs:
             tags: [pr]
           - get: ci
             tags: [pr]
-      - *pending_status_notification
       - task: integration
         timeout: 1h
         attempts: 3
@@ -418,14 +425,15 @@ jobs:
     <<: *status_notifications
     plan:
       - in_parallel:
-          - get: concourse-pr
-            tags: [pr]
-            trigger: true
+          - do:
+            - get: concourse-pr
+              tags: [pr]
+              trigger: true
+            - *pending_status_notification
           - get: unit-image
             tags: [pr]
           - get: ci
             tags: [pr]
-      - *pending_status_notification
       - task: check-format-for-go-files
         image: unit-image
         input_mapping:
