@@ -311,13 +311,6 @@ resource_types:
   source:
     repository: frodenas/gcs-resource
 
-#!TODO: remove after upgrading to >=7.14.1
-- name: semver
-  type: registry-image
-  source:
-    repository: concourse/semver-resource
-    tag: "1.10.2"
-
 resources:
 - name: base-image
   type: registry-image
