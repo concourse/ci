@@ -17,7 +17,7 @@ caches:
   - path: concourse/web/wats/node_modules
 
 params:
-  RUNTIME: guardian
+  RUNTIME: containerd
 
 run:
   path: ci/tasks/scripts/with-docker-compose
