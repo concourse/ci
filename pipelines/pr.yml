@@ -178,10 +178,10 @@ jobs:
     plan:
       - in_parallel:
           - do:
-            - get: concourse-pr
-              trigger: true
-              tags: [pr]
-            - *pending_status_notification
+              - get: concourse-pr
+                trigger: true
+                tags: [pr]
+              - *pending_status_notification
           - get: concourse-base
             tags: [pr]
           - get: unit-image
@@ -233,10 +233,10 @@ jobs:
     plan:
       - in_parallel:
           - do:
-            - get: concourse-pr
-              trigger: true
-              tags: [pr]
-            - *pending_status_notification
+              - get: concourse-pr
+                trigger: true
+                tags: [pr]
+              - *pending_status_notification
           - get: ci
             tags: [pr]
           - get: validator
@@ -256,10 +256,10 @@ jobs:
     plan:
       - in_parallel:
           - do:
-            - get: concourse-pr
-              trigger: true
-              tags: [pr]
-            - *pending_status_notification
+              - get: concourse-pr
+                trigger: true
+                tags: [pr]
+              - *pending_status_notification
           - get: ci
             tags: [pr]
           - get: unit-image
@@ -291,10 +291,10 @@ jobs:
     plan:
       - in_parallel:
           - do:
-            - get: concourse-pr
-              trigger: true
-              tags: [pr]
-            - *pending_status_notification
+              - get: concourse-pr
+                trigger: true
+                tags: [pr]
+              - *pending_status_notification
           - get: dev-image
             tags: [pr]
           - get: ci
@@ -315,11 +315,11 @@ jobs:
     plan:
       - in_parallel:
           - do:
-            - get: concourse-pr
-              passed: [pr-image]
-              trigger: true
-              tags: [pr]
-            - *pending_status_notification
+              - get: concourse-pr
+                passed: [pr-image]
+                trigger: true
+                tags: [pr]
+              - *pending_status_notification
           - get: pr-image
             passed: [pr-image]
             params: { format: oci }
@@ -356,11 +356,11 @@ jobs:
     plan:
       - in_parallel:
           - do:
-            - get: concourse-pr
-              passed: [pr-image]
-              trigger: true
-              tags: [pr]
-            - *pending_status_notification
+              - get: concourse-pr
+                passed: [pr-image]
+                trigger: true
+                tags: [pr]
+              - *pending_status_notification
           - get: pr-image
             passed: [pr-image]
             params: { format: oci }
@@ -391,11 +391,11 @@ jobs:
     plan:
       - in_parallel:
           - do:
-            - get: concourse-pr
-              passed: [pr-image]
-              trigger: true
-              tags: [pr]
-            - *pending_status_notification
+              - get: concourse-pr
+                passed: [pr-image]
+                trigger: true
+                tags: [pr]
+              - *pending_status_notification
           - get: concourse-image
             params: { format: oci }
             tags: [pr]
@@ -413,7 +413,6 @@ jobs:
             tags: [pr]
       - task: integration
         timeout: 1h
-        attempts: 3
         privileged: true
         input_mapping: { concourse: concourse-pr, dev-image: pr-image }
         file: ci/tasks/integration-tests/task.yml
@@ -426,10 +425,10 @@ jobs:
     plan:
       - in_parallel:
           - do:
-            - get: concourse-pr
-              tags: [pr]
-              trigger: true
-            - *pending_status_notification
+              - get: concourse-pr
+                tags: [pr]
+                trigger: true
+              - *pending_status_notification
           - get: unit-image
             tags: [pr]
           - get: ci
