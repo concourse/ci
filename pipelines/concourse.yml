@@ -848,7 +848,6 @@ jobs:
           branch: master
 
   - name: bin-smoke
-    old_name: bin-smoke-rapid
     public: true
     serial: true
     plan:
