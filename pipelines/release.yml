@@ -813,7 +813,6 @@ jobs:
           - get: concourse
             passed: [build-rc]
             trigger: true
-          - get: unit-image
           - get: version
             passed: [build-rc]
             trigger: true
@@ -828,7 +827,6 @@ jobs:
           - get: concourse-docker
             trigger: true
           - get: oci-build-task
-          - get: ci
       - task: build
         file: concourse-docker/ci/build-image.yml
         image: oci-build-task
