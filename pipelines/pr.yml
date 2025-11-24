@@ -268,8 +268,7 @@ jobs:
           - var: platform
             max_in_flight: 1
             values:
-              - os: linux
-                arch: amd64
+              # Skip linux because we compile for linux in the pr-image job
               - os: darwin
                 arch: amd64
               - os: windows
