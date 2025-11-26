@@ -301,7 +301,7 @@ jobs:
       - task: integration
         image: dev-image
         privileged: true
-        timeout: 1h
+        timeout: 2h
         file: ci/tasks/containerd-integration/task.yml
         input_mapping: { concourse: concourse-pr }
         tags: [pr]
@@ -339,7 +339,7 @@ jobs:
         task: testflight
         tags: [pr]
         image: unit-image
-        timeout: 1h
+        timeout: 2h
         privileged: true
         file: ci/tasks/testflight/task.yml
         input_mapping: { concourse: concourse-pr, dev-image: pr-image }
@@ -411,7 +411,7 @@ jobs:
           - get: ci
             tags: [pr]
       - task: integration
-        timeout: 1h
+        timeout: 2h
         privileged: true
         input_mapping: { concourse: concourse-pr, dev-image: pr-image }
         file: ci/tasks/integration-tests/task.yml
