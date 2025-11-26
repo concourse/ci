@@ -410,7 +410,10 @@ jobs:
             tags: [pr]
           - get: ci
             tags: [pr]
+          - get: unit-image
+            tags: [pr]
       - task: integration
+        image: unit-image
         timeout: 2h
         privileged: true
         input_mapping: { concourse: concourse-pr, dev-image: pr-image }
