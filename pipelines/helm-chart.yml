@@ -40,7 +40,8 @@ jobs:
         image: unit-image
         file: ci/tasks/bump-chart-app-version/task.yml
       - put: concourse-chart
-        inputs: [concourse-chart-bumped]
+        inputs: detect
+        no_get: true
         params:
           repository: concourse-chart-bumped
           merge: true
