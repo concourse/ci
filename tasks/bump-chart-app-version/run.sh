@@ -6,7 +6,7 @@ concourse_version=$(cat concourse-release/version)
 
 pushd concourse-chart
   sed -i "s/appVersion: .*/appVersion: ${concourse_version}/g" Chart.yaml
-  sed -i "0,/imageTag/s/imageTag: .*/imageTag: \"${concourse_version}\"/g" values.yaml
+  sed -i "1,/imageTag/s/imageTag: .*/imageTag: \"${concourse_version}\"/g" values.yaml
   sed -i "s/Concourse image version | .* |/Concourse image version | \`${concourse_version}\` |/g" README.md
 
   git --no-pager diff
