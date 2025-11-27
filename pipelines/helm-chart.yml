@@ -35,7 +35,9 @@ jobs:
               globs: [none]
           - get: concourse-chart
           - get: ci
+          - get: unit-image
       - task: bump-chart-app-version
+        image: unit-image
         file: ci/tasks/bump-chart-app-version/task.yml
       - put: concourse-chart
         inputs: [concourse-chart-bumped]
