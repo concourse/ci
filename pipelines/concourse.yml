@@ -94,14 +94,16 @@ jobs:
       - in_parallel:
           - get: ci
           - get: oci-build-task
-          - get: golang-linux
+          - get: golang
             trigger: true
+            params:
+              skip_download: true
           - get: wolfi-base
             trigger: true
             params:
               format: oci-layout
       - load_var: go_version
-        file: golang-linux/version
+        file: golang/tag
         reveal: true
       - task: build
         image: oci-build-task
@@ -1850,10 +1852,10 @@ resources:
       repository: cgr.dev/chainguard/wolfi-base
       tag: latest
 
-  - name: golang-linux
-    type: s3
+  - name: golang
+    type: registry-image
     icon: language-go
     source:
-      endpoint: storage.googleapis.com
-      bucket: golang
-      regexp: 'go(\d+\.\d+(\.\d+)?)\.linux-amd64\.tar\.gz$'
+      repository: golang
+      username: ((docker.username))
+      password: ((docker.password))

@@ -9,7 +9,7 @@ RUN apk --no-cache add \
 
 ARG golang_version
 ARG TARGETARCH
-RUN curl https://storage.googleapis.com/golang/go${golang_version}.linux-${TARGETARCH}.tar.gz -o go.linux.tar.gz
+RUN curl -L https://go.dev/dl/go${golang_version}.linux-${TARGETARCH}.tar.gz -o go.linux.tar.gz
 RUN gzip -d go.linux.tar.gz
 RUN tar -C /usr/local -xf go.linux.tar && rm go.linux.tar
 
