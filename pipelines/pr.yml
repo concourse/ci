@@ -41,10 +41,6 @@ status_notifications: &status_notifications
     tags: [pr]
 
 resource_types:
-  - name: bosh-deployment
-    type: registry-image
-    source: { repository: cloudfoundry/bosh-deployment-resource }
-
   - name: pull-request
     type: registry-image
     source:
