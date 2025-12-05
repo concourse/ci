@@ -1084,9 +1084,9 @@ jobs:
         image: unit-image
         params:
           BOSH_ENVIRONMENT: https://10.0.0.6:25555
-          BOSH_CA_CERT: ((testing_bosh_ca_cert))
-          BOSH_CLIENT: ((testing_bosh_client.id))
-          BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
+          BOSH_CLIENT: ((bosh_env.client_id))
+          BOSH_CLIENT_SECRET: ((bosh_env.client_secret))
+          BOSH_CA_CERT: ((bosh_env.ca_cert))
 
   - name: bosh-smoke
     public: true
@@ -1133,9 +1133,9 @@ jobs:
         image: unit-image
         params:
           BOSH_ENVIRONMENT: https://10.0.0.6:25555
-          BOSH_CA_CERT: ((testing_bosh_ca_cert))
-          BOSH_CLIENT: ((testing_bosh_client.id))
-          BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
+          BOSH_CLIENT: ((bosh_env.client_id))
+          BOSH_CLIENT_SECRET: ((bosh_env.client_secret))
+          BOSH_CA_CERT: ((bosh_env.ca_cert))
           BOSH_DEPLOYMENT: ((concourse_smoke_deployment_name))
           BOSH_INSTANCE_GROUP: concourse
       - task: smoke
@@ -1591,9 +1591,9 @@ resources:
     icon: fire
     source:
       target: https://10.0.0.6:25555
-      client: ((testing_bosh_client.id))
-      client_secret: ((testing_bosh_client.secret))
-      ca_cert: ((testing_bosh_ca_cert))
+      client: ((bosh_env.client_id))
+      client_secret: ((bosh_env.client_secret))
+      ca_cert: ((bosh_env.ca_cert))
       deployment: ((concourse_smoke_deployment_name))
 
   - name: concourse-chart

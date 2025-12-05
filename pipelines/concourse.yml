@@ -1020,9 +1020,9 @@ jobs:
         image: unit-image
         params:
           BOSH_ENVIRONMENT: https://10.0.0.6:25555
-          BOSH_CA_CERT: ((testing_bosh_ca_cert))
-          BOSH_CLIENT: ((testing_bosh_client.id))
-          BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
+          BOSH_CLIENT: ((bosh_env.client_id))
+          BOSH_CLIENT_SECRET: ((bosh_env.client_secret))
+          BOSH_CA_CERT: ((bosh_env.ca_cert))
 
   - name: bosh-smoke-containerd
     public: true
@@ -1071,9 +1071,9 @@ jobs:
         image: unit-image
         params:
           BOSH_ENVIRONMENT: https://10.0.0.6:25555
-          BOSH_CA_CERT: ((testing_bosh_ca_cert))
-          BOSH_CLIENT: ((testing_bosh_client.id))
-          BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
+          BOSH_CLIENT: ((bosh_env.client_id))
+          BOSH_CLIENT_SECRET: ((bosh_env.client_secret))
+          BOSH_CA_CERT: ((bosh_env.ca_cert))
           BOSH_DEPLOYMENT: concourse-smoke
           BOSH_INSTANCE_GROUP: concourse
       - task: smoke
@@ -1138,9 +1138,9 @@ jobs:
         image: unit-image
         params:
           BOSH_ENVIRONMENT: https://10.0.0.6:25555
-          BOSH_CA_CERT: ((testing_bosh_ca_cert))
-          BOSH_CLIENT: ((testing_bosh_client.id))
-          BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
+          BOSH_CLIENT: ((bosh_env.client_id))
+          BOSH_CLIENT_SECRET: ((bosh_env.client_secret))
+          BOSH_CA_CERT: ((bosh_env.ca_cert))
           BOSH_DEPLOYMENT: concourse-smoke-guardian
           BOSH_INSTANCE_GROUP: concourse
       - task: smoke
@@ -1206,12 +1206,9 @@ jobs:
           stemcell: gcp-jammy-stemcell
         params:
           BOSH_ENVIRONMENT: https://10.0.0.6:25555
-          BOSH_CA_CERT: ((testing_bosh_ca_cert))
-          BOSH_CLIENT: ((testing_bosh_client.id))
-          BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
-          # AWS_REGION: ((topgun_aws_ssm.region))
-          # AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
-          # AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
+          BOSH_CLIENT: ((bosh_env.client_id))
+          BOSH_CLIENT_SECRET: ((bosh_env.client_secret))
+          BOSH_CA_CERT: ((bosh_env.ca_cert))
           SUITE: core
           STEMCELL_VARIANT: jammy
 
@@ -1263,9 +1260,9 @@ jobs:
           stemcell: gcp-jammy-stemcell
         params:
           BOSH_ENVIRONMENT: https://10.0.0.6:25555
-          BOSH_CA_CERT: ((testing_bosh_ca_cert))
-          BOSH_CLIENT: ((testing_bosh_client.id))
-          BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
+          BOSH_CLIENT: ((bosh_env.client_id))
+          BOSH_CLIENT_SECRET: ((bosh_env.client_secret))
+          BOSH_CA_CERT: ((bosh_env.ca_cert))
           # AWS_REGION: ((topgun_aws_ssm.region))
           # AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
           # AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
@@ -1320,9 +1317,9 @@ jobs:
           stemcell: gcp-jammy-stemcell
         params:
           BOSH_ENVIRONMENT: https://10.0.0.6:25555
-          BOSH_CA_CERT: ((testing_bosh_ca_cert))
-          BOSH_CLIENT: ((testing_bosh_client.id))
-          BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
+          BOSH_CLIENT: ((bosh_env.client_id))
+          BOSH_CLIENT_SECRET: ((bosh_env.client_secret))
+          BOSH_CA_CERT: ((bosh_env.ca_cert))
           # AWS_REGION: ((topgun_aws_ssm.region))
           # AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
           # AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
@@ -1381,12 +1378,9 @@ jobs:
           postgres-release: postgres-bbr-compatible-release
         params:
           BOSH_ENVIRONMENT: https://10.0.0.6:25555
-          BOSH_CA_CERT: ((testing_bosh_ca_cert))
-          BOSH_CLIENT: ((testing_bosh_client.id))
-          BOSH_CLIENT_SECRET: ((testing_bosh_client.secret))
-          # AWS_REGION: ((topgun_aws_ssm.region))
-          # AWS_ACCESS_KEY_ID: ((topgun_aws_ssm.access_key_id))
-          # AWS_SECRET_ACCESS_KEY: ((topgun_aws_ssm.secret_access_key))
+          BOSH_CLIENT: ((bosh_env.client_id))
+          BOSH_CLIENT_SECRET: ((bosh_env.client_secret))
+          BOSH_CA_CERT: ((bosh_env.ca_cert))
           SUITE: pcf
           STEMCELL_VARIANT: jammy
 
@@ -1773,9 +1767,9 @@ resources:
     icon: fire
     source:
       target: https://10.0.0.6:25555
-      client: ((testing_bosh_client.id))
-      client_secret: ((testing_bosh_client.secret))
-      ca_cert: ((testing_bosh_ca_cert))
+      client: ((bosh_env.client_id))
+      client_secret: ((bosh_env.client_secret))
+      ca_cert: ((bosh_env.ca_cert))
       deployment: concourse-smoke
 
   - name: smoke-deployment-guardian
@@ -1784,9 +1778,9 @@ resources:
     icon: fire
     source:
       target: https://10.0.0.6:25555
-      client: ((testing_bosh_client.id))
-      client_secret: ((testing_bosh_client.secret))
-      ca_cert: ((testing_bosh_ca_cert))
+      client: ((bosh_env.client_id))
+      client_secret: ((bosh_env.client_secret))
+      ca_cert: ((bosh_env.ca_cert))
       deployment: concourse-smoke-guardian
 
   - name: gcp-jammy-stemcell
