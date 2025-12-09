@@ -13,7 +13,8 @@ instance_groups:
 - name: concourse
   instances: 1
   azs: [z1]
-  networks: [{name: test}]
+  networks:
+    - name: default
   persistent_disk: 10240
   vm_type: minimal
   stemcell: ((stemcell_variant))
