@@ -7,7 +7,7 @@ set -euo pipefail
 # - version contains "dev"
 # - is not one of the four latest versions uploaded
 # - is not currently being used, denoted by the version containing an asterisk
-releases=$(bosh releases --json | jq '
+releases=$(bosh releases --json | jq -r '
   .Tables[0].Rows
   | [.[] | select(.name | startswith("concourse")) | select(.version | contains("dev")) | select(.version | contains("*") | not)]
   | group_by(.name)
