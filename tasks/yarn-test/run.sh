@@ -12,10 +12,10 @@ retry() {
 
   until "$@"; do
     if (( attempt >= max_attempts )); then
-      echo "Command '$cmd' failed after $max_attempts attempts"
+      echo "command '$cmd' failed after $max_attempts attempts"
       exit 1
     fi
-    echo "Command '$cmd' failed (attempt $attempt/$max_attempts). Retrying..."
+    echo "command '$cmd' failed (attempt $attempt/$max_attempts). retrying..."
     ((attempt++))
   done
 }
