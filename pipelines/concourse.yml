@@ -1023,6 +1023,15 @@ jobs:
           BOSH_CLIENT: ((bosh_env.client_id))
           BOSH_CLIENT_SECRET: ((bosh_env.client_secret))
           BOSH_CA_CERT: ((bosh_env.ca_cert))
+      - task: bosh-cleanup
+        tags: [bosh]
+        file: ci/tasks/bosh-cleanup/task.yml
+        image: unit-image
+        params:
+          BOSH_ENVIRONMENT: https://10.0.0.6:25555
+          BOSH_CLIENT: ((bosh_env.client_id))
+          BOSH_CLIENT_SECRET: ((bosh_env.client_secret))
+          BOSH_CA_CERT: ((bosh_env.ca_cert))
 
   - name: bosh-smoke-containerd
     public: true

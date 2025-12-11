@@ -1,0 +1,18 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: { repository: concourse/unit }
+
+params:
+  BOSH_CA_CERT:
+  BOSH_CLIENT:
+  BOSH_CLIENT_SECRET:
+  BOSH_ENVIRONMENT:
+
+inputs:
+  - name: ci
+
+run:
+  path: ci/tasks/bosh-cleanup/run.sh
