@@ -29,36 +29,17 @@ jobs:
       - in_parallel:
           - get: concourse
             trigger: true
+          - get: examples
           - get: docs
+            params:
+              fetch: [gh-pages]
+              submodules: none
       - task: build-docs
         file: docs/ci/build.yml
-        params:
-          ANALYTICS_ID: ((analytics_id))
-          GITHUB_TOKEN: ((concourse_github_dummy.access_token))
       - put: docs-gh-pages
         no_get: true
         params:
           repository: built-docs
-
-  - name: refresh-rfc-table
-    public: true
-    serial: true
-    plan:
-      - in_parallel:
-          - get: concourse
-            passed: [publish-docs]
-          - get: docs
-            passed: [publish-docs]
-          - get: daily
-            trigger: true
-      - task: build-docs
-        file: docs/ci/build.yml
-        params:
-          ANALYTICS_ID: ((analytics_id))
-          GITHUB_TOKEN: ((concourse_github_dummy.access_token))
-      - put: docs-gh-pages
-        no_get: true
-        params: { repository: built-docs }
 
 resources:
   - name: cbd
@@ -91,9 +72,18 @@ resources:
       branch: master
       private_key: ((concourse_repo_private_key))
 
+  - name: examples
+    type: git
+    icon: *git-icon
+    check_every: 1h
+    source:
+      uri: https://github.com/concourse/examples
+      branch: main
+
   - name: docs
     type: git
     icon: *git-icon
+    check_every: 1h
     source:
       uri: https://github.com/concourse/docs
       branch: master
@@ -105,8 +95,3 @@ resources:
       uri: git@github.com:concourse/docs
       branch: gh-pages
       private_key: ((docs_deploy_key))
-
-  - name: daily
-    type: time
-    icon: clock
-    source: {} # daily is the effective default
