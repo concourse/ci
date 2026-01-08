@@ -286,6 +286,36 @@ jobs:
                 cni: ''
                 runc: ''
                 containerd: ''
+          - set_pipeline: release
+            file: pipelines-and-tasks/pipelines/release.yml
+            instance_vars:
+              version: 8.0.x
+            vars:
+              release_major: '8'
+              release_minor: '8.0'
+              latest_release: '7.14'
+              concourse_smoke_deployment_name: concourse-smoke-8-0
+              stemcell_name: jammy
+              ci_branch: master
+              postgresql_major: '16'
+              resource_type_versions:
+                bosh-io-release: ""
+                bosh-io-stemcell: ""
+                docker-image: ""
+                git: ""
+                github-release: ""
+                hg: ""
+                mock: ""
+                pool: ""
+                registry-image: ""
+                s3: ""
+                semver: ""
+                time: ""
+              dep_bin_versions:
+                gdn: ""
+                cni: ""
+                runc: ""
+                containerd: ""
           # TEMPLATE FOR NEXT RELEASE
           # to create a new release pipeline, copy (but don't delete!) this
           # template, replacing MAJOR, MINOR, PREV_MAJOR, and PREV_MINOR
