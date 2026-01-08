@@ -461,6 +461,7 @@ jobs:
               - postgres-image
               - postgres-image-legacy
             max_in_flight: all
+        fail_fast: true
         task: testflight
         image: unit-image
         privileged: true
