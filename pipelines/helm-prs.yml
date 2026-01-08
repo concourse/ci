@@ -80,8 +80,14 @@ jobs:
       tags: [k8s-topgun]
     plan:
       - in_parallel:
-          - get: chart-pr
-            tags: [k8s-topgun]
+          - do:
+            - get: chart-pr
+              tags: [k8s-topgun]
+            - put: chart-pr
+              inputs: detect
+              params: { path: chart-pr, status: pending, context: k8s-topgun }
+              get_params: { list_changed_files: true }
+              tags: [k8s-topgun]
           - get: concourse
             tags: [k8s-topgun]
           - get: concourse-image
@@ -95,11 +101,6 @@ jobs:
             params: { untar: true }
           - get: postgresql-chart-git
             tags: [k8s-topgun]
-      - put: chart-pr
-        inputs: [chart-pr]
-        params: { path: chart-pr, status: pending, context: k8s-topgun }
-        get_params: { list_changed_files: true }
-        tags: [k8s-topgun]
       - task: k8s-topgun
         tags: [k8s-topgun]
         file: ci/tasks/k8s-topgun/task.yml
@@ -128,20 +129,21 @@ jobs:
       tags: [k8s-topgun]
     plan:
       - in_parallel:
-          - get: chart-pr
-            trigger: true
-            version: every
-            tags: [k8s-topgun]
+          - do:
+            - get: chart-pr
+              trigger: true
+              version: every
+              tags: [k8s-topgun]
+            - put: update-pr-status
+              resource: chart-pr
+              inputs: detect
+              params:
+                { path: chart-pr, status: pending, context: lint-and-install-test }
+              get_params: { list_changed_files: true }
           - get: ci
             tags: [k8s-topgun]
           - get: unit-image
             tags: [k8s-topgun]
-      - put: update-pr-status
-        resource: chart-pr
-        inputs: [chart-pr]
-        params:
-          { path: chart-pr, status: pending, context: lint-and-install-test }
-        get_params: { list_changed_files: true }
         tags: [k8s-topgun]
       - task: lint-and-install-test
         tags: [k8s-topgun]
@@ -165,20 +167,21 @@ jobs:
       tags: [k8s-topgun]
     plan:
       - in_parallel:
-          - get: chart-pr
-            trigger: true
-            version: every
-            tags: [k8s-topgun]
+          - do:
+            - get: chart-pr
+              trigger: true
+              version: every
+              tags: [k8s-topgun]
+            - put: update-pr-status
+              resource: chart-pr
+              inputs: detect
+              params: { path: chart-pr, status: pending, context: unit-tests }
+              get_params: { list_changed_files: true }
+              tags: [k8s-topgun]
           - get: ci
             tags: [k8s-topgun]
           - get: unit-image
             tags: [k8s-topgun]
-      - put: update-pr-status
-        resource: chart-pr
-        inputs: [chart-pr]
-        params: { path: chart-pr, status: pending, context: unit-tests }
-        get_params: { list_changed_files: true }
-        tags: [k8s-topgun]
       - task: unit-tests
         tags: [k8s-topgun]
         file: ci/tasks/helm-chart-unit-tests/task.yml
