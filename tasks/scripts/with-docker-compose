@@ -24,7 +24,7 @@ ci/tasks/scripts/generate-keys
 docker compose \
   $DOCKER_COMPOSE_FLAGS \
   -f ci/overrides/docker-compose.no-build.yml \
-  up --no-build -d
+  up --no-build --no-color --yes --detach
 
 trap stop_docker_compose EXIT SIGTERM SIGINT
 function stop_docker_compose() {
