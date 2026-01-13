@@ -21,7 +21,7 @@ popd
 
 ci/tasks/smoke-test/run.sh
 
-pushd docs
+pushd docs/docs
   docker compose down
 popd
 
