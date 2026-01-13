@@ -445,13 +445,14 @@ jobs:
               - containerd
             max_in_flight: all
         fail_fast: true
-        task: testflight
-        image: unit-image
-        privileged: true
-        timeout: 1h
-        params:
-          RUNTIME: ((.:runtime))
-        file: ci/tasks/testflight/task.yml
+        do:
+          - task: testflight
+            image: unit-image
+            privileged: true
+            timeout: 2h
+            params:
+              RUNTIME: ((.:runtime))
+            file: ci/tasks/testflight/task.yml
 
   - name: watsjs
     public: true
@@ -528,15 +529,16 @@ jobs:
               - containerd
             max_in_flight: all
         fail_fast: true
-        task: testflight
-        image: unit-image
-        privileged: true
-        timeout: 1h
-        input_mapping:
-          dev-image: concourse-rc-image
-        params:
-          RUNTIME: ((.:runtime))
-        file: ci/tasks/testflight/task.yml
+        do:
+          - task: testflight
+            image: unit-image
+            privileged: true
+            timeout: 2h
+            input_mapping:
+              dev-image: concourse-rc-image
+            params:
+              RUNTIME: ((.:runtime))
+            file: ci/tasks/testflight/task.yml
 
   - name: k8s-smoke
     public: true

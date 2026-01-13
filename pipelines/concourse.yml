@@ -462,13 +462,15 @@ jobs:
               - postgres-image-legacy
             max_in_flight: all
         fail_fast: true
-        task: testflight
-        image: unit-image
-        privileged: true
-        params:
-          RUNTIME: ((.:runtime))
-        file: ci/tasks/testflight/task.yml
-        input_mapping: { postgres-image: ((.:postgres-image)) }
+        do:
+          - task: testflight
+            image: unit-image
+            timeout: 2h
+            privileged: true
+            params:
+              RUNTIME: ((.:runtime))
+            file: ci/tasks/testflight/task.yml
+            input_mapping: { postgres-image: ((.:postgres-image)) }
 
   - name: watsjs
     public: true
