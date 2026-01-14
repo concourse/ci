@@ -136,6 +136,7 @@ jobs:
               tags: [k8s-topgun]
             - put: update-pr-status
               resource: chart-pr
+              tags: [k8s-topgun]
               inputs: detect
               params:
                 { path: chart-pr, status: pending, context: lint-and-install-test }
@@ -144,7 +145,6 @@ jobs:
             tags: [k8s-topgun]
           - get: unit-image
             tags: [k8s-topgun]
-        tags: [k8s-topgun]
       - task: lint-and-install-test
         tags: [k8s-topgun]
         file: ci/tasks/k8s-lint-and-install/task.yml
