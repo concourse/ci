@@ -225,9 +225,9 @@ jobs:
           - set_pipeline: helm-chart
             file: pipelines-and-tasks/pipelines/helm-chart.yml
             instance_vars:
-              version: 7
+              version: 8
             vars:
-              concourse-chart-branch: release/7.14.x
+              concourse-chart-branch: release/8.0.x
           - set_pipeline: helm-prs
             file: pipelines-and-tasks/pipelines/helm-prs.yml
             instance_vars:
@@ -244,7 +244,7 @@ jobs:
             vars:
               concourse_base_branch: master
               concourse_image_name: concourse/concourse-rc
-              concourse_image_tag: release-7.14
+              concourse_image_tag: release-8.0
               postgresql_major: "16"
           - set_pipeline: docs-prs
             team: contributor
