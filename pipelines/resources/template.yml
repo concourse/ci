@@ -256,6 +256,7 @@ plan:
 
 - load_var: version
   file: version/version
+  reveal: true
 - in_parallel:
   - put: resource-image
     no_get: true
