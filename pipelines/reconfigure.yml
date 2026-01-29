@@ -256,6 +256,8 @@ jobs:
             file: dex-ci/ci/pipeline.yml
           - set_pipeline: oci-build-task
             file: pipelines-and-tasks/pipelines/oci-build-task.yml
+          - set_pipeline: bash
+            file: pipelines-and-tasks/pipelines/bash.yml
           - set_pipeline: release
             file: pipelines-and-tasks/pipelines/release.yml
             instance_vars:
