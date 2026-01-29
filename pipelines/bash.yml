@@ -44,6 +44,7 @@ jobs:
           - get: oci-build-task
       - task: build
         image: oci-build-task
+        privileged: true
         config:
           platform: linux
           inputs:
