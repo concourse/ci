@@ -37,6 +37,7 @@ jobs:
     plan:
       - in_parallel:
           - get: wolfi
+            trigger: true
             params:
               format: oci-layout
           - get: ci
