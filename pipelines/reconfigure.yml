@@ -149,6 +149,8 @@ jobs:
         passed: [reconfigure-self]
       - get: latest-concourse
         trigger: true
+        params:
+          globs: [none]
       - load_var: release-version
         file: latest-concourse/version
       - set_pipeline: promote
