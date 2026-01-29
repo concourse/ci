@@ -20,9 +20,7 @@ groups:
   - name: publish
     jobs:
       - k8s-smoke
-      - publish-chart-major
-      - publish-chart-minor
-      - publish-chart-patch
+      - publish-chart-*
 
 jobs:
   - name: concourse-app-bump
@@ -35,9 +33,9 @@ jobs:
               globs: [none]
           - get: concourse-chart
           - get: ci
-          - get: unit-image
+          - get: bash
       - task: bump-chart-app-version
-        image: unit-image
+        image: bash
         file: ci/tasks/bump-chart-app-version/task.yml
       - put: concourse-chart
         inputs: detect
@@ -97,12 +95,12 @@ jobs:
             passed: [k8s-smoke]
           - get: chart-repo-index
           - get: ci
-          - get: unit-image
+          - get: bash
       - task: bump-chart-version
-        image: unit-image
+        image: bash
         file: ci/tasks/bump-chart-version/task.yml
       - task: package-chart
-        image: unit-image
+        image: bash
         file: ci/tasks/package-chart/task.yml
       - in_parallel:
           - put: version
@@ -173,12 +171,12 @@ jobs:
             passed: [k8s-smoke]
           - get: chart-repo-index
           - get: ci
-          - get: unit-image
+          - get: bash
       - task: bump-chart-version
-        image: unit-image
+        image: bash
         file: ci/tasks/bump-chart-version/task.yml
       - task: package-chart
-        image: unit-image
+        image: bash
         file: ci/tasks/package-chart/task.yml
       - in_parallel:
           - put: version
@@ -252,6 +250,15 @@ resources:
     icon: docker
     source:
       repository: concourse/unit
+      username: ((docker.username))
+      password: ((docker.password))
+
+  - name: bash
+    type: registry-image
+    icon: docker
+    source:
+      repository: concourse/bash
+      tag: latest
       username: ((docker.username))
       password: ((docker.password))
 

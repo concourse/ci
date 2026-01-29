@@ -2,6 +2,8 @@
 
 set -euo pipefail -x
 
+apk add --no-progress --no-cache git cmd:sed
+
 chart_version=$(cat version/version)
 
 pushd concourse-chart
