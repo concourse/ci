@@ -336,13 +336,7 @@ jobs:
             - get: golang-builder-image
               trigger: true
               params: { format: oci-layout }
-            - get: containerd
-              trigger: true
-            - get: runc
-              trigger: true
             - get: gdn
-              trigger: true
-            - get: cni
               trigger: true
             - get: dumb-init
               trigger: true
@@ -1709,33 +1703,6 @@ resources:
       owner: cloudfoundry
       repository: garden-runc-release
       semver_constraint: ((dep_bin_versions.gdn))
-      access_token: ((concourse_github_dummy.access_token))
-
-  - name: containerd
-    type: github-release
-    icon: *release-icon
-    source:
-      owner: containerd
-      repository: containerd
-      semver_constraint: ((dep_bin_versions.containerd))
-      access_token: ((concourse_github_dummy.access_token))
-
-  - name: runc
-    type: github-release
-    icon: *release-icon
-    source:
-      owner: opencontainers
-      repository: runc
-      semver_constraint: ((dep_bin_versions.runc))
-      access_token: ((concourse_github_dummy.access_token))
-
-  - name: cni
-    type: github-release
-    icon: *release-icon
-    source:
-      owner: containernetworking
-      repository: plugins
-      semver_constraint: ((dep_bin_versions.cni))
       access_token: ((concourse_github_dummy.access_token))
 
   - name: postgres-release

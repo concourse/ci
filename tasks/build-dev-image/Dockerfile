@@ -36,38 +36,56 @@ RUN apk --no-cache add \
     ca-certificates \
     dumb-init
 
-# Networking tools for container runtimes
+RUN mkdir -p /usr/local/concourse/bin
+
+# Container runtime, dependencies
+# For containerd backend:
+#   - containerd binaries
+#   - runc
+#   - cni plugins
 RUN apk --no-cache add \
-    iproute2 \
-    iptables \
-    ip6tables \
-    # guardian runtime runs some script on startup to create iptable rules and
-    # requires the real xargs, not busybox's impl (https://github.com/cloudfoundry/guardian/blob/main/kawasaki/iptables/global_chains.go)
-    cmd:xargs
+    cni-plugins \
+    runc \
+    containerd
+
+# Copy containerd binaries
+RUN cp /usr/bin/containerd* /usr/local/concourse/bin/ && \
+    cp /usr/bin/ctr /usr/local/concourse/bin/
+
+# Copy runc
+RUN cp /usr/bin/runc /usr/local/concourse/bin/
+
+# Copy CNI plugin binaries
+RUN cp /usr/bin/bandwidth /usr/bin/bridge /usr/bin/dhcp /usr/bin/dummy \
+       /usr/bin/firewall /usr/bin/host-device /usr/bin/host-local /usr/bin/ipvlan \
+       /usr/bin/loopback /usr/bin/macvlan /usr/bin/portmap /usr/bin/ptp \
+       /usr/bin/sbr /usr/bin/static /usr/bin/tap /usr/bin/tuning \
+       /usr/bin/vlan /usr/bin/vrf \
+       /usr/local/concourse/bin/
+
+# Remove container runtime packages after they've been copied to the concourse bin directory
+RUN apk --no-cache del \
+    cni-plugins \
+    runc \
+    containerd
+
+# Add networking tools
+RUN apk --no-cache add \
+       iproute2 \
+       iptables \
+       ip6tables \
+       # guardian runtime runs some script on startup to create iptable rules and
+       # requires the real xargs, not busybox's impl (https://github.com/cloudfoundry/guardian/blob/main/kawasaki/iptables/global_chains.go)
+       cmd:xargs
 
 # for worker/runtime/integration tests
 RUN apk --no-cache add \
     mount \
     umount
 
-# Add container runtime dependencies
-#
-# For containerd backend:
-#   - containerd binaries
-#   - runc
-#   - cni plugins
-#   - iptables (needed by cni plugins)
-
-# Copies files from the bin directory of the tarball to /usr/local/concourse/bin
-ADD containerd/containerd-*-linux-${TARGETARCH}.tar.gz /usr/local/concourse
-
 COPY gdn/gdn-linux-${TARGETARCH}-[0-9]*.*.* /usr/local/concourse/bin/gdn
 # wolfi does not have /var/run setup, which guardian depends on existing already
 RUN ln -sf /run /var/run
-
-COPY runc/runc.${TARGETARCH} /usr/local/concourse/bin/runc
-
-ADD cni/cni-plugins-linux-${TARGETARCH}-*.tgz /usr/local/concourse/bin
 
 RUN chmod -R +x /usr/local/concourse/bin
 

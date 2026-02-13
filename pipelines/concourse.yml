@@ -331,13 +331,7 @@ jobs:
             - get: golang-builder-image
               trigger: true
               params: { format: oci-layout }
-            - get: containerd
-              trigger: true
-            - get: runc
-              trigger: true
             - get: gdn
-              trigger: true
-            - get: cni
               trigger: true
             - get: dumb-init
               trigger: true
@@ -1495,22 +1489,6 @@ resources:
       repository: bosh-backup-and-restore
       access_token: ((concourse_github_dummy.access_token))
 
-  - name: containerd
-    type: github-release
-    icon: *release-icon
-    source:
-      owner: containerd
-      repository: containerd
-      access_token: ((concourse_github_dummy.access_token))
-
-  - name: runc
-    type: github-release
-    icon: *release-icon
-    source:
-      owner: opencontainers
-      repository: runc
-      access_token: ((concourse_github_dummy.access_token))
-
   - name: dumb-init
     type: github-release
     icon: *release-icon
@@ -1525,14 +1503,6 @@ resources:
     source:
       owner: cloudfoundry
       repository: garden-runc-release
-      access_token: ((concourse_github_dummy.access_token))
-
-  - name: cni
-    type: github-release
-    icon: *release-icon
-    source:
-      owner: containernetworking
-      repository: plugins
       access_token: ((concourse_github_dummy.access_token))
 
   - name: mock-resource
