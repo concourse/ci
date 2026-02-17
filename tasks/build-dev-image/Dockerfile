@@ -63,11 +63,9 @@ RUN cp /usr/bin/bandwidth /usr/bin/bridge /usr/bin/dhcp /usr/bin/dummy \
        /usr/bin/vlan /usr/bin/vrf \
        /usr/local/concourse/bin/
 
-# Remove container runtime packages after they've been copied to the concourse bin directory
+# Remove cni-plugins since it has a conflicting bridge binary with the one in iproute2
 RUN apk --no-cache del \
-    cni-plugins \
-    runc \
-    containerd
+    cni-plugins
 
 # Add networking tools
 RUN apk --no-cache add \
