@@ -45,15 +45,14 @@ RUN mkdir -p /usr/local/concourse/bin
 #   - cni plugins
 RUN apk --no-cache add \
     cni-plugins \
-    runc \
     containerd
 
 # Copy containerd binaries
 RUN cp /usr/bin/containerd* /usr/local/concourse/bin/ && \
     cp /usr/bin/ctr /usr/local/concourse/bin/
 
-# Copy runc
-RUN cp /usr/bin/runc /usr/local/concourse/bin/
+# Copy custom-built runc binary for the target architecture
+COPY runc-${TARGETARCH}/runc.${TARGETARCH} /usr/local/concourse/bin/runc
 
 # Copy CNI plugin binaries
 RUN cp /usr/bin/bandwidth /usr/bin/bridge /usr/bin/dhcp /usr/bin/dummy \

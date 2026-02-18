@@ -15,6 +15,8 @@ inputs:
   - name: fly-linux
   - name: fly-darwin
   - name: fly-windows
+  - name: runc-amd64
+  - name: runc-arm64
   - name: base-image
     optional: true
 

@@ -350,6 +350,8 @@ jobs:
               passed: [resource-types-images]
               trigger: true
               params: *arm64
+            - get: runc-amd64
+            - get: runc-arm64
             - get: unit-image
             - get: oci-build-task
             - get: ci
@@ -1704,6 +1706,22 @@ resources:
       repository: garden-runc-release
       semver_constraint: ((dep_bin_versions.gdn))
       access_token: ((concourse_github_dummy.access_token))
+
+  - name: runc-amd64
+    type: gcs
+    icon: linux
+    source:
+      bucket: concourse-artifacts
+      json_key: ((concourse_artifacts_json_key))
+      versioned_file: runc/runc.amd64
+
+  - name: runc-arm64
+    type: gcs
+    icon: linux
+    source:
+      bucket: concourse-artifacts
+      json_key: ((concourse_artifacts_json_key))
+      versioned_file: runc/runc.arm64
 
   - name: postgres-release
     type: bosh-io-release
