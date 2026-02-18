@@ -1,0 +1,17 @@
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: concourse/oci-build-task
+
+inputs:
+  - name: ci
+  - name: golang-builder-image
+  - name: runc
+
+outputs:
+  - name: runc-bin
+
+run:
+  path: ci/tasks/runc/build.sh
