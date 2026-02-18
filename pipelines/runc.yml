@@ -1,3 +1,8 @@
+resource_types:
+  - name: gcs
+    type: registry-image
+    source: { repository: frodenas/gcs-resource }
+
 resources:
   - name: golang-builder-image
     type: registry-image
@@ -28,6 +33,22 @@ resources:
       owner: opencontainers
       repository: runc
 
+  - name: runc-amd64
+    type: gcs
+    icon: linux
+    source:
+      bucket: concourse-artifacts
+      json_key: ((concourse_artifacts_json_key))
+      versioned_file: runc/runc.amd64
+
+  - name: runc-arm64
+    type: gcs
+    icon: linux
+    source:
+      bucket: concourse-artifacts
+      json_key: ((concourse_artifacts_json_key))
+      versioned_file: runc/runc.arm64
+
 jobs:
   - name: runc
     plan:
@@ -46,4 +67,13 @@ jobs:
         privileged: true
         image: oci-build-task
         file: ci/tasks/runc/task.yml
+      - in_parallel:
+        - put: runc-amd64
+          no_get: true
+          params:
+            file: runc-bin/runc.amd64
+        - put: runc-arm64
+          no_get: true
+          params:
+            file: runc-bin/runc.arm64
 
