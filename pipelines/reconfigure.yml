@@ -251,9 +251,6 @@ jobs:
           - set_pipeline: docs-prs
             team: contributor
             file: docs-ci/ci/prs-pipeline.yml
-          - set_pipeline: dutyfree
-            team: dutyfree
-            file: resource-types-website-ci/ci/pipeline.yml
           - set_pipeline: update-dex
             file: dex-ci/ci/pipeline.yml
           - set_pipeline: oci-build-task
