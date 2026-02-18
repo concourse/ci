@@ -257,6 +257,8 @@ jobs:
             file: pipelines-and-tasks/pipelines/oci-build-task.yml
           - set_pipeline: bash
             file: pipelines-and-tasks/pipelines/bash.yml
+          - set_pipeline: runc
+            file: pipelines-and-tasks/pipelines/runc.yml
           - set_pipeline: release
             file: pipelines-and-tasks/pipelines/release.yml
             instance_vars:

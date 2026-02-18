@@ -1,0 +1,49 @@
+resources:
+  - name: golang-builder-image
+    type: registry-image
+    icon: docker
+    source:
+      repository: concourse/golang-builder
+      tag: latest
+      username: ((docker.username))
+      password: ((docker.password))
+
+  - name: oci-build-task
+    type: registry-image
+    icon: docker
+    source: { repository: concourse/oci-build-task }
+
+  - name: ci
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/concourse/ci.git
+      branch: runc
+
+  - name: runc
+    type: github-release
+    icon: github
+    check_every: 24h
+    source:
+      owner: opencontainers
+      repository: runc
+
+jobs:
+  - name: runc
+    plan:
+      - in_parallel:
+        - get: ci
+        - get: runc
+          trigger: true
+          params:
+            globs: [none]
+            include_source_tarball: true
+        - get: oci-build-task
+        - get: golang-builder-image
+          trigger: true
+          params: { format: oci-layout }
+      - task: build-runc-binaries
+        privileged: true
+        image: oci-build-task
+        file: ci/tasks/runc/task.yml
+
