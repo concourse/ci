@@ -330,6 +330,7 @@ jobs:
               concourse_smoke_deployment_name: "concourse-smoke-8-1"
               stemcell_name: jammy
               ci_branch: master
+              postgresql_major: '16'
               resource_type_versions:
                 bosh-io-release: ""
                 bosh-io-stemcell: ""
@@ -368,6 +369,7 @@ jobs:
           #     concourse_smoke_deployment_name: "concourse-smoke-MAJOR-MINOR"
           #     stemcell_name: jammy
           #     ci_branch: master
+          #     postgresql_major: '16'
           #     resource_type_versions:
           #       # These should be left blank, as they will be updated after the release has shipped!
           #       bosh-io-release: ""
