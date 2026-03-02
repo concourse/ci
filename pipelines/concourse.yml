@@ -1035,7 +1035,7 @@ jobs:
   - name: bosh-smoke-containerd
     public: true
     serial: true
-    serial_group: [bosh-smoke]
+    serial_groups: [bosh-smoke]
     plan:
       - in_parallel:
           # these don't trigger, to ensure that the job gets triggered by
@@ -1103,7 +1103,7 @@ jobs:
   - name: bosh-smoke-guardian
     public: true
     serial: true
-    serial_group: [bosh-smoke]
+    serial_groups: [bosh-smoke]
     plan:
       - in_parallel:
           # these don't trigger, to ensure that the job gets triggered by
@@ -1171,7 +1171,7 @@ jobs:
   - name: bosh-topgun-core
     public: true
     serial: true
-    serial_group: [bosh-topgun]
+    serial_groups: [bosh-topgun]
     interruptible: true
     plan:
       - in_parallel:
@@ -1226,7 +1226,7 @@ jobs:
   - name: bosh-topgun-runtime
     public: true
     serial: true
-    serial_group: [bosh-topgun]
+    serial_groups: [bosh-topgun]
     interruptible: true
     plan:
       - in_parallel:
@@ -1284,7 +1284,7 @@ jobs:
   - name: bosh-topgun-both
     public: true
     serial: true
-    serial_group: [bosh-topgun]
+    serial_groups: [bosh-topgun]
     interruptible: true
     plan:
       - in_parallel:
@@ -1342,7 +1342,7 @@ jobs:
   - name: bosh-topgun-pcf
     public: true
     serial: true
-    serial_group: [bosh-topgun]
+    serial_groups: [bosh-topgun]
     interruptible: true
     plan:
       - in_parallel:
