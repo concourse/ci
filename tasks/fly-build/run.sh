@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-apk --no-cache --no-progress add cmd:shasum
+apk --no-progress add cmd:shasum
 
 export GOPATH=$PWD/gopath
 export PATH=$PWD/gopath/bin:$PATH
@@ -64,7 +64,7 @@ for platform in "${platforms[@]}"; do
 
     pushd "$platform_dir"
     if [ "$GOOS" = "windows" ]; then
-        apk --no-cache --no-progress add zip
+        apk --no-progress add zip
         archive=fly-$GOOS-$GOARCH.zip
         zip "$archive" fly.exe
     else
