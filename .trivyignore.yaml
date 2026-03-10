@@ -3,3 +3,10 @@ vulnerabilities:
     paths:
       - "usr/local/concourse/bin/concourse"
     statement: "False-positive"
+  - id: CVE-2020-5415
+    paths:
+      - "usr/local/concourse/bin/concourse"
+    statement: |
+      Was fixed in 6.4.1 of Concourse. Scanner doesn't recognize
+      self-referencing of concourse/concourse within the binary and thinks
+      we're using an older version
