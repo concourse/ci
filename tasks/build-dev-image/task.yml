@@ -17,6 +17,8 @@ inputs:
   - name: fly-windows
   - name: runc-amd64
   - name: runc-arm64
+  - name: containerd-amd64
+  - name: containerd-arm64
   - name: base-image
     optional: true
 
