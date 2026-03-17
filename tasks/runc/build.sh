@@ -2,8 +2,11 @@
 
 set -e
 
-tar xf ./runc/source.tar.gz
-mv ./opencontainers-runc-*/* ./runc/
+apk --no-progress add git
+
+cd runc
+git checkout "$RUNC_TAG"
+cd ..
 
 mkdir -p ./image
 

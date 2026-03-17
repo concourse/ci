@@ -38,23 +38,15 @@ RUN apk --no-cache add \
 
 RUN mkdir -p /usr/local/concourse/bin
 
-# Container runtime, dependencies
-# For containerd backend:
-#   - containerd binaries
-#   - runc
-#   - cni plugins
-RUN apk --no-cache add \
-    cni-plugins \
-    containerd
-
-# Copy containerd binaries
-RUN cp /usr/bin/containerd* /usr/local/concourse/bin/ && \
-    cp /usr/bin/ctr /usr/local/concourse/bin/
+# Copy custom-built static containerd binaries. ADD will extract binaries from
+# the archive
+ADD containerd-${TARGETARCH}/containerd.${TARGETARCH}.tar.gz /usr/local/concourse/bin/
 
 # Copy custom-built runc binary for the target architecture
 COPY runc-${TARGETARCH}/runc.${TARGETARCH} /usr/local/concourse/bin/runc
 
 # Copy CNI plugin binaries
+RUN apk --no-cache add cni-plugins
 RUN cp /usr/bin/bandwidth /usr/bin/bridge /usr/bin/dhcp /usr/bin/dummy \
        /usr/bin/firewall /usr/bin/host-device /usr/bin/host-local /usr/bin/ipvlan \
        /usr/bin/loopback /usr/bin/macvlan /usr/bin/portmap /usr/bin/ptp \
@@ -62,7 +54,8 @@ RUN cp /usr/bin/bandwidth /usr/bin/bridge /usr/bin/dhcp /usr/bin/dummy \
        /usr/bin/vlan /usr/bin/vrf \
        /usr/local/concourse/bin/
 
-# Remove cni-plugins since it has a conflicting bridge binary with the one in iproute2
+# Remove cni-plugins since it has a conflicting bridge binary with the one in
+# iproute2
 RUN apk --no-cache del \
     cni-plugins
 
@@ -71,8 +64,9 @@ RUN apk --no-cache add \
        iproute2 \
        iptables \
        ip6tables \
-       # guardian runtime runs some script on startup to create iptable rules and
-       # requires the real xargs, not busybox's impl (https://github.com/cloudfoundry/guardian/blob/main/kawasaki/iptables/global_chains.go)
+       # guardian runtime runs some script on startup to create iptable rules
+       # and requires the real xargs, not busybox's impl
+       # (https://github.com/cloudfoundry/guardian/blob/main/kawasaki/iptables/global_chains.go)
        cmd:xargs
 
 # for worker/runtime/integration tests

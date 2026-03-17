@@ -1,0 +1,152 @@
+resource_types:
+  - name: gcs
+    type: registry-image
+    source: { repository: frodenas/gcs-resource }
+
+resources:
+  - name: golang-builder-image
+    type: registry-image
+    icon: docker
+    source:
+      repository: concourse/golang-builder
+      tag: latest
+      username: ((docker.username))
+      password: ((docker.password))
+
+  - name: oci-build-task
+    type: registry-image
+    icon: docker
+    source: { repository: concourse/oci-build-task }
+
+  - name: ci
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/concourse/ci.git
+
+  - name: runc-release
+    type: github-release
+    icon: github
+    check_every: 24h
+    source:
+      owner: opencontainers
+      repository: runc
+
+  - name: runc
+    type: git
+    icon: github
+    check_every: 24h
+    source:
+      uri: https://github.com/opencontainers/runc.git
+      fetch_tags: true
+
+  - name: runc-amd64
+    type: gcs
+    icon: linux
+    source:
+      bucket: concourse-artifacts
+      json_key: ((concourse_artifacts_json_key))
+      versioned_file: runc/runc.amd64
+
+  - name: runc-arm64
+    type: gcs
+    icon: linux
+    source:
+      bucket: concourse-artifacts
+      json_key: ((concourse_artifacts_json_key))
+      versioned_file: runc/runc.arm64
+
+  - name: containerd-release
+    type: github-release
+    icon: github
+    check_every: 24h
+    source:
+      owner: containerd
+      repository: containerd
+
+  - name: containerd
+    type: git
+    icon: github
+    check_every: 24h
+    source:
+      uri: https://github.com/containerd/containerd.git
+      fetch_tags: true
+
+  - name: containerd-amd64
+    type: gcs
+    icon: linux
+    source:
+      bucket: concourse-artifacts
+      json_key: ((concourse_artifacts_json_key))
+      versioned_file: containerd/containerd.amd64.tar.gz
+
+  - name: containerd-arm64
+    type: gcs
+    icon: linux
+    source:
+      bucket: concourse-artifacts
+      json_key: ((concourse_artifacts_json_key))
+      versioned_file: containerd/containerd.arm64.tar.gz
+
+jobs:
+  - name: runc
+    plan:
+      - in_parallel:
+        - get: ci
+        - get: runc-release
+          trigger: true
+          params:
+            globs: [none]
+        - get: runc
+        - get: oci-build-task
+        - get: golang-builder-image
+          trigger: true
+          params: { format: oci-layout }
+      - load_var: runc_tag
+        reveal: true
+        file: runc-release/tag
+      - task: build-runc-binaries
+        privileged: true
+        image: oci-build-task
+        file: ci/tasks/runc/task.yml
+        params:
+          RUNC_TAG: ((.:runc_tag))
+      - in_parallel:
+        - put: runc-amd64
+          no_get: true
+          params:
+            file: runc-bin/runc.amd64
+        - put: runc-arm64
+          no_get: true
+          params:
+            file: runc-bin/runc.arm64
+
+
+  - name: containerd
+    plan:
+      - in_parallel:
+        - get: ci
+        - get: containerd-release
+          trigger: true
+          params:
+            globs: [none]
+        - get: containerd
+        - get: golang-builder-image
+          trigger: true
+      - load_var: containerd_tag
+        reveal: true
+        file: containerd-release/tag
+      - task: build-containerd-binaries
+        image: golang-builder-image
+        file: ci/tasks/containerd/task.yml
+        params:
+          CONTAINERD_TAG: ((.:containerd_tag))
+      - in_parallel:
+        - put: containerd-amd64
+          no_get: true
+          params:
+            file: containerd-tar/containerd.amd64.tar.gz
+        - put: containerd-arm64
+          no_get: true
+          params:
+            file: containerd-tar/containerd.arm64.tar.gz

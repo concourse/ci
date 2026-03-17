@@ -1,0 +1,16 @@
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: concourse/golang-builder
+
+inputs:
+  - name: ci
+  - name: containerd
+
+outputs:
+  - name: containerd-tar
+
+run:
+  path: ci/tasks/containerd/build.sh

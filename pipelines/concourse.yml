@@ -347,6 +347,8 @@ jobs:
               params: *arm64
             - get: runc-amd64
             - get: runc-arm64
+            - get: containerd-amd64
+            - get: containerd-arm64
             - get: unit-image
             - get: oci-build-task
             - get: ci
@@ -1693,6 +1695,22 @@ resources:
       bucket: concourse-artifacts
       json_key: ((concourse_artifacts_json_key))
       versioned_file: runc/runc.arm64
+
+  - name: containerd-amd64
+    type: gcs
+    icon: linux
+    source:
+      bucket: concourse-artifacts
+      json_key: ((concourse_artifacts_json_key))
+      versioned_file: containerd/containerd.amd64.tar.gz
+
+  - name: containerd-arm64
+    type: gcs
+    icon: linux
+    source:
+      bucket: concourse-artifacts
+      json_key: ((concourse_artifacts_json_key))
+      versioned_file: containerd/containerd.arm64.tar.gz
 
   - name: docs
     type: git
