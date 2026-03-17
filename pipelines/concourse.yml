@@ -99,7 +99,6 @@ jobs:
             params:
               skip_download: true
           - get: wolfi-base
-            trigger: true
             params:
               format: oci-layout
       - load_var: go_version
@@ -329,7 +328,6 @@ jobs:
               trigger: true
               params: { format: rootfs }
             - get: golang-builder-image
-              trigger: true
               params: { format: oci-layout }
             - get: gdn
               trigger: true
@@ -346,9 +344,13 @@ jobs:
               trigger: true
               params: *arm64
             - get: runc-amd64
+              trigger: true
             - get: runc-arm64
+              trigger: true
             - get: containerd-amd64
+              trigger: true
             - get: containerd-arm64
+              trigger: true
             - get: unit-image
             - get: oci-build-task
             - get: ci
