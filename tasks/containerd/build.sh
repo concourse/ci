@@ -11,7 +11,7 @@ make STATIC=1 GOARCH=amd64
 
 # Log versions
 ./bin/containerd --version
-./bin/containerd-shim-runc-v2 --version
+./bin/containerd-shim-runc-v2 -v
 ./bin/ctr --version
 
 cd ./bin
