@@ -1,7 +1,8 @@
 resource_types:
-  - name: pull-request
+  - name: github
     type: registry-image
-    source: { repository: aoldershaw/github-pr-resource }
+    source:
+      repository: pixelairio/github-resource
 
 resources:
   - name: pipelines-and-tasks
@@ -92,21 +93,12 @@ resources:
       access_token: ((concourse_github_dummy.access_token))
 
   - name: concourse-prs
-    type: pull-request
-    check_every: 2m
+    type: github
     source:
+      kind: prs
       repository: concourse/concourse
       access_token: ((pull_requests_access_token))
-      base_branch: master
-
-  - name: concourse-deploy-prs
-    type: pull-request
-    check_every: 2m
-    source:
-      repository: concourse/concourse
-      access_token: ((pull_requests_access_token))
-      base_branch: master
-      labels: [deploy]
+      target_branch: master
 
 jobs:
   - name: reconfigure-self
@@ -410,43 +402,17 @@ jobs:
             trigger: true
           - get: concourse-prs
             trigger: true
-          - get: concourse-deploy-prs
-            trigger: true
-      - load_var: all_prs
+      - load_var: prs
         file: concourse-prs/prs.json
-      - load_var: deploy_prs
-        file: concourse-deploy-prs/prs.json
-      - task: non-deploy-prs
-        file: ci/tasks/jq.yml
-        params:
-          VAR_all_prs: ((.:all_prs))
-          VAR_deploy_prs: ((.:deploy_prs))
-          EXPR: .all_prs - .deploy_prs
-        output_mapping: { result: non-deploy-prs }
-      - load_var: non_deploy_prs
-        file: non-deploy-prs/result.json
       - across:
-          - var: non_deploy_pr
-            values: ((.:non_deploy_prs))
+          - var: pr
+            values: ((.:prs))
             max_in_flight: all
         set_pipeline: pr
         team: contributor
         file: pr-pipeline/pipelines/pr.yml
         instance_vars:
-          number: ((.:non_deploy_pr.number))
-        vars:
-          branch: master
-          dev_image_tag: latest
-          concourse_image_tag: latest
-      - across:
-          - var: deploy_pr
-            values: ((.:deploy_prs))
-            max_in_flight: all
-        set_pipeline: pr
-        team: contributor
-        file: pr-pipeline/pipelines/pr-deploy.yml
-        instance_vars:
-          number: ((.:deploy_pr.number))
+          number: ((.:pr.number))
         vars:
           branch: master
           dev_image_tag: latest

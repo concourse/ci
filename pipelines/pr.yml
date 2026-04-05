@@ -7,44 +7,58 @@
 
 ---
 pending_status_notification: &pending_status_notification
-  put: concourse-status-update
+  put: pr-status-update
   resource: concourse-pr
-  inputs: [concourse-pr]
-  params: { path: concourse-pr, status: pending, context: $BUILD_JOB_NAME }
+  params:
+    ref: ((.:concourse-pr.ref))
+    name: concourse-ci/$BUILD_JOB_NAME
+    status: pending
   no_get: true
   tags: [pr]
 
 status_notifications: &status_notifications
   on_success:
-    put: concourse-pr
-    inputs: [concourse-pr]
-    params: { path: concourse-pr, status: success, context: $BUILD_JOB_NAME }
+    put: pr-status-update
+    resource: concourse-pr
+    params:
+      ref: ((.:concourse-pr.ref))
+      name: concourse-ci/$BUILD_JOB_NAME
+      status: success
     no_get: true
     tags: [pr]
   on_failure:
-    put: concourse-pr
-    inputs: [concourse-pr]
-    params: { path: concourse-pr, status: failure, context: $BUILD_JOB_NAME }
+    put: pr-status-update
+    resource: concourse-pr
+    params:
+      ref: ((.:concourse-pr.ref))
+      name: concourse-ci/$BUILD_JOB_NAME
+      status: failure
     no_get: true
     tags: [pr]
   on_abort:
-    put: concourse-pr
-    inputs: [concourse-pr]
-    params: { path: concourse-pr, status: failure, context: $BUILD_JOB_NAME }
+    put: pr-status-update
+    resource: concourse-pr
+    params:
+      ref: ((.:concourse-pr.ref))
+      name: concourse-ci/$BUILD_JOB_NAME
+      status: failure
     no_get: true
     tags: [pr]
   on_error:
-    put: concourse-pr
-    inputs: [concourse-pr]
-    params: { path: concourse-pr, status: failure, context: $BUILD_JOB_NAME }
+    put: pr-status-update
+    resource: concourse-pr
+    params:
+      ref: ((.:concourse-pr.ref))
+      name: concourse-ci/$BUILD_JOB_NAME
+      status: failure
     no_get: true
     tags: [pr]
 
 resource_types:
-  - name: pull-request
+  - name: github
     type: registry-image
     source:
-      repository: aoldershaw/github-pr-resource
+      repository: pixelairio/github-resource
 
 resources:
   - name: concourse-base
@@ -55,9 +69,10 @@ resources:
       branch: ((branch))
 
   - name: concourse-pr
-    type: pull-request
+    type: github
     icon: source-pull
     source:
+      kind: pr
       repository: concourse/concourse
       access_token: ((pull_requests_access_token))
       number: ((number))
