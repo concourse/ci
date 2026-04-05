@@ -12,6 +12,7 @@ inputs:
 
 params:
   GITHUB_TOKEN:
+  PRNUMBER:
 
 run:
   path: ci/tasks/validate-pr/run.sh

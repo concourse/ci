@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-PRNUMBER=$(cat concourse-pr/.git/resource/pr)
-
 chmod +x validator/releaseme
 
 validator/releaseme validate \

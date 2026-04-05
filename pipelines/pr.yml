@@ -254,6 +254,7 @@ jobs:
         tags: [pr]
         params:
           GITHUB_TOKEN: ((concourse_github_dummy.access_token))
+          PRNUMBER: ((.:concourse-pr.pr))
 
   - name: compile-check
     public: true
