@@ -135,7 +135,7 @@ serial_groups:
 plan:
 - in_parallel:
   - do:
-    - get: resource-pr
+    - get: #@ resource_name + "-resource"
       trigger: true
       version: every
     - put: #@ resource_name + "-resource"
@@ -143,9 +143,9 @@ plan:
       no_get: true
       params:
         name: build-and-test
-        ref: ((.:resource-pr.ref))
-        pr: ((.:resource-pr.pr))
-        commit_date: ((.:resource-pr.commit_date))
+        ref: #@ "((.:" + resource_name + "-resource.ref))"
+        pr: #@ "((.:" + resource_name + "-resource.pr))"
+        commit_date: #@ "((.:" + resource_name + "-resource.commit_date))"
         status: pending
   - get: base-image
     params:
@@ -163,27 +163,27 @@ plan:
     no_get: true
     params:
       name: build-and-test
-      ref: ((.:resource-pr.ref))
-      pr: ((.:resource-pr.pr))
-      commit_date: ((.:resource-pr.commit_date))
+      ref: #@ "((.:" + resource_name + "-resource.ref))"
+      pr: #@ "((.:" + resource_name + "-resource.pr))"
+      commit_date: #@ "((.:" + resource_name + "-resource.commit_date))"
       status: failure
   on_error:
     put: resource-pr
     no_get: true
     params:
       name: build-and-test
-      ref: ((.:resource-pr.ref))
-      pr: ((.:resource-pr.pr))
-      commit_date: ((.:resource-pr.commit_date))
+      ref: #@ "((.:" + resource_name + "-resource.ref))"
+      pr: #@ "((.:" + resource_name + "-resource.pr))"
+      commit_date: #@ "((.:" + resource_name + "-resource.commit_date))"
       status: error
   on_success:
     put: resource-pr
     no_get: true
     params:
       name: build-and-test
-      ref: ((.:resource-pr.ref))
-      pr: ((.:resource-pr.pr))
-      commit_date: ((.:resource-pr.commit_date))
+      ref: #@ "((.:" + resource_name + "-resource.ref))"
+      pr: #@ "((.:" + resource_name + "-resource.pr))"
+      commit_date: #@ "((.:" + resource_name + "-resource.commit_date))"
       status: success
 #@ end
 
