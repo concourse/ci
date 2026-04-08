@@ -136,6 +136,7 @@ plan:
 - in_parallel:
   - do:
     - get: #@ resource_name + "-resource"
+      resource: resource-pr
       trigger: true
       version: every
     - put: #@ resource_name + "-resource"
