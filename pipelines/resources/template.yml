@@ -379,7 +379,7 @@ resources:
   source:
     kind: commits-from-prs
     access_token: ((pull_requests_access_token))
-    base_branch: master
+    target_branch: master
     repository: #@ github_owner() + "/" + resource_name + "-resource"
 
 - name: resource-image
