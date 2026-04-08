@@ -134,9 +134,17 @@ serial_groups:
 - validate
 plan:
 - in_parallel:
-  - get: resource-pr
-    trigger: true
-    version: every
+  - do:
+    - get: resource-pr
+      trigger: true
+      version: every
+    - put: #@ resource_name + "-resource"
+      resource: resource-pr
+      params:
+        name: build-and-test
+        ref: ((.:resource-pr.ref))
+        pr: ((.:resource-pr.pr))
+        status: pending
   - get: base-image
     params:
       format: oci-layout
@@ -146,30 +154,31 @@ plan:
       format: oci-layout
   - get: oci-build-task
   - #@ template.replace(extra_get_steps())
-- put: #@ resource_name + "-resource"
-  resource: resource-pr
-  inputs: detect
-  params:
-    context: status
-    path: resource-pr
-    status: pending
 - do:
   - #@ build_task(resource_name, "linux/amd64")
   on_failure:
     put: resource-pr
     no_get: true
-    inputs: detect
     params:
-      context: status
-      path: resource-pr
+      name: build-and-test
+      ref: ((.:resource-pr.ref))
+      pr: ((.:resource-pr.pr))
       status: failure
+  on_error:
+    put: resource-pr
+    no_get: true
+    params:
+      name: build-and-test
+      ref: ((.:resource-pr.ref))
+      pr: ((.:resource-pr.pr))
+      status: error
   on_success:
     put: resource-pr
     no_get: true
-    inputs: detect
     params:
-      context: status
-      path: resource-pr
+      name: build-and-test
+      ref: ((.:resource-pr.ref))
+      pr: ((.:resource-pr.pr))
       status: success
 #@ end
 
@@ -301,11 +310,11 @@ jobs:
 - #@ publish_job("patch")
 
 resource_types:
-- name: pull-request
+- name: github
   type: registry-image
   check_every: 2m
   source:
-    repository: teliaoss/github-pr-resource
+    repository: pixelairio/github-resource
 
 - name: gcs
   type: registry-image
@@ -364,10 +373,11 @@ resources:
     uri: #@ "git@github.com:" + github_owner() + "/" + resource_name + "-resource"
 
 - name: resource-pr
-  type: pull-request
+  type: github
   icon: source-pull
   check_every: 2m
   source:
+    kind: commits-from-prs
     access_token: ((pull_requests_access_token))
     base_branch: master
     repository: #@ github_owner() + "/" + resource_name + "-resource"
