@@ -140,6 +140,7 @@ plan:
       version: every
     - put: #@ resource_name + "-resource"
       resource: resource-pr
+      no_get: true
       params:
         name: build-and-test
         ref: ((.:resource-pr.ref))
