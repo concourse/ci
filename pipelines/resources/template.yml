@@ -145,6 +145,7 @@ plan:
         name: build-and-test
         ref: ((.:resource-pr.ref))
         pr: ((.:resource-pr.pr))
+        commit_date: ((.:resource-pr.commit_date))
         status: pending
   - get: base-image
     params:
