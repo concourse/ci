@@ -6,7 +6,7 @@ readonly DIR=$(cd $(dirname $0) && pwd)
 
 source "ci/tasks/scripts/k8s-helpers.sh"
 
-releasename="pr-$(cat concourse/.git/resource/pr)-$(head -c 6 concourse/.git/resource/base_sha)"
+releasename="pr-${PRNUMBER}-${REF:0:5}"
 
 function cleanup {
     sleep 10

@@ -154,6 +154,8 @@ jobs:
         input_mapping: { concourse: chart-pr }
         params:
           SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
+          REF: ((.:chart-pr.ref))
+          PRNUMBER: ((.:chart-pr.pr))
 
   - name: unit-tests
     public: true
