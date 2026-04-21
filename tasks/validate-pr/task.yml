@@ -11,6 +11,8 @@ inputs:
 params:
   GITHUB_TOKEN:
   PRNUMBER:
+  OWNER: concourse
+  REPO: concourse
 
 run:
   path: ci/tasks/validate-pr/run.sh

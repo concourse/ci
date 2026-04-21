@@ -237,11 +237,9 @@ jobs:
                 tags: [pr]
               - *pending_status_notification
           - get: ci
-            tags: [pr]
       - task: validate-pr
         timeout: 5m
         file: ci/tasks/validate-pr/task.yml
-        tags: [pr]
         params:
           GITHUB_TOKEN: ((concourse_github_dummy.access_token))
           PRNUMBER: ((.:concourse-pr.pr))
