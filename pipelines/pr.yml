@@ -77,14 +77,6 @@ resources:
       access_token: ((pull_requests_access_token))
       number: ((number))
 
-  - name: validator
-    type: github-release
-    icon: github
-    source:
-      owner: clarafu
-      repository: release-me
-      access_token: ((pull_requests_access_token))
-
   - name: ci
     type: git
     icon: github
@@ -245,8 +237,6 @@ jobs:
                 tags: [pr]
               - *pending_status_notification
           - get: ci
-            tags: [pr]
-          - get: validator
             tags: [pr]
       - task: validate-pr
         timeout: 5m
