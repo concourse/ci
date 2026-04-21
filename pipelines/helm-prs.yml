@@ -78,6 +78,8 @@ jobs:
       params:
         name: concourse-ci/$BUILD_JOB_NAME
         ref: ((.:chart-pr.ref))
+        pr: ((.:chart-pr.pr))
+        commit_date: ((.:chart-pr.commit_date))
         status: failure
     on_success: &success-status-update
       put: pr-status-update
@@ -86,6 +88,8 @@ jobs:
       params:
         name: concourse-ci/$BUILD_JOB_NAME
         ref: ((.:chart-pr.ref))
+        pr: ((.:chart-pr.pr))
+        commit_date: ((.:chart-pr.commit_date))
         status: success
     plan:
       - in_parallel:
@@ -95,9 +99,12 @@ jobs:
             - &pending-status-update
               put: pr-status-update
               resource: chart-pr
+              no_get: true
               params:
                 name: concourse-ci/$BUILD_JOB_NAME
                 ref: ((.:chart-pr.ref))
+                pr: ((.:chart-pr.pr))
+                commit_date: ((.:chart-pr.commit_date))
                 status: pending
           - get: concourse
             tags: [k8s-topgun]
