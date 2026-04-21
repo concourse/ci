@@ -14,7 +14,6 @@ pending_status_notification: &pending_status_notification
     name: concourse-ci/$BUILD_JOB_NAME
     status: pending
   no_get: true
-  tags: [pr]
 
 status_notifications: &status_notifications
   on_success:
@@ -25,7 +24,6 @@ status_notifications: &status_notifications
       name: concourse-ci/$BUILD_JOB_NAME
       status: success
     no_get: true
-    tags: [pr]
   on_failure:
     put: pr-status-update
     resource: concourse-pr
@@ -34,7 +32,6 @@ status_notifications: &status_notifications
       name: concourse-ci/$BUILD_JOB_NAME
       status: failure
     no_get: true
-    tags: [pr]
   on_abort:
     put: pr-status-update
     resource: concourse-pr
@@ -43,7 +40,6 @@ status_notifications: &status_notifications
       name: concourse-ci/$BUILD_JOB_NAME
       status: failure
     no_get: true
-    tags: [pr]
   on_error:
     put: pr-status-update
     resource: concourse-pr
@@ -52,13 +48,13 @@ status_notifications: &status_notifications
       name: concourse-ci/$BUILD_JOB_NAME
       status: failure
     no_get: true
-    tags: [pr]
 
 resource_types:
   - name: github
     type: registry-image
     source:
       repository: pixelairio/github-resource
+      tag: latest
 
 resources:
   - name: concourse-base
