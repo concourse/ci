@@ -1,8 +1,10 @@
 ---
 resource_types:
-  - name: pull-request
+  - name: github
     type: registry-image
-    source: { repository: loggregatorbot/github-pr-resource }
+    source:
+      repository: pixelairio/github-resource
+      tag: latest
 
   - name: helm-chart
     type: registry-image
@@ -10,11 +12,12 @@ resource_types:
 
 resources:
   - name: chart-pr
-    type: pull-request
+    type: github
     icon: source-pull
     source:
+      kind: commits-from-prs
       repository: concourse/concourse-chart
-      base_branch: ((branch))
+      target_branch: ((branch))
       access_token: ((pr_access_token))
 
   - name: concourse
@@ -68,26 +71,34 @@ jobs:
   - name: k8s-topgun
     serial: true
     public: true
-    on_failure:
-      put: chart-pr
-      inputs: [chart-pr]
-      params: { path: chart-pr, status: failure, context: k8s-topgun }
-      tags: [k8s-topgun]
-    on_success:
-      put: chart-pr
-      inputs: [chart-pr]
-      params: { path: chart-pr, status: success, context: k8s-topgun }
-      tags: [k8s-topgun]
+    on_failure: &failure-status-update
+      put: pr-status-update
+      resource: chart-pr
+      no_get: true
+      params:
+        name: concourse-ci/$BUILD_JOB_NAME
+        ref: ((.:chart-pr.ref))
+        status: failure
+    on_success: &success-status-update
+      put: pr-status-update
+      resource: chart-pr
+      no_get: true
+      params:
+        name: concourse-ci/$BUILD_JOB_NAME
+        ref: ((.:chart-pr.ref))
+        status: success
     plan:
       - in_parallel:
           - do:
             - get: chart-pr
               tags: [k8s-topgun]
-            - put: chart-pr
-              inputs: detect
-              params: { path: chart-pr, status: pending, context: k8s-topgun }
-              get_params: { list_changed_files: true }
-              tags: [k8s-topgun]
+            - &pending-status-update
+              put: pr-status-update
+              resource: chart-pr
+              params:
+                name: concourse-ci/$BUILD_JOB_NAME
+                ref: ((.:chart-pr.ref))
+                status: pending
           - get: concourse
             tags: [k8s-topgun]
           - get: concourse-image
@@ -115,18 +126,8 @@ jobs:
 
   - name: lint-and-install-test
     public: true
-    on_failure:
-      put: chart-pr
-      inputs: [chart-pr]
-      params:
-        { path: chart-pr, status: failure, context: lint-and-install-test }
-      tags: [k8s-topgun]
-    on_success:
-      put: chart-pr
-      inputs: [chart-pr]
-      params:
-        { path: chart-pr, status: success, context: lint-and-install-test }
-      tags: [k8s-topgun]
+    on_failure: *failure-status-update
+    on_success: *success-status-update
     plan:
       - in_parallel:
           - do:
@@ -134,13 +135,7 @@ jobs:
               trigger: true
               version: every
               tags: [k8s-topgun]
-            - put: update-pr-status
-              resource: chart-pr
-              tags: [k8s-topgun]
-              inputs: detect
-              params:
-                { path: chart-pr, status: pending, context: lint-and-install-test }
-              get_params: { list_changed_files: true }
+            - *pending-status-update
           - get: ci
             tags: [k8s-topgun]
           - get: unit-image
@@ -155,16 +150,8 @@ jobs:
 
   - name: unit-tests
     public: true
-    on_failure:
-      put: chart-pr
-      inputs: [chart-pr]
-      params: { path: chart-pr, status: failure, context: unit-tests }
-      tags: [k8s-topgun]
-    on_success:
-      put: chart-pr
-      inputs: [chart-pr]
-      params: { path: chart-pr, status: success, context: unit-tests }
-      tags: [k8s-topgun]
+    on_failure: *failure-status-update
+    on_success: *success-status-update
     plan:
       - in_parallel:
           - do:
@@ -172,12 +159,7 @@ jobs:
               trigger: true
               version: every
               tags: [k8s-topgun]
-            - put: update-pr-status
-              resource: chart-pr
-              inputs: detect
-              params: { path: chart-pr, status: pending, context: unit-tests }
-              get_params: { list_changed_files: true }
-              tags: [k8s-topgun]
+            - *pending-status-update
           - get: ci
             tags: [k8s-topgun]
           - get: unit-image
