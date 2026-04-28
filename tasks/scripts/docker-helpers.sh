@@ -31,9 +31,9 @@ function start_docker() {
         echo waiting for docker to come up...
         sleep 1
     done
-    }
+}
 
-    function stop_docker() {
+function stop_docker() {
     local pid=$(cat /tmp/docker.pid)
     if [ -z "$pid" ]; then
         return 0
