@@ -40,9 +40,9 @@ resource_types:
     type: registry-image
     source: { repository: concourse/helm-chart-resource }
 
-  - name: pull-request
+  - name: github
     type: registry-image
-    source: { repository: aoldershaw/github-pr-resource }
+    source: { repository: pixelairio/github-resource }
 
 groups:
   - name: develop
@@ -1895,12 +1895,13 @@ resources:
       interval: 24h
 
   - name: concourse-prs
-    type: pull-request
+    type: github
     check_every: 2m
     source:
+      kind: prs
       repository: concourse/concourse
       access_token: ((pull_requests_access_token))
-      base_branch: release/((release_minor)).x
+      target_branch: release/((release_minor)).x
 
   - name: wolfi-base
     type: registry-image
