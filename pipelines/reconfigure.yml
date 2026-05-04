@@ -284,36 +284,6 @@ jobs:
           - set_pipeline: release
             file: pipelines-and-tasks/pipelines/release.yml
             instance_vars:
-              version: 8.0.x
-            vars:
-              release_major: '8'
-              release_minor: '8.0'
-              latest_release: '7.14'
-              concourse_smoke_deployment_name: concourse-smoke-8-0
-              stemcell_name: jammy
-              ci_branch: master
-              postgresql_major: '16'
-              resource_type_versions:
-                bosh-io-release: ~1.3.3
-                bosh-io-stemcell: ~1.5.3
-                docker-image: ~1.12.2
-                git: ~1.22.0
-                github-release: ~1.13.1
-                hg: ~1.5.1
-                mock: ~0.14.3
-                pool: ~1.7.1
-                registry-image: ~1.15.3
-                s3: ~2.5.2
-                semver: ~1.11.1
-                time: ~1.11.1
-              dep_bin_versions:
-                gdn: ''
-                cni: ''
-                runc: ''
-                containerd: ''
-          - set_pipeline: release
-            file: pipelines-and-tasks/pipelines/release.yml
-            instance_vars:
               version: 8.1.x
             vars:
               release_major: '8'
@@ -341,6 +311,37 @@ jobs:
                 cni: ''
                 runc: ''
                 containerd: ''
+          - set_pipeline: release
+            file: pipelines-and-tasks/pipelines/release.yml
+            instance_vars:
+              version: 8.2.x
+            vars:
+              release_major: "8"
+              release_minor: "8.2"
+              latest_release: "8.1"
+              concourse_smoke_deployment_name: "concourse-smoke-8-2"
+              stemcell_name: jammy
+              ci_branch: master
+              postgresql_major: '16'
+              resource_type_versions:
+                bosh-io-release: ""
+                bosh-io-stemcell: ""
+                cf: ""
+                docker-image: ""
+                git: ""
+                github-release: ""
+                hg: ""
+                mock: ""
+                pool: ""
+                registry-image: ""
+                s3: ""
+                semver: ""
+                time: ""
+              dep_bin_versions:
+                gdn: ""
+                cni: ""
+                runc: ""
+                containerd: ""
           # TEMPLATE FOR NEXT RELEASE
           # to create a new release pipeline, copy (but don't delete!) this
           # template, replacing MAJOR, MINOR, PREV_MAJOR, and PREV_MINOR
