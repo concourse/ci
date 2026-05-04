@@ -20,6 +20,7 @@ trivy \
   --quiet \
   image \
   --severity "HIGH,CRITICAL" \
+  --scanners vuln \
   --ignore-unfixed \
   --exit-code 1 \
   --input image/image.tar \
