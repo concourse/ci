@@ -84,7 +84,7 @@ RUN npm install -g corepack &&\
     yarn set version stable
 
 # install BOSH CLI for bosh-smoke, bosh-topgun
-ARG BOSH_VERSION=7.9.4
+ARG BOSH_VERSION=7.10.3
 RUN curl -L "https://github.com/cloudfoundry/bosh-cli/releases/download/v${BOSH_VERSION}/bosh-cli-${BOSH_VERSION}-linux-${TARGETARCH}" \
     -o /usr/sbin/bosh && \
     chmod +x /usr/sbin/bosh
