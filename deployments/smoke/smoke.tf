@@ -40,6 +40,12 @@ provider "google" {
 }
 
 data "google_compute_zones" "available" {
+  status = "UP"
+}
+
+resource "random_shuffle" "zone" {
+  input        = data.google_compute_zones.available.names
+  result_count = 1
 }
 
 resource "random_pet" "smoke" {
@@ -75,7 +81,7 @@ data "google_compute_image" "ubuntu" {
 resource "google_compute_instance" "smoke" {
   name         = "smoke-${random_pet.smoke.id}"
   machine_type = var.ARCH == "amd64" ? "e2-standard-2" : "t2a-standard-2"
-  zone         = data.google_compute_zones.available.names[0]
+  zone         = one(random_shuffle.zone.result)
   tags         = ["smoke"]
 
   boot_disk {
