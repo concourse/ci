@@ -44,8 +44,14 @@ data "google_compute_zones" "available" {
 }
 
 resource "random_shuffle" "zone" {
-  input        = data.google_compute_zones.available.names
+  input        = local.supported_zones
   result_count = 1
+}
+
+data "google_compute_machine_types" "by_zone" {
+  for_each = toset(data.google_compute_zones.available.names)
+  zone     = each.value
+  filter   = "name = \"${local.machine_type}\""
 }
 
 resource "random_pet" "smoke" {
@@ -69,7 +75,12 @@ resource "google_compute_firewall" "smoke" {
 }
 
 locals {
-  arch = var.ARCH == "amd64" ? "X86_64" : var.ARCH
+  arch         = var.ARCH == "amd64" ? "X86_64" : var.ARCH
+  machine_type = var.ARCH == "amd64" ? "e2-standard-2" : "t2a-standard-2"
+  supported_zones = sort([
+    for zone, result in data.google_compute_machine_types.by_zone :
+    zone if length(result.machine_types) > 0
+  ])
 }
 
 data "google_compute_image" "ubuntu" {
@@ -80,7 +91,7 @@ data "google_compute_image" "ubuntu" {
 
 resource "google_compute_instance" "smoke" {
   name         = "smoke-${random_pet.smoke.id}"
-  machine_type = var.ARCH == "amd64" ? "e2-standard-2" : "t2a-standard-2"
+  machine_type = local.machine_type
   zone         = one(random_shuffle.zone.result)
   tags         = ["smoke"]
 
