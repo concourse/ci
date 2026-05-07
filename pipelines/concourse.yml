@@ -1491,7 +1491,8 @@ resources:
   - name: vault-image
     type: registry-image
     icon: *image-icon
-    source: { repository: vault }
+    # TODO: remove tag after https://github.com/hashicorp/vault/issues/31919 is resolved
+    source: { repository: hashicorp/vault, tag: "1.21" }
 
   - name: bbr
     type: github-release
