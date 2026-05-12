@@ -132,7 +132,7 @@ jobs:
   - name: pr-image
     public: true
     serial: true
-    # serial_groups: [heavy]
+    serial_groups: [heavy]
     plan:
       - in_parallel:
           - get: concourse-pr
@@ -243,7 +243,7 @@ jobs:
   - name: compile-check
     public: true
     serial: true
-    # serial_groups: [heavy]
+    serial_groups: [heavy]
     <<: *status_notifications
     plan:
       - in_parallel:
@@ -301,7 +301,7 @@ jobs:
   - name: testflight
     public: true
     serial: true
-    # serial_groups: [heavy]
+    serial_groups: [heavy]
     <<: *status_notifications
     plan:
       - in_parallel:
@@ -342,7 +342,7 @@ jobs:
   - name: watsjs
     public: true
     serial: true
-    # serial_groups: [heavy]
+    serial_groups: [heavy]
     <<: *status_notifications
     plan:
       - in_parallel:
@@ -375,7 +375,7 @@ jobs:
   - name: integration
     public: true
     serial: true
-    # serial_groups: [heavy]
+    serial_groups: [heavy]
     <<: *status_notifications
     plan:
       - in_parallel:
