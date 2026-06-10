@@ -60,9 +60,6 @@ RUN apk --update-cache add \
 # expect to be present when running as UID=0
 RUN adduser -D postgres
 
-# enable `docker compose` command, otherwise we have to call `docker-compose` directly
-RUN ln -s /usr/sbin/docker-compose /usr/libexec/docker/cli-plugins/docker-compose
-
 # ensure that Puppeteer uses this Chrome instead of downloading on demand
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/sbin/chromium
