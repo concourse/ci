@@ -71,6 +71,7 @@ RUN apk --no-cache add \
 
 # for worker/runtime/integration tests
 RUN apk --no-cache add \
+    cmd:losetup \
     mount \
     umount
 
