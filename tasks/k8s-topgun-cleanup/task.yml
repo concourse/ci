@@ -1,0 +1,10 @@
+platform: linux
+
+inputs:
+  - name: ci
+
+params:
+  SERVICE_ACCOUNT_KEY:
+
+run:
+  path: ci/tasks/k8s-topgun-cleanup/run.sh

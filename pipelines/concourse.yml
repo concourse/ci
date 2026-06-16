@@ -631,6 +631,20 @@ jobs:
         input_mapping: { distribution: concourse-chart, linux-rc: linux-amd64 }
         params: { DISTRIBUTION: helm }
 
+  - name: k8s-cleanup-topgun
+    max_in_flight: 1
+    plan:
+      - in_parallel:
+        - get: ci
+        - get: bash
+        - get: periodic-check
+          trigger: true
+      - task: cleanup-old-topgun-namespaces
+        image: bash
+        file: ci/tasks/k8s-topgun-cleanup/task.yml
+        params:
+          SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
+
   - name: build-concourse
     public: true
     serial: true
@@ -1878,5 +1892,20 @@ resources:
     icon: language-go
     source:
       repository: golang
+      username: ((docker.username))
+      password: ((docker.password))
+
+  - name: periodic-check
+    icon: clock
+    type: time
+    source:
+      interval: 24h
+
+  - name: bash
+    type: registry-image
+    icon: *image-icon
+    source:
+      repository: concourse/bash
+      tag: latest
       username: ((docker.username))
       password: ((docker.password))
