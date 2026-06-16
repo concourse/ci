@@ -13,4 +13,12 @@ gke_auth
 
 echo "Deleting any topgun-* namespaces older than 4hrs"
 cutoff=$(date -d @$(( $(date +%s) - 4*3600 )) +%s)
-kubectl get ns -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.metadata.creationTimestamp}{"\n"}{end}' | while read -r name ts; do [[ "$name" == topgun-* ]] && [ "$(date -d "$ts" +%s)" -lt "$cutoff" ] && kubectl delete ns "$name"; done
+kubectl get ns -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.metadata.creationTimestamp}{"\n"}{end}' \
+  | while read -r name ts; do
+      [[ "$name" == topgun-* ]] || continue
+      [[ -n "$ts" ]] || continue
+      created=$(date -d "$ts" +%s) || continue
+      if (( created < cutoff )); then
+        kubectl delete ns "$name"
+      fi
+    done
