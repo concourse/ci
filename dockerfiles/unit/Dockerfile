@@ -7,7 +7,7 @@ ARG TARGETARCH
 ENV CGO_ENABLED=1
 
 # tools needed for running some tests and installing other dependencies
-RUN apk --update-cache add \
+RUN apk --no-cache --no-progress add \
     btrfs-progs \
     ca-certificates \
     # install Chrome for Puppeteer (watsjs /upgrade/downgrade/smoke tests)
@@ -47,8 +47,8 @@ RUN apk --update-cache add \
     # for bin-smoke test
     terraform \
     cmd:ssh-keygen \
-    # used by gcloud
-    python3 \
+    google-cloud-sdk \
+    gke-gcloud-auth-plugin \
     unzip \
     # for bosh-topgun tests
     vault \
@@ -63,17 +63,6 @@ RUN adduser -D postgres
 # ensure that Puppeteer uses this Chrome instead of downloading on demand
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/sbin/chromium
-
-# install gcloud
-# GCLOUD_ARCH can be 'x86_64' or 'arm': https://cloud.google.com/sdk/docs/install#linux
-ARG GCLOUD_ARCH=x86_64
-RUN curl -L https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-linux-${GCLOUD_ARCH}.tar.gz -o gcloud-cli.tar.gz &&\
-    tar -xf gcloud-cli.tar.gz &&\
-    mv google-cloud-sdk /usr/local/ &&\
-    rm gcloud-cli.tar.gz
-ENV PATH=$PATH:/usr/local/google-cloud-sdk/bin
-RUN apk add \
-    gke-gcloud-auth-plugin
 
 # install Yarn for web UI tests
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
@@ -93,7 +82,7 @@ RUN curl https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x1.pem -o $L
     update-ca-certificates
 
 # install Let's Encrypt staging cert to nssdb for Chrome
-RUN apk add libnss-tools
+RUN apk --no-cache --no-progress add libnss-tools
 RUN mkdir -p /root/.pki/nssdb && \
     chmod 700 /root/.pki/nssdb && \
     certutil -N -d sql:/root/.pki/nssdb --empty-password && \
@@ -105,7 +94,3 @@ RUN mkdir -p /root/.pki/nssdb && \
 
 # install goimports CLI for formatting go files
 RUN go install golang.org/x/tools/cmd/goimports@latest
-
-# reduce final image size
-RUN apk cache purge && \
-    rm -rf /var/cache/apk/*
