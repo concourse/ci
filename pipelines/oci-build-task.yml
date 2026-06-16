@@ -1,3 +1,10 @@
+resource_types:
+- name: github
+  type: registry-image
+  check_every: 2m
+  source:
+    repository: pixelairio/github-resource
+
 resources:
   - name: repo
     type: git
@@ -70,7 +77,114 @@ resources:
       owner: moby
       repository: buildkit
 
+  - name: pr-commits
+    type: github
+    icon: source-pull
+    check_every: 2m
+    source:
+      kind: commits-from-prs
+      access_token: ((pull_requests_access_token))
+      target_branch: master
+      repository: concourse/oci-build-task
+
 jobs:
+  - name: prs
+    plan:
+      - in_parallel:
+          - do:
+            - get: repo
+              resource: pr-commits
+              trigger: true
+              version: every
+            - put: pr-status-update
+              resource: pr-commits
+              no_get: true
+              params:
+                name: Test and Build
+                status: pending
+                ref: ((.:repo.ref))
+                pr: ((.:repo.pr))
+                commit_date: ((.:repo.commit_date))
+          - get: buildkit
+            params:
+              globs: [none]
+          - get: oci-build-task
+          - get: golang-rootfs
+            resource: golang-builder
+          - get: golang-builder
+            params:
+              format: oci-layout
+          - get: wolfi
+            params:
+              format: oci-layout
+      - load_var: buildkit-version
+        file: buildkit/version
+      - task: tests
+        privileged: true
+        image: golang-rootfs
+        config:
+          platform: linux
+          inputs:
+            - name: repo
+          params:
+            BUILDKIT_VERSION: ((.:buildkit-version))
+          run:
+            path: sh
+            args:
+              - -c
+              - |
+                apk --no-cache --no-progress add bash curl
+                repo/scripts/test
+      - task: build
+        privileged: true
+        image: oci-build-task
+        config:
+          platform: linux
+          inputs:
+            - name: repo
+            - name: wolfi
+            - name: golang-builder
+          outputs:
+            - name: image
+          params:
+            CONTEXT: repo
+            BUILD_ARG_BUILDKIT_VERSION: ((.:buildkit-version))
+            IMAGE_ARG_base_image: wolfi/oci
+            IMAGE_ARG_builder_image: golang-builder/oci
+            IMAGE_PLATFORM: linux/amd64,linux/arm64
+          run:
+            path: build
+    on_failure:
+      put: pr-status-update
+      resource: pr-commits
+      no_get: true
+      params:
+        name: Test and Build
+        status: failure
+        ref: ((.:repo.ref))
+        pr: ((.:repo.pr))
+        commit_date: ((.:repo.commit_date))
+    on_error:
+      put: pr-status-update
+      resource: pr-commits
+      no_get: true
+      params:
+        name: Test and Build
+        status: error
+        ref: ((.:repo.ref))
+        pr: ((.:repo.pr))
+        commit_date: ((.:repo.commit_date))
+    on_success:
+      put: pr-status-update
+      resource: pr-commits
+      no_get: true
+      params:
+        name: Test and Build
+        status: success
+        ref: ((.:repo.ref))
+        pr: ((.:repo.pr))
+        commit_date: ((.:repo.commit_date))
+
   - name: build
     plan:
       - in_parallel:
