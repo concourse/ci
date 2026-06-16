@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-apk --no-cache --no-progress \
+apk add --no-cache --no-progress \
     kubectl \
     google-cloud-sdk \
     gke-gcloud-auth-plugin

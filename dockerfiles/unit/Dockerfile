@@ -7,7 +7,7 @@ ARG TARGETARCH
 ENV CGO_ENABLED=1
 
 # tools needed for running some tests and installing other dependencies
-RUN apk --no-cache --no-progress add \
+RUN apk add --no-cache --no-progress \
     btrfs-progs \
     ca-certificates \
     # install Chrome for Puppeteer (watsjs /upgrade/downgrade/smoke tests)
@@ -82,7 +82,7 @@ RUN curl https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x1.pem -o $L
     update-ca-certificates
 
 # install Let's Encrypt staging cert to nssdb for Chrome
-RUN apk --no-cache --no-progress add libnss-tools
+RUN apk add --no-cache --no-progress libnss-tools
 RUN mkdir -p /root/.pki/nssdb && \
     chmod 700 /root/.pki/nssdb && \
     certutil -N -d sql:/root/.pki/nssdb --empty-password && \
