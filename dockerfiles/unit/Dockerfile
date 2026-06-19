@@ -46,7 +46,7 @@ RUN apk add --no-cache --no-progress \
     postgresql-17-contrib \
     # for bin-smoke test
     terraform \
-    cmd:ssh-keygen \
+    openssh-keygen \
     google-cloud-sdk \
     gke-gcloud-auth-plugin \
     unzip \

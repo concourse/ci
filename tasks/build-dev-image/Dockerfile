@@ -67,11 +67,11 @@ RUN apk --no-cache add \
        # guardian runtime runs some script on startup to create iptable rules
        # and requires the real xargs, not busybox's impl
        # (https://github.com/cloudfoundry/guardian/blob/main/kawasaki/iptables/global_chains.go)
-       cmd:xargs
+       findutils
 
 # for worker/runtime/integration tests
 RUN apk --no-cache add \
-    cmd:losetup \
+    losetup \
     mount \
     umount
 
