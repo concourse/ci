@@ -41,9 +41,9 @@ RUN apk add --no-cache --no-progress \
     # for shasum cli
     perl-utils \
     # used for /atc/db tests
-    postgresql-17 \
-    postgresql-17-client \
-    postgresql-17-contrib \
+    postgresql-18 \
+    postgresql-18-client \
+    postgresql-18-contrib \
     # for bin-smoke test
     terraform \
     openssh-keygen \
