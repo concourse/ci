@@ -18,6 +18,13 @@ resource_types:
     type: registry-image
     source: { repository: linkyard/helm-chart-resource, tag: 2.17.0 }
 
+  # TODO: remove after 8.3.0 release
+  - name: git
+    type: registry-image
+    source:
+      repository: concourse/git-resource
+      tag: dev
+
 groups:
   - name: develop
     jobs:
@@ -102,7 +109,7 @@ jobs:
             params:
               format: oci-layout
       - load_var: go_version
-        file: golang/tag
+        file: golang/.git/tag
         reveal: true
       - task: build
         image: oci-build-task
@@ -1888,12 +1895,13 @@ resources:
       tag: latest
 
   - name: golang
-    type: registry-image
+    type: git
     icon: language-go
     source:
-      repository: golang
-      username: ((docker.username))
-      password: ((docker.password))
+      version_type: tags
+      uri: https://github.com/golang/go.git
+      tag_sort: version
+      tag_regex: "go1\\.[0-9]+\\.[0-9]+"
 
   - name: periodic-check
     icon: clock
