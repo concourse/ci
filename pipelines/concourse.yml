@@ -103,8 +103,6 @@ jobs:
           - get: oci-build-task
           - get: golang
             trigger: true
-            params:
-              skip_download: true
           - get: wolfi-base
             params:
               format: oci-layout
