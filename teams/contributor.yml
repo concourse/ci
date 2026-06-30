@@ -4,6 +4,7 @@ roles:
   github:
     teams:
     - concourse:maintainers
+    - concourse:wg-concourse-leads
 - name: pipeline-operator
   github:
     orgs:
