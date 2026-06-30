@@ -1,6 +1,11 @@
 ---
 roles:
 - name: owner
+  # Not sure where we use these so disabling them for now
+  # local:
+  #   users:
+  #     - admin
+  #     - svc-security
   github:
     teams:
     - concourse:maintainers
