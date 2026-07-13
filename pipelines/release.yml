@@ -42,6 +42,13 @@ resource_types:
 
   - name: github
     type: registry-image
+
+  # TODO: remove after 8.3.0 release
+  - name: git
+    type: registry-image
+    source:
+      repository: concourse/git-resource
+      tag: dev
     source: { repository: pixelairio/github-resource }
 
 groups:
@@ -1619,8 +1626,10 @@ resources:
     type: git
     check_every: 24h
     source:
-      uri: "https://github.com/bitnami/charts.git"
+      version_type: tags
+      uri: https://github.com/bitnami/charts.git
       tag_filter: postgresql/((postgresql_major))*
+      tag_sort: version
 
   - name: concourse-draft-release
     type: github-release
