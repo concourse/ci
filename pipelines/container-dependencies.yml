@@ -38,7 +38,7 @@ resources:
     source:
       version_type: tags
       uri: https://github.com/opencontainers/runc.git
-      tag_regex: v[0-9]+\.[0-9]+\.[0-9]+$
+      tag_regex: ^v[0-9]+\.[0-9]+\.[0-9]+$
       tag_sort: version
 
   - name: runc-amd64
