@@ -3,6 +3,13 @@ resource_types:
     type: registry-image
     source: { repository: frodenas/gcs-resource }
 
+  # TODO: remove after 8.3.0 release
+  - name: git
+    type: registry-image
+    source:
+      repository: concourse/git-resource
+      tag: dev
+
 resources:
   - name: golang-builder-image
     type: registry-image
@@ -24,21 +31,15 @@ resources:
     source:
       uri: https://github.com/concourse/ci.git
 
-  - name: runc-release
-    type: github-release
-    icon: github
-    check_every: 24h
-    source:
-      owner: opencontainers
-      repository: runc
-
   - name: runc
     type: git
     icon: github
     check_every: 24h
     source:
+      version_type: tags
       uri: https://github.com/opencontainers/runc.git
-      fetch_tags: true
+      tag_regex: v[0-9]+\.[0-9]+\.[0-9]+
+      tag_sort: version
 
   - name: runc-amd64
     type: gcs
@@ -93,24 +94,16 @@ jobs:
     plan:
       - in_parallel:
         - get: ci
-        - get: runc-release
-          trigger: true
-          params:
-            globs: [none]
         - get: runc
+          trigger: true
         - get: oci-build-task
         - get: golang-builder-image
           trigger: true
           params: { format: oci-layout }
-      - load_var: runc_tag
-        reveal: true
-        file: runc-release/tag
       - task: build-runc-binaries
         privileged: true
         image: oci-build-task
         file: ci/tasks/runc/task.yml
-        params:
-          RUNC_TAG: ((.:runc_tag))
       - in_parallel:
         - put: runc-amd64
           no_get: true

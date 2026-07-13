@@ -2,12 +2,6 @@
 
 set -e
 
-apk --no-progress add git
-
-cd runc
-git checkout "$RUNC_TAG"
-cd ..
-
 mkdir -p ./image
 
 export UNPACK_ROOTFS=true
