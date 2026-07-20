@@ -9,4 +9,4 @@ caches:
   - path: gopath/
 
 run:
-  path: ci/tasks/unit-baggageclaim-windows/run.bat
+  path: ci/tasks/unit-baggageclaim-windows/run.ps1
