@@ -140,7 +140,6 @@ jobs:
             image: unit-image
             file: ci/tasks/unit/task.yml
           - task: unit-windows
-            attempts: 3
             file: ci/tasks/unit-windows/task.yml
 
   - name: unit-yarn

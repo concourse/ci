@@ -10,6 +10,6 @@ if ($LASTEXITCODE) { Throw "failed to determine Ginkgo version (exit code $LASTE
 go install "github.com/onsi/ginkgo/v2/ginkgo@$GinkgoVersion"
 if ($LASTEXITCODE) { Throw "Ginkgo installation failed (exit code $LASTEXITCODE)" }
 
-ginkgo -r -p ./go-archive
+ginkgo -r -p -flake-attempts=3 -race ./go-archive
 
 Exit $LastExitCode
