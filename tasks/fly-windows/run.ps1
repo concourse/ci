@@ -1,11 +1,16 @@
 . .\ci\tasks\scripts\go-build.ps1
 
-cd .\concourse\fly
+cd .\concourse
 
 go mod download
 
-go install github.com/onsi/ginkgo/v2/ginkgo
+$GinkgoVersion = go list -f '{{.Version}}' -m github.com/onsi/ginkgo/v2
+if ($LASTEXITCODE) { Throw "failed to determine Ginkgo version (exit code $LASTEXITCODE)" }
 
-ginkgo -r -p
+go install "github.com/onsi/ginkgo/v2/ginkgo@$GinkgoVersion"
+if ($LASTEXITCODE) { Throw "Ginkgo installation failed (exit code $LASTEXITCODE)" }
+
+$env:CGO_ENABLED = 1
+ginkgo -r -p -flake-attempts=3 -race .\fly
 
 Exit $LastExitCode
