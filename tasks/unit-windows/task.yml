@@ -1,0 +1,14 @@
+---
+platform: windows
+
+inputs:
+  - name: ci
+  - name: concourse
+
+caches:
+  - path: gopath/
+
+run:
+  path: powershell
+  args: 
+  - ci/tasks/unit-windows/run.ps1

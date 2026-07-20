@@ -134,10 +134,13 @@ jobs:
           - get: unit-image
             trigger: true
           - get: ci
-      - task: unit
-        timeout: 1h
-        image: unit-image
-        file: ci/tasks/unit/task.yml
+      - timeout: 1h
+        in_parallel:
+          - task: unit
+            image: unit-image
+            file: ci/tasks/unit/task.yml
+          - task: unit-windows
+            file: ci/tasks/unit-windows/task.yml
 
   - name: unit-yarn
     public: true
