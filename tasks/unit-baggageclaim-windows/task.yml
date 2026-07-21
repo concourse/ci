@@ -9,4 +9,6 @@ caches:
   - path: gopath/
 
 run:
-  path: ci/tasks/unit-baggageclaim-windows/run.ps1
+  path: powershell
+  args: 
+  - ci/tasks/unit-baggageclaim-windows/run.ps1
