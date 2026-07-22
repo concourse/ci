@@ -10,5 +10,8 @@ inputs:
   - name: concourse-base
   - name: ci
 
+params:
+  pr_title:
+
 run:
   path: ci/tasks/check-migration-order/run.sh

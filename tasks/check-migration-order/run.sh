@@ -6,9 +6,9 @@ migrations_path=atc/db/migration/migrations/
 base_dir=concourse-base/$migrations_path
 pr_dir=concourse-pr/$migrations_path
 
-if grep skip-migrations-check concourse-pr/.git/resource/title >/dev/null; then
+if [[ "$pr_title" == *"skip-migrations-check"* ]]; then
+  echo "pr title: ${pr_title}"
   echo "skipping migration check at PR's request"
-  echo "pr title: $(cat concourse-pr/.git/resource/title)"
   exit 0
 fi
 

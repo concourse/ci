@@ -191,6 +191,8 @@ jobs:
         image: unit-image
         file: ci/tasks/check-migration-order/task.yml
         tags: [pr]
+        params:
+          pr_title: ((.:concourse-pr.title))
       - task: yarn-analyse
         image: unit-image
         file: ci/tasks/yarn-analyse/task.yml
