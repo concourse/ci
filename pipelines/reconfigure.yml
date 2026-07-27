@@ -170,7 +170,6 @@ jobs:
             - semver
             - s3
             - pool
-            - datadog-event
             - mock
         input_mapping: { pipelines: pipelines-and-tasks }
       - in_parallel:
@@ -181,7 +180,6 @@ jobs:
                   - bosh-io-release
                   - bosh-io-stemcell
                   - github-release
-                  - datadog-event
                   - mock
                   - git
                   - docker-image
