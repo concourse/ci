@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-apk add --quiet --no-progress py3-pip git
+apk add --quiet --no-progress python3 py3-pip git
 pip install oyaml
 python ci/tasks/pin-resource-type-versions/run.py
 
