@@ -3,13 +3,6 @@ resource_types:
     type: registry-image
     source: { repository: frodenas/gcs-resource }
 
-  # TODO: remove after 8.3.0 release
-  - name: git
-    type: registry-image
-    source:
-      repository: concourse/git-resource
-      tag: dev
-
 resources:
   - name: golang-builder-image
     type: registry-image

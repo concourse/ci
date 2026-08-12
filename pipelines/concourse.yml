@@ -18,13 +18,6 @@ resource_types:
     type: registry-image
     source: { repository: linkyard/helm-chart-resource, tag: 2.17.0 }
 
-  # TODO: remove after 8.3.0 release
-  - name: git
-    type: registry-image
-    source:
-      repository: concourse/git-resource
-      tag: dev
-
 groups:
   - name: develop
     jobs:
