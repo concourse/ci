@@ -73,6 +73,7 @@ jobs:
           platform: linux
           inputs:
             - name: repo
+              path: .
           run:
             path: bash
             args:
