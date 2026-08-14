@@ -88,6 +88,12 @@ resources:
       target_branch: master
       repository: concourse/oci-build-task
 
+  - name: monthly
+    type: time
+    icon: clock-outline
+    source:
+      interval: 720h #30 days
+
 jobs:
   - name: prs
     plan:
@@ -253,6 +259,8 @@ jobs:
   - name: dependency-update
     plan:
       - in_parallel:
+          - get: monthly
+            trigger: true
           - get: repo
           - get: ci
           - get: wolfi
