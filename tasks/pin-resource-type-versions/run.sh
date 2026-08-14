@@ -8,8 +8,8 @@ python ci/tasks/pin-resource-type-versions/run.py
 
 cd ci
 
-git config --global user.email "ci@localhost"
-git config --global user.name "CI Bot"
+git config --global user.email "concourseteam+concourse-github-bot@gmail.com"
+git config --global user.name "Concourse Bot"
 
 git add -A
 git commit --allow-empty -m "pin resource type versions for release $RELEASE_MINOR"

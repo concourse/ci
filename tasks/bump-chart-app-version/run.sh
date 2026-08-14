@@ -13,8 +13,8 @@ pushd concourse-chart
 
   git --no-pager diff
 
-  git config --global user.email "ci@localhost.com"
-  git config --global user.name "CI Bot"
+  git config --global user.email "concourseteam+concourse-github-bot@gmail.com"
+  git config --global user.name "Concourse Bot"
 
   git add -A
   git commit -m "bump app version and image tag" --signoff
