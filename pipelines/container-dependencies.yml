@@ -50,21 +50,15 @@ resources:
       json_key: ((concourse_artifacts_json_key))
       versioned_file: runc/runc.arm64
 
-  - name: containerd-release
-    type: github-release
-    icon: github
-    check_every: 24h
-    source:
-      owner: containerd
-      repository: containerd
-
   - name: containerd
     type: git
     icon: github
     check_every: 24h
     source:
+      version_type: tags
       uri: https://github.com/containerd/containerd.git
-      fetch_tags: true
+      tag_regex: ^v[0-9]+\.[0-9]+\.[0-9]+$
+      tag_sort: version
 
   - name: containerd-amd64
     type: gcs
@@ -112,21 +106,13 @@ jobs:
     plan:
       - in_parallel:
         - get: ci
-        - get: containerd-release
-          trigger: true
-          params:
-            globs: [none]
         - get: containerd
+          trigger: true
         - get: golang-builder-image
           trigger: true
-      - load_var: containerd_tag
-        reveal: true
-        file: containerd-release/tag
       - task: build-containerd-binaries
         image: golang-builder-image
         file: ci/tasks/containerd/task.yml
-        params:
-          CONTAINERD_TAG: ((.:containerd_tag))
       - in_parallel:
         - put: containerd-amd64
           no_get: true

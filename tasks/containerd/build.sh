@@ -5,7 +5,6 @@ set -e
 apk --no-progress add git make
 
 cd containerd
-git checkout "$CONTAINERD_TAG"
 
 make STATIC=1 GOARCH=amd64
 
