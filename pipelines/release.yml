@@ -416,7 +416,7 @@ jobs:
             passed: [dev-image]
             trigger: true
           - get: ci
-      - task: integration
+      - task: runtime-integration
         image: dev-image
         privileged: true
         timeout: 1h
