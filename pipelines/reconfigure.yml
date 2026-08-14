@@ -60,15 +60,6 @@ resources:
       branch: master
       paths: [ci]
 
-  - name: greenpeace
-    type: git
-    icon: github
-    source:
-      uri: git@github.com:concourse/greenpeace.git
-      branch: master
-      paths: [pipelines, tasks]
-      private_key: ((greenpeace_private_key))
-
   - name: resource-types-website-ci
     type: git
     icon: github
@@ -120,19 +111,6 @@ jobs:
           ADMIN_USERNAME: ((concourse.username))
           ADMIN_PASSWORD: ((concourse.password))
           CONCOURSE_URL: ((concourse.url))
-
-  - name: reconfigure-greenpeace
-    plan:
-      - get: pipelines-and-tasks
-        passed: [reconfigure-self]
-      - get: greenpeace
-        trigger: true
-      - task: render-greenpeace-pipeline
-        file: greenpeace/tasks/render-ytt.yml
-        params:
-          ARGS: -v cluster=dispatcher -f greenpeace/pipelines/greenpeace.yml -f greenpeace/pipelines/data.yml
-      - set_pipeline: dispatcher-greenpeace
-        file: rendered/pipeline.yml
 
   - name: reconfigure-promote
     plan:
