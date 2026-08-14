@@ -1741,39 +1741,46 @@ resources:
 
   - name: postgres-release
     type: bosh-io-release
+    check_every: 24h
     icon: *release-icon
     source: { repository: cloudfoundry/postgres-release }
 
   - name: bpm-release
     type: bosh-io-release
+    check_every: 24h
     icon: *release-icon
     source:
       repository: cloudfoundry/bpm-release
 
   - name: vault-release
     type: bosh-io-release
+    check_every: 24h
     icon: *release-icon
     source:
       repository: vito/vault-boshrelease
 
   - name: credhub-release
     type: bosh-io-release
+    check_every: 24h
     icon: *release-icon
     source: { repository: pivotal-cf/credhub-release }
 
   - name: uaa-release
     type: bosh-io-release
+    check_every: 24h
     icon: *release-icon
     source: { repository: cloudfoundry/uaa-release }
 
   - name: bbr-sdk-release
     type: bosh-io-release
+    check_every: 24h
     icon: *release-icon
     source:
       repository: cloudfoundry-incubator/backup-and-restore-sdk-release
 
   - name: windows-utilities-release
     type: bosh-io-release
+    check_every: 24h
     icon: *release-icon
     source:
       repository: cloudfoundry-incubator/windows-utilities-release

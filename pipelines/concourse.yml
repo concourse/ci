@@ -1744,12 +1744,14 @@ resources:
 
   - name: postgres-release
     type: bosh-io-release
+    check_every: 24h
     icon: *release-icon
     source:
       repository: cloudfoundry/postgres-release
 
   - name: postgres-bbr-compatible-release
     type: bosh-io-release
+    check_every: 24h
     icon: *release-icon
     source:
       repository: cloudfoundry/postgres-release
@@ -1757,18 +1759,21 @@ resources:
 
   - name: bpm-release
     type: bosh-io-release
+    check_every: 24h
     icon: *release-icon
     source:
       repository: cloudfoundry/bpm-release
 
   - name: bbr-sdk-release
     type: bosh-io-release
+    check_every: 24h
     icon: *release-icon
     source:
       repository: cloudfoundry-incubator/backup-and-restore-sdk-release
 
   - name: vault-release
     type: bosh-io-release
+    check_every: 24h
     icon: *release-icon
     source:
       #TODO: migrate to https://github.com/cloudfoundry-community/vault-boshrelease ?
@@ -1776,12 +1781,14 @@ resources:
 
   - name: credhub-release
     type: bosh-io-release
+    check_every: 24h
     icon: *release-icon
     source:
       repository: pivotal-cf/credhub-release
 
   - name: uaa-release
     type: bosh-io-release
+    check_every: 24h
     icon: *release-icon
     source:
       repository: cloudfoundry/uaa-release
