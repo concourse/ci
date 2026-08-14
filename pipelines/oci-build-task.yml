@@ -10,7 +10,8 @@ resources:
     type: git
     icon: github
     source:
-      uri: https://github.com/concourse/oci-build-task.git
+      uri: git@github.com:concourse/oci-build-task
+      private_key: ((concourse_bot_private_key))
       branch: master
 
   - name: ci
@@ -248,6 +249,20 @@ jobs:
         no_get: true
         params:
           image: image/image
+
+  - name: dependency-update
+    plan:
+      - in_parallel:
+          - get: repo
+          - get: ci
+          - get: wolfi
+      - task: dependency-update
+        image: wolfi
+        file: ci/tasks/go-dependency-update/task.yml
+      - put: repo
+        params:
+          repository: repo
+
 
   - name: scan
     plan:

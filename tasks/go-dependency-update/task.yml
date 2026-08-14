@@ -1,0 +1,11 @@
+platform: linux
+
+inputs:
+  - name: ci
+  - name: repo
+
+outputs:
+  - name: repo
+
+run:
+  path: ci/tasks/go-dependency-update/run.sh
