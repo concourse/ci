@@ -13,7 +13,7 @@ if git --no-pager diff --quiet; then
 fi
 
 # log changes
-git --no-pager diff
+git --no-pager diff --color=always
 
 echo "verifying changes don't break anything..."
 go build ./...
