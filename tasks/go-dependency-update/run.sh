@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-apk add --no-progress --no-cache git go
-
 cd repo
 
 go get -u -t ./...

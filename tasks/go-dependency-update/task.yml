@@ -8,4 +8,9 @@ outputs:
   - name: repo
 
 run:
-  path: ci/tasks/go-dependency-update/run.sh
+  path: sh
+  args:
+    - -c
+    - |
+      apk add --no-progress --no-cache bash git go
+      ci/tasks/go-dependency-update/run.sh
