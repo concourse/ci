@@ -80,7 +80,8 @@ jobs:
               - -c
               - |
                 set -euo pipefail
-                go test ./...
+                apk add --no-progress --no-cache gnutar
+                go test -v ./...
 
   - name: publish-minor
     plan:
