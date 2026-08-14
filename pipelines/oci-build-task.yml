@@ -88,12 +88,6 @@ resources:
       target_branch: master
       repository: concourse/oci-build-task
 
-  - name: monthly
-    type: time
-    icon: clock-outline
-    source:
-      interval: 720h #30 days
-
 jobs:
   - name: prs
     plan:
@@ -255,26 +249,6 @@ jobs:
         no_get: true
         params:
           image: image/image
-
-  - name: dependency-update
-    plan:
-      - in_parallel:
-          - get: monthly
-            trigger: true
-          - get: repo
-          - get: ci
-          - get: wolfi
-      - task: dependency-update
-        image: wolfi
-        file: ci/tasks/go-dependency-update/task.yml
-      # push to different branch first to pass EasyCLA status check
-      - put: repo
-        params:
-          repository: repo
-          branch: dependency-update
-      - put: repo
-        params:
-          repository: repo
 
 
   - name: scan
