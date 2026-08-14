@@ -245,6 +245,8 @@ jobs:
             file: dex-ci/ci/pipeline.yml
           - set_pipeline: oci-build-task
             file: pipelines-and-tasks/pipelines/oci-build-task.yml
+          - set_pipeline: houdini
+            file: pipelines-and-tasks/pipelines/houdini.yml
           - set_pipeline: bash
             file: pipelines-and-tasks/pipelines/bash.yml
           - set_pipeline: container-dependencies
