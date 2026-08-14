@@ -10,5 +10,5 @@ caches:
 
 run:
   path: powershell
-  args: 
+  args:
   - ci/tasks/unit-windows/run.ps1
