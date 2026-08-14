@@ -595,37 +595,30 @@ jobs:
   - name: k8s-topgun
     public: true
     serial: true
+    tags: [k8s-topgun]
     plan:
       - in_parallel:
           - get: concourse
-            tags: [k8s-topgun]
             passed: [k8s-smoke]
             trigger: true
           - get: version
-            tags: [k8s-topgun]
             passed: [k8s-smoke]
             trigger: true
           - get: concourse-rc-image
-            tags: [k8s-topgun]
             passed: [k8s-smoke]
             trigger: true
             params: { format: oci }
           - get: unit-image
           - get: prometheus-chart
-            tags: [k8s-topgun]
             params: { untar: true }
           - get: postgresql-chart-git
-            tags: [k8s-topgun]
           - get: concourse-chart
             trigger: true
             passed: [k8s-smoke]
-            tags: [k8s-topgun]
           - get: ci
-            tags: [k8s-topgun]
       - task: k8s-topgun
         file: ci/tasks/k8s-topgun/task.yml
         image: unit-image
-        tags: [k8s-topgun]
         params:
           IN_CLUSTER: "true"
           SERVICE_ACCOUNT_KEY: ((k8s_topgun.service_account_key))
@@ -1118,36 +1111,35 @@ jobs:
           - get: gcp-ubuntu-stemcell
             trigger: true
           - get: ci
-      - put: smoke-deployment
-        tags: [bosh]
-        inputs: detect
-        params:
-          manifest: ci/deployments/bosh-smoke.yml
-          releases:
-            - concourse-release/*.tgz
-            - postgres-release/*.tgz
-            - bpm-release/*.tgz
-          stemcells:
-            - gcp-ubuntu-stemcell/*.tgz
-          vars:
-            deployment_name: ((concourse_smoke_deployment_name))
-            stemcell_variant: ((stemcell_name))
-      - task: discover-bosh-endpoint-info
-        tags: [bosh]
-        file: ci/tasks/discover-bosh-endpoint-info/task.yml
-        image: unit-image
-        params:
-          BOSH_ENVIRONMENT: https://10.0.0.6:25555
-          BOSH_CLIENT: ((bosh_env.client_id))
-          BOSH_CLIENT_SECRET: ((bosh_env.client_secret))
-          BOSH_CA_CERT: ((bosh_env.ca_cert))
-          BOSH_DEPLOYMENT: ((concourse_smoke_deployment_name))
-          BOSH_INSTANCE_GROUP: concourse
-      - task: smoke
-        tags: [bosh]
-        image: unit-image
-        file: ci/tasks/smoke-test/task.yml
-        timeout: 1h
+      - tags: [bosh]
+        do:
+          - put: smoke-deployment
+            inputs: detect
+            params:
+              manifest: ci/deployments/bosh-smoke.yml
+              releases:
+                - concourse-release/*.tgz
+                - postgres-release/*.tgz
+                - bpm-release/*.tgz
+              stemcells:
+                - gcp-ubuntu-stemcell/*.tgz
+              vars:
+                deployment_name: ((concourse_smoke_deployment_name))
+                stemcell_variant: ((stemcell_name))
+          - task: discover-bosh-endpoint-info
+            file: ci/tasks/discover-bosh-endpoint-info/task.yml
+            image: unit-image
+            params:
+              BOSH_ENVIRONMENT: https://10.0.0.6:25555
+              BOSH_CLIENT: ((bosh_env.client_id))
+              BOSH_CLIENT_SECRET: ((bosh_env.client_secret))
+              BOSH_CA_CERT: ((bosh_env.ca_cert))
+              BOSH_DEPLOYMENT: ((concourse_smoke_deployment_name))
+              BOSH_INSTANCE_GROUP: concourse
+          - task: smoke
+            image: unit-image
+            file: ci/tasks/smoke-test/task.yml
+            timeout: 1h
     on_success:
       put: smoke-deployment
       no_get: true
