@@ -7,13 +7,13 @@ cd repo
 go get -u -t ./...
 go mod tidy
 
-if git diff --quiet; then
+if git --no-pager diff --quiet; then
     echo "No updates"
     exit 0
 fi
 
 # log changes
-git diff
+git --no-pager diff
 
 echo "verifying changes don't break anything..."
 go build ./...

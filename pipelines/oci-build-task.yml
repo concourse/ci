@@ -267,6 +267,11 @@ jobs:
       - task: dependency-update
         image: wolfi
         file: ci/tasks/go-dependency-update/task.yml
+      # push to different branch first to pass EasyCLA status check
+      - put: repo
+        params:
+          repository: repo
+          branch: dependency-update
       - put: repo
         params:
           repository: repo
