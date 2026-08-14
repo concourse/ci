@@ -1,0 +1,123 @@
+resources:
+  - name: repo
+    type: git
+    icon: github
+    source:
+      uri: git@github.com:concourse/retryhttp
+      private_key: ((concourse_bot_private_key))
+      branch: master
+
+  - name: ci
+    type: git
+    icon: github
+    source:
+      uri: https://github.com/concourse/ci.git
+      branch: master
+
+  - name: version
+    type: semver
+    icon: tag
+    source:
+      uri: git@github.com:concourse/retryhttp
+      private_key: ((concourse_bot_private_key))
+      branch: version
+      driver: git
+      file: version
+
+  - name: wolfi
+    type: registry-image
+    icon: docker
+    source:
+      repository: cgr.dev/chainguard/wolfi-base
+
+  - name: monthly
+    type: time
+    icon: clock-outline
+    source:
+      interval: 720h #30 days
+
+  - name: golang-builder
+    type: registry-image
+    icon: docker
+    source:
+      repository: concourse/golang-builder
+      tag: latest
+
+jobs:
+  - name: dependency-update
+    plan:
+      - in_parallel:
+          - get: monthly
+            trigger: true
+          - get: repo
+          - get: ci
+          - get: wolfi
+      - task: dependency-update
+        image: wolfi
+        file: ci/tasks/go-dependency-update/task.yml
+      - put: repo
+        no_get: true
+        params:
+          repository: repo
+
+  - name: test
+    plan:
+      - in_parallel:
+          - get: repo
+            trigger: true
+          - get: ci
+          - get: golang-builder
+      - task: test
+        image: golang-builder
+        config:
+          platform: linux
+          inputs:
+            - name: repo
+              path: .
+          run:
+            path: bash
+            args:
+              - -c
+              - |
+                set -euo pipefail
+                go test -v ./...
+
+  - name: publish-minor
+    plan:
+      - in_parallel:
+          - get: repo
+            passed: [test]
+          - get: version
+            params:
+              bump: minor
+      - put: repo
+        no_get: true
+        params:
+          repository: repo
+          tag: version/version
+          tag_prefix: v
+      - put: version
+        no_get: true
+        inputs: detect
+        params:
+          file: version/version
+
+  - name: publish-patch
+    plan:
+      - in_parallel:
+          - get: repo
+            passed: [test]
+          - get: version
+            params:
+              bump: patch
+      - put: repo
+        no_get: true
+        params:
+          repository: repo
+          tag: version/version
+          tag_prefix: v
+      - put: version
+        no_get: true
+        inputs: detect
+        params:
+          file: version/version

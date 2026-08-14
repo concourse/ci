@@ -247,6 +247,8 @@ jobs:
             file: pipelines-and-tasks/pipelines/oci-build-task.yml
           - set_pipeline: houdini
             file: pipelines-and-tasks/pipelines/houdini.yml
+          - set_pipeline: retryhttp
+            file: pipelines-and-tasks/pipelines/retryhttp.yml
           - set_pipeline: bash
             file: pipelines-and-tasks/pipelines/bash.yml
           - set_pipeline: container-dependencies
