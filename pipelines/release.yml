@@ -210,6 +210,7 @@ jobs:
             - get: periodic-check
               trigger: true
             - get: oci-build-task
+            - get: bash
             - get: ci
             #amd64
             - get: registry-image-amd64
@@ -313,10 +314,13 @@ jobs:
               resource: github-release-resource
               trigger: true
               params: *arm64
+      - task: repackage
+        image: bash
+        file: ci/tasks/build-resource-types-image/repackage.yml
       - task: build
         image: oci-build-task
         privileged: true
-        file: ci/tasks/build-resource-types-image/task.yml
+        file: ci/tasks/build-resource-types-image/build.yml
       - put: resource-types-image
         no_get: true
         inputs: detect
@@ -1914,3 +1918,12 @@ resources:
     source:
       repository: cgr.dev/chainguard/wolfi-base
       tag: latest
+
+  - name: bash
+    type: registry-image
+    icon: *image-icon
+    source:
+      repository: concourse/bash
+      tag: latest
+      username: ((docker.username))
+      password: ((docker.password))

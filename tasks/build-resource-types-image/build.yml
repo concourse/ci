@@ -42,9 +42,4 @@ outputs:
   - name: image
 
 run:
-  path: sh
-  args:
-    - -c
-    - |
-      apk --no-cache --no-progress add bash jq
-      ci/tasks/build-resource-types-image/run.sh
+  path: build

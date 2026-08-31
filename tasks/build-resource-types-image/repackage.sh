@@ -1,6 +1,8 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -euo pipefail
+
+apk --no-cache --no-progress add jq
 
 for arch in amd64 arm64; do
 for resource in *-"${arch}"; do
@@ -31,5 +33,3 @@ for resource in *-"${arch}"; do
     popd
 done;
 done;
-
-build

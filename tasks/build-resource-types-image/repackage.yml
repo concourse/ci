@@ -1,0 +1,65 @@
+platform: linux
+
+image_resource:
+  type: registry-image
+  source: { repository: concourse/bash }
+
+inputs:
+  - name: ci
+  #amd64
+  - name: bosh-io-release-amd64
+  - name: bosh-io-stemcell-amd64
+  - name: docker-image-amd64
+  - name: git-amd64
+  - name: github-release-amd64
+  - name: hg-amd64
+  - name: mock-amd64
+  - name: pool-amd64
+  - name: registry-image-amd64
+  - name: s3-amd64
+  - name: semver-amd64
+  - name: time-amd64
+  #arm64
+  - name: bosh-io-release-arm64
+  - name: bosh-io-stemcell-arm64
+  - name: docker-image-arm64
+  - name: git-arm64
+  - name: github-release-arm64
+  - name: hg-arm64
+  - name: mock-arm64
+  - name: pool-arm64
+  - name: registry-image-arm64
+  - name: s3-arm64
+  - name: semver-arm64
+  - name: time-arm64
+
+outputs:
+  #amd64
+  - name: bosh-io-release-amd64
+  - name: bosh-io-stemcell-amd64
+  - name: docker-image-amd64
+  - name: git-amd64
+  - name: github-release-amd64
+  - name: hg-amd64
+  - name: mock-amd64
+  - name: pool-amd64
+  - name: registry-image-amd64
+  - name: s3-amd64
+  - name: semver-amd64
+  - name: time-amd64
+  #arm64
+  - name: bosh-io-release-arm64
+  - name: bosh-io-stemcell-arm64
+  - name: docker-image-arm64
+  - name: git-arm64
+  - name: github-release-arm64
+  - name: hg-arm64
+  - name: mock-arm64
+  - name: pool-arm64
+  - name: registry-image-arm64
+  - name: s3-arm64
+  - name: semver-arm64
+  - name: time-arm64
+
+run:
+  path: ci/tasks/build-resource-types-image/repackage.sh
