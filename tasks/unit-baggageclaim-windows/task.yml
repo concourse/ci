@@ -10,5 +10,5 @@ caches:
 
 run:
   path: powershell
-  args: 
+  args:
   - ci/tasks/unit-baggageclaim-windows/run.ps1
