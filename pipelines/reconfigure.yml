@@ -284,7 +284,7 @@ jobs:
                 pool: ~1.8.2
                 registry-image: ~1.18.0
                 s3: ~2.5.5
-                semver: ~2.0.2
+                semver: ~2.0.3
                 time: ~1.11.4
               dep_bin_versions:
                 gdn: ''
