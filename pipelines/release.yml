@@ -197,6 +197,7 @@ jobs:
             trigger: true
           - get: ci
       - task: fly-windows
+        timeout: 30m
         attempts: 3
         file: ci/tasks/fly-windows/task.yml
 

@@ -192,6 +192,7 @@ jobs:
           - get: ci
       - task: fly-windows
         attempts: 3
+        timeout: 30m
         file: ci/tasks/fly-windows/task.yml
 
   - name: resource-types-images
