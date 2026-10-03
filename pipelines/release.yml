@@ -1915,7 +1915,7 @@ resources:
 
   - name: wolfi-base
     type: registry-image
-    check_every: 12h
+    check_every: 168h #7 days
     source:
       repository: cgr.dev/chainguard/wolfi-base
       tag: latest

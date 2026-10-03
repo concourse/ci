@@ -97,6 +97,7 @@ jobs:
           - get: golang
             trigger: true
           - get: wolfi-base
+            trigger: true
             params:
               format: oci-layout
       - load_var: go_version
@@ -1888,7 +1889,7 @@ resources:
   - name: wolfi-base
     type: registry-image
     icon: *image-icon
-    check_every: 6h
+    check_every: 168h #7 days
     source:
       repository: cgr.dev/chainguard/wolfi-base
       tag: latest
