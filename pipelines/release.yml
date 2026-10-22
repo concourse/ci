@@ -420,6 +420,11 @@ jobs:
           - get: dev-image
             passed: [dev-image]
             trigger: true
+          - get: resource-types-image
+            passed: [dev-image]
+            trigger: true
+            params:
+              skip_download: true
           - get: ci
       - task: runtime-integration
         image: dev-image
@@ -440,6 +445,11 @@ jobs:
             passed: [dev-image]
             trigger: true
             params: { format: oci }
+          - get: resource-types-image
+            passed: [dev-image]
+            trigger: true
+            params:
+              skip_download: true
           - get: postgres-image
             params: { format: oci }
           - get: unit-image
@@ -473,6 +483,11 @@ jobs:
             passed: [dev-image]
             trigger: true
             params: { format: oci }
+          - get: resource-types-image
+            passed: [dev-image]
+            trigger: true
+            params:
+              skip_download: true
           - get: postgres-image
             params: { format: oci }
           - get: unit-image
@@ -497,6 +512,11 @@ jobs:
             passed: [dev-image]
             params: { format: oci }
             trigger: true
+          - get: resource-types-image
+            passed: [dev-image]
+            trigger: true
+            params:
+              skip_download: true
           - get: latest-concourse-image
             params: { format: oci }
           - get: postgres-image
