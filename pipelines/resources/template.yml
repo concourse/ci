@@ -199,6 +199,7 @@ plan:
 
 #@ def publish_job(bump):
 name: #@ "publish-" + bump
+disable_reruns: true
 plan:
 - in_parallel:
   - get: resource-repo
