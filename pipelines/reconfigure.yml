@@ -274,15 +274,15 @@ jobs:
               ci_branch: master
               postgresql_major: '16'
               resource_type_versions:
-                bosh-io-release: ~1.3.5
-                bosh-io-stemcell: ~1.6.0
-                docker-image: ~1.13.2
-                git: ~1.23.0
+                bosh-io-release: ~1.3.6
+                bosh-io-stemcell: ~1.7.0
+                docker-image: ~1.13.3
+                git: ~1.24.0
                 github-release: ~1.14.1
                 hg: ~1.5.5
                 mock: ~0.14.6
                 pool: ~1.8.2
-                registry-image: ~1.18.0
+                registry-image: ~1.19.0
                 s3: ~2.5.5
                 semver: ~2.0.3
                 time: ~1.11.4
