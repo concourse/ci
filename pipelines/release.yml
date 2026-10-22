@@ -692,6 +692,11 @@ jobs:
             passed: [testflight, watsjs, integration, worker-runtime]
             params:
               skip_download: true
+          - get: resource-types-image
+            trigger: true
+            passed: [testflight, watsjs, integration, worker-runtime]
+            params:
+              skip_download: true
           - get: golang-builder-image
             passed: [dev-image]
             params:
@@ -732,12 +737,12 @@ jobs:
             params: *arm64
           - get: resource-types-amd64
             resource: resource-types-image
-            passed: [dev-image]
+            passed: [testflight, watsjs, integration, worker-runtime]
             trigger: true
             params: *amd64
           - get: resource-types-arm64
             resource: resource-types-image
-            passed: [dev-image]
+            passed: [testflight, watsjs, integration, worker-runtime]
             trigger: true
             params: *arm64
       - in_parallel:
