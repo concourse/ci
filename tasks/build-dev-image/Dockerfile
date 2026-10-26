@@ -62,8 +62,8 @@ RUN apk --no-cache del \
 # Add networking tools
 RUN apk --no-cache add \
        iproute2 \
-       iptables \
-       ip6tables \
+       iptables-nft \
+       iptables-wrappers \
        # guardian runtime runs some script on startup to create iptable rules
        # and requires the real xargs, not busybox's impl
        # (https://github.com/cloudfoundry/guardian/blob/main/kawasaki/iptables/global_chains.go)
