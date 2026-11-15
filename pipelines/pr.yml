@@ -112,6 +112,11 @@ resources:
     icon: docker
     source: { repository: concourse/unit }
 
+  - name: golang-builder-image
+    type: registry-image
+    icon: docker
+    source: { repository: concourse/golang-builder }
+
   - name: postgres-image
     type: registry-image
     icon: docker
@@ -433,3 +438,26 @@ jobs:
           concourse: concourse-pr
         tags: [pr]
         file: ci/tasks/check-gofmt/task.yml
+
+  - name: govulncheck
+    public: true
+    serial: true
+    serial_groups: [heavy]
+    <<: *status_notifications
+    plan:
+      - in_parallel:
+          - do:
+              - get: concourse-pr
+                trigger: true
+                tags: [pr]
+              - *pending_status_notification
+          - get: golang-builder-image
+            tags: [pr]
+          - get: ci
+            tags: [pr]
+      - task: govulncheck
+        timeout: 30m
+        image: golang-builder-image
+        file: ci/tasks/govulncheck/task.yml
+        input_mapping: { concourse: concourse-pr }
+        tags: [pr]
