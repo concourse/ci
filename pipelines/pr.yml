@@ -138,24 +138,19 @@ jobs:
     public: true
     serial: true
     serial_groups: [heavy]
+    tags: [pr]
     plan:
       - in_parallel:
           - get: concourse-pr
             trigger: true
-            tags: [pr]
           - get: oci-build-task
-            tags: [pr]
           - get: dev-image
             params: { format: oci }
-            tags: [pr]
           - get: ci
-            tags: [pr]
       - task: yarn-build
         file: ci/tasks/yarn-build/task.yml
         input_mapping: { concourse: concourse-pr }
-        tags: [pr]
       - task: build
-        tags: [pr]
         image: oci-build-task
         privileged: true
         config:
@@ -171,62 +166,52 @@ jobs:
       - put: pr-image
         params: { image: image/image.tar }
         no_get: true
-        tags: [pr]
 
   - name: unit
     public: true
     serial: true
     serial_groups: [heavy]
+    tags: [pr]
     <<: *status_notifications
     plan:
       - in_parallel:
           - do:
               - get: concourse-pr
                 trigger: true
-                tags: [pr]
               - *pending_status_notification
           - get: concourse-base
-            tags: [pr]
           - get: unit-image
-            tags: [pr]
           - get: ci
-            tags: [pr]
       - task: check-migration-order
         timeout: 5m
         image: unit-image
         file: ci/tasks/check-migration-order/task.yml
-        tags: [pr]
         params:
           pr_title: ((.:concourse-pr.title))
       - task: yarn-analyse
         image: unit-image
         file: ci/tasks/yarn-analyse/task.yml
         input_mapping: { concourse: concourse-pr }
-        tags: [pr]
       - task: yarn-test
         image: unit-image
         file: ci/tasks/yarn-test/task.yml
         input_mapping: { concourse: concourse-pr }
-        tags: [pr]
       - task: yarn-benchmark
         image: unit-image
         file: ci/tasks/yarn-benchmark/task.yml
         input_mapping: { concourse: concourse-pr }
-        tags: [pr]
       - timeout: 1h
         in_parallel:
           - task: unit
             image: unit-image
             file: ci/tasks/unit/task.yml
             input_mapping: { concourse: built-concourse }
-            tags: [pr]
           - task: unit-baggageclaim
             attempts: 3
             image: unit-image
             file: ci/tasks/unit-baggageclaim/task.yml
             privileged: true
             input_mapping: { concourse: built-concourse }
-            tags: [pr]
 
   - name: validate-labels
     public: true
@@ -285,30 +270,28 @@ jobs:
   - name: containerd-integration
     public: true
     serial: true
+    tags: [pr]
     <<: *status_notifications
     plan:
       - in_parallel:
           - do:
               - get: concourse-pr
                 trigger: true
-                tags: [pr]
               - *pending_status_notification
           - get: dev-image
-            tags: [pr]
           - get: ci
-            tags: [pr]
       - task: integration
         image: dev-image
         privileged: true
         timeout: 2h
         file: ci/tasks/containerd-integration/task.yml
         input_mapping: { concourse: concourse-pr }
-        tags: [pr]
 
   - name: testflight
     public: true
     serial: true
     serial_groups: [heavy]
+    tags: [pr]
     <<: *status_notifications
     plan:
       - in_parallel:
@@ -316,19 +299,14 @@ jobs:
               - get: concourse-pr
                 passed: [pr-image]
                 trigger: true
-                tags: [pr]
               - *pending_status_notification
           - get: pr-image
             passed: [pr-image]
             params: { format: oci }
-            tags: [pr]
           - get: postgres-image
             params: { format: oci }
-            tags: [pr]
           - get: unit-image
-            tags: [pr]
           - get: ci
-            tags: [pr]
       - across:
           - var: runtime
             values:
@@ -336,7 +314,6 @@ jobs:
               - containerd
             max_in_flight: all
         task: testflight
-        tags: [pr]
         image: unit-image
         timeout: 2h
         privileged: true
@@ -350,6 +327,7 @@ jobs:
     public: true
     serial: true
     serial_groups: [heavy]
+    tags: [pr]
     <<: *status_notifications
     plan:
       - in_parallel:
@@ -357,32 +335,27 @@ jobs:
               - get: concourse-pr
                 passed: [pr-image]
                 trigger: true
-                tags: [pr]
               - *pending_status_notification
           - get: pr-image
             passed: [pr-image]
             params: { format: oci }
-            tags: [pr]
           - get: postgres-image
             params: { format: oci }
-            tags: [pr]
           - get: ci
-            tags: [pr]
       - task: yarn-build
         file: ci/tasks/yarn-build/task.yml
         input_mapping: { concourse: concourse-pr }
-        tags: [pr]
       - task: watsjs
         timeout: 1h
         privileged: true
         file: ci/tasks/watsjs/task.yml
         input_mapping: { concourse: built-concourse, dev-image: pr-image }
-        tags: [pr]
 
   - name: integration
     public: true
     serial: true
     serial_groups: [heavy]
+    tags: [pr]
     <<: *status_notifications
     plan:
       - in_parallel:
@@ -390,74 +363,60 @@ jobs:
               - get: concourse-pr
                 passed: [pr-image]
                 trigger: true
-                tags: [pr]
               - *pending_status_notification
           - get: concourse-image
             params: { format: oci }
-            tags: [pr]
           - get: pr-image
             passed: [pr-image]
             params: { format: oci }
-            tags: [pr]
           - get: postgres-image
             params: { format: oci }
-            tags: [pr]
           - get: vault-image
             params: { format: oci }
-            tags: [pr]
           - get: ci
-            tags: [pr]
           - get: unit-image
-            tags: [pr]
       - task: integration
         image: unit-image
         timeout: 2h
         privileged: true
         input_mapping: { concourse: concourse-pr, dev-image: pr-image }
         file: ci/tasks/integration-tests/task.yml
-        tags: [pr]
 
   - name: go-format-check
     public: true
     serial: true
+    tags: [pr]
     <<: *status_notifications
     plan:
       - in_parallel:
           - do:
               - get: concourse-pr
-                tags: [pr]
                 trigger: true
               - *pending_status_notification
           - get: unit-image
-            tags: [pr]
           - get: ci
-            tags: [pr]
       - task: check-format-for-go-files
         image: unit-image
         input_mapping:
           concourse: concourse-pr
-        tags: [pr]
         file: ci/tasks/check-gofmt/task.yml
 
   - name: govulncheck
     public: true
     serial: true
     serial_groups: [heavy]
+    tags: [pr]
     <<: *status_notifications
     plan:
       - in_parallel:
           - do:
               - get: concourse-pr
                 trigger: true
-                tags: [pr]
               - *pending_status_notification
           - get: golang-builder-image
-            tags: [pr]
           - get: ci
-            tags: [pr]
       - task: govulncheck
         timeout: 30m
         image: golang-builder-image
         file: ci/tasks/govulncheck/task.yml
         input_mapping: { concourse: concourse-pr }
-        tags: [pr]
