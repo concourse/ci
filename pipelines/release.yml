@@ -50,6 +50,7 @@ groups:
       - reconfigure-prs
       - unit
       - unit-*
+      - govulncheck
       - integration
       - resource-types-images
       - dev-image
@@ -200,6 +201,23 @@ jobs:
         timeout: 30m
         attempts: 3
         file: ci/tasks/fly-windows/task.yml
+
+  - name: govulncheck
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - get: concourse
+            trigger: true
+          - get: golang-builder-image
+          # new vulnerabilities get published without any change to the code
+          - get: periodic-check
+            trigger: true
+          - get: ci
+      - task: govulncheck
+        timeout: 30m
+        image: golang-builder-image
+        file: ci/tasks/govulncheck/task.yml
 
   - name: resource-types-images
     public: true
